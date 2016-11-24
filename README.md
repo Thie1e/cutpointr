@@ -1,2 +1,3 @@
-# cutpointr
-An R package for determining and evaluating cutpoints in binary classification
+## cutpointr
+
+[![Travis-CI Build Status](https://travis-ci.org/.svg?branch=master)](https://travis-ci.org/)
