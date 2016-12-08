@@ -1,12 +1,37 @@
-#' Calculate AUC
-#' @source MESS::auc
-auc <- function (x, y, from = min(x), to = max(x))
-{
-    # MESS::auc with type = "linear" and absolutearea = F
-    if (length(x) != length(y))
-        stop("x and y must have the same length")
-    if (length(unique(x)) < 2)
-        return(NA)
-    values <- approx(x, y, xout = sort(unique(c(from, to, x[x > from & x < to]))), ...)
-    0.5 * sum(diff(values$x) * (values$y[-1] + values$y[-length(values$y)]))
+#' Insert midpoints between neighboring values after sorting, usually for cutpoints
+insert_midpoints <- function(x) {
+    midpoints <- na.omit(rowMeans(cbind(x, c(NA, x[-length(x)]))))
+    midpoints <- rowMeans(cbind(x, c(NA, x[-length(x)]))[-1, ])
+    # write test to make sure there are no duplicates ####
+    lx <- length(x)
+    newx <- rep(NA, times = lx + lx - 1)
+    newx[seq(from = 1, by = 2, length.out = lx)] <- x
+    newx[seq(from = 2, by = 2, length.out = lx - 1)] <- midpoints
+    return(newx)
+}
+
+# insert_midpoints2 <- function(x) {
+#     lx <- length(x)
+#     midpoints <- sapply(2:lx, function(i) {
+#         mean(x[(i - 1):i])
+#     })
+#     newx <- rep(NA, times = lx + lx - 1)
+#     newx[seq(from = 1, by = 2, length.out = lx)] <- x
+#     newx[seq(from = 2, by = 2, length.out = lx - 1)] <- midpoints
+#     return(newx)
+# }
+
+# x <- rnorm(100)
+# microbenchmark::microbenchmark(
+#     insert_midpoints(x),
+#     insert_midpoints2(x),
+#     times = 1000
+# )
+# Die 1. Funktion ist ca. 10-mal schneller
+
+
+extract_opt_cut <- function(df) {
+    optcut <- df$Cut
+    if (!is.null(optcut)) return(optcut)
+    return(df[1, 1])
 }

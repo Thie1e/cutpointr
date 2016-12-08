@@ -5,14 +5,16 @@ Title: Methods for determining and evaluating optimal cutpoints in binary
 Version: 0.0.0.9000
 Author: Christian Thiele
 Maintainer: Christian Thiele <c.thiele@hs-osnabrueck.de>
-Description: Apart from just picking the cutpoint that maximizes a chosen metric
+Description: In addition to finding the cutpoint that maximizes a chosen metric
     the package includes functions for bootstrapping and validating cutpoints.
 License: none
 Encoding: UTF-8
 LazyData: true
-Imports: 
+Imports:
     fANCOVA,
+    ggplot2,
     KernSmooth,
-    viridis,
-    plotROC
+    plotROC,
+    viridis
 RoxygenNote: 5.0.1
+Suggests: testthat
