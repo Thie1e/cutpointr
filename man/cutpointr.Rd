@@ -4,7 +4,7 @@
 \alias{cutpointr}
 \title{Determine and evaluate optimal cutpoints}
 \usage{
-cutpointr(x, ...)
+cutpointr(...)
 }
 \arguments{
 \item{x}{(numeric vector) The variable to be used for classification, e.g. test values.}

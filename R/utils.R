@@ -31,7 +31,7 @@ insert_midpoints <- function(x) {
 
 
 extract_opt_cut <- function(df) {
-    optcut <- df$Cut
+    optcut <- df$optimal_cutpoint
     if (!is.null(optcut)) return(optcut)
     return(df[1, 1])
 }

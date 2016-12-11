@@ -5,11 +5,14 @@
 \alias{optcut_emp_youden.default}
 \alias{optcut_emp_youden.formula}
 \title{Determine optimal cutpoint by maximizing the sum of sensitivity and specificity}
+\source{
+me me me
+}
 \usage{
 optcut_emp_youden(...)
 
-\method{optcut_emp_youden}{default}(x, class, group = NULL,
-  candidate_cuts = unique(x), pos_class = NULL, higher = NULL)
+\method{optcut_emp_youden}{default}(x, class, candidate_cuts = unique(x),
+  pos_class = NULL, higher = NULL)
 
 \method{optcut_emp_youden}{formula}(formula, group, data)
 }
@@ -18,10 +21,10 @@ optcut_emp_youden(...)
 
 \item{class}{(character / factor / numeric) The dependent binary class variable}
 
+\item{formula}{(formula) Formula for splitting classes by some numeric vector, e.g. class ~ x.}
+
 \item{group}{(numeric) An additional covariate that identifies subgroups. Separate
 optimal cutpoints will be calculated for every group.}
-
-\item{formula}{(formula) Formula for splitting classes by some numeric vector, e.g. class ~ x.}
 
 \item{data}{(data.frame) The dependent and independent variables}
 }

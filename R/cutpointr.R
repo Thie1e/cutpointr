@@ -11,6 +11,10 @@ cutpointr <- function(...){
 
 #' @importFrom purrr %>%
 #' @export
+#' @examples
+#' library(OptimalCutpoints)
+#' data(elas)
+#' cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500)
 cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = NULL,
                               optcut_func = optcut_emp_youden,
                               insert_midpoints = F, only_integer_cuts = F,
@@ -69,9 +73,10 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
         pos_class <- levels(class)[1]
         message(paste("Assuming", pos_class, "as positive class"))
     }
-    neg_x <- x[class != pos_class]
-    pos_x <- x[class == pos_class]
+    if (!any(pos_class == class)) stop("Positive class not found in data")
     if (is.null(higher)) {
+        neg_x <- x[class != pos_class]
+        pos_x <- x[class == pos_class]
         if (mean(neg_x) < mean(pos_x)) {
             message("Assuming the positive class has higher x values")
             higher <- TRUE
@@ -87,6 +92,7 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
     # Calculate optimal cutpoint, map to cutpoint functions
     #
     ### Das hier könnte man evtl. in eine .default und eine .grouped_df Methode auslagern
+    ### (auch die anonymen Funktionen in map)
     ### Mit mutate_ vor map_ bekäme man die gruppierten, nested Daten zum späteren
     ###     Plotten mit dazu
     if (!missing(group)) {
@@ -95,8 +101,11 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
         dat <- tibble::tibble(x, class, group)
         dat <- dat %>%
             dplyr::group_by_("group") %>%
+            # dplyr::mutate_(prevalence = ~ mean(class == pos_class)) %>%
             tidyr::nest_(data = ., key_col = "data", nest_cols = colnames(.)) %>%
-            dplyr::mutate_(group = ~ as.character(group))
+            dplyr::mutate_(group = ~ as.character(group),
+                           pos_class = ~ pos_class,
+                           prevalence = ~ purrr::map_dbl(data, function(g) mean(g$class == pos_class)))
         optcut <- purrr::pmap_df(list(mod_names, optcut_func), function(n, f) {
             purrr::pmap_df(list(dat$group, dat$data), function(g, d) {
                 optcut <- f(d$x, d$class, candidate_cuts = candidate_cuts,
@@ -105,101 +114,86 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
                             group = ~ g)
             })
         })
+        optcut <- tibble::as_tibble(optcut) # can pmap_df return a tibble so this is not necessary?
+        optcut <- dplyr::full_join(optcut, dat, by = "group")
     } else {
         dat <- tibble::tibble(x, class)
         dat <- dat %>%
             tidyr::nest_(data = ., key_col = "data", nest_cols = colnames(.))
         optcut <- purrr::pmap_df(list(mod_names, optcut_func), function(n, f) {
-            purrr::map_df(dat$data, function(d) {
-                optcut <- f(d$x, d$class, candidate_cuts = candidate_cuts,
-                            higher = higher, pos_class = pos_class) %>%
-                    dplyr::mutate_(method = ~ n)
+            purrr::pmap_df(list(mod_names, optcut_func), function(n, f) {
+                purrr::map_df(dat$data, function(d) {
+                    optcut <- f(d$x, d$class, candidate_cuts = candidate_cuts,
+                                higher = higher, pos_class = pos_class) %>%
+                        dplyr::mutate_(method = ~ n)
+                })
             })
         })
+        optcut <- tibble::as_tibble(optcut)
+        optcut <- dplyr::full_join(optcut, dat, by = "group")
     }
-
-    #
-    # Bootstrap to return distribution (all bootstrapped cuts?) of bootstrap runs
-    # Also return LOO-Boot estimate
-    #
-    # optcut_func_partial <-purrr::partial(optcut_func, candidate_cuts = candidate_cuts,
-    #                pos_class = pos_class, higher = higher)
-    # replicate(10, function(x, class) {
-    #     optcut_func_partial(sample(x, replace = T),
-    #                         sample(class, replace = T))
-    # })
-    # if (boot_runs > 0) {
-    #     # one bootstrap
-    #     bi <- sample(1:length(x), size = x, replace = T)
-    #     x <- x[bi]
-    #     class <- class[bi]
-    #     if (!missing(group)) {
-    #         g <- unique(group)
-    #         group <- group[bi]
-    #         dat <- tibble(x, class, group)
-    #         optcut <- dat %>%
-    #             group_by_("group") %>%
-    #             do_(~optcut_func(x = .$x, class = .$class,
-    #                              candidate_cuts = candidate_cuts,
-    #                              pos_class = pos_class, higher = higher))
-    #     } else {
-    #         optcut <- optcut_func(x = x, class = class,
-    #                               candidate_cuts = candidate_cuts,
-    #                               pos_class = pos_class, higher = higher)
-    #     }
-    # } else {
-    #     boot_res <- NULL
-    # }
-
-
 
     #
     # Bootstrap cutpoint variability and get LOO-Bootstrap performance estimate
     # Data are already nested and grouped if necessary
     #
-    # bootstrap <- map2_df(mod_funcs, mod_names, function(f, n) {
-    #     dat %>%
-    #         transmute_(boot = ~ map(data, function(g) {
-    #             map_df(1:10, function(rep) {
-    #                 b_ind   <- sample(1:nrow(g), replace = T, size = nrow(g))
-    #                 obs_b   <- g$status[b_ind]
-    #                 x_b     <- g$elas[b_ind]
-    #                 opt     <- f(x = x_b, status = obs_b)
-    #                 optcut  <- extract_opt_cut(opt)
-    #                 obs_oob <- g$status[-b_ind]
-    #                 x_oob   <- g$elas[-b_ind]
-    #                 # LOO-Bootstrap
-    #                 Sensitivity_b = sens(obs = obs_b,  preds = x_b > optcut,
-    #                                      pos_class = 1)
-    #                 Specificity_b = spec(obs = obs_b,  preds = x_b > optcut,
-    #                                      pos_class = 1)
-    #                 # Youden_Index_b = Sensitivity_train + Specificity_train - 1
-    #                 Sensitivity_oob = sens(obs = obs_oob,  preds = x_oob > optcut,
-    #                                        pos_class = 1)
-    #                 Specificity_oob = spec(obs = obs_oob,  preds = x_oob > optcut,
-    #                                        pos_class = 1)
-    #                 # Youden_Index_oob = Sensitivity_test + Specificity_test - 1
-    #                 data.frame(opt,
-    #                            Sensitivity_b, Specificity_b, #Youden_Index_train,
-    #                            Sensitivity_oob, Specificity_oob #, Youden_Index_test
-    #                 )
-    #             })
-    #         })) %>%
-    #         mutate_(method = ~ n)
-    # })
-
+    #### innermost map_df could be refactored into own function
+    #
+    if (boot_runs <= 0) {
+        bootstrap <- NULL
+    } else {
+        bootstrap <- purrr::map2_df(optcut_func, mod_names, function(f, n) {
+            dat %>%
+                dplyr::transmute_(boot = ~ purrr::map(data, function(g) {
+                    purrr::map_df(1:boot_runs, function(rep) {
+                        b_ind   <- sample(1:nrow(g), replace = T, size = nrow(g))
+                        obs_b   <- g$class[b_ind]
+                        x_b     <- g$x[b_ind]
+                        optcut_b <- f(x_b, obs_b, candidate_cuts = candidate_cuts,
+                                    higher = higher, pos_class = pos_class)
+                        optcut_b  <- extract_opt_cut(optcut_b)
+                        obs_oob <- g$class[-b_ind]
+                        x_oob   <- g$x[-b_ind]
+                        # LOO-Bootstrap
+                        preds_b <- ifelse(x_b > optcut_b, pos_class, "neg")
+                        # Sensitivity_b = sens(obs = obs_b,  preds = preds_b,
+                        #                      pos_class = pos_class)
+                        # Specificity_b = spec(obs = obs_b,  preds = preds_b,
+                        #                      pos_class = pos_class)
+                        Sens_Spec_b = sens_spec(obs = obs_b,  preds = preds_b,
+                                             pos_class = pos_class)
+                        # Youden_Index_b = Sensitivity_train + Specificity_train - 1
+                        preds_oob <- ifelse(x_oob > optcut_b, pos_class, "neg")
+                        # Sensitivity_oob = sens(obs = obs_oob,  preds = preds_oob,
+                        #                        pos_class = pos_class)
+                        # Specificity_oob = spec(obs = obs_oob,  preds = preds_oob,
+                        #                        pos_class = pos_class)
+                        Sens_Spec_oob = sens_spec(obs = obs_oob,  preds = preds_oob,
+                                               pos_class = pos_class)
+                        # Youden_Index_oob = Sensitivity_test + Specificity_test - 1
+                        tibble::tibble(optcut_b,
+                                   # Sensitivity_b, Specificity_b, #Youden_Index_train,
+                                   # Sensitivity_oob, Specificity_oob #, Youden_Index_test
+                                   Sensitivity_b   = Sens_Spec_b[1],
+                                   Specificity_b   = Sens_Spec_b[2],
+                                   Sensitivity_oob = Sens_Spec_oob[1],
+                                   Specificity_oob = Sens_Spec_oob[2]
+                        )
+                    })
+                })) # %>%
+                # dplyr::mutate_(method = ~ n) # As a check, is already in optcut
+        })
+    }
 
 
     #
-    # Get n, prevalence, used data
+    # Get n, prevalence
     #
 
 
 
-    res <- optcut
-
-    # Join optcut and bootstrap by group and method
-    # What happens if identical mehods were given? maybe not a good idea
+    res <- dplyr::bind_cols(optcut, bootstrap)
+    class(res) <- c("cutpointr", class(res))
 
     # res <- list(optimal_cutpoint = data.frame(optimal_cutpoint, metric with correct name),
     #             n,
@@ -209,3 +203,5 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
     #             possible bootstrap validation results)
     return(res)
 }
+
+

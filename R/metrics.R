@@ -25,6 +25,14 @@ spec <- function(obs, preds, pos_class) {
     sum(!binary_preds & !binary_obs) / sum(!binary_obs)
 }
 
+sens_spec <- function(obs, preds, pos_class) {
+    binary_obs <- obs == pos_class
+    binary_preds <- preds == pos_class
+    sens <- sum(binary_preds & binary_obs) / sum(binary_obs)
+    spec <- sum(!binary_preds & !binary_obs) / sum(!binary_obs)
+    c(Sensitivity = sens, Specificity = spec)
+}
+
 
 #' Calculate Youden Index (Sensitivity + Specificity - 1)
 youden <- function(obs, preds, pos_class) {
