@@ -14,7 +14,9 @@ cutpointr <- function(...){
 #' @examples
 #' library(OptimalCutpoints)
 #' data(elas)
-#' cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500)
+#' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500)
+#' opt_cut
+#' plot(opt_cut)
 cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = NULL,
                               optcut_func = optcut_emp_youden,
                               insert_midpoints = F, only_integer_cuts = F,
@@ -82,7 +84,6 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
             higher <- TRUE
         } else {
             message("Assuming the positive class has lower x values")
-            stop("higher = F not yet implemented")
             higher <- FALSE
         }
     }
@@ -93,8 +94,6 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
     #
     ### Das hier könnte man evtl. in eine .default und eine .grouped_df Methode auslagern
     ### (auch die anonymen Funktionen in map)
-    ### Mit mutate_ vor map_ bekäme man die gruppierten, nested Daten zum späteren
-    ###     Plotten mit dazu
     if (!missing(group)) {
         g <- unique(group)
         ### Do we have to create this extra tibble?
@@ -105,7 +104,10 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
             tidyr::nest_(data = ., key_col = "data", nest_cols = colnames(.)) %>%
             dplyr::mutate_(group = ~ as.character(group),
                            pos_class = ~ pos_class,
-                           prevalence = ~ purrr::map_dbl(data, function(g) mean(g$class == pos_class)))
+                           prevalence = ~ purrr::map_dbl(data, function(g) {
+                               mean(g$class == pos_class)
+                               })
+                           )
         optcut <- purrr::pmap_df(list(mod_names, optcut_func), function(n, f) {
             purrr::pmap_df(list(dat$group, dat$data), function(g, d) {
                 optcut <- f(d$x, d$class, candidate_cuts = candidate_cuts,
@@ -119,7 +121,12 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
     } else {
         dat <- tibble::tibble(x, class)
         dat <- dat %>%
-            tidyr::nest_(data = ., key_col = "data", nest_cols = colnames(.))
+            tidyr::nest_(data = ., key_col = "data", nest_cols = colnames(.)) %>%
+            dplyr::mutate_(pos_class = ~ pos_class,
+                           prevalence = ~ purrr::map_dbl(data, function(g) {
+                               mean(g$class == pos_class)
+                               })
+                           )
         optcut <- purrr::pmap_df(list(mod_names, optcut_func), function(n, f) {
             purrr::pmap_df(list(mod_names, optcut_func), function(n, f) {
                 purrr::map_df(dat$data, function(d) {
@@ -130,7 +137,7 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
             })
         })
         optcut <- tibble::as_tibble(optcut)
-        optcut <- dplyr::full_join(optcut, dat, by = "group")
+        optcut <- dplyr::bind_cols(optcut, dat)
     }
 
     #
@@ -149,9 +156,9 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
                         b_ind   <- sample(1:nrow(g), replace = T, size = nrow(g))
                         obs_b   <- g$class[b_ind]
                         x_b     <- g$x[b_ind]
-                        optcut_b <- f(x_b, obs_b, candidate_cuts = candidate_cuts,
+                        funcout_b <- f(x_b, obs_b, candidate_cuts = candidate_cuts,
                                     higher = higher, pos_class = pos_class)
-                        optcut_b  <- extract_opt_cut(optcut_b)
+                        optcut_b  <- extract_opt_cut(funcout_b)
                         obs_oob <- g$class[-b_ind]
                         x_oob   <- g$x[-b_ind]
                         # LOO-Bootstrap
@@ -171,36 +178,31 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
                         Sens_Spec_oob = sens_spec(obs = obs_oob,  preds = preds_oob,
                                                pos_class = pos_class)
                         # Youden_Index_oob = Sensitivity_test + Specificity_test - 1
-                        tibble::tibble(optcut_b,
-                                   # Sensitivity_b, Specificity_b, #Youden_Index_train,
-                                   # Sensitivity_oob, Specificity_oob #, Youden_Index_test
+
+                        # tibble::tibble(optcut_b,
+                        #            # Sensitivity_b, Specificity_b, #Youden_Index_train,
+                        #            # Sensitivity_oob, Specificity_oob #, Youden_Index_test
+                        #            Sensitivity_b   = Sens_Spec_b[1],
+                        #            Specificity_b   = Sens_Spec_b[2],
+                        #            Sensitivity_oob = Sens_Spec_oob[1],
+                        #            Specificity_oob = Sens_Spec_oob[2]
+                        # )
+
+                        tibble::as_data_frame(cbind(funcout_b,
                                    Sensitivity_b   = Sens_Spec_b[1],
                                    Specificity_b   = Sens_Spec_b[2],
                                    Sensitivity_oob = Sens_Spec_oob[1],
                                    Specificity_oob = Sens_Spec_oob[2]
-                        )
+                        ))
                     })
                 })) # %>%
                 # dplyr::mutate_(method = ~ n) # As a check, is already in optcut
         })
     }
 
-
-    #
-    # Get n, prevalence
-    #
-
-
-
     res <- dplyr::bind_cols(optcut, bootstrap)
     class(res) <- c("cutpointr", class(res))
 
-    # res <- list(optimal_cutpoint = data.frame(optimal_cutpoint, metric with correct name),
-    #             n,
-    #             prev,
-    #             used_data,
-    #             possible bootstrap results,
-    #             possible bootstrap validation results)
     return(res)
 }
 
