@@ -1,3 +1,4 @@
+#' @export
 print.cutpointr <- function(cutpointr) {
-    tibble:::print.tbl_df(cutpointr, width = 200)
+    tibble:::print.tbl_df(cutpointr, width = Inf)
 }

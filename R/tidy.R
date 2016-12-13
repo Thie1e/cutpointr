@@ -18,18 +18,16 @@
 #     UseMethod("tidy")
 # }
 
-#' @export
-tidy.cutpointr <- function(data, maximize = T) {
-    stop("Not yet implemented")
-    data <- cutpointr$all_cutpoints # oder so
-    cutpointr::tidy.cp_result(data)
-}
-
-#' @export
-tidy.cp_result <- function(cp_result) {
-    warning("How to break ties here? Metric possibly optimistic.")
-    max_m <- max(cp_result[, 2])
-    max_ind <- which(cp_result[, 2] == max_m)
-    opt_cut <- median(cp_result[max_ind, "cutpoint"])
-    opt_metric <- max_m
-}
+# #' @export
+# tidy.cutpointr <- function(cutpointr) {
+#     cutpointr$optimal_cutpoint
+# }
+#
+# #' @export
+# tidy.cp_result <- function(cp_result) {
+#     warning("How to break ties here? Metric possibly optimistic.")
+#     max_m <- max(cp_result[, 2])
+#     max_ind <- which(cp_result[, 2] == max_m)
+#     opt_cut <- median(cp_result[max_ind, "cutpoint"])
+#     opt_metric <- max_m
+# }

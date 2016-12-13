@@ -1,4 +1,4 @@
-#' @source https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs
+#' @source Forked from https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs
 grid_arrange_shared_legend <- function(plots, ncol = length(plots), nrow = 1,
                                        position = c("bottom", "right")) {
     # plots <- list(...) ### Changed from original. Instead plots argument.
@@ -15,13 +15,17 @@ grid_arrange_shared_legend <- function(plots, ncol = length(plots), nrow = 1,
     if (!all(!gb)) gl <- c(gl, ncol = ncol, nrow = nrow)
 
     if (!all(!gb)) {
-        combined <- switch(position,
-                           "bottom" = gridExtra::arrangeGrob(do.call(arrangeGrob, gl),
-                                                             legend, ncol = 1,
-                                                             heights = grid::unit.c(grid::unit(1, "npc") - lheight, lheight)),
-                           "right" = gridExtra::arrangeGrob(do.call(arrangeGrob, gl),
-                                                             legend, ncol = 2,
-                                                             widths = grid::unit.c(unit(1, "npc") - lwidth, lwidth)))
+        if (position == "bottom") {
+            hei <- grid::unit.c(grid::unit(1, "npc") - lheight, lheight)
+            combined <- gridExtra::arrangeGrob(do.call(gridExtra::arrangeGrob, gl),
+                                               legend, ncol = 1,
+                                               heights = hei)
+        } else if (position == "right") {
+            wid <- grid::unit.c(grid::unit(1, "npc") - lwidth, lwidth)
+            combined <- gridExtra::arrangeGrob(do.call(gridExtra::arrangeGrob, gl),
+                                               legend, ncol = 2,
+                                               widths = wid)
+        }
     } else {
         # No legend because only one class:
         combined <- gridExtra::arrangeGrob(do.call(arrangeGrob, gl),

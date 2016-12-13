@@ -8,7 +8,6 @@
 #' @param group (numeric) An additional covariate that identifies subgroups. Separate
 #' optimal cutpoints will be calculated for every group.
 #' @export
-#' @source me me me
 #' @examples
 #' dat <- iris[1:100, ]
 #' optcut_emp_youden(dat$Sepal.Width, class = dat$Species)
@@ -20,6 +19,10 @@ optcut_emp_youden <- function(...){
 #' @param x (numeric) The values that will be used for splitting
 #' @param class (character / factor / numeric) The dependent binary class variable
 #' @export
+#' @examples
+#' library(OptimalCutpoints)
+#' data(elas)
+#' optcut_emp_youden(elas$elas, elas$status, pos_class = 1)
 optcut_emp_youden.default <- function(x, class,
                                       candidate_cuts = unique(x),
                                       pos_class = NULL, higher = NULL) {
@@ -34,12 +37,13 @@ optcut_emp_youden.default <- function(x, class,
         pos_class <- levels(class)[1]
         message(paste("Assuming", pos_class, "as positive class"))
     }
-    args <- as.list(match.call()[-1])
-    if (!("higher" %in% names(args))) {
-        if (args$higher) {
-            message(paste("Assuming higher x values imply positive class"))
-        }
-    }
+    # args <- as.list(match.call()[-1])
+    # if (!("higher" %in% names(args))) {
+    #     if (args$higher) {
+    #         message(paste("Assuming higher x values imply positive class"))
+    #     }
+    # }
+
     neg_x <- x[class != pos_class]
     pos_x <- x[class == pos_class]
     if (is.null(higher)) {
