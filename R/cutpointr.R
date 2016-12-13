@@ -27,9 +27,14 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
     if (is.character(substitute(x))) x <- as.name(x)
     if (is.character(substitute(class))) class <- as.name(class)
     if (!missing(group) && is.character(substitute(group))) group <- as.name(group)
+    predictor <- as.character(substitute(x))
+    outcome   <- as.character(substitute(class))
     x <- eval(substitute(x), data, parent.frame())
     class <- eval(substitute(class), data, parent.frame())
-    if (!missing(group)) group <- eval(substitute(group), data, parent.frame())
+    if (!missing(group)) {
+        group_var <- as.character(substitute(group))
+        group <- eval(substitute(group), data, parent.frame())
+    }
 
     #
     # Prep
@@ -75,7 +80,9 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
         pos_class <- levels(class)[1]
         message(paste("Assuming", pos_class, "as positive class"))
     }
+    pos_class <- as.character(pos_class)
     if (!any(pos_class == class)) stop("Positive class not found in data")
+    neg_class <- levels(class)[levels(class) != pos_class]
     if (is.null(higher)) {
         neg_x <- x[class != pos_class]
         pos_x <- x[class == pos_class]
@@ -87,7 +94,6 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
             higher <- FALSE
         }
     }
-
 
     #
     # Calculate optimal cutpoint, map to cutpoint functions
@@ -113,7 +119,8 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
                 optcut <- f(d$x, d$class, candidate_cuts = candidate_cuts,
                             higher = higher, pos_class = pos_class) %>%
                     dplyr::mutate_(method = ~ n,
-                            group = ~ g)
+                                   group = ~ g)
+                                   # direction = ~ ifelse(higher, ">", "<"))
             })
         })
         optcut <- tibble::as_tibble(optcut) # can pmap_df return a tibble so this is not necessary?
@@ -133,12 +140,25 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
                     optcut <- f(d$x, d$class, candidate_cuts = candidate_cuts,
                                 higher = higher, pos_class = pos_class) %>%
                         dplyr::mutate_(method = ~ n)
+                                       # direction = ~ ifelse(higher, ">", "<"))
                 })
             })
         })
         optcut <- tibble::as_tibble(optcut)
         optcut <- dplyr::bind_cols(optcut, dat)
     }
+
+    optcut$direction                     <- ifelse(higher, ">", "<")
+    optcut$predictor                     <- predictor
+    optcut$outcome                       <- outcome
+    optcut$neg_class                     <- neg_class
+    if (!missing(group)) optcut$grouping <- group_var
+
+    # Reorder for nicer output
+    mn <- find_metric_name(colnames(optcut))
+    optcut <- optcut[, c("group", "direction", "optimal_cutpoint", mn, "method",
+                         "pos_class", "neg_class", "prevalence",
+                         "outcome", "predictor", "grouping", "data")]
 
     #
     # Bootstrap cutpoint variability and get LOO-Bootstrap performance estimate
@@ -163,31 +183,11 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
                         x_oob   <- g$x[-b_ind]
                         # LOO-Bootstrap
                         preds_b <- ifelse(x_b > optcut_b, pos_class, "neg")
-                        # Sensitivity_b = sens(obs = obs_b,  preds = preds_b,
-                        #                      pos_class = pos_class)
-                        # Specificity_b = spec(obs = obs_b,  preds = preds_b,
-                        #                      pos_class = pos_class)
                         Sens_Spec_b = sens_spec(obs = obs_b,  preds = preds_b,
                                              pos_class = pos_class)
-                        # Youden_Index_b = Sensitivity_train + Specificity_train - 1
                         preds_oob <- ifelse(x_oob > optcut_b, pos_class, "neg")
-                        # Sensitivity_oob = sens(obs = obs_oob,  preds = preds_oob,
-                        #                        pos_class = pos_class)
-                        # Specificity_oob = spec(obs = obs_oob,  preds = preds_oob,
-                        #                        pos_class = pos_class)
                         Sens_Spec_oob = sens_spec(obs = obs_oob,  preds = preds_oob,
                                                pos_class = pos_class)
-                        # Youden_Index_oob = Sensitivity_test + Specificity_test - 1
-
-                        # tibble::tibble(optcut_b,
-                        #            # Sensitivity_b, Specificity_b, #Youden_Index_train,
-                        #            # Sensitivity_oob, Specificity_oob #, Youden_Index_test
-                        #            Sensitivity_b   = Sens_Spec_b[1],
-                        #            Specificity_b   = Sens_Spec_b[2],
-                        #            Sensitivity_oob = Sens_Spec_oob[1],
-                        #            Specificity_oob = Sens_Spec_oob[2]
-                        # )
-
                         tibble::as_data_frame(cbind(funcout_b,
                                    Sensitivity_b   = Sens_Spec_b[1],
                                    Specificity_b   = Sens_Spec_b[2],
