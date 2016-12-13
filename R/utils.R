@@ -2,7 +2,7 @@
 insert_midpoints <- function(x) {
     midpoints <- na.omit(rowMeans(cbind(x, c(NA, x[-length(x)]))))
     midpoints <- rowMeans(cbind(x, c(NA, x[-length(x)]))[-1, ])
-    # write test to make sure there are no duplicates ####
+    ### write test to make sure there are no duplicates ####
     lx <- length(x)
     newx <- rep(NA, times = lx + lx - 1)
     newx[seq(from = 1, by = 2, length.out = lx)] <- x
@@ -34,4 +34,14 @@ extract_opt_cut <- function(df) {
     optcut <- df$optimal_cutpoint
     if (!is.null(optcut)) return(optcut)
     return(df[1, 1])
+}
+
+find_metric_name <- function(colnames) {
+        other_cols <- c("group", "optimal_cutpoint", "Sens", "Spec", "direction",
+                        "pos_class", "neg_class", "prevalence", "outcome",
+                        "predictor", "grouping", "data", "boot")
+        other_cols <- paste0(other_cols, collapse = "|")
+        metric_name <- colnames[!grepl(pattern = other_cols, x = colnames)]
+        metric_name <- metric_name[1] # If multiple metrics / other cols
+        return(metric_name)
 }
