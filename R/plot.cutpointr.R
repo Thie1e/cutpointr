@@ -25,20 +25,18 @@ plot.cutpointr <- function(cutpointr) {
         boot_cut <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,
                             ggplot2::aes_(x = ~ optimal_cutpoint, fill = fll)) +
-                ggplot2::geom_histogram(alpha = transparency) +
+                # ggplot2::geom_histogram(alpha = transparency) +
+                ggplot2::geom_density(alpha = transparency) +
                 ggplot2::ggtitle("Bootstrap", "distribution of optimal cutpoints") +
                 ggplot2::xlab("optimal cutpoint") +
                 ggplot2::theme(legend.position = "none")
         )
-        # Look for metric column
-        metric_name <- colnames(res_boot_unnested)
-        other_cols <- "group|optimal_cutpoint|Sens|Spec"
-        metric_name <- metric_name[!grepl(pattern = other_cols, x = metric_name)]
-        metric_name <- metric_name[1] # If multiple metrics / other cols
+        metric_name <- find_metric_name(colnames(res_boot_unnested))
         boot_metric <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,
                             ggplot2::aes_(x = ~ get(metric_name), fill = fll)) +
-                ggplot2::geom_histogram(alpha = transparency) +
+                # ggplot2::geom_histogram(alpha = transparency) +
+                ggplot2::geom_density(alpha = transparency) +
                 ggplot2::ggtitle("Bootstrap",
                                  paste("out-of-bag estimates of", metric_name)) +
                 ggplot2::xlab(metric_name) +
@@ -65,7 +63,7 @@ plot.cutpointr <- function(cutpointr) {
     res_unnested <- res_unnested %>%
         ### pos_class should all be the same
         ### maybe map over rows would be cleaner
-        mutate_(class = ~ ifelse(class == cutpointr$pos_class[1], 1, 0))
+        dplyr::mutate_(class = ~ ifelse(class == cutpointr$pos_class[1], 1, 0))
     if (suppressWarnings(!is.null(cutpointr$group))) {
         roc <- ggplot2::ggplot(res_unnested,
                                ggplot2::aes_(m = ~ x, d = ~ class,
