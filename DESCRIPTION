@@ -20,7 +20,6 @@ Imports:
     tidyr,
     purrr,
     tibble,
-    gridExtra,
-    stringi
+    gridExtra
 RoxygenNote: 5.0.1
 Suggests: testthat

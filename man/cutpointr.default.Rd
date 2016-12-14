@@ -2,10 +2,14 @@
 % Please edit documentation in R/cutpointr.R
 \name{cutpointr.default}
 \alias{cutpointr.default}
+\title{Determine and evaluate optimal cutpoints}
 \usage{
 \method{cutpointr}{default}(data, x, class, group, pos_class = NULL,
   higher = NULL, optcut_func = optcut_emp_youden, insert_midpoints = F,
   only_integer_cuts = F, boot_runs = 0)
+}
+\description{
+Determine and evaluate optimal cutpoints
 }
 \examples{
 library(OptimalCutpoints)

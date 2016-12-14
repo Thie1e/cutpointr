@@ -1,5 +1,4 @@
 #' Determine and evaluate optimal cutpoints
-#'
 #' @param x (numeric vector) The variable to be used for classification, e.g. test values.
 #' @param class (vector) class is a binary vector of values indicating class membership.
 #' @param group (vector) An additional covariate that identifies subgroups. Separate
@@ -9,6 +8,7 @@ cutpointr <- function(...){
     UseMethod("cutpointr")
 }
 
+#' Determine and evaluate optimal cutpoints
 #' @importFrom purrr %>%
 #' @export
 #' @examples
@@ -27,12 +27,12 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
     if (is.character(substitute(x))) x <- as.name(x)
     if (is.character(substitute(class))) class <- as.name(class)
     if (!missing(group) && is.character(substitute(group))) group <- as.name(group)
-    predictor <- as.character(substitute(x))
-    outcome   <- as.character(substitute(class))
+    predictor <- deparse(substitute(x))
+    outcome   <- deparse(substitute(class))
     x <- eval(substitute(x), data, parent.frame())
     class <- eval(substitute(class), data, parent.frame())
     if (!missing(group)) {
-        group_var <- as.character(substitute(group))
+        group_var <- deparse(substitute(group))
         group <- eval(substitute(group), data, parent.frame())
     }
 
@@ -156,9 +156,12 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
 
     # Reorder for nicer output
     mn <- find_metric_name(colnames(optcut))
-    optcut <- optcut[, c("group", "direction", "optimal_cutpoint", mn, "method",
+    select_cols <- c("group", "direction", "optimal_cutpoint", mn, "method",
                          "pos_class", "neg_class", "prevalence",
-                         "outcome", "predictor", "grouping", "data")]
+                         "outcome", "predictor", "grouping", "data")
+    # group and grouping may not be given
+    select_cols <- select_cols[select_cols %in% colnames(optcut)]
+    optcut <- optcut[, select_cols]
 
     #
     # Bootstrap cutpoint variability and get LOO-Bootstrap performance estimate

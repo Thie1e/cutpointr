@@ -5,9 +5,6 @@
 \alias{optcut_emp_youden.default}
 \alias{optcut_emp_youden.formula}
 \title{Determine optimal cutpoint by maximizing the sum of sensitivity and specificity}
-\source{
-me me me
-}
 \usage{
 optcut_emp_youden(...)
 
@@ -36,5 +33,8 @@ evaluated based on the chosen method.
 \examples{
 dat <- iris[1:100, ]
 optcut_emp_youden(dat$Sepal.Width, class = dat$Species)
+library(OptimalCutpoints)
+data(elas)
+optcut_emp_youden(elas$elas, elas$status, pos_class = 1)
 }
 

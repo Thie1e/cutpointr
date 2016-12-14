@@ -26,4 +26,4 @@ vignettes/*.pdf
 packrat/lib*/
 packrat/src/
 .Rprofile
-cutpointr_design.*
+cutpointr_design.pptx

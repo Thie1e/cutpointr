@@ -28,7 +28,7 @@ grid_arrange_shared_legend <- function(plots, ncol = length(plots), nrow = 1,
         }
     } else {
         # No legend because only one class:
-        combined <- gridExtra::arrangeGrob(do.call(arrangeGrob, gl),
+        combined <- gridExtra::arrangeGrob(do.call(gridExtra::arrangeGrob, gl),
                                            nrow = 1, ncol = 1)
     }
     grid::grid.newpage()
