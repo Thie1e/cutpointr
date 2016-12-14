@@ -17,7 +17,8 @@ cutpointr <- function(...){
 #' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500)
 #' opt_cut
 #' plot(opt_cut)
-cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = NULL,
+cutpointr.default <- function(data, x, class, group, pos_class = NULL,
+                              neg_class = NULL, higher = NULL,
                               optcut_func = optcut_emp_youden,
                               insert_midpoints = F, only_integer_cuts = F,
                               boot_runs = 0) {
@@ -74,15 +75,19 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL, higher = 
         candidate_cuts <- unique(x)
     }
     if (only_integer_cuts) stop("Not yet implemented")
-    if (!is.factor(class)) class <- as.factor(class)
+    # if (!is.factor(class)) class <- as.factor(class)
     if (length(unique(class)) != 2) stop(paste("Expecting two classes, got", length(unique(class))))
     if (is.null(pos_class)) {
-        pos_class <- levels(class)[1]
+        pos_class <- class[1]
         message(paste("Assuming", pos_class, "as positive class"))
     }
-    pos_class <- as.character(pos_class)
+    # pos_class <- as.character(pos_class)
     if (!any(pos_class == class)) stop("Positive class not found in data")
-    neg_class <- levels(class)[levels(class) != pos_class]
+    # neg_class <- levels(class)[levels(class) != pos_class]
+    if (is.null(neg_class)) {
+        neg_class <- unique(class)
+        neg_class <- neg_class[neg_class != pos_class]
+    }
     if (is.null(higher)) {
         neg_x <- x[class != pos_class]
         pos_x <- x[class == pos_class]
