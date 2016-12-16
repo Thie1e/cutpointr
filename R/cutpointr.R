@@ -17,11 +17,19 @@ cutpointr <- function(...){
 #' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500)
 #' opt_cut
 #' plot(opt_cut)
+#'
+#' ## With NAs
+#' elas_na <- elas
+#' elas_na$elas[10] <- NA
+#' elas_na$status[20] <- NA
+#' elas_na$gender[30] <- NA
+#' opt_cut_na <- cutpointr(elas_na, elas, status, gender, pos_class = 1,
+#'                   boot_runs = 500, na.rm = T)
 cutpointr.default <- function(data, x, class, group, pos_class = NULL,
                               neg_class = NULL, higher = NULL,
                               optcut_func = optcut_emp_youden,
-                              insert_midpoints = F, only_integer_cuts = F,
-                              boot_runs = 0) {
+                              insert_midpoints = FALSE, only_integer_cuts = FALSE,
+                              boot_runs = 0, na.rm = FALSE) {
     #
     # NSE
     #
@@ -40,6 +48,10 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
     #
     # Prep
     #
+    if (any(anyNA(c(x, class)) | (!missing(group) && anyNA(group))) &&
+         (missing(na.rm) | !na.rm)) {
+        warning("NAs found but na.rm = FALSE")
+    }
     if (length(optcut_func) > 1 && length(unique(sapply(optcut_func, class))) != 1) {
         stop("optcut_func should be a character vector, a list of functions, or a function. Do not mix types.")
     }
@@ -76,7 +88,8 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
     }
     if (only_integer_cuts) stop("Not yet implemented")
     # if (!is.factor(class)) class <- as.factor(class)
-    if (length(unique(class)) != 2) stop(paste("Expecting two classes, got", length(unique(class))))
+    luc <- ifelse(na.rm, length(unique(na.omit(class))), length(unique(class)))
+    if (luc != 2) stop(paste("Expecting two classes, got", luc))
     if (is.null(pos_class)) {
         pos_class <- class[1]
         message(paste("Assuming", pos_class, "as positive class"))
@@ -89,9 +102,7 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
         neg_class <- neg_class[neg_class != pos_class]
     }
     if (is.null(higher)) {
-        neg_x <- x[class != pos_class]
-        pos_x <- x[class == pos_class]
-        if (mean(neg_x) < mean(pos_x)) {
+        if (mean(na.omit(x[class != pos_class])) < mean(na.omit(x[class == pos_class]))) {
             message("Assuming the positive class has higher x values")
             higher <- TRUE
         } else {
@@ -109,6 +120,7 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
         g <- unique(group)
         ### Do we have to create this extra tibble?
         dat <- tibble::tibble(x, class, group)
+        if (na.rm) dat <- na.omit(dat)
         dat <- dat %>%
             dplyr::group_by_("group") %>%
             # dplyr::mutate_(prevalence = ~ mean(class == pos_class)) %>%
@@ -132,6 +144,7 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
         optcut <- dplyr::full_join(optcut, dat, by = "group")
     } else {
         dat <- tibble::tibble(x, class)
+        if (na.rm) dat <- na.omit(dat)
         dat <- dat %>%
             tidyr::nest_(data = ., key_col = "data", nest_cols = colnames(.)) %>%
             dplyr::mutate_(pos_class = ~ pos_class,
