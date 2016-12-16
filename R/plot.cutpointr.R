@@ -28,9 +28,10 @@ plot.cutpointr <- function(cutpointr, ...) {
             tidyr::unnest()
         boot_cut <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,
-                            ggplot2::aes_(x = ~ optimal_cutpoint, fill = fll)) +
+                            ggplot2::aes_(x = ~ optimal_cutpoint, fill = fll, color = clr)) +
                 # ggplot2::geom_histogram(alpha = transparency) +
                 ggplot2::geom_density(alpha = transparency) +
+                ggplot2::geom_rug(alpha = 0.5) +
                 ggplot2::ggtitle("Bootstrap", "distribution of optimal cutpoints") +
                 ggplot2::xlab("optimal cutpoint") +
                 ggplot2::theme(legend.position = "none")
@@ -38,9 +39,10 @@ plot.cutpointr <- function(cutpointr, ...) {
         metric_name <- find_metric_name(colnames(res_boot_unnested))
         boot_metric <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,
-                            ggplot2::aes_(x = ~ get(metric_name), fill = fll)) +
+                            ggplot2::aes_(x = ~ get(metric_name), fill = fll, color = clr)) +
                 # ggplot2::geom_histogram(alpha = transparency) +
                 ggplot2::geom_density(alpha = transparency) +
+                ggplot2::geom_rug(alpha = 0.5) +
                 ggplot2::ggtitle("Bootstrap",
                                  paste("out-of-bag estimates of", metric_name)) +
                 ggplot2::xlab(metric_name) +
@@ -61,13 +63,14 @@ plot.cutpointr <- function(cutpointr, ...) {
         res_unnested$optimal_cutpoint <- cutpointr$optimal_cutpoint
         col <- NULL
     } else {
-        res_unnested <- full_join(res_unnested,
+        res_unnested <- dplyr::full_join(res_unnested,
                                   cutpointr[, c("optimal_cutpoint", "group")],
                                   by = "group")
         col <- ~ group
     }
-    dist <- ggplot2::ggplot(res_unnested, ggplot2::aes_(x = ~ x, fill = fll)) +
+    dist <- ggplot2::ggplot(res_unnested, ggplot2::aes_(x = ~ x, fill = fll, color = clr)) +
         ggplot2::geom_density(alpha = transparency) +
+        ggplot2::geom_rug(alpha = 0.5) +
         ggplot2::geom_vline(ggplot2::aes_(xintercept = ~ optimal_cutpoint,
                                           color = col),
                             show.legend = FALSE) +
@@ -85,11 +88,12 @@ plot.cutpointr <- function(cutpointr, ...) {
         roc <- ggplot2::ggplot(res_unnested,
                                ggplot2::aes_(m = ~ x, d = ~ class,
                                              color = clr)) +
-            plotROC::geom_roc(n.cuts = 5, lineend = "round", linealpha = transparency) +
+            suppressWarnings(plotROC::geom_roc(n.cuts = 5, lineend = "round", linealpha = transparency)) +
             ggplot2::ggtitle("ROC curve", "by class") +
             ggplot2::xlab("1 - Specificity") +
             ggplot2::ylab("Sensitivity") +
-            ggplot2::theme(legend.position = "none")
+            ggplot2::theme(legend.position = "none") +
+            ggplot2::coord_equal()
     # } else {
     #     ##### delete this? ------------------------
     #     roc <- ggplot2::ggplot(res_unnested,
