@@ -5,8 +5,9 @@
 \title{Determine and evaluate optimal cutpoints}
 \usage{
 \method{cutpointr}{default}(data, x, class, group, pos_class = NULL,
-  higher = NULL, optcut_func = optcut_emp_youden, insert_midpoints = F,
-  only_integer_cuts = F, boot_runs = 0)
+  neg_class = NULL, higher = NULL, optcut_func = optcut_emp_youden,
+  insert_midpoints = FALSE, only_integer_cuts = FALSE, boot_runs = 0,
+  na.rm = FALSE, allowParallel = FALSE)
 }
 \description{
 Determine and evaluate optimal cutpoints
@@ -17,5 +18,20 @@ data(elas)
 opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500)
 opt_cut
 plot(opt_cut)
+
+## With NAs
+elas_na <- elas
+elas_na$elas[10] <- NA
+elas_na$status[20] <- NA
+elas_na$gender[30] <- NA
+opt_cut_na <- cutpointr(elas_na, elas, status, gender, pos_class = 1,
+                  boot_runs = 500, na.rm = T)
+
+## Cutoff for model prediction
+library(caret)
+library(randomForest)
+mod <- train(y = spam$type, x = spam[, 1:57], method = "rpart", preProcess = "nzv",
+           trControl = trainControl(savePredictions = TRUE, classProbs = TRUE, number = 5))
+mod_cut <- cutpointr(mod$pred, spam, obs, boot_runs = 200)
 }
 

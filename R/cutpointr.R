@@ -10,6 +10,8 @@ cutpointr <- function(...){
 
 #' Determine and evaluate optimal cutpoints
 #' @importFrom purrr %>%
+#' @importFrom doRNG %dorng%
+#' @importFrom foreach %do%
 #' @export
 #' @examples
 #' library(OptimalCutpoints)
@@ -25,11 +27,28 @@ cutpointr <- function(...){
 #' elas_na$gender[30] <- NA
 #' opt_cut_na <- cutpointr(elas_na, elas, status, gender, pos_class = 1,
 #'                   boot_runs = 500, na.rm = T)
+#'
+#' ## Parallelized bootstrapping
+#' library(doSNOW)
+#' cl <- makeCluster(parallel::detectCores())
+#' registerDoSNOW(cl)
+#' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1,
+#'                boot_runs = 2000, allowParallel = TRUE)
+#' opt_cut
+#' plot(opt_cut)
+#'
+#' ## Cutoff for model prediction
+#' library(caret)
+#' library(randomForest)
+#' mod <- train(y = spam$type, x = spam[, 1:57], method = "rpart", preProcess = "nzv",
+#'            trControl = trainControl(savePredictions = TRUE, classProbs = TRUE, number = 5))
+#' mod_cut <- cutpointr(mod$pred, spam, obs, boot_runs = 200)
+#'
 cutpointr.default <- function(data, x, class, group, pos_class = NULL,
                               neg_class = NULL, higher = NULL,
                               optcut_func = optcut_emp_youden,
                               insert_midpoints = FALSE, only_integer_cuts = FALSE,
-                              boot_runs = 0, na.rm = FALSE) {
+                              boot_runs = 0, na.rm = FALSE, allowParallel = FALSE) {
     #
     # NSE
     #
@@ -187,37 +206,41 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
     #
     #### innermost map_df could be refactored into own function
     #
+    `%seq_or_par%` <- ifelse(allowParallel, `%dorng%`, `%do%`)
     if (boot_runs <= 0) {
         bootstrap <- NULL
     } else {
         bootstrap <- purrr::map2_df(optcut_func, mod_names, function(f, n) {
             dat %>%
                 dplyr::transmute_(boot = ~ purrr::map(data, function(g) {
-                    purrr::map_df(1:boot_runs, function(rep) {
+                    # purrr::map_df(1:boot_runs, function(rep) {
+                    foreach::foreach(rep = 1:boot_runs, .combine = rbind,
+                            .export = c("f", "n", "higher", "pos_class",
+                                        "neg_class", "candidate_cuts")) %seq_or_par% {
                         b_ind   <- sample(1:nrow(g), replace = T, size = nrow(g))
                         obs_b   <- g$class[b_ind]
                         x_b     <- g$x[b_ind]
                         funcout_b <- f(x_b, obs_b, candidate_cuts = candidate_cuts,
-                                    higher = higher, pos_class = pos_class)
+                                       higher = higher, pos_class = pos_class)
                         optcut_b  <- extract_opt_cut(funcout_b)
                         obs_oob <- g$class[-b_ind]
                         x_oob   <- g$x[-b_ind]
                         # LOO-Bootstrap
-                        preds_b <- ifelse(x_b > optcut_b, pos_class, "neg")
+                        preds_b <- ifelse(x_b > optcut_b, pos_class, neg_class)
                         Sens_Spec_b = sens_spec(obs = obs_b,  preds = preds_b,
-                                             pos_class = pos_class)
-                        preds_oob <- ifelse(x_oob > optcut_b, pos_class, "neg")
+                                                pos_class = pos_class)
+                        preds_oob <- ifelse(x_oob > optcut_b, pos_class, neg_class)
                         Sens_Spec_oob = sens_spec(obs = obs_oob,  preds = preds_oob,
-                                               pos_class = pos_class)
+                                                  pos_class = pos_class)
                         tibble::as_data_frame(cbind(funcout_b,
-                                   Sensitivity_b   = Sens_Spec_b[1],
-                                   Specificity_b   = Sens_Spec_b[2],
-                                   Sensitivity_oob = Sens_Spec_oob[1],
-                                   Specificity_oob = Sens_Spec_oob[2]
+                                                    Sensitivity_b   = Sens_Spec_b[1],
+                                                    Specificity_b   = Sens_Spec_b[2],
+                                                    Sensitivity_oob = Sens_Spec_oob[1],
+                                                    Specificity_oob = Sens_Spec_oob[2]
                         ))
-                    })
+                    }
                 })) # %>%
-                # dplyr::mutate_(method = ~ n) # As a check, is already in optcut
+            # dplyr::mutate_(method = ~ n) # As a check, is already in optcut
         })
     }
 

@@ -20,6 +20,7 @@ Imports:
     tidyr,
     purrr,
     tibble,
-    gridExtra
+    gridExtra,
+    doRNG
 RoxygenNote: 5.0.1
 Suggests: testthat
