@@ -61,9 +61,9 @@ optcut_emp_youden.default <- function(x, class,
     #
     fh <- ecdf(neg_x)
     gd <- ecdf(pos_x)
-    youden <- fh(candidate_cuts - 1)-gd(candidate_cuts - 1)
+    youden <- fh(candidate_cuts)-gd(candidate_cuts)
     oc <- mean(candidate_cuts[youden == max(youden)])
-    youden_oc <- fh(oc - 1) - gd(oc - 1)
+    youden_oc <- fh(oc) - gd(oc)
     data.frame(optimal_cutpoint = oc,
                youden           = youden_oc)
 }
