@@ -20,6 +20,12 @@ cutpointr <- function(...){
 #' opt_cut
 #' plot(opt_cut)
 #'
+#' ## Different cutpoint function / metric
+#' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500,
+#'                      optcut_func = optcut_emp_eqsensspec)
+#' opt_cut
+#' plot(opt_cut)
+#'
 #' ## With NAs
 #' elas_na <- elas
 #' elas_na$elas[10] <- NA
@@ -48,6 +54,7 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
                               neg_class = NULL, higher = NULL,
                               optcut_func = optcut_emp_youden,
                               insert_midpoints = FALSE, only_integer_cuts = FALSE,
+                              candidate_cuts = unique(x),
                               boot_runs = 0, na.rm = FALSE, allowParallel = FALSE) {
     #
     # NSE
@@ -100,22 +107,13 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
     }
     if (is.null(mod_names)) stop("Could not get the names of the cutpoint function(s)")
     if (!is.list(optcut_func)) optcut_func <- list(optcut_func)
-    if (insert_midpoints) {
-        candidate_cuts <- unique(insert_midpoints(x))
-    } else {
-        candidate_cuts <- unique(x)
-    }
-    if (only_integer_cuts) stop("Not yet implemented")
-    # if (!is.factor(class)) class <- as.factor(class)
     luc <- ifelse(na.rm, length(unique(na.omit(class))), length(unique(class)))
     if (luc != 2) stop(paste("Expecting two classes, got", luc))
     if (is.null(pos_class)) {
         pos_class <- class[1]
         message(paste("Assuming", pos_class, "as positive class"))
     }
-    # pos_class <- as.character(pos_class)
     if (!any(pos_class == class)) stop("Positive class not found in data")
-    # neg_class <- levels(class)[levels(class) != pos_class]
     if (is.null(neg_class)) {
         neg_class <- unique(class)
         neg_class <- neg_class[neg_class != pos_class]
@@ -129,6 +127,17 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
             higher <- FALSE
         }
     }
+    if (higher) {
+        candidate_cuts <- unique(c(-Inf, candidate_cuts))
+    } else {
+        candidate_cuts <- unique(c(candidate_cuts, Inf))
+    }
+    if (insert_midpoints) {
+        candidate_cuts <- unique(insert_midpoints(x))
+    } else {
+        candidate_cuts <- unique(x)
+    }
+    if (only_integer_cuts) stop("Not yet implemented")
 
     #
     # Calculate optimal cutpoint, map to cutpoint functions
