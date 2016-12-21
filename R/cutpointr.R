@@ -16,6 +16,13 @@ cutpointr <- function(...){
 #' @examples
 #' library(OptimalCutpoints)
 #' data(elas)
+#'
+#' ## Optimal cutpoint for elas
+#' opt_cut <- cutpointr(elas, elas, status, pos_class = 1, boot_runs = 500)
+#' opt_cut
+#' plot(opt_cut)
+#'
+#' ## Optimal cutpoint for elas, as before, but for the separate subgroups
 #' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500)
 #' opt_cut
 #' plot(opt_cut)
@@ -107,18 +114,11 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
     }
     if (is.null(mod_names)) stop("Could not get the names of the cutpoint function(s)")
     if (!is.list(optcut_func)) optcut_func <- list(optcut_func)
-    luc <- ifelse(na.rm, length(unique(na.omit(class))), length(unique(class)))
+    if(na.rm) uc <- unique(na.omit(class)) else uc <- unique(class)
+    luc <- length(uc)
     if (luc != 2) stop(paste("Expecting two classes, got", luc))
-    if (is.null(pos_class)) {
-        pos_class <- class[1]
-        message(paste("Assuming", pos_class, "as positive class"))
-    }
-    if (!any(pos_class == class)) stop("Positive class not found in data")
-    if (is.null(neg_class)) {
-        neg_class <- unique(class)
-        neg_class <- neg_class[neg_class != pos_class]
-    }
-    if (is.null(higher)) {
+    # Determine higher and/or pos_class if necessary:
+    if (is.null(higher) & !is.null(pos_class)) {
         if (mean(na.omit(x[class != pos_class])) < mean(na.omit(x[class == pos_class]))) {
             message("Assuming the positive class has higher x values")
             higher <- TRUE
@@ -126,6 +126,31 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
             message("Assuming the positive class has lower x values")
             higher <- FALSE
         }
+    }
+    if (is.null(higher) & is.null(pos_class)) higher <- TRUE
+    if (!is.null(higher) & is.null(pos_class)) {
+        if (higher) {
+            if (mean(na.omit(x[class != uc[1]])) < mean(na.omit(x[class == uc[2]]))) {
+                message(paste("Assuming", uc[1], "as the positive class"))
+                pos_class <- uc[1]
+            } else {
+                message(paste("Assuming", uc[2], "as the positive class"))
+                pos_class <- uc[2]
+            }
+        } else {
+            if (mean(na.omit(x[class != uc[1]])) > mean(na.omit(x[class == uc[2]]))) {
+                message(paste("Assuming", uc[1], "as the positive class"))
+                pos_class <- uc[1]
+            } else {
+                message(paste("Assuming", uc[2], "as the positive class"))
+                pos_class <- uc[2]
+            }
+        }
+    }
+    if (!any(pos_class == class)) stop("Positive class not found in data")
+    if (is.null(neg_class)) {
+        neg_class <- unique(class)
+        neg_class <- neg_class[neg_class != pos_class]
     }
     if (higher) {
         candidate_cuts <- unique(c(-Inf, candidate_cuts))

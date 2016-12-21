@@ -6,8 +6,9 @@
 \usage{
 \method{cutpointr}{default}(data, x, class, group, pos_class = NULL,
   neg_class = NULL, higher = NULL, optcut_func = optcut_emp_youden,
-  insert_midpoints = FALSE, only_integer_cuts = FALSE, boot_runs = 0,
-  na.rm = FALSE, allowParallel = FALSE)
+  insert_midpoints = FALSE, only_integer_cuts = FALSE,
+  candidate_cuts = unique(x), boot_runs = 0, na.rm = FALSE,
+  allowParallel = FALSE)
 }
 \description{
 Determine and evaluate optimal cutpoints
@@ -15,7 +16,20 @@ Determine and evaluate optimal cutpoints
 \examples{
 library(OptimalCutpoints)
 data(elas)
+
+## Optimal cutpoint for elas
+opt_cut <- cutpointr(elas, elas, status, pos_class = 1, boot_runs = 500)
+opt_cut
+plot(opt_cut)
+
+## Optimal cutpoint for elas, as before, but for the separate subgroups
 opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500)
+opt_cut
+plot(opt_cut)
+
+## Different cutpoint function / metric
+opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500,
+                     optcut_func = optcut_emp_eqsensspec)
 opt_cut
 plot(opt_cut)
 
@@ -27,11 +41,21 @@ elas_na$gender[30] <- NA
 opt_cut_na <- cutpointr(elas_na, elas, status, gender, pos_class = 1,
                   boot_runs = 500, na.rm = T)
 
+## Parallelized bootstrapping
+library(doSNOW)
+cl <- makeCluster(parallel::detectCores())
+registerDoSNOW(cl)
+opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1,
+               boot_runs = 2000, allowParallel = TRUE)
+opt_cut
+plot(opt_cut)
+
 ## Cutoff for model prediction
 library(caret)
 library(randomForest)
 mod <- train(y = spam$type, x = spam[, 1:57], method = "rpart", preProcess = "nzv",
            trControl = trainControl(savePredictions = TRUE, classProbs = TRUE, number = 5))
 mod_cut <- cutpointr(mod$pred, spam, obs, boot_runs = 200)
+
 }
 
