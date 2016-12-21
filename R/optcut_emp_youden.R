@@ -30,20 +30,11 @@ optcut_emp_youden.default <- function(x, class,
     # Preparation ---------
     #
     if (length(x) != length(class)) stop("The x and class vectors are of different length")
-    if (!is.null(higher) && higher == F) stop("higher = F not yet implemented")
-    if (!is.factor(class)) class <- as.factor(class)
     if (length(unique(class)) != 2) stop(paste("Expecting two classes, got", length(unique(class))))
     if (is.null(pos_class)) {
-        pos_class <- levels(class)[1]
+        pos_class <- unique(class)[1]
         message(paste("Assuming", pos_class, "as positive class"))
     }
-    # args <- as.list(match.call()[-1])
-    # if (!("higher" %in% names(args))) {
-    #     if (args$higher) {
-    #         message(paste("Assuming higher x values imply positive class"))
-    #     }
-    # }
-
     neg_x <- x[class != pos_class]
     pos_x <- x[class == pos_class]
     if (is.null(higher)) {
@@ -52,21 +43,70 @@ optcut_emp_youden.default <- function(x, class,
             higher = T
         } else {
             message("Assuming the positive class has lower x values")
-            stop("higher = F not yet implemented")
             higher = F
         }
+    }
+    if (higher) {
+        candidate_cuts <- unique(c(-Inf, candidate_cuts))
+    } else {
+        candidate_cuts <- unique(c(candidate_cuts, Inf))
     }
     #
     # End preparation -------
     #
+
     fh <- ecdf(neg_x)
     gd <- ecdf(pos_x)
-    youden <- fh(candidate_cuts)-gd(candidate_cuts)
-    oc <- mean(candidate_cuts[youden == max(youden)])
-    youden_oc <- fh(oc) - gd(oc)
-    data.frame(optimal_cutpoint = oc,
-               youden           = youden_oc)
+    if (higher) {
+        youden <- fh(candidate_cuts) - gd(candidate_cuts)
+        oc <- mean(candidate_cuts[youden == max(youden)])
+        youden_oc <- fh(oc) - gd(oc)
+        res <- data.frame(optimal_cutpoint = oc,
+                          youden           = youden_oc)
+    } else {
+        youden <- gd(candidate_cuts) - fh(candidate_cuts)
+        oc <- mean(candidate_cuts[youden == max(youden)])
+        youden_oc <- gd(oc) - fh(oc)
+        res <- data.frame(optimal_cutpoint = oc,
+                          youden           = youden_oc)
+    }
+    return(res)
 }
+
+# youden_rocr <- function(x,class){
+#   pred<-ROCR::prediction(x,class)
+#   perf<-ROCR::performance(pred, "sens", "spec")
+#
+#   cutpoint<-slot(perf, "alpha.values")[[1]]
+#   spec<-slot(perf, "x.values")[[1]]
+#   sens<-slot(perf, "y.values")[[1]]
+#   res_tab<-data.frame(cutpoint, sens, spec)
+#
+#   oc <- res_tab[which.max(abs(res_tab$sens + res_tab$spec)),]
+#
+#   return(oc$cutpoint)
+# }
+
+# tempx <- rnorm(1000)
+# tempy <- sample(c("a", "b"), size = 1000, replace = T)
+# dat <- data.frame(value = tempx, class = tempy)
+# microbenchmark::microbenchmark(
+#     optcut_emp_youden.default(x = tempx, class = tempy, higher = F,
+#                               pos_class = "a")
+#     )
+# microbenchmark::microbenchmark(
+#     youden_rocr(x = tempx, class = tempy)
+#     )
+# microbenchmark::microbenchmark(
+#     cutpointr(dat, value, class, pos_class = "a", higher = F)
+#     )
+
+# Check higher TRUE / FALSE
+# tempx <- 1:7
+# tempy <- c("a", "a", "a", "b", "b", "b", "b")
+# cbind(tempx, tempy)
+# optcut_emp_youden.default(tempx, tempy, pos_class = "a", higher = F)
+
 
 #' @rdname optcut_emp_youden
 #' @param formula (formula) Formula for splitting classes by some numeric vector, e.g. class ~ x.
@@ -75,64 +115,3 @@ optcut_emp_youden.formula <- function(formula, group, data) {
     stop("Not yet implemented")
 }
 
-
-gather_cutoffs <- function(x, class,  candidate_cuts = unique(x),
-                           metric_func = NULL, pos_class = NULL, higher = NULL) {
-    #
-    # Preparation ---------
-    #
-    if (!is.null(higher) && higher == F) stop("higher = F not yet implemented")
-    if (!is.factor(class)) class <- as.factor(class)
-    if (length(levels(class)) != 2) {
-        stop(paste("Expecting two classes, got", length(levels(class))))
-    }
-    if (is.null(pos_class)) {
-        pos_class <- levels(class)[1]
-        message(paste("Assuming", pos_class, "as positive class"))
-    }
-    stopifnot(pos_class %in% levels(class))
-    # args <- as.list(match.call()[-1])
-    # if (!("higher" %in% names(args))) {
-    #     if (args$higher) {
-    #         message(paste("Assuming higher x values imply positive class"))
-    #     }
-    # }
-    neg_x <- x[class != pos_class]
-    pos_x <- x[class == pos_class]
-    if (is.null(higher)) {
-        if (mean(neg_x) < mean(pos_x)) {
-            message("Assuming the positive class has higher x values")
-            higher = T
-        } else {
-            message("Assuming the positive class has lower x values")
-            stop("higher = F not yet implemented")
-            higher = F
-        }
-    }
-    #
-    # End preparation -------
-    #
-    metric_name <- as.character(match.call()$metric_func)
-
-    # Assuming higher = T
-    # p <- ifelse(x > candidate_cuts, pos_class, 0)
-    metrics <- purrr::map_dbl(candidate_cuts, function(cutpoint) {
-        p <- ifelse(cutpoint > x, pos_class, 0)
-        metric_func(preds = p, obs = class, pos_class)
-    })
-    res <- data.frame(cutpoint = candidate_cuts, metrics)
-    colnames(res)[2] <- metric_name
-    # class(res) <- c("cp_result", "data.frame") # Klasse cp_result wird in cutpointr gesetzt
-    return(res)
-}
-
-# dat <- data.frame(value = rnorm(1000),
-#                   class = sample(c("a", "b"), size = 1000, replace = T))
-# gather_cutoffs(dat$value, class = dat$class, pos_class = "a", metric_func = youden, higher = T)
-# microbenchmark::microbenchmark(
-#     gather_cutoffs(dat$value, class = dat$class, pos_class = "a", metric_func = youden, higher = T)
-# )
-#
-# microbenchmark::microbenchmark(
-#     optcut_emp_youden.default(dat$value, dat$class)
-# )

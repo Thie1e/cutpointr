@@ -1,14 +1,18 @@
+
+#### Evtl. einfacher nicht wirklich die midpoints einzufügen, sondern am Ende
+#### mean(c(cutpoints[oc_ind], cutpoints[oc_ind + 1])) zurückzugeben
+
 #' Insert midpoints between neighboring values after sorting, usually for cutpoints
-insert_midpoints <- function(x) {
-    midpoints <- na.omit(rowMeans(cbind(x, c(NA, x[-length(x)]))))
-    midpoints <- rowMeans(cbind(x, c(NA, x[-length(x)]))[-1, ])
-    ### write test to make sure there are no duplicates ####
-    lx <- length(x)
-    newx <- rep(NA, times = lx + lx - 1)
-    newx[seq(from = 1, by = 2, length.out = lx)] <- x
-    newx[seq(from = 2, by = 2, length.out = lx - 1)] <- midpoints
-    return(newx)
-}
+# insert_midpoints <- function(x) {
+#     midpoints <- na.omit(rowMeans(cbind(x, c(NA, x[-length(x)]))))
+#     midpoints <- rowMeans(cbind(x, c(NA, x[-length(x)]))[-1, ])
+#     ### write test to make sure there are no duplicates ####
+#     lx <- length(x)
+#     newx <- rep(NA, times = lx + lx - 1)
+#     newx[seq(from = 1, by = 2, length.out = lx)] <- x
+#     newx[seq(from = 2, by = 2, length.out = lx - 1)] <- midpoints
+#     return(newx)
+# }
 
 # insert_midpoints2 <- function(x) {
 #     lx <- length(x)
