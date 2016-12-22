@@ -4,16 +4,17 @@
 \alias{cutpointr.default}
 \title{Determine and evaluate optimal cutpoints}
 \usage{
-\method{cutpointr}{default}(data, x, class, group, pos_class = NULL,
+\method{cutpointr}{default}(data, x, class, subgroup, pos_class = NULL,
   neg_class = NULL, higher = NULL, optcut_func = optcut_emp_youden,
   insert_midpoints = FALSE, only_integer_cuts = FALSE,
   candidate_cuts = unique(x), boot_runs = 0, na.rm = FALSE,
-  allowParallel = FALSE)
+  allowParallel = FALSE, ...)
 }
 \description{
 Determine and evaluate optimal cutpoints
 }
 \examples{
+library(cutpointr)
 library(OptimalCutpoints)
 data(elas)
 

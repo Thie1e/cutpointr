@@ -1,7 +1,7 @@
 #' Determine and evaluate optimal cutpoints
 #' @param x (numeric vector) The variable to be used for classification, e.g. test values.
 #' @param class (vector) class is a binary vector of values indicating class membership.
-#' @param group (vector) An additional covariate that identifies subgroups. Separate
+#' @param subgroup (vector) An additional covariate that identifies subgroups. Separate
 #' optimal cutpoints will be determined by group.
 #' @export
 cutpointr <- function(...){
@@ -14,6 +14,7 @@ cutpointr <- function(...){
 #' @importFrom foreach %do%
 #' @export
 #' @examples
+#' library(cutpointr)
 #' library(OptimalCutpoints)
 #' data(elas)
 #'
@@ -57,31 +58,31 @@ cutpointr <- function(...){
 #'            trControl = trainControl(savePredictions = TRUE, classProbs = TRUE, number = 5))
 #' mod_cut <- cutpointr(mod$pred, spam, obs, boot_runs = 200)
 #'
-cutpointr.default <- function(data, x, class, group, pos_class = NULL,
+cutpointr.default <- function(data, x, class, subgroup, pos_class = NULL,
                               neg_class = NULL, higher = NULL,
                               optcut_func = optcut_emp_youden,
                               insert_midpoints = FALSE, only_integer_cuts = FALSE,
                               candidate_cuts = unique(x),
-                              boot_runs = 0, na.rm = FALSE, allowParallel = FALSE) {
+                              boot_runs = 0, na.rm = FALSE, allowParallel = FALSE, ...) {
     #
     # NSE
     #
     if (is.character(substitute(x))) x <- as.name(x)
     if (is.character(substitute(class))) class <- as.name(class)
-    if (!missing(group) && is.character(substitute(group))) group <- as.name(group)
+    if (!missing(subgroup) && is.character(substitute(subgroup))) subgroup <- as.name(subgroup)
     predictor <- deparse(substitute(x))
     outcome   <- deparse(substitute(class))
     x <- eval(substitute(x), data, parent.frame())
     class <- eval(substitute(class), data, parent.frame())
-    if (!missing(group)) {
-        group_var <- deparse(substitute(group))
-        group <- eval(substitute(group), data, parent.frame())
+    if (!missing(subgroup)) {
+        subgroup_var <- deparse(substitute(subgroup))
+        subgroup <- eval(substitute(subgroup), data, parent.frame())
     }
 
     #
     # Prep
     #
-    if (any(anyNA(c(x, class)) | (!missing(group) && anyNA(group))) &&
+    if (any(anyNA(c(x, class)) | (!missing(subgroup) && anyNA(subgroup))) &&
          (missing(na.rm) | !na.rm)) {
         warning("NAs found but na.rm = FALSE")
     }
@@ -169,32 +170,32 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
     #
     ### Das hier könnte man evtl. in eine .default und eine .grouped_df Methode auslagern
     ### (auch die anonymen Funktionen in map)
-    if (!missing(group)) {
-        g <- unique(group)
+    if (!missing(subgroup)) {
+        g <- unique(subgroup)
         ### Do we have to create this extra tibble?
-        dat <- tibble::tibble(x, class, group)
+        dat <- tibble::tibble(x, class, subgroup)
         if (na.rm) dat <- na.omit(dat)
         dat <- dat %>%
-            dplyr::group_by_("group") %>%
+            dplyr::group_by_("subgroup") %>%
             # dplyr::mutate_(prevalence = ~ mean(class == pos_class)) %>%
             tidyr::nest_(data = ., key_col = "data", nest_cols = colnames(.)) %>%
-            dplyr::mutate_(group = ~ as.character(group),
+            dplyr::mutate_(subgroup = ~ as.character(subgroup),
                            pos_class = ~ pos_class,
                            prevalence = ~ purrr::map_dbl(data, function(g) {
                                mean(g$class == pos_class)
                                })
                            )
         optcut <- purrr::pmap_df(list(mod_names, optcut_func), function(n, f) {
-            purrr::pmap_df(list(dat$group, dat$data), function(g, d) {
+            purrr::pmap_df(list(dat$subgroup, dat$data), function(g, d) {
                 optcut <- f(d$x, d$class, candidate_cuts = candidate_cuts,
-                            higher = higher, pos_class = pos_class) %>%
+                            higher = higher, pos_class = pos_class, ...) %>%
                     dplyr::mutate_(method = ~ n,
-                                   group = ~ g)
+                                   subgroup = ~ g)
                                    # direction = ~ ifelse(higher, ">", "<"))
             })
         })
         optcut <- tibble::as_tibble(optcut) # can pmap_df return a tibble so this is not necessary?
-        optcut <- dplyr::full_join(optcut, dat, by = "group")
+        optcut <- dplyr::full_join(optcut, dat, by = "subgroup")
     } else {
         dat <- tibble::tibble(x, class)
         if (na.rm) dat <- na.omit(dat)
@@ -209,7 +210,7 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
             purrr::pmap_df(list(mod_names, optcut_func), function(n, f) {
                 purrr::map_df(dat$data, function(d) {
                     optcut <- f(d$x, d$class, candidate_cuts = candidate_cuts,
-                                higher = higher, pos_class = pos_class) %>%
+                                higher = higher, pos_class = pos_class, ...) %>%
                         dplyr::mutate_(method = ~ n)
                                        # direction = ~ ifelse(higher, ">", "<"))
                 })
@@ -223,14 +224,14 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
     optcut$predictor                     <- predictor
     optcut$outcome                       <- outcome
     optcut$neg_class                     <- neg_class
-    if (!missing(group)) optcut$grouping <- group_var
+    if (!missing(subgroup)) optcut$grouping <- subgroup_var
 
     # Reorder for nicer output
     mn <- find_metric_name(colnames(optcut))
-    select_cols <- c("group", "direction", "optimal_cutpoint", mn, "method",
+    select_cols <- c("subgroup", "direction", "optimal_cutpoint", mn, "method",
                          "pos_class", "neg_class", "prevalence",
                          "outcome", "predictor", "grouping", "data")
-    # group and grouping may not be given
+    # subgroup and grouping may not be given
     select_cols <- select_cols[select_cols %in% colnames(optcut)]
     optcut <- optcut[, select_cols]
 
@@ -255,7 +256,7 @@ cutpointr.default <- function(data, x, class, group, pos_class = NULL,
                         obs_b   <- g$class[b_ind]
                         x_b     <- g$x[b_ind]
                         funcout_b <- f(x_b, obs_b, candidate_cuts = candidate_cuts,
-                                       higher = higher, pos_class = pos_class)
+                                       higher = higher, pos_class = pos_class, ...)
                         optcut_b  <- extract_opt_cut(funcout_b)
                         obs_oob <- g$class[-b_ind]
                         x_oob   <- g$x[-b_ind]

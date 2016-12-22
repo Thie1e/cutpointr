@@ -1,6 +1,6 @@
 #' @export
 print.summary_cutpointr <- function(cutpointr) {
-    if (suppressWarnings(is.null(cutpointr$group))) {
+    if (suppressWarnings(is.null(cutpointr$subgroup))) {
         cat(paste("Optimal cutpoints using method:", unique(cutpointr$method), "\n"))
         cat(paste0(rep("-", getOption("width")), collapse = ""), "\n")
         cps <- round(cutpointr$optimal_cutpoint, 5)
@@ -59,7 +59,7 @@ print.summary_cutpointr <- function(cutpointr) {
         cat(paste0(rep("-", getOption("width")), collapse = ""), "\n")
         cps <- round(cutpointr$optimal_cutpoint, 5)
         for (i in 1:length(cps)) {
-            cat(paste0("Group ", cutpointr$group[i],
+            cat(paste0("Subgroup ", cutpointr$subgroup[i],
                        ", variable ", cutpointr$predictor[i], ": ",
                        cps[i],
                        " with ", colnames(cutpointr)[4], " = ", round(cutpointr[i, 4], 4),
@@ -75,14 +75,14 @@ print.summary_cutpointr <- function(cutpointr) {
         cat(paste0(rep("-", getOption("width")), collapse = ""), "\n")
         n_obs <- purrr::map_int(cutpointr$data, nrow)
         for (i in 1:length(n_obs)) {
-            cat(paste0("Group ", cutpointr$group[i], ": ", n_obs[i],
+            cat(paste0("Subgroup ", cutpointr$subgroup[i], ": ", n_obs[i],
                        " observations, prevalence ",
                        round(cutpointr$prevalence[i], 4) * 100,
                        "%", " \n"))
         }
         cat("\n")
         desc <- do.call(rbind, desc)
-        rownames(desc) <- cutpointr$group
+        rownames(desc) <- cutpointr$subgroup
         print(desc)
 
         cat("\n")
@@ -96,7 +96,7 @@ print.summary_cutpointr <- function(cutpointr) {
                   SD = round(sd(b$optimal_cutpoint), 2))
             })
             cut_b <- do.call(rbind, cut_b)
-            rownames(cut_b) <- cutpointr$group
+            rownames(cut_b) <- cutpointr$subgroup
             print(cut_b)
 
             cat("\n")
@@ -106,7 +106,7 @@ print.summary_cutpointr <- function(cutpointr) {
                 summary(unlist(b[, metric_name]))
             })
             metric_b <- do.call(rbind, metric_b)
-            rownames(metric_b) <- cutpointr$group
+            rownames(metric_b) <- cutpointr$subgroup
             print(metric_b)
         }
     }

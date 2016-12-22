@@ -11,7 +11,7 @@ optcut_emp_youden(...)
 \method{optcut_emp_youden}{default}(x, class, candidate_cuts = unique(x),
   pos_class = NULL, higher = NULL)
 
-\method{optcut_emp_youden}{formula}(formula, group, data)
+\method{optcut_emp_youden}{formula}(formula, data)
 }
 \arguments{
 \item{x}{(numeric) The values that will be used for splitting}
@@ -19,9 +19,6 @@ optcut_emp_youden(...)
 \item{class}{(character / factor / numeric) The dependent binary class variable}
 
 \item{formula}{(formula) Formula for splitting classes by some numeric vector, e.g. class ~ x.}
-
-\item{group}{(numeric) An additional covariate that identifies subgroups. Separate
-optimal cutpoints will be calculated for every group.}
 
 \item{data}{(data.frame) The dependent and independent variables}
 }

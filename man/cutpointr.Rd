@@ -11,7 +11,7 @@ cutpointr(...)
 
 \item{class}{(vector) class is a binary vector of values indicating class membership.}
 
-\item{group}{(vector) An additional covariate that identifies subgroups. Separate
+\item{subgroup}{(vector) An additional covariate that identifies subgroups. Separate
 optimal cutpoints will be determined by group.}
 }
 \description{

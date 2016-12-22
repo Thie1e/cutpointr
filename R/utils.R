@@ -41,7 +41,7 @@ extract_opt_cut <- function(df) {
 }
 
 find_metric_name <- function(colnames) {
-        other_cols <- c("group", "optimal_cutpoint", "Sens", "Spec", "direction",
+        other_cols <- c("subgroup", "optimal_cutpoint", "Sens", "Spec", "direction",
                         "pos_class", "neg_class", "prevalence", "outcome",
                         "predictor", "grouping", "data", "boot")
         other_cols <- paste0(other_cols, collapse = "|")

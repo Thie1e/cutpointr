@@ -6,19 +6,19 @@ predict.cutpointr <- function(cutpointr, newdata) {
     pos_class <- cutpointr$pos_class[1]
     neg_class <- cutpointr$neg_class[1]
 
-    if (any(colnames(cutpointr) == "group")) {
+    if (any(colnames(cutpointr) == "subgroup")) {
         grouping_name     <- unique(cutpointr$grouping)
         grouping_var_new  <- eval(parse(text = grouping_name), newdata, parent.frame())
         opt_cut_ind <- purrr::map_int(grouping_var_new, function(g) {
-            which(cutpointr$group == g)
+            which(cutpointr$subgroup == g)
         })
         optimal_cuts <- cutpointr$optimal_cutpoint[opt_cut_ind]
 
         #-------
         # if(!any(colnames(newdata) == grouping_name)) stop("grouping variable not found in newdata")
-        # optimal_cut <- cutpointr$optimal_cutpoint[cutpointr$group == newdata$group]
+        # optimal_cut <- cutpointr$optimal_cutpoint[cutpointr$subgroup == newdata$subgroup]
         # opt_cut_ind <- purrr::map_int(newdata[, grouping_name], function(g) {
-        #     which(cutpointr$group == g)
+        #     which(cutpointr$subgroup == g)
         # })
         # optimal_cuts <- cutpointr$optimal_cutpoint[opt_cut_ind]
         #----------

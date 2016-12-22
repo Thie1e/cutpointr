@@ -4,17 +4,17 @@ plot.cutpointr <- function(cutpointr, ...) {
     args <- list(...)
     # print(str(args))
 
-    if (is.null(suppressWarnings(cutpointr$group))) {
+    if (is.null(suppressWarnings(cutpointr$subgroup))) {
         dts_boot <- "boot"
         dts <- "data"
         fll <- NULL
         clr <- NULL
         transparency <- 1
     } else {
-        dts_boot <- c("boot", "group")
-        dts <- c("data", "group")
-        fll <- ~ group
-        clr <- ~ group
+        dts_boot <- c("boot", "subgroup")
+        dts <- c("data", "subgroup")
+        fll <- ~ subgroup
+        clr <- ~ subgroup
         transparency <- 0.6
     }
 
@@ -59,14 +59,14 @@ plot.cutpointr <- function(cutpointr, ...) {
     res_unnested <- cutpointr %>%
         dplyr::select_(.data = ., .dots = dts) %>%
         tidyr::unnest()
-    if (is.null(suppressWarnings(cutpointr$group))) {
+    if (is.null(suppressWarnings(cutpointr$subgroup))) {
         res_unnested$optimal_cutpoint <- cutpointr$optimal_cutpoint
         col <- NULL
     } else {
         res_unnested <- dplyr::full_join(res_unnested,
-                                  cutpointr[, c("optimal_cutpoint", "group")],
-                                  by = "group")
-        col <- ~ group
+                                  cutpointr[, c("optimal_cutpoint", "subgroup")],
+                                  by = "subgroup")
+        col <- ~ subgroup
     }
     dist <- ggplot2::ggplot(res_unnested, ggplot2::aes_(x = ~ x, fill = fll, color = clr)) +
         ggplot2::geom_density(alpha = transparency) +
@@ -84,7 +84,7 @@ plot.cutpointr <- function(cutpointr, ...) {
         ### pos_class should all be the same
         ### maybe map over rows would be cleaner
         dplyr::mutate_(class = ~ ifelse(class == cutpointr$pos_class[1], 1, 0))
-    # if (suppressWarnings(!is.null(cutpointr$group))) {
+    # if (suppressWarnings(!is.null(cutpointr$subgroup))) {
         roc <- ggplot2::ggplot(res_unnested,
                                ggplot2::aes_(m = ~ x, d = ~ class,
                                              color = clr)) +

@@ -5,8 +5,6 @@
 #' evaluated based on the chosen method.
 #'
 #' @param data (data.frame) The dependent and independent variables
-#' @param group (numeric) An additional covariate that identifies subgroups. Separate
-#' optimal cutpoints will be calculated for every group.
 #' @export
 #' @examples
 #' dat <- iris[1:100, ]
@@ -111,7 +109,7 @@ optcut_emp_youden.default <- function(x, class,
 #' @rdname optcut_emp_youden
 #' @param formula (formula) Formula for splitting classes by some numeric vector, e.g. class ~ x.
 #' @export
-optcut_emp_youden.formula <- function(formula, group, data) {
+optcut_emp_youden.formula <- function(formula, data) {
     stop("Not yet implemented")
 }
 
