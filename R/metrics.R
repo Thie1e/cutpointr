@@ -20,16 +20,24 @@ sens <- function(obs, preds, pos_class) {
 
 #' Calculate specificity
 spec <- function(obs, preds, pos_class) {
-    binary_obs <- obs == pos_class
-    binary_preds <- preds == pos_class
-    sum(!binary_preds & !binary_obs) / sum(!binary_obs)
+    neg_class <- unique(obs)
+    neg_class <- neg_class[neg_class != pos_class]
+    stopifnot(length(neg_class) == 1)
+    binary_obs <- obs == neg_class
+    binary_preds <- preds == neg_class
+    sum(binary_preds & binary_obs) / sum(binary_obs)
 }
 
 sens_spec <- function(obs, preds, pos_class) {
+    neg_class <- unique(obs)
+    neg_class <- neg_class[neg_class != pos_class]
+    stopifnot(length(neg_class) == 1)
     binary_obs <- obs == pos_class
     binary_preds <- preds == pos_class
     sens <- sum(binary_preds & binary_obs) / sum(binary_obs)
-    spec <- sum(!binary_preds & !binary_obs) / sum(!binary_obs)
+    binary_obs <- obs == neg_class
+    binary_preds <- preds == neg_class
+    spec <- sum(binary_preds & binary_obs) / sum(binary_obs)
     c(Sensitivity = sens, Specificity = spec)
 }
 
