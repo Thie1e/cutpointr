@@ -33,6 +33,7 @@ cutpointr <- function(...){
 #' plot(opt_cut)
 #'
 #' ## Bootstrapping also works on individual subgroups
+#' set.seed(123)
 #' opt_cut <- cutpointr(elas, elas, status, gender, boot_runs = 200)
 #' opt_cut
 #' plot(opt_cut)
@@ -56,6 +57,7 @@ cutpointr <- function(...){
 #' library(doSNOW)
 #' cl <- makeCluster(parallel::detectCores())
 #' registerDoSNOW(cl)
+#' registerDoRNG(123) # Reproducible parallel loops using doRNG
 #' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1,
 #'                boot_runs = 2000, allowParallel = TRUE)
 #' opt_cut
@@ -69,6 +71,7 @@ cutpointr <- function(...){
 #' mod_cut <- cutpointr(mod$pred, spam, obs, boot_runs = 200)
 #'
 #' ## Wrapper for optimal.cutpoints
+#' registerDoRNG(123) # Reproducible parallel loops using doRNG
 #' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 2000,
 #'                      optcut_func = oc_OptimalCutpoints, methods = "Youden", allowParallel = T)
 #' # OptimalCutpoints finds different cutpoints because candidate_cuts per subgroup
@@ -248,8 +251,8 @@ cutpointr.default <- function(data, x, class, subgroup, pos_class = NULL,
             dplyr::transmute_(boot = ~ purrr::map(data, function(g) {
                 boot_g <- foreach::foreach(rep = 1:boot_runs, .combine = rbind,
                     .packages = "OptimalCutpoints",
-                    .export = c("f", "n", "direction", "pos_class",
-                    "neg_class", "candidate_cuts", "metric_names")) %seq_or_par%
+                    .export = c("optcut_func", "direction", "pos_class",
+                    "neg_class", "candidate_cuts", "mn")) %seq_or_par%
                     {
                         b_ind   <- sample(1:nrow(g), replace = T, size = nrow(g))
                         if (length(unique(g[b_ind, ]$class)) == 1) {
@@ -278,9 +281,8 @@ cutpointr.default <- function(data, x, class, subgroup, pos_class = NULL,
                         ))
                         return(bootstrap)
                     }
-                if (anyNA(boot_g)) {
-                    warning("Missing values in bootstrap, probably due to sampling of only one class")
-                }
+                lna <- sum(is.na(boot_g))
+                if (lna) warning(paste(lna, "missing values in bootstrap, probably due to sampling of only one class"))
                 return(boot_g)
             }))
     }

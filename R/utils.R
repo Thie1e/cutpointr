@@ -49,3 +49,14 @@ find_metric_name <- function(colnames) {
         metric_name <- metric_name[1] # If multiple metrics / other cols
         return(metric_name)
 }
+
+sesp_from_oc <- function(x, class, oc, direction, pos_class, neg_class) {
+    if (direction == ">") {
+        predictions <- ifelse(x > oc, pos_class, neg_class)
+        sens_spec(obs = class, preds = predictions, pos_class)
+    } else if (direction == "<") {
+        predictions <- ifelse(x < oc, pos_class, neg_class)
+        sens_spec(obs = class, preds = predictions, pos_class)
+    }
+}
+

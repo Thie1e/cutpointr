@@ -1,5 +1,4 @@
 #' Find optimal cutpoint to maximize Kappa
-#' @export
 # oc_kappa <- function(...) {
 #     UseMethod("oc_kappa")
 # }

@@ -5,10 +5,9 @@
 \title{Determine and evaluate optimal cutpoints}
 \usage{
 \method{cutpointr}{default}(data, x, class, subgroup, pos_class = NULL,
-  neg_class = NULL, higher = NULL, optcut_func = optcut_emp_youden,
-  insert_midpoints = FALSE, only_integer_cuts = FALSE,
-  candidate_cuts = unique(x), boot_runs = 0, na.rm = FALSE,
-  allowParallel = FALSE, ...)
+  neg_class = NULL, direction = NULL, optcut_func = oc_youden,
+  insert_midpoints = FALSE, candidate_cuts = NULL, boot_runs = 0,
+  na.rm = FALSE, allowParallel = FALSE, ...)
 }
 \description{
 Determine and evaluate optimal cutpoints
@@ -19,18 +18,29 @@ library(OptimalCutpoints)
 data(elas)
 
 ## Optimal cutpoint for elas
-opt_cut <- cutpointr(elas, elas, status, pos_class = 1, boot_runs = 500)
+opt_cut <- cutpointr(elas, elas, status)
 opt_cut
 plot(opt_cut)
 
 ## Optimal cutpoint for elas, as before, but for the separate subgroups
-opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500)
+opt_cut <- cutpointr(elas, elas, status, gender)
+opt_cut
+plot(opt_cut)
+
+## Bootstrapping to assess cutpoint variability and out-of-sample performance
+opt_cut <- cutpointr(elas, elas, status, boot_runs = 200)
+opt_cut
+plot(opt_cut)
+
+## Bootstrapping also works on individual subgroups
+set.seed(123)
+opt_cut <- cutpointr(elas, elas, status, gender, boot_runs = 200)
 opt_cut
 plot(opt_cut)
 
 ## Different cutpoint function / metric
-opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 500,
-                     optcut_func = optcut_emp_eqsensspec)
+opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 200,
+                     optcut_func = oc_equalsesp)
 opt_cut
 plot(opt_cut)
 
@@ -39,13 +49,15 @@ elas_na <- elas
 elas_na$elas[10] <- NA
 elas_na$status[20] <- NA
 elas_na$gender[30] <- NA
-opt_cut_na <- cutpointr(elas_na, elas, status, gender, pos_class = 1,
-                  boot_runs = 500, na.rm = T)
+opt_cut_na <- cutpointr(elas_na, elas, status, gender,
+                  boot_runs = 200, na.rm = T)
+opt_cut_na
 
 ## Parallelized bootstrapping
 library(doSNOW)
 cl <- makeCluster(parallel::detectCores())
 registerDoSNOW(cl)
+registerDoRNG(123) # Reproducible parallel loops using doRNG
 opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1,
                boot_runs = 2000, allowParallel = TRUE)
 opt_cut
@@ -57,6 +69,14 @@ library(randomForest)
 mod <- train(y = spam$type, x = spam[, 1:57], method = "rpart", preProcess = "nzv",
            trControl = trainControl(savePredictions = TRUE, classProbs = TRUE, number = 5))
 mod_cut <- cutpointr(mod$pred, spam, obs, boot_runs = 200)
+
+## Wrapper for optimal.cutpoints
+registerDoRNG(123) # Reproducible parallel loops using doRNG
+opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 2000,
+                     optcut_func = oc_OptimalCutpoints, methods = "Youden", allowParallel = T)
+# OptimalCutpoints finds different cutpoints because candidate_cuts per subgroup
+opt_cut
+plot(opt_cut)
 
 }
 
