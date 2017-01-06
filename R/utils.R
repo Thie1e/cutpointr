@@ -50,13 +50,8 @@ find_metric_name <- function(colnames) {
         return(metric_name)
 }
 
-sesp_from_oc <- function(x, class, oc, direction, pos_class, neg_class) {
-    if (direction == ">") {
-        predictions <- ifelse(x > oc, pos_class, neg_class)
-        sens_spec(obs = class, preds = predictions, pos_class)
-    } else if (direction == "<") {
-        predictions <- ifelse(x < oc, pos_class, neg_class)
-        sens_spec(obs = class, preds = predictions, pos_class)
-    }
+ifel_pos_neg <- function(logi_vec, pos_class, neg_class) {
+    predictions <- rep(neg_class, length(logi_vec))
+    predictions[logi_vec] <- pos_class
+    return(predictions)
 }
-
