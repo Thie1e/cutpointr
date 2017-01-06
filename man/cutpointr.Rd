@@ -4,7 +4,9 @@
 \alias{cutpointr}
 \title{Determine and evaluate optimal cutpoints}
 \usage{
-cutpointr(...)
+cutpointr(data, x, class, subgroup, pos_class = NULL, neg_class = NULL,
+  direction = NULL, optcut_func = oc_youden, candidate_cuts = NULL,
+  boot_runs = 0, na.rm = FALSE, allowParallel = FALSE, ...)
 }
 \arguments{
 \item{x}{(numeric vector) The variable to be used for classification, e.g. test values.}
@@ -16,5 +18,90 @@ optimal cutpoints will be determined by group.}
 }
 \description{
 Determine and evaluate optimal cutpoints
+}
+\examples{
+library(cutpointr)
+library(OptimalCutpoints)
+data(elas)
+
+## Optimal cutpoint for elas
+opt_cut <- cutpointr(elas, elas, status)
+opt_cut
+plot(opt_cut)
+
+opt_cut <- cutpointr(elas, elas, status, direction = "<", pos_class = 0)
+opt_cut
+plot(opt_cut)
+
+## Optimal cutpoint for elas, as before, but for the separate subgroups
+opt_cut <- cutpointr(elas, elas, status, gender)
+opt_cut
+plot(opt_cut)
+
+## Bootstrapping to assess cutpoint variability and out-of-sample performance
+set.seed(123)
+opt_cut <- cutpointr(elas, elas, status, boot_runs = 200)
+opt_cut
+plot(opt_cut)
+
+## Bootstrapping also works on individual subgroups
+set.seed(123)
+opt_cut <- cutpointr(elas, elas, status, gender, boot_runs = 200)
+opt_cut
+plot(opt_cut)
+
+## Different cutpoint function / metric
+set.seed(123)
+opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 200,
+                     optcut_func = oc_equalsesp)
+opt_cut
+plot(opt_cut)
+
+## With NAs
+elas_na <- elas
+elas_na$elas[10] <- NA
+elas_na$status[20] <- NA
+elas_na$gender[30] <- NA
+opt_cut_na <- cutpointr(elas_na, elas, status, gender, na.rm = T)
+opt_cut_na
+plot(opt_cut_na)
+
+## Parallelized bootstrapping
+library(doSNOW)
+cl <- makeCluster(parallel::detectCores())
+registerDoSNOW(cl)
+library(doRNG)
+registerDoRNG(123) # Reproducible parallel loops using doRNG
+opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1,
+               boot_runs = 2000, allowParallel = TRUE)
+opt_cut
+plot(opt_cut)
+
+## Cutoff for model prediction
+library(caret)
+mod <- train(y = iris$Species, x = iris[, 1:4], method = "rpart",
+           tuneGrid = data.frame(cp = 0.1),
+           trControl = trainControl(savePredictions = TRUE, classProbs = TRUE,
+           method = "boot", number = 100))
+dim(mod$pred)
+registerDoRNG(123)
+mod_cut <- cutpointr(mod$pred, versicolor, obs == "versicolor",
+                     candidate_cuts = seq(0, 1, by = 0.01),
+                     boot_runs = 200, allowParallel = T)
+plot(mod_cut)
+## Plot bootstrap results of out-of-sample accuracy
+ggplot(mod_cut$boot[[1]], aes(x = Accuracy_oob)) + geom_histogram()
+## Here, in every bootstrap sample the same optimal cutpoint emerges:
+table(mod_cut$boot[[1]]$optimal_cutpoint)
+
+## Wrapper for optimal.cutpoints
+registerDoRNG(123) # Reproducible parallel loops using doRNG
+opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 2000,
+                     optcut_func = oc_OptimalCutpoints, methods = "Youden", allowParallel = T)
+# OptimalCutpoints finds different cutpoints because candidate_cuts per subgroup
+opt_cut
+plot(opt_cut)
+
+
 }
 

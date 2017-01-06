@@ -91,7 +91,7 @@ kappa_cf <- function(a, b, c, d) {
 
 oc_kappa_simple <- function(x, class,
                              candidate_cuts = unique(x),
-                             pos_class = NULL, higher = TRUE) {
+                             pos_class = NULL, neg_class = NULL, higher = TRUE) {
     if (higher) {
         candidate_cuts <- unique(c(-Inf, candidate_cuts))
     } else {
@@ -103,7 +103,7 @@ oc_kappa_simple <- function(x, class,
 
     if (higher) {
         kappas <- sapply(candidate_cuts, function(cu) {
-            pred <- ifelse(x > cu, pos_class, "neg")
+            pred <- ifelse(x > cu, pos_class, neg_class)
             obs <- class
             kappa(pred, obs, pos_class = pos_class)
         })
@@ -114,7 +114,7 @@ oc_kappa_simple <- function(x, class,
                           kappa            = kappa_oc)
     } else {
         kappas <- sapply(candidate_cuts, function(cu) {
-            pred <- ifelse(x < cu, pos_class, "neg")
+            pred <- ifelse(x < cu, pos_class, neg_class)
             obs <- class
             kappa(pred, obs, pos_class = pos_class)
         })

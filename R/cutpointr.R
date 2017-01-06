@@ -3,12 +3,6 @@
 #' @param class (vector) class is a binary vector of values indicating class membership.
 #' @param subgroup (vector) An additional covariate that identifies subgroups. Separate
 #' optimal cutpoints will be determined by group.
-#' @export
-cutpointr <- function(...){
-    UseMethod("cutpointr")
-}
-
-#' Determine and evaluate optimal cutpoints
 #' @importFrom purrr %>%
 #' @importFrom doRNG %dorng%
 #' @importFrom foreach %do%
@@ -22,12 +16,17 @@ cutpointr <- function(...){
 #' opt_cut
 #' plot(opt_cut)
 #'
+#' opt_cut <- cutpointr(elas, elas, status, direction = "<", pos_class = 0)
+#' opt_cut
+#' plot(opt_cut)
+#'
 #' ## Optimal cutpoint for elas, as before, but for the separate subgroups
 #' opt_cut <- cutpointr(elas, elas, status, gender)
 #' opt_cut
 #' plot(opt_cut)
 #'
 #' ## Bootstrapping to assess cutpoint variability and out-of-sample performance
+#' set.seed(123)
 #' opt_cut <- cutpointr(elas, elas, status, boot_runs = 200)
 #' opt_cut
 #' plot(opt_cut)
@@ -39,6 +38,7 @@ cutpointr <- function(...){
 #' plot(opt_cut)
 #'
 #' ## Different cutpoint function / metric
+#' set.seed(123)
 #' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 200,
 #'                      optcut_func = oc_equalsesp)
 #' opt_cut
@@ -49,14 +49,15 @@ cutpointr <- function(...){
 #' elas_na$elas[10] <- NA
 #' elas_na$status[20] <- NA
 #' elas_na$gender[30] <- NA
-#' opt_cut_na <- cutpointr(elas_na, elas, status, gender,
-#'                   boot_runs = 200, na.rm = T)
+#' opt_cut_na <- cutpointr(elas_na, elas, status, gender, na.rm = T)
 #' opt_cut_na
+#' plot(opt_cut_na)
 #'
 #' ## Parallelized bootstrapping
 #' library(doSNOW)
 #' cl <- makeCluster(parallel::detectCores())
 #' registerDoSNOW(cl)
+#' library(doRNG)
 #' registerDoRNG(123) # Reproducible parallel loops using doRNG
 #' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1,
 #'                boot_runs = 2000, allowParallel = TRUE)
@@ -65,10 +66,20 @@ cutpointr <- function(...){
 #'
 #' ## Cutoff for model prediction
 #' library(caret)
-#' library(randomForest)
-#' mod <- train(y = spam$type, x = spam[, 1:57], method = "rpart", preProcess = "nzv",
-#'            trControl = trainControl(savePredictions = TRUE, classProbs = TRUE, number = 5))
-#' mod_cut <- cutpointr(mod$pred, spam, obs, boot_runs = 200)
+#' mod <- train(y = iris$Species, x = iris[, 1:4], method = "rpart",
+#'            tuneGrid = data.frame(cp = 0.1),
+#'            trControl = trainControl(savePredictions = TRUE, classProbs = TRUE,
+#'            method = "boot", number = 100))
+#' dim(mod$pred)
+#' registerDoRNG(123)
+#' mod_cut <- cutpointr(mod$pred, versicolor, obs == "versicolor",
+#'                      candidate_cuts = seq(0, 1, by = 0.01),
+#'                      boot_runs = 200, allowParallel = T)
+#' plot(mod_cut)
+#' ## Plot bootstrap results of out-of-sample accuracy
+#' ggplot(mod_cut$boot[[1]], aes(x = Accuracy_oob)) + geom_histogram()
+#' ## Here, in every bootstrap sample the same optimal cutpoint emerges:
+#' table(mod_cut$boot[[1]]$optimal_cutpoint)
 #'
 #' ## Wrapper for optimal.cutpoints
 #' registerDoRNG(123) # Reproducible parallel loops using doRNG
@@ -78,13 +89,13 @@ cutpointr <- function(...){
 #' opt_cut
 #' plot(opt_cut)
 #'
+#'
 #' @export
-cutpointr.default <- function(data, x, class, subgroup, pos_class = NULL,
+cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
                               neg_class = NULL, direction = NULL,
-                              optcut_func = oc_youden,
-                              insert_midpoints = FALSE,
-                              candidate_cuts = NULL,
-                              boot_runs = 0, na.rm = FALSE, allowParallel = FALSE, ...) {
+                              optcut_func = oc_youden, candidate_cuts = NULL,
+                              boot_runs = 0, na.rm = FALSE,
+                              allowParallel = FALSE, ...) {
     #
     # NSE
     #
@@ -113,24 +124,10 @@ cutpointr.default <- function(data, x, class, subgroup, pos_class = NULL,
         cl <- match.call()
         mod_names <- cl$optcut_func
         # if default was not changed:
-        # if (is.null(mod_names)) {
             mod_names <- as.character(substitute(optcut_func))
             mod_names <- mod_names[1]
-        # } else {
-        #     if (is.symbol(mod_names)) {
-        #         # a single function was given:
-        #         mod_names <- as.character(substitute(mod_names))
-        #     } else if (mod_names[[1]] == "list") {
-        #         # if a list of functions is given:
-        #         mod_names <- lapply(seq_along(mod_names)[-1], function(i) mod_names[[i]])
-        #         mod_names <- as.character(mod_names)
-        #     } else if (is.null(mod_names)) {
-        #         stop("Could not get the names of the cutpoint function(s)")
-        #     }
-        # }
     }
     if (is.null(mod_names)) stop("Could not get the names of the cutpoint function(s)")
-    # if (!is.list(optcut_func)) optcut_func <- list(optcut_func)
 
     #
     # Prep
@@ -141,11 +138,6 @@ cutpointr.default <- function(data, x, class, subgroup, pos_class = NULL,
          (missing(na.rm) | !na.rm)) {
         warning("NAs found but na.rm = FALSE")
     }
-
-    # Check classes
-    # if(na.rm) uc <- unique(na.omit(class)) else uc <- unique(class)
-    # luc <- length(uc)
-    # if (luc != 2) stop(paste("Expecting two classes, got", luc))
 
     # Determine direction and/or pos_class if necessary:
     assumptions <- assume_direction_pos_class(x = x, class = class,
@@ -267,17 +259,29 @@ cutpointr.default <- function(data, x, class, subgroup, pos_class = NULL,
                             optcut_b  <- extract_opt_cut(funcout_b)
                         }
                         # LOO-Bootstrap
-                        preds_b <- ifelse(g$x[b_ind] > optcut_b, pos_class, neg_class)
-                        Sens_Spec_b = sens_spec(obs = g$class[b_ind],  preds = preds_b,
+                        # preds_b <- ifelse(g$x[b_ind] > optcut_b, pos_class, neg_class)
+                        preds_b <- ifel_pos_neg(g$x[b_ind] > optcut_b, pos_class, neg_class)
+                        cm_b <- conf_mat(obs = g$class[b_ind],  preds = preds_b,
                                                 pos_class = pos_class)
-                        preds_oob <- ifelse(g$x[-b_ind] > optcut_b, pos_class, neg_class)
-                        Sens_Spec_oob = sens_spec(obs = g$class[-b_ind],  preds = preds_oob,
-                                                  pos_class = pos_class)
+                        Sens_Spec_b <- sens_spec(tp = cm_b["TP"], fp = cm_b["FP"],
+                                                tn = cm_b["TN"], fn = cm_b["FN"])
+                        Acc_b <- accuracy(tp = cm_b["TP"], fp = cm_b["FP"],
+                                          tn = cm_b["TN"], fn = cm_b["FN"])
+                        # preds_oob <- ifelse(g$x[-b_ind] > optcut_b, pos_class, neg_class)
+                        preds_oob <- ifel_pos_neg(g$x[-b_ind] > optcut_b, pos_class, neg_class)
+                        cm_oob <- conf_mat(obs = g$class[-b_ind],  preds = preds_oob,
+                                           pos_class = pos_class)
+                        Sens_Spec_oob <- sens_spec(tp = cm_oob["TP"], fp = cm_oob["FP"],
+                                                   tn = cm_oob["TN"], fn = cm_oob["FN"])
+                        Acc_oob <- accuracy(tp = cm_oob["TP"], fp = cm_oob["FP"],
+                                            tn = cm_oob["TN"], fn = cm_oob["FN"])
                         bootstrap <- tibble::as_data_frame(cbind(funcout_b,
                                                                  Sensitivity_b   = Sens_Spec_b[1],
                                                                  Specificity_b   = Sens_Spec_b[2],
+                                                                 Accuracy_b      = Acc_b,
                                                                  Sensitivity_oob = Sens_Spec_oob[1],
-                                                                 Specificity_oob = Sens_Spec_oob[2]
+                                                                 Specificity_oob = Sens_Spec_oob[2],
+                                                                 Accuracy_oob    = Acc_oob
                         ))
                         return(bootstrap)
                     }

@@ -1,49 +1,17 @@
-
 #' Find optimal cutpoint by minimizing the difference between sensitivity and specificity
 #' @export
-oc_equalsesp <- function(...) {
-    UseMethod("oc_equalsesp")
-}
-
-#' Find optimal cutpoint by minimizing the difference between sensitivity and specificity
-#' @export
-oc_equalsesp.default <- function(data, x, class,
+oc_equalsesp <- function(data, x, class,
                                  candidate_cuts = NULL,
                                  pos_class = NULL, neg_class = NULL, direction = NULL) {
-    # stopifnot(is.character(x))
-    # stopifnot(is.character(class))
+    stopifnot(is.character(x))
+    stopifnot(is.character(class))
     data <- as.data.frame(data)
     #
-    # Preparation ---------
+    # Preparation
     #
-    # if (length(x) != length(class)) stop("The x and class vectors are of different length")
-    # if (dplyr::n_distinct(data[, class]) != 2)
-    #     stop(paste("Expecting two classes, got", dplyr::n_distinct(data[, class])))
-    # if (is.null(pos_class)) {
-    #     pos_class <- unique(data[, class])[1]
-    #     message(paste("Assuming", pos_class, "as positive class"))
-    # }
     neg_x <- data$x[data$class != pos_class]
     pos_x <- data$x[data$class == pos_class]
-    # if (is.null(direction)) {
-    #     if (mean(neg_x) < mean(pos_x)) {
-    #         message("Assuming the positive class has higher x values")
-    #         direction <- ">"
-    #     } else {
-    #         message("Assuming the positive class has lower x values")
-    #         direction <- "<"
-    #     }
-    # }
-    # if (is.null(candidate_cuts)) candidate_cuts <- unique(c(neg_x, pos_x))
-    # if (direction == ">") {
-    #     candidate_cuts <- unique(c(-Inf, candidate_cuts))
-    # } else if (direction == "<") {
-    #     candidate_cuts <- unique(c(candidate_cuts, Inf))
-    # }
     candidate_cuts <- inf_to_candidate_cuts(candidate_cuts, direction)
-    #
-    # End preparation -------
-    #
 
     if (direction == ">") {
         fh <- ecdf(neg_x)
@@ -53,9 +21,6 @@ oc_equalsesp.default <- function(data, x, class,
         abs_d_sesp <- abs(sens_c - spec_c)
         oc <- mean(candidate_cuts[abs_d_sesp == min(abs_d_sesp)])
         abs_d_sensspec_oc <- abs(1 - gd(oc) - fh(oc))
-
-        # print(data.frame(candidate_cuts, sens_c, spec_c))
-
         res <- data.frame(optimal_cutpoint = oc,
                           abs_d_sensspec   = abs_d_sensspec_oc)
     } else if (direction == "<") {
@@ -67,14 +32,13 @@ oc_equalsesp.default <- function(data, x, class,
         oc <- mean(-candidate_cuts[abs_d_sesp == min(abs_d_sesp)])
         abs_d_sensspec_oc <- abs(1 - gd(oc) - fh(oc))
         oc <- -oc
-
-        # print(data.frame(candidate_cuts, sens_c, spec_c))
-
         res <- data.frame(optimal_cutpoint = oc,
                           abs_d_sensspec   = abs_d_sensspec_oc)
     }
     return(res)
 }
+
+### Benchmarks vs. various other ways of computing equal_sesp
 
 # equal_sen_spec<-function(x,class, neg_class, pos_class){
 #   pred<-ROCR::prediction(x,class, label.ordering = c(neg_class, pos_class))

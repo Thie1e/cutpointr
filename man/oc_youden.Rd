@@ -2,17 +2,10 @@
 % Please edit documentation in R/oc_youden.R
 \name{oc_youden}
 \alias{oc_youden}
-\alias{oc_youden.default}
-\alias{oc_youden.formula}
 \title{Determine optimal cutpoint by maximizing the sum of sensitivity and specificity}
 \usage{
-oc_youden(...)
-
-\method{oc_youden}{default}(data, x, class,
-  candidate_cuts = unique(unlist(data[, x])), pos_class = NULL,
-  neg_class = NULL, direction = NULL)
-
-\method{oc_youden}{formula}(formula, data)
+oc_youden(data, x, class, candidate_cuts = unique(unlist(data[, x])),
+  pos_class = NULL, neg_class = NULL, direction = NULL)
 }
 \arguments{
 \item{data}{(data.frame) The dependent and independent variables}
@@ -20,8 +13,6 @@ oc_youden(...)
 \item{x}{(numeric) The values that will be used for splitting}
 
 \item{class}{(character / factor / numeric) The dependent binary class variable}
-
-\item{formula}{(formula) Formula for splitting classes by some numeric vector, e.g. class ~ x.}
 }
 \description{
 Cutpoints are taken from the sample values (with the optional addition of midpoints
@@ -29,8 +20,6 @@ between these values) and the classification quality of these cupoints is
 evaluated based on the chosen method.
 }
 \examples{
-dat <- iris[1:100, ]
-oc_youden(dat$Sepal.Width, class = dat$Species)
 library(OptimalCutpoints)
 data(elas)
 oc_youden(elas$elas, elas$status, pos_class = 1)

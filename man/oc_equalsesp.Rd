@@ -4,7 +4,8 @@
 \alias{oc_equalsesp}
 \title{Find optimal cutpoint by minimizing the difference between sensitivity and specificity}
 \usage{
-oc_equalsesp(...)
+oc_equalsesp(data, x, class, candidate_cuts = NULL, pos_class = NULL,
+  neg_class = NULL, direction = NULL)
 }
 \description{
 Find optimal cutpoint by minimizing the difference between sensitivity and specificity
