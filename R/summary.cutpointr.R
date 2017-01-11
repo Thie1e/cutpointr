@@ -1,5 +1,5 @@
 #' @export
-summary.cutpointr <- function(cutpointr) {
-    class(cutpointr) <- c("summary_cutpointr", class(cutpointr))
-    return(cutpointr)
+summary.cutpointr <- function(object, ...) {
+    class(object) <- c("summary_cutpointr", class(object))
+    return(object)
 }

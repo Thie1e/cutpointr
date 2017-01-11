@@ -1,10 +1,9 @@
 #' @export
-plot.cutpointr <- function(cutpointr, ...) {
+plot.cutpointr <- function(x, ...) {
 
     args <- list(...)
-    # print(str(args))
 
-    if (is.null(suppressWarnings(cutpointr$subgroup))) {
+    if (is.null(suppressWarnings(x$subgroup))) {
         dts_boot <- "boot"
         dts <- "data"
         fll <- NULL
@@ -21,15 +20,14 @@ plot.cutpointr <- function(cutpointr, ...) {
     #
     # Bootstrap results
     #
-    boot_flag <- !is.null(suppressWarnings(cutpointr$boot))
+    boot_flag <- !is.null(suppressWarnings(x$boot))
     if (boot_flag) {
-        res_boot_unnested <- cutpointr %>%
+        res_boot_unnested <- x %>%
             dplyr::select_(.data = ., .dots = dts_boot) %>%
             tidyr::unnest()
         boot_cut <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,
                             ggplot2::aes_(x = ~ optimal_cutpoint, fill = fll, color = clr)) +
-                # ggplot2::geom_histogram(alpha = transparency) +
                 ggplot2::geom_density(alpha = transparency) +
                 ggplot2::geom_rug(alpha = 0.5) +
                 ggplot2::ggtitle("Bootstrap", "distribution of optimal cutpoints") +
@@ -40,7 +38,6 @@ plot.cutpointr <- function(cutpointr, ...) {
         boot_metric <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,
                             ggplot2::aes_(x = ~ get(metric_name), fill = fll, color = clr)) +
-                # ggplot2::geom_histogram(alpha = transparency) +
                 ggplot2::geom_density(alpha = transparency) +
                 ggplot2::geom_rug(alpha = 0.5) +
                 ggplot2::ggtitle("Bootstrap",
@@ -56,15 +53,15 @@ plot.cutpointr <- function(cutpointr, ...) {
     #
     # In-sample results
     #
-    res_unnested <- cutpointr %>%
+    res_unnested <- x %>%
         dplyr::select_(.data = ., .dots = dts) %>%
         tidyr::unnest()
-    if (is.null(suppressWarnings(cutpointr$subgroup))) {
-        res_unnested$optimal_cutpoint <- cutpointr$optimal_cutpoint
+    if (is.null(suppressWarnings(x$subgroup))) {
+        res_unnested$optimal_cutpoint <- x$optimal_cutpoint
         col <- NULL
     } else {
         res_unnested <- dplyr::full_join(res_unnested,
-                                  cutpointr[, c("optimal_cutpoint", "subgroup")],
+                                  x[, c("optimal_cutpoint", "subgroup")],
                                   by = "subgroup")
         col <- ~ subgroup
     }
@@ -80,31 +77,25 @@ plot.cutpointr <- function(cutpointr, ...) {
         ggplot2::xlab("value") +
         ggplot2::theme(legend.position = "none")
 
+    if (x$direction[1] == "<") res_unnested$x <- -res_unnested$x
     res_unnested <- res_unnested %>%
-        ### pos_class should all be the same
-        ### maybe map over rows would be cleaner
-        dplyr::mutate_(class = ~ ifelse(class == cutpointr$pos_class[1], 1, 0))
-    # if (suppressWarnings(!is.null(cutpointr$subgroup))) {
-        roc <- ggplot2::ggplot(res_unnested,
-                               ggplot2::aes_(m = ~ x, d = ~ class,
-                                             color = clr)) +
-            suppressWarnings(plotROC::geom_roc(n.cuts = 5, lineend = "round", linealpha = transparency)) +
-            ggplot2::ggtitle("ROC curve", "by class") +
-            ggplot2::xlab("1 - Specificity") +
-            ggplot2::ylab("Sensitivity") +
-            ggplot2::theme(legend.position = "none") +
-            ggplot2::coord_equal()
-    # } else {
-    #     ##### delete this? ------------------------
-    #     roc <- ggplot2::ggplot(res_unnested,
-    #                            ggplot2::aes_(m = ~ x, d = ~ class)) +
-    #         plotROC::geom_roc(n.cuts = 7, lineend = "round", linealpha = transparency) +
-    #         ggplot2::ggtitle("ROC curve", "by class") +
-    #         ggplot2::xlab("1 - Specificity") +
-    #         ggplot2::ylab("Sensitivity") +
-    #         ggplot2::theme(legend.position = "none")
-    #     ##### ----------------------------
-    # }
+        ### pos_class should all be the same, maybe map over rows would be cleaner
+        dplyr::mutate_(class = ~ ifelse(class == x$pos_class[1], 1, 0))
+    if (suppressWarnings(is.null(x$subgroup))) {
+        roc_title <- ggplot2::ggtitle("ROC curve")
+    } else {
+        roc_title <- ggplot2::ggtitle("ROC curve", "by class")
+    }
+    roc <- ggplot2::ggplot(res_unnested,
+                           ggplot2::aes_(m = ~ x, d = ~ class,
+                                         color = clr)) +
+        suppressWarnings(plotROC::geom_roc(n.cuts = 0,# lineend = "round",
+                                           linealpha = transparency)) +
+        roc_title +
+        ggplot2::xlab("1 - Specificity") +
+        ggplot2::ylab("Sensitivity") +
+        ggplot2::theme(legend.position = "none") +
+        ggplot2::coord_equal()
 
     #
     # Compose plots
@@ -113,7 +104,6 @@ plot.cutpointr <- function(cutpointr, ...) {
     keep <- !(purrr::map_lgl(plots, is.null))
     plots <- plots[keep]
     plots <- lapply(plots, function(p) p + args)
-    # suppressMessages(multiggplot(plots)) ### Add plot.layout depending on number of included plots
     rows <- round(sum(keep) / 2)
     pos <- ifelse(rows > 1, "right", "bottom")
     suppressMessages(grid_arrange_shared_legend(plots,

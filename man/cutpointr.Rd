@@ -2,19 +2,157 @@
 % Please edit documentation in R/cutpointr.R
 \name{cutpointr}
 \alias{cutpointr}
-\title{Determine and evaluate optimal cutpoints}
+\title{Determine and evaluate optimal cutpoints.}
 \usage{
-cutpointr(...)
+cutpointr(data, x, class, subgroup, pos_class = NULL, neg_class = NULL,
+  direction = NULL, optcut_func = oc_youden, candidate_cuts = NULL,
+  boot_runs = 0, na.rm = FALSE, allowParallel = FALSE, ...)
 }
 \arguments{
-\item{x}{(numeric vector) The variable to be used for classification, e.g. test values.}
+\item{data}{A data frame or tibble in which the columns that are given in x, class and possibly subgroup can be found}
 
-\item{class}{(vector) class is a binary vector of values indicating class membership.}
+\item{x}{The variable name (with or without quotation marks) to be used for classification, e.g. predictions or test values.}
 
-\item{subgroup}{(vector) An additional covariate that identifies subgroups. Separate
-optimal cutpoints will be determined by group.}
+\item{class}{The variable name (with or without quotation marks) indicating class membership.}
+
+\item{subgroup}{The variable name of an additional covariate that identifies subgroups. Separate
+optimal cutpoints will be determined by group. Numeric, character and factor are
+allowed. Also expressions like z > 10 are possible.}
+
+\item{pos_class}{(optional) The value of class that indicates the positive class}
+
+\item{neg_class}{(optional) The value of class that indicates the negative class}
+
+\item{direction}{(character, optional) Use ">" or "<" to indicate whether x
+is supposed to be larger or smaller for the positive class.}
+
+\item{optcut_func}{(function or character) A function for determining cutpoints. Can
+be user supplied or use some of the built in methods. See details.}
+
+\item{candidate_cuts}{(numeric vector) By default the unique values in x will
+be used as potential cutoffs. Alternatively, a vector of cutoffs to be used can
+be supplied using the candidate_cuts argument.}
+
+\item{boot_runs}{(numeric, optional) If positive, this number of bootstrap samples
+will be used to assess the variability and the out-of-sample performance.}
+
+\item{na.rm}{(logical) Set to TRUE to keep only complete cases of x, class and
+subgroup (if specified). Missing values with na.rm = FALSE (default) will
+raise an error.}
+
+\item{allowParallel}{(logical) If TRUE, the bootstrapping will be parallelized
+using foreach. A local cluster, for example, should have been started manually
+beforehand.}
+
+\item{...}{Further optional arguments that will be passed to optcut_func.}
 }
 \description{
-Determine and evaluate optimal cutpoints
+Using predictions (e.g. test values) and binary class labels, this function
+will determine "optimal" cutpoints using various selectable methods. The
+methods for cutpoint determination can be evaluated using bootstrapping. An
+estimate of the cutpoint variability and the out-of-sample performance will
+be returned.
+}
+\details{
+If direction and/or pos_class and neg_class are not given, the function will
+assume that higher values indicate the positive class and assign the class
+with a higher mean as the positive class.
+
+Different methods can be used for determining the "optimal" cutpoint via
+the optcut_func argument. The package includes the following cutpoint functions:
+\itemize{
+ \item oc_youden: Youden- or J-Index, maximize sensitivity + specificity - 1
+ \item oc_equalsesp: minimize the absolute difference of sensitivity and specificity
+ \item oc_OptimalCutpoints: A wrapper for optimal.cutpoints from the OptimalCutpoints package.
+ Supply an additional "methods" argument with the method choice corresponding
+ to a method from the OptimalCutpoints package
+}
+
+User defined functions can be supplied to optcut_func, too. As a reference,
+the code of all included cutpoint functions can be accessed by simply typing
+their name. To define a new cutpoint function, create a function that may take
+as input(s):
+\itemize{
+ \item data
+ \item x
+ \item class
+ \item candidate_cuts
+ \item pos_class
+ \item neg_class
+ \item direction
+}
+
+The ... argument can be used to avoid an error if not all of the above
+arguments are needed.
+}
+\examples{
+library(cutpointr)
+library(OptimalCutpoints)
+data(elas)
+
+## Optimal cutpoint for elas
+opt_cut <- cutpointr(elas, elas, status)
+opt_cut
+plot(opt_cut)
+
+opt_cut <- cutpointr(elas, elas, status, direction = "<", pos_class = 0)
+opt_cut
+plot(opt_cut)
+
+## Optimal cutpoint for elas, as before, but for the separate subgroups
+opt_cut <- cutpointr(elas, elas, status, gender)
+opt_cut
+plot(opt_cut)
+
+## Bootstrapping to assess cutpoint variability and out-of-sample performance
+set.seed(123)
+opt_cut <- cutpointr(elas, elas, status, boot_runs = 200)
+opt_cut
+plot(opt_cut)
+
+## Bootstrapping also works on individual subgroups
+set.seed(123)
+opt_cut <- cutpointr(elas, elas, status, gender, boot_runs = 200)
+opt_cut
+plot(opt_cut)
+
+## Different cutpoint function / metric
+set.seed(123)
+opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 200,
+                     optcut_func = oc_equalsesp)
+opt_cut
+plot(opt_cut)
+
+## With NAs
+elas_na <- elas
+elas_na$elas[10] <- NA
+elas_na$status[20] <- NA
+elas_na$gender[30] <- NA
+opt_cut_na <- cutpointr(elas_na, elas, status, gender, na.rm = TRUE)
+opt_cut_na
+plot(opt_cut_na)
+
+## Parallelized bootstrapping
+library(doSNOW)
+cl <- makeCluster(parallel::detectCores())
+registerDoSNOW(cl)
+library(doRNG)
+registerDoRNG(123) # Reproducible parallel loops using doRNG
+opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1,
+               boot_runs = 2000, allowParallel = TRUE)
+opt_cut
+plot(opt_cut)
+
+
+## Wrapper for optimal.cutpoints
+registerDoRNG(123) # Reproducible parallel loops using doRNG
+opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 2000,
+                     optcut_func = oc_OptimalCutpoints, methods = "Youden",
+                     allowParallel = TRUE)
+# OptimalCutpoints finds different cutpoints because candidate_cuts per subgroup
+opt_cut
+plot(opt_cut)
+
+
 }
 

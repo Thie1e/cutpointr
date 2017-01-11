@@ -2,9 +2,8 @@
 #### Evtl. einfacher nicht wirklich die midpoints einzufügen, sondern am Ende
 #### mean(c(cutpoints[oc_ind], cutpoints[oc_ind + 1])) zurückzugeben
 
-#' Insert midpoints between neighboring values after sorting, usually for cutpoints
 # insert_midpoints <- function(x) {
-#     midpoints <- na.omit(rowMeans(cbind(x, c(NA, x[-length(x)]))))
+#     midpoints <- stats::na.omit(rowMeans(cbind(x, c(NA, x[-length(x)]))))
 #     midpoints <- rowMeans(cbind(x, c(NA, x[-length(x)]))[-1, ])
 #     ### write test to make sure there are no duplicates ####
 #     lx <- length(x)
@@ -48,4 +47,10 @@ find_metric_name <- function(colnames) {
         metric_name <- colnames[!grepl(pattern = other_cols, x = colnames)]
         metric_name <- metric_name[1] # If multiple metrics / other cols
         return(metric_name)
+}
+
+ifel_pos_neg <- function(logi_vec, pos_class, neg_class) {
+    predictions <- rep(neg_class, length(logi_vec))
+    predictions[logi_vec] <- pos_class
+    return(predictions)
 }

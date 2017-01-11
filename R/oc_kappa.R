@@ -1,11 +1,3 @@
-#' Find optimal cutpoint to maximize Kappa
-#' @export
-# oc_kappa <- function(...) {
-#     UseMethod("oc_kappa")
-# }
-#
-# #' Find optimal cutpoint to maximize Kappa
-# #' @export
 # oc_kappa.default <- function(x, class,
 #                              candidate_cuts = unique(x),
 #                              pos_class = NULL, higher = NULL) {
@@ -70,7 +62,7 @@
 # }
 
 
-kappa <- function(pred, obs, pos_class) {
+kap <- function(pred, obs, pos_class) {
     a <- sum(pred == pos_class & obs == pos_class) # TP
     d <- sum(pred != pos_class & obs != pos_class) # TN
     b <- sum(pred == pos_class & obs != pos_class) # FP
@@ -90,23 +82,22 @@ kappa_cf <- function(a, b, c, d) {
 # kappa(pred, obs, pos_class = 1)
 
 
-oc_kappa_simple <- function(x, class,
-                             candidate_cuts = unique(x),
-                             pos_class = NULL, higher = TRUE) {
-    if (higher) {
+#' Find optimal cutpoint to maximize Kappa
+#' @inheritParams cutpointr
+#' @export
+oc_kappa_simple <- function(x, class, candidate_cuts = unique(x),
+                            pos_class = NULL, neg_class = NULL, direction = ">") {
+    if (direction == ">") {
         candidate_cuts <- unique(c(-Inf, candidate_cuts))
     } else {
         candidate_cuts <- unique(c(candidate_cuts, Inf))
     }
-    #
-    # End preparation -------
-    #
 
-    if (higher) {
+    if (direction == ">") {
         kappas <- sapply(candidate_cuts, function(cu) {
-            pred <- ifelse(x > cu, pos_class, "neg")
+            pred <- ifelse(x > cu, pos_class, neg_class)
             obs <- class
-            kappa(pred, obs, pos_class = pos_class)
+            kap(pred, obs, pos_class = pos_class)
         })
         oc_ind <- which(kappas == max(kappas))
         kappa_oc <- mean(kappas[oc_ind])
@@ -115,9 +106,9 @@ oc_kappa_simple <- function(x, class,
                           kappa            = kappa_oc)
     } else {
         kappas <- sapply(candidate_cuts, function(cu) {
-            pred <- ifelse(x < cu, pos_class, "neg")
+            pred <- ifelse(x < cu, pos_class, neg_class)
             obs <- class
-            kappa(pred, obs, pos_class = pos_class)
+            kap(pred, obs, pos_class = pos_class)
         })
         oc_ind <- which(kappas == max(kappas))
         kappa_oc <- mean(kappas[oc_ind])
@@ -125,7 +116,6 @@ oc_kappa_simple <- function(x, class,
         res <- data.frame(optimal_cutpoint = oc,
                           kappa            = kappa_oc)
     }
-    # print(kappas)
     return(res)
 }
 

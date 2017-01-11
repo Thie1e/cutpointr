@@ -1,50 +1,70 @@
-# #' Calculate AUC
-# #' @source MESS::auc
-# auc <- function (x, y, from = min(x), to = max(x))
-# {
-#     # MESS::auc with type = "linear" and absolutearea = F
-#     if (length(x) != length(y))
-#         stop("x and y must have the same length")
-#     if (length(unique(x)) < 2)
-#         return(NA)
-#     values <- approx(x, y, xout = sort(unique(c(from, to, x[x > from & x < to]))), ...)
-#     0.5 * sum(diff(values$x) * (values$y[-1] + values$y[-length(values$y)]))
+# sens_spec <- function(obs, preds, pos_class) {
+#     neg_class <- unique(obs)
+#     neg_class <- neg_class[neg_class != pos_class]
+#     stopifnot(length(neg_class) == 1)
+#     binary_obs <- obs == pos_class
+#     binary_preds <- preds == pos_class
+#     sens <- sum(binary_preds & binary_obs) / sum(binary_obs)
+#     binary_obs <- obs == neg_class
+#     binary_preds <- preds == neg_class
+#     spec <- sum(binary_preds & binary_obs) / sum(binary_obs)
+#     c(Sensitivity = sens, Specificity = spec)
+# }
+#
+#
+# sens_spec <- function(obs, preds, pos_class) {
+#     neg_class <- unique(obs)
+#     neg_class <- neg_class[neg_class != pos_class]
+#     stopifnot(length(neg_class) == 1)
+#     binary_obs <- obs == pos_class
+#     binary_preds <- preds == pos_class
+#     tp <- sum(binary_preds & binary_obs)
+#     fp <- sum(binary_preds & (!binary_obs))
+#     binary_obs <- obs == neg_class
+#     binary_preds <- preds == neg_class
+#     tn <- sum(binary_preds & binary_obs)
+#     fn <- sum(binary_preds & !binary_obs)
+#     sens <- tp / (tp + fn)
+#     spec <- tn / (tn + fp)
+#     c(Sensitivity = sens, Specificity = spec)
 # }
 
-#' Calculate sensitivity
-sens <- function(obs, preds, pos_class) {
-    binary_obs <- obs == pos_class
-    binary_preds <- preds == pos_class
-    sum(binary_preds & binary_obs) / sum(binary_obs)
-}
-
-#' Calculate specificity
-spec <- function(obs, preds, pos_class) {
-    neg_class <- unique(obs)
-    neg_class <- neg_class[neg_class != pos_class]
-    stopifnot(length(neg_class) == 1)
-    binary_obs <- obs == neg_class
-    binary_preds <- preds == neg_class
-    sum(binary_preds & binary_obs) / sum(binary_obs)
-}
-
-sens_spec <- function(obs, preds, pos_class) {
+conf_mat <- function(obs, preds, pos_class) {
     neg_class <- unique(obs)
     neg_class <- neg_class[neg_class != pos_class]
     stopifnot(length(neg_class) == 1)
     binary_obs <- obs == pos_class
     binary_preds <- preds == pos_class
-    sens <- sum(binary_preds & binary_obs) / sum(binary_obs)
+    tp <- sum(binary_preds & binary_obs)
+    fp <- sum(binary_preds & (!binary_obs))
     binary_obs <- obs == neg_class
     binary_preds <- preds == neg_class
-    spec <- sum(binary_preds & binary_obs) / sum(binary_obs)
-    c(Sensitivity = sens, Specificity = spec)
+    tn <- sum(binary_preds & binary_obs)
+    fn <- sum(binary_preds & !binary_obs)
+    c(TP = tp, FP = fp, TN = tn, FN = fn)
 }
 
-
-#' Calculate Youden Index (Sensitivity + Specificity - 1)
-youden <- function(obs, preds, pos_class) {
-    sens(obs = obs, preds = preds, pos_class = pos_class) +
-        spec(obs = obs, preds = preds, pos_class = pos_class) -
-        1
+sens_spec <- function(tp, fp, tn, fn) {
+    sens <- tp / (tp + fn)
+    spec <- tn / (tn + fp)
+    res <- c(sens, spec)
+    names(res) <- c("Sensitivity", "Specificity")
+    return(res)
 }
+
+sesp_from_oc <- function(x, class, oc, direction, pos_class, neg_class) {
+    if (direction == ">") {
+        predictions <- ifelse(x > oc, pos_class, neg_class)
+    } else if (direction == "<") {
+        predictions <- ifelse(x < oc, pos_class, neg_class)
+    }
+    cm <- conf_mat(obs = class, preds = predictions, pos_class)
+    sens_spec(tp = cm["TP"], fp = cm["FP"], tn = cm["TN"], fn = cm["FN"])
+}
+
+accuracy <- function(tp, fp, tn, fn) {
+    Accuracy = (tp + tn) / (tp + fp + tn + fn)
+    names(Accuracy) <- "Accuracy"
+    return(Accuracy)
+}
+

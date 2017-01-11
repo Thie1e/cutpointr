@@ -1,74 +1,50 @@
-
-#' Find optimal cutpoint by minimizing the difference between sensitivity and specificity
+#' Find optimal cutpoint by minimizing the absolute difference between sensitivity and specificity
+#'
+#' @inheritParams cutpointr
+#' @return A data frame with one row, the column optimal_cutpoint and the column
+#' abs_d_sensspec
+#' @examples
+#' library(OptimalCutpoints)
+#' data(elas)
+#' oc_equalsesp(elas, "elas", "status", pos_class = 1, neg_class = 0, direction = ">")
 #' @export
-optcut_emp_eqsensspec <- function(...) {
-    UseMethod("optcut_emp_eqsensspec")
-}
+oc_equalsesp <- function(data, x, class,
+                         candidate_cuts = unique(unlist(data[, x])),
+                         pos_class = NULL, neg_class = NULL, direction = ">") {
+    stopifnot(is.character(x))
+    stopifnot(is.character(class))
+    data <- as.data.frame(data)
 
-#' Find optimal cutpoint by minimizing the difference between sensitivity and specificity
-#' @export
-optcut_emp_eqsensspec.default <- function(x, class,
-                                      candidate_cuts = unique(x),
-                                      pos_class = NULL, higher = NULL) {
-    #
-    # Preparation ---------
-    #
-    if (length(x) != length(class)) stop("The x and class vectors are of different length")
-    if (length(unique(class)) != 2) stop(paste("Expecting two classes, got", length(unique(class))))
-    if (is.null(pos_class)) {
-        pos_class <- unique(class)[1]
-        message(paste("Assuming", pos_class, "as positive class"))
-    }
-    neg_x <- x[class != pos_class]
-    pos_x <- x[class == pos_class]
-    if (is.null(higher)) {
-        if (mean(neg_x) < mean(pos_x)) {
-            message("Assuming the positive class has higher x values")
-            higher = T
-        } else {
-            message("Assuming the positive class has lower x values")
-            higher = F
-        }
-    }
-    if (higher) {
-        candidate_cuts <- unique(c(-Inf, candidate_cuts))
-    } else {
-        candidate_cuts <- unique(c(candidate_cuts, Inf))
-    }
-    #
-    # End preparation -------
-    #
+    neg_x <- data[, x][data[, class] == neg_class]
+    pos_x <- data[, x][data[, class] == pos_class]
+    candidate_cuts <- inf_to_candidate_cuts(candidate_cuts, direction)
 
-    if (higher) {
-        fh <- ecdf(neg_x)
-        gd <- ecdf(pos_x)
+    if (direction == ">") {
+        fh <- stats::ecdf(neg_x)
+        gd <- stats::ecdf(pos_x)
         sens_c <- 1 - gd(candidate_cuts)
         spec_c <- fh(candidate_cuts)
         abs_d_sesp <- abs(sens_c - spec_c)
         oc <- mean(candidate_cuts[abs_d_sesp == min(abs_d_sesp)])
         abs_d_sensspec_oc <- abs(1 - gd(oc) - fh(oc))
-
-        # print(data.frame(candidate_cuts, sens_c, spec_c))
-
         res <- data.frame(optimal_cutpoint = oc,
                           abs_d_sensspec   = abs_d_sensspec_oc)
-    } else {
-        fh <- ecdf(-neg_x)
-        gd <- ecdf(-pos_x)
+    } else if (direction == "<") {
+        fh <- stats::ecdf(-neg_x)
+        gd <- stats::ecdf(-pos_x)
         sens_c <- 1 - gd(-candidate_cuts)
         spec_c <- fh(-candidate_cuts)
         abs_d_sesp <- abs(sens_c - spec_c)
         oc <- mean(-candidate_cuts[abs_d_sesp == min(abs_d_sesp)])
         abs_d_sensspec_oc <- abs(1 - gd(oc) - fh(oc))
         oc <- -oc
-
-        # print(data.frame(candidate_cuts, sens_c, spec_c))
-
         res <- data.frame(optimal_cutpoint = oc,
                           abs_d_sensspec   = abs_d_sensspec_oc)
     }
     return(res)
 }
+
+### Benchmarks vs. various other ways of computing equal_sesp
 
 # equal_sen_spec<-function(x,class, neg_class, pos_class){
 #   pred<-ROCR::prediction(x,class, label.ordering = c(neg_class, pos_class))
@@ -189,7 +165,7 @@ optcut_emp_eqsensspec.default <- function(x, class,
 # tempy <- c("a", "a", "a", "b", "b", "b", "b")
 # cbind(tempx, tempy)
 # equal_sen_spec(tempx, tempy, neg_class = "a", "b") # ROCR benutzt implizit >=
-# optcut_emp_eqsensspec.default(tempx, tempy, higher = T, pos_class = "b")
+# oc_equalsesp.default(tempx, tempy, higher = T, pos_class = "b")
 # oc_sesp_simple(tempx, tempy, higher = T, pos_class = "b")
 # eq_sesp_rocr(tempx, tempy, pos_class = "b")
 #
@@ -199,7 +175,7 @@ optcut_emp_eqsensspec.default <- function(x, class,
 # microbenchmark::microbenchmark(
 #     # optcut_emp_youden.default(tempx, tempy, pos_class = "b", higher = T),
 #     equal_sen_spec(tempx, tempy, "a", "b"), # ROCR benutzt implizit >=
-#     optcut_emp_eqsensspec.default(tempx, tempy, higher = T, pos_class = "b"),
+#     oc_equalsesp.default(tempx, tempy, higher = T, pos_class = "b"),
 #     # oc_sesp_simple(x = tempx, class = tempy, higher = T, pos_class = "b"),
 #     eq_sesp_rocr(tempx, tempy, pos_class = "b"),
 #     times = 20
