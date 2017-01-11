@@ -10,7 +10,7 @@ Description: In addition to finding the cutpoint that maximizes a chosen metric
 License: GPL (>=2)
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.3.2)
+Depends: R (>= 3.3.1)
 Imports:
     fANCOVA (>= 0.5-1),
     gridExtra (>= 2.2.1),
