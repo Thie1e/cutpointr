@@ -2,9 +2,8 @@
 #### Evtl. einfacher nicht wirklich die midpoints einzufügen, sondern am Ende
 #### mean(c(cutpoints[oc_ind], cutpoints[oc_ind + 1])) zurückzugeben
 
-#' Insert midpoints between neighboring values after sorting, usually for cutpoints
 # insert_midpoints <- function(x) {
-#     midpoints <- na.omit(rowMeans(cbind(x, c(NA, x[-length(x)]))))
+#     midpoints <- stats::na.omit(rowMeans(cbind(x, c(NA, x[-length(x)]))))
 #     midpoints <- rowMeans(cbind(x, c(NA, x[-length(x)]))[-1, ])
 #     ### write test to make sure there are no duplicates ####
 #     lx <- length(x)

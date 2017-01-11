@@ -1,20 +1,33 @@
+#' A tidy wrapper for optimal.cutpoints
+#'
+#' Determine "optimal" cutpoints using optimal.cutpoints and its included methods
+#' from the OptimalCutpoints package. The output will be a tidy data frame.of
+#' the optimal cutpoint and the value of the metric, depending on methods, that
+#' was obtained in-sample.
+#'
+#' @inheritParams cutpointr
+#' @param methods (character) See ?optimal.cutpoints for available methods.
+#' @return A data frame with one row, the column optimal_cutpoint and a second
+#' column named after method that gives the obtained metric value.
+#' @examples
+#' library(OptimalCutpoints)
+#' data(elas)
+#' oc_OptimalCutpoints(elas, "elas", "status", methods = "Youden", pos_class = 1,
+#' direction = ">")
 #' @export
 oc_OptimalCutpoints <- function(data, x, class, methods,
                                 pos_class, neg_class, direction, ...) {
-    if (any(direction == c(">=", "<="))) stop("OptimalCutpoints only supports < and >")
-    # stopifnot(is.character(x))
-    # stopifnot(is.character(class))
     cl <- match.call()
     metric_name <- cl$methods
     neg_class <- unique(unlist(data[, class]))
     neg_class <- neg_class[neg_class != pos_class]
-    # Reverse direction because optimal.cutpoints thinks in terms of tag.healthy
+    # Reverse direction because optimal.cutpoints "thinks" in terms of tag.healthy
     if (direction == ">") {
         direction <- "<"
     } else if (direction == "<") {
         direction <- ">"
     }
-    mod <- optimal.cutpoints.default(X = x,
+    mod <- OptimalCutpoints::optimal.cutpoints.default(X = x,
                                      status = class,
                                      data = as.data.frame(data), # dislikes tibbles
                                      methods = methods, tag.healthy = neg_class,
@@ -28,11 +41,6 @@ oc_OptimalCutpoints <- function(data, x, class, methods,
     return(res)
 }
 
-
-# oc_OptimalCutpoints(elas$elas, elas$status, methods = "Youden", pos_class = 1, higher = T)
-
-# cutpointr(elas, elas, status, pos_class = 1,
-#           optcut_func = oc_OptimalCutpoints, methods = "Youden")
 
 
 

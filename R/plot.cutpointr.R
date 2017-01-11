@@ -1,9 +1,9 @@
 #' @export
-plot.cutpointr <- function(cutpointr, ...) {
+plot.cutpointr <- function(x, ...) {
 
     args <- list(...)
 
-    if (is.null(suppressWarnings(cutpointr$subgroup))) {
+    if (is.null(suppressWarnings(x$subgroup))) {
         dts_boot <- "boot"
         dts <- "data"
         fll <- NULL
@@ -20,9 +20,9 @@ plot.cutpointr <- function(cutpointr, ...) {
     #
     # Bootstrap results
     #
-    boot_flag <- !is.null(suppressWarnings(cutpointr$boot))
+    boot_flag <- !is.null(suppressWarnings(x$boot))
     if (boot_flag) {
-        res_boot_unnested <- cutpointr %>%
+        res_boot_unnested <- x %>%
             dplyr::select_(.data = ., .dots = dts_boot) %>%
             tidyr::unnest()
         boot_cut <- suppressMessages(
@@ -53,15 +53,15 @@ plot.cutpointr <- function(cutpointr, ...) {
     #
     # In-sample results
     #
-    res_unnested <- cutpointr %>%
+    res_unnested <- x %>%
         dplyr::select_(.data = ., .dots = dts) %>%
         tidyr::unnest()
-    if (is.null(suppressWarnings(cutpointr$subgroup))) {
-        res_unnested$optimal_cutpoint <- cutpointr$optimal_cutpoint
+    if (is.null(suppressWarnings(x$subgroup))) {
+        res_unnested$optimal_cutpoint <- x$optimal_cutpoint
         col <- NULL
     } else {
         res_unnested <- dplyr::full_join(res_unnested,
-                                  cutpointr[, c("optimal_cutpoint", "subgroup")],
+                                  x[, c("optimal_cutpoint", "subgroup")],
                                   by = "subgroup")
         col <- ~ subgroup
     }
@@ -77,16 +77,21 @@ plot.cutpointr <- function(cutpointr, ...) {
         ggplot2::xlab("value") +
         ggplot2::theme(legend.position = "none")
 
-    if (cutpointr$direction[1] == "<") res_unnested$x <- -res_unnested$x
+    if (x$direction[1] == "<") res_unnested$x <- -res_unnested$x
     res_unnested <- res_unnested %>%
         ### pos_class should all be the same, maybe map over rows would be cleaner
-        dplyr::mutate_(class = ~ ifelse(class == cutpointr$pos_class[1], 1, 0))
+        dplyr::mutate_(class = ~ ifelse(class == x$pos_class[1], 1, 0))
+    if (suppressWarnings(is.null(x$subgroup))) {
+        roc_title <- ggplot2::ggtitle("ROC curve")
+    } else {
+        roc_title <- ggplot2::ggtitle("ROC curve", "by class")
+    }
     roc <- ggplot2::ggplot(res_unnested,
                            ggplot2::aes_(m = ~ x, d = ~ class,
                                          color = clr)) +
         suppressWarnings(plotROC::geom_roc(n.cuts = 0,# lineend = "round",
                                            linealpha = transparency)) +
-        ggplot2::ggtitle("ROC curve", "by class") +
+        roc_title +
         ggplot2::xlab("1 - Specificity") +
         ggplot2::ylab("Sensitivity") +
         ggplot2::theme(legend.position = "none") +

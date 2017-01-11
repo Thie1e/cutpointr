@@ -1,21 +1,27 @@
-#' Find optimal cutpoint by minimizing the difference between sensitivity and specificity
+#' Find optimal cutpoint by minimizing the absolute difference between sensitivity and specificity
+#'
+#' @inheritParams cutpointr
+#' @return A data frame with one row, the column optimal_cutpoint and the column
+#' abs_d_sensspec
+#' @examples
+#' library(OptimalCutpoints)
+#' data(elas)
+#' oc_equalsesp(elas, "elas", "status", pos_class = 1, neg_class = 0, direction = ">")
 #' @export
 oc_equalsesp <- function(data, x, class,
-                                 candidate_cuts = NULL,
-                                 pos_class = NULL, neg_class = NULL, direction = NULL) {
+                         candidate_cuts = unique(unlist(data[, x])),
+                         pos_class = NULL, neg_class = NULL, direction = ">") {
     stopifnot(is.character(x))
     stopifnot(is.character(class))
     data <- as.data.frame(data)
-    #
-    # Preparation
-    #
-    neg_x <- data$x[data$class != pos_class]
-    pos_x <- data$x[data$class == pos_class]
+
+    neg_x <- data[, x][data[, class] == neg_class]
+    pos_x <- data[, x][data[, class] == pos_class]
     candidate_cuts <- inf_to_candidate_cuts(candidate_cuts, direction)
 
     if (direction == ">") {
-        fh <- ecdf(neg_x)
-        gd <- ecdf(pos_x)
+        fh <- stats::ecdf(neg_x)
+        gd <- stats::ecdf(pos_x)
         sens_c <- 1 - gd(candidate_cuts)
         spec_c <- fh(candidate_cuts)
         abs_d_sesp <- abs(sens_c - spec_c)
@@ -24,8 +30,8 @@ oc_equalsesp <- function(data, x, class,
         res <- data.frame(optimal_cutpoint = oc,
                           abs_d_sensspec   = abs_d_sensspec_oc)
     } else if (direction == "<") {
-        fh <- ecdf(-neg_x)
-        gd <- ecdf(-pos_x)
+        fh <- stats::ecdf(-neg_x)
+        gd <- stats::ecdf(-pos_x)
         sens_c <- 1 - gd(-candidate_cuts)
         spec_c <- fh(-candidate_cuts)
         abs_d_sesp <- abs(sens_c - spec_c)

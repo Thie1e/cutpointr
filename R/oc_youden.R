@@ -1,37 +1,34 @@
 #' Determine optimal cutpoint by maximizing the sum of sensitivity and specificity
 #'
-#' Cutpoints are taken from the sample values (with the optional addition of midpoints
-#' between these values) and the classification quality of these cupoints is
-#' evaluated based on the chosen method.
+#' This function takes bivariate data of predictions or test values and class
+#' labels and determines an optimal cutpoint to empirically maximize
+#' sensitivity + specificity - 1 (the J-Index or Youden-Index).
 #'
-#' @param data (data.frame) The dependent and independent variables
-#' @param x (numeric) The values that will be used for splitting
-#' @param class (character / factor / numeric) The dependent binary class variable
+#' @inheritParams cutpointr
 #' @importFrom purrr %>%
-#' @export
+#' @return A data frame with one row, the column optimal_cutpoint and the column
+#' youden
 #' @examples
 #' library(OptimalCutpoints)
 #' data(elas)
-#' oc_youden(elas$elas, elas$status, pos_class = 1)
+#' oc_youden(elas, "elas", "status", pos_class = 1, neg_class = 0)
+#' @export
 oc_youden <- function(data, x, class,
-                              candidate_cuts = unique(unlist(data[, x])),
-                              pos_class = NULL, neg_class = NULL,
-                              direction = NULL) {
+                      candidate_cuts = unique(unlist(data[, x])),
+                      pos_class = NULL, neg_class = NULL, direction = ">") {
     data <- as.data.frame(data)
     stopifnot(is.character(x))
     stopifnot(is.character(class))
-    #
-    # Preparation
-    #
-    neg_x <- data[, x][data[, class] != pos_class]
+
+    neg_x <- data[, x][data[, class] == neg_class]
     pos_x <- data[, x][data[, class] == pos_class]
     candidate_cuts <- inf_to_candidate_cuts(candidate_cuts, direction)
 
     #
     # Get optimal cutpoint
     #
-    fh <- ecdf(neg_x)
-    gd <- ecdf(pos_x)
+    fh <- stats::ecdf(neg_x)
+    gd <- stats::ecdf(pos_x)
     if (direction == ">") {
         youden <- fh(candidate_cuts) - gd(candidate_cuts)
         oc <- mean(candidate_cuts[youden == max(youden)])

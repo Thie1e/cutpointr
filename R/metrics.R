@@ -47,7 +47,9 @@ conf_mat <- function(obs, preds, pos_class) {
 sens_spec <- function(tp, fp, tn, fn) {
     sens <- tp / (tp + fn)
     spec <- tn / (tn + fp)
-    c(Sensitivity = sens, Specificity = spec)
+    res <- c(sens, spec)
+    names(res) <- c("Sensitivity", "Specificity")
+    return(res)
 }
 
 sesp_from_oc <- function(x, class, oc, direction, pos_class, neg_class) {
