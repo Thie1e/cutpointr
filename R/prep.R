@@ -57,15 +57,6 @@ assume_direction_pos_class <- function(x, class, pos_class, neg_class, direction
     return(list(direction = direction, pos_class = pos_class, neg_class = neg_class))
 }
 
-microbenchmark::microbenchmark(
-    suppressMessages(
-    assume_direction_pos_class(iris$Petal.Width, iris$Species == "versicolor", na.rm = T,
-                               direction = NULL, pos_class = NULL, neg_class = NULL)
-    )
-)
-#     min      lq     mean   median      uq     max neval
-# 311.478 322.643 344.9638 334.9095 351.626 641.243   100
-
 
 inf_to_candidate_cuts <- function(candidate_cuts, direction) {
     if (direction == ">" | direction == ">=") {
