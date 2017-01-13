@@ -30,9 +30,9 @@
 # }
 
 conf_mat <- function(obs, preds, pos_class) {
-    neg_class <- unique(obs)
+    neg_class <- unique(c(obs, preds))
     neg_class <- neg_class[neg_class != pos_class]
-    stopifnot(length(neg_class) == 1)
+    if (length(neg_class) == 0) neg_class <- "neg"
     binary_obs <- obs == pos_class
     binary_preds <- preds == pos_class
     tp <- sum(binary_preds & binary_obs)
