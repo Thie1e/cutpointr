@@ -35,7 +35,9 @@
 #' }
 #'
 #' The ... argument can be used to avoid an error if not all of the above
-#' arguments are needed.
+#' arguments are needed. The function should return a data frame or tbl_df with
+#' one row, the column "optimal_cutpoint, and a column with an arbitraty name
+#' with the metric value at the optimal cutpoint.
 #'
 #' @examples
 #' library(cutpointr)
@@ -52,7 +54,7 @@
 #' plot(opt_cut)
 #'
 #' ## Optimal cutpoint for elas, as before, but for the separate subgroups
-#' opt_cut <- cutpointr(elas, elas, status, gender)
+#' opt_cut <- cutpointr(elas, round(elas), status, gender)
 #' opt_cut
 #' plot(opt_cut)
 #'
@@ -65,6 +67,13 @@
 #' ## Bootstrapping also works on individual subgroups
 #' set.seed(123)
 #' opt_cut <- cutpointr(elas, elas, status, gender, boot_runs = 200)
+#' opt_cut
+#' plot(opt_cut)
+#'
+#' ## Transforming variables (unrealistic, just to show the functionality)
+#' set.seed(123)
+#' opt_cut <- cutpointr(elas, log(elas), status == 1,
+#'     gender == "Male" & elas %% 1 == 0, boot_runs = 200)
 #' opt_cut
 #' plot(opt_cut)
 #'
@@ -178,15 +187,17 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
     #NA
     if (any(anyNA(c(x, class)) | (!missing(subgroup) && anyNA(subgroup))) &&
          (missing(na.rm) | !na.rm)) {
-        warning("NAs found but na.rm = FALSE")
+        stop("NAs found but na.rm = FALSE")
     }
 
     # Determine direction and/or pos_class if necessary:
-    assumptions <- assume_direction_pos_class(x = x, class = class,
-                                              pos_class = pos_class,
-                                              neg_class = neg_class,
-                                              direction = direction,
-                                              na.rm = na.rm)
+    if (any(c(is.null(pos_class), is.null(neg_class), is.null(direction)))) {
+        assumptions <- assume_direction_pos_class(x = x, class = class,
+                                                  pos_class = pos_class,
+                                                  neg_class = neg_class,
+                                                  direction = direction,
+                                                  na.rm = na.rm)
+    }
     if (is.null(direction)) direction <- assumptions$direction
     if (is.null(pos_class)) pos_class <- assumptions$pos_class
     if (is.null(neg_class)) neg_class <- assumptions$neg_class
@@ -197,7 +208,7 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
     candidate_cuts <- inf_to_candidate_cuts(candidate_cuts, direction)
 
     #
-    # Calculate optimal cutpoint, map to cutpoint functions
+    # Calculate optimal cutpoint, map to cutpoint function
     #
     if (!missing(subgroup)) {
         dat <- tibble::tibble(x, class, subgroup)
@@ -226,7 +237,6 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
             optcut$specificity <- sesp["Specificity"]
             return(optcut)
         })
-        # })
         optcut <- tibble::as_tibble(optcut) # can pmap_df return a tibble so this is not necessary?
         optcut <- dplyr::full_join(optcut, dat, by = "subgroup")
     } else {

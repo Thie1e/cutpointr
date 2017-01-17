@@ -83,7 +83,9 @@ as input(s):
 }
 
 The ... argument can be used to avoid an error if not all of the above
-arguments are needed.
+arguments are needed. The function should return a data frame or tbl_df with
+one row, the column "optimal_cutpoint, and a column with an arbitraty name
+with the metric value at the optimal cutpoint.
 }
 \examples{
 library(cutpointr)
@@ -91,7 +93,7 @@ library(OptimalCutpoints)
 data(elas)
 
 ## Optimal cutpoint for elas
-opt_cut <- cutpointr(elas, elas, status)
+opt_cut <- cutpointr(elas, -elas, status, pos_class = 1)
 opt_cut
 plot(opt_cut)
 
@@ -100,7 +102,7 @@ opt_cut
 plot(opt_cut)
 
 ## Optimal cutpoint for elas, as before, but for the separate subgroups
-opt_cut <- cutpointr(elas, elas, status, gender)
+opt_cut <- cutpointr(elas, round(elas), status, gender)
 opt_cut
 plot(opt_cut)
 
