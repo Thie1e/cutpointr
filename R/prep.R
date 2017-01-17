@@ -1,7 +1,8 @@
 assume_direction_pos_class <- function(x, class, pos_class, neg_class, direction,
                                        na.rm) {
+
     # Check classes
-    if(na.rm) uc <- unique(stats::na.omit(class)) else uc <- unique(class)
+    if (na.rm) uc <- unique(stats::na.omit(class)) else uc <- unique(class)
     luc <- length(uc)
     if (luc != 2) stop(paste("Expecting two classes, got", luc))
 
@@ -14,6 +15,21 @@ assume_direction_pos_class <- function(x, class, pos_class, neg_class, direction
         class <- class[complete_ind]
     } else {
         if (anyNA(c(x, class))) stop("NAs in x or class but na.rm = FALSE")
+    }
+
+    # If Inf and -Inf mean gives NaN
+    if (any(x == Inf) & any(x == -Inf)) {
+        message("Removing -Inf from mean for assuming pos_class and direction")
+        class <- class[x != -Inf]
+        x <- x[x != -Inf]
+    }
+
+    # If after removing NAs and Inf only <= 1 class is left (simple fallback)
+    if (length(unique(class)) != 2) {
+        warning("After removing NA / Inf only one class left. Guessing pos_class and direction")
+        message("Assuming the positive class has higher x values")
+        message(paste("Assuming", uc[1], "as the positive class"))
+        return(list(direction = ">", pos_class = uc[1], neg_class = uc[2]))
     }
 
     if (is.null(direction) & !is.null(pos_class)) {
