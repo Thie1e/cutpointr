@@ -25,20 +25,32 @@ plot.cutpointr <- function(x, ...) {
         res_boot_unnested <- x %>%
             dplyr::select_(.data = ., .dots = dts_boot) %>%
             tidyr::unnest()
+        if (all(na.omit(res_boot_unnested$optimal_cutpoint %% 1 == 0))) {
+            dist_plot <- ggplot2::geom_histogram(alpha = transparency, position = "identity")
+        } else {
+            dist_plot <- ggplot2::geom_density(alpha = transparency)
+        }
         boot_cut <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,
                             ggplot2::aes_(x = ~ optimal_cutpoint, fill = fll, color = clr)) +
-                ggplot2::geom_density(alpha = transparency) +
+                # ggplot2::geom_density(alpha = transparency) +
+                dist_plot +
                 ggplot2::geom_rug(alpha = 0.5) +
                 ggplot2::ggtitle("Bootstrap", "distribution of optimal cutpoints") +
                 ggplot2::xlab("optimal cutpoint") +
                 ggplot2::theme(legend.position = "none")
         )
         metric_name <- find_metric_name(colnames(res_boot_unnested))
+        if (all(na.omit(get(metric_name, res_boot_unnested) %% 1 == 0))) {
+            dist_plot <- ggplot2::geom_histogram(alpha = transparency, position = "identity")
+        } else {
+            dist_plot <- ggplot2::geom_density(alpha = transparency)
+        }
         boot_metric <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,
                             ggplot2::aes_(x = ~ get(metric_name), fill = fll, color = clr)) +
-                ggplot2::geom_density(alpha = transparency) +
+                # ggplot2::geom_density(alpha = transparency) +
+                dist_plot +
                 ggplot2::geom_rug(alpha = 0.5) +
                 ggplot2::ggtitle("Bootstrap",
                                  paste("out-of-bag estimates of", metric_name)) +
@@ -65,13 +77,21 @@ plot.cutpointr <- function(x, ...) {
                                   by = "subgroup")
         col <- ~ subgroup
     }
-    dist <- ggplot2::ggplot(res_unnested, ggplot2::aes_(x = ~ x, fill = fll, color = clr)) +
-        ggplot2::geom_density(alpha = transparency) +
+    if (all(na.omit(res_unnested$x %% 1 == 0))) {
+        dist_plot <- ggplot2::geom_histogram(alpha = transparency, position = "identity")
+    } else {
+        dist_plot <- ggplot2::geom_density(alpha = transparency)
+    }
+    dist <- ggplot2::ggplot(res_unnested,
+                            ggplot2::aes_(x = ~ x, fill = fll, color = clr)) +
+        # ggplot2::geom_density(alpha = transparency) +
+        dist_plot +
         ggplot2::geom_rug(alpha = 0.5) +
         ggplot2::geom_vline(ggplot2::aes_(xintercept = ~ optimal_cutpoint,
                                           color = col),
                             show.legend = FALSE) +
-        ggplot2::facet_grid(~ class) + # facet by class because always 2
+        # facet by class because always 2
+        ggplot2::facet_wrap(~ class, scales = "free_y") +
         ggplot2::ggtitle("Independent variable",
                          "distribution by class and optimal cutpoint") +
         ggplot2::xlab("value") +
@@ -86,6 +106,7 @@ plot.cutpointr <- function(x, ...) {
     } else {
         roc_title <- ggplot2::ggtitle("ROC curve", "by class")
     }
+    if (any(!is.finite(res_unnested$x))) warning("Infinite values excluded from ROC curve")
     roc <- ggplot2::ggplot(res_unnested,
                            ggplot2::aes_(m = ~ x, d = ~ class,
                                          color = clr)) +

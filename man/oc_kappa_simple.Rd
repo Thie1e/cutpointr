@@ -12,10 +12,6 @@ oc_kappa_simple(x, class, candidate_cuts = unique(x), pos_class = NULL,
 
 \item{class}{The variable name (with or without quotation marks) indicating class membership.}
 
-\item{candidate_cuts}{(numeric vector) By default the unique values in x will
-be used as potential cutoffs. Alternatively, a vector of cutoffs to be used can
-be supplied using the candidate_cuts argument.}
-
 \item{pos_class}{(optional) The value of class that indicates the positive class}
 
 \item{neg_class}{(optional) The value of class that indicates the negative class}

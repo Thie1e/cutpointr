@@ -10,7 +10,7 @@
 #' @param candidate_cuts (numeric vector) Optionally, the cutoffs to be supplied
 #' to metric_func can be specified. By default all unique values in x will be used.
 #' @param metric_func (function) A function that takes one or more of the following
-#' arguments:
+#' arguments. If not all :
 #' \itemize{
 #'  \item preds
 #'  \item obs
@@ -27,28 +27,33 @@
 #' whether x values larger or smaller than a cutoff indicate the positive class.
 #' @param ... Further optional arguments that will be passed to metric_func
 #' @return A data frame with columns "cutpoint" and "metric"
-#' @export
-gather_cutoffs <- function(data, x, class,  candidate_cuts = unique(data[, x]),
-                           metric_func = NULL, pos_class, neg_class,
-                           direction = ">", ...) {
-    stopifnot(is.character(x))
-    stopifnot(is.character(class))
-
-    metric_name <- as.character(match.call()$metric_func)
-    candidate_cuts <- sort(candidate_cuts)
-
-    if (is.null(neg_class)) {
-        neg_class <- unique(stats::na.omit(data[, class]))
-        neg_class <- neg_class[neg_class != pos_class]
-    }
-
-    `%direc%` <- ifelse(direction == ">", `>`, `<`)
-
-    metrics <- purrr::map_dbl(candidate_cuts, function(cutpoint) {
-        p <- ifel_pos_neg(data[, x] %direc% cutpoint, pos_class, neg_class)
-        metric_func(preds = p, obs = data[, class], pos_class, ...)
-    })
-    res <- data.frame(cutpoint = candidate_cuts, metric = metrics)
-    return(res)
-}
+#' @examples
+#' library(OptimalCutpoints)
+#' data(elas)
+#' mymetric <- function(preds, obs, ...) sum(preds == obs) / length(preds)
+#' gather_cutoffs(elas, "elas", "status", metric_func = mymetric,
+#'     pos_class = 1, neg_class = 0, direction = ">")
+# gather_cutoffs <- function(data, x, class,  candidate_cuts = unique(data[, x]),
+#                            metric_func = NULL, pos_class, neg_class,
+#                            direction = ">", ...) {
+#     stopifnot(is.character(x))
+#     stopifnot(is.character(class))
+#
+#     metric_name <- as.character(match.call()$metric_func)
+#     candidate_cuts <- sort(candidate_cuts)
+#
+#     if (is.null(neg_class)) {
+#         neg_class <- unique(stats::na.omit(data[, class]))
+#         neg_class <- neg_class[neg_class != pos_class]
+#     }
+#
+#     `%direc%` <- ifelse(direction == ">", `>`, `<`)
+#
+#     metrics <- purrr::map_dbl(candidate_cuts, function(cutpoint) {
+#         p <- ifel_pos_neg(data[, x] %direc% cutpoint, pos_class, neg_class)
+#         metric_func(preds = p, obs = data[, class], pos_class, ...)
+#     })
+#     res <- data.frame(cutpoint = candidate_cuts, metric = metrics)
+#     return(res)
+# }
 

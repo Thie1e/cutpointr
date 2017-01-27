@@ -28,7 +28,6 @@
 #'  \item data
 #'  \item x
 #'  \item class
-#'  \item candidate_cuts
 #'  \item pos_class
 #'  \item neg_class
 #'  \item direction
@@ -38,6 +37,34 @@
 #' arguments are needed. The function should return a data frame or tbl_df with
 #' one row, the column "optimal_cutpoint, and a column with an arbitraty name
 #' with the metric value at the optimal cutpoint.
+#'
+#' If boot_runs is positive, that number of bootstrap samples will be drawn
+#' and the optimal cutpoint using optcut_func will be determined. Additionally,
+#' as an alternative to cross validation, boot_metric_func will be used to
+#' score the out-of-bag predictions using the cutpoints determined by
+#' optcut_func. By default, out-of-bag accuracy will be assessed. Accuracy,
+#' Sensitivity, Specificity, Kappa, true positives/negatives and false
+#' positives/negatives are always included in the bootstrap results.
+#' User defined functions can be used as well which can accept the following
+#' inputs:
+#' \itemize{
+#'  \item tp
+#'  \item fp
+#'  \item tn
+#'  \item fn
+#' }
+#'
+#' If not all inputs are needed ... can be used to avoid an unused argument error.
+#'
+#' If multiple optimal cutpoints are found, the first one is returned and a
+#' warning including all optimal cutpoints is issued. The first one refers to
+#' the minimum of the optimal cutpoints if direction = ">" or to the maximum
+#' of the optimal cutpoints if direction = "<".
+#'
+#' If use_midpoints is set to TRUE and multiple optimal cutpoints are found,
+#' the midpoint of the minimum / maximum of the optimal cutpoints, as described
+#' above, and the next highest / lowest observation is returned. Thus, finding
+#' multiple optimal cutpoints has no effect on determining the midpoint.
 #'
 #' @examples
 #' library(cutpointr)
@@ -54,7 +81,7 @@
 #' plot(opt_cut)
 #'
 #' ## Optimal cutpoint for elas, as before, but for the separate subgroups
-#' opt_cut <- cutpointr(elas, round(elas), status, gender)
+#' opt_cut <- cutpointr(elas, elas, status, gender)
 #' opt_cut
 #' plot(opt_cut)
 #'
@@ -95,7 +122,7 @@
 #'
 #' ## Parallelized bootstrapping
 #' library(doSNOW)
-#' cl <- makeCluster(parallel::detectCores())
+#' cl <- makeCluster(2) # 2 cores
 #' registerDoSNOW(cl)
 #' library(doRNG)
 #' registerDoRNG(123) # Reproducible parallel loops using doRNG
@@ -110,7 +137,6 @@
 #' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 2000,
 #'                      optcut_func = oc_OptimalCutpoints, methods = "Youden",
 #'                      allowParallel = TRUE)
-#' # OptimalCutpoints finds different cutpoints because candidate_cuts per subgroup
 #' opt_cut
 #' plot(opt_cut)
 #'
@@ -127,14 +153,18 @@
 #' is supposed to be larger or smaller for the positive class.
 #' @param optcut_func (function or character) A function for determining cutpoints. Can
 #' be user supplied or use some of the built in methods. See details.
-#' @param candidate_cuts (numeric vector) By default the unique values in x will
-#' be used as potential cutoffs. Alternatively, a vector of cutoffs to be used can
-#' be supplied using the candidate_cuts argument.
 #' @param boot_runs (numeric, optional) If positive, this number of bootstrap samples
 #' will be used to assess the variability and the out-of-sample performance.
-#' @param na.rm (logical) Set to TRUE to keep only complete cases of x, class and
-#' subgroup (if specified). Missing values with na.rm = FALSE (default) will
-#' raise an error.
+#' @param boot_metric_func (function) The function to compute a metric using the
+#' out-of-bag values during bootstrapping. A way of validating the performance.
+#' User defined functions can be supplied, see details.
+#' @param use_midpoints (logical) If TRUE (default FALSE) the returned optimal
+#' cutpoint will be the mean of the optimal cutpoint and the next highest
+#' observation (for direction = ">") or the next lowest observation
+#' (for direction = "<").
+#' @param na.rm (logical) Set to TRUE (default FALSE) to keep only complete
+#' cases of x, class and subgroup (if specified). Missing values with
+#' na.rm = FALSE will raise an error.
 #' @param allowParallel (logical) If TRUE, the bootstrapping will be parallelized
 #' using foreach. A local cluster, for example, should have been started manually
 #' beforehand.
@@ -143,10 +173,11 @@
 #' @importFrom foreach %do%
 #' @export
 cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
-                              neg_class = NULL, direction = NULL,
-                              optcut_func = oc_youden, candidate_cuts = NULL,
-                              boot_runs = 0, na.rm = FALSE,
-                              allowParallel = FALSE, ...) {
+                      neg_class = NULL, direction = NULL,
+                      method = maximize_metric,
+                      boot_runs = 0, metric = youden,
+                      use_midpoints = FALSE, na.rm = FALSE,
+                      allowParallel = FALSE, ...) {
     #
     # NSE
     #
@@ -163,22 +194,25 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
     }
 
     # Get cutpoint function
-    if (length(optcut_func) > 1 | !(class(optcut_func) %in% c("character", "function"))) {
-        stop("optcut_func should be character string or a function")
+    if (length(method) > 1 | !(class(method) %in% c("character", "function"))) {
+        stop("method should be character string or a function")
     }
-    if (is.character(optcut_func)) {
+    if (is.character(method)) {
         # If a character vec is given the user surely wants to search in the package
-        mod_names <- optcut_func[1]
-        optcut_func <- paste0("cutpointr::", optcut_func)
-        optcut_func <- lapply(optcut_func, function(fun) eval(parse(text = fun)))
+        mod_names <- method[1]
+        method <- paste0("cutpointr::", method)
+        # method <- lapply(method, function(fun) eval(parse(text = fun)))
+        method <- eval(parse(text = method))
     } else {
         cl <- match.call()
-        mod_names <- cl$optcut_func
+        mod_names <- cl$method
         # if default was not changed:
-            mod_names <- as.character(substitute(optcut_func))
-            mod_names <- mod_names[1]
+        mod_names <- as.character(substitute(method))
+        mod_names <- mod_names[1]
     }
-    if (is.null(mod_names)) stop("Could not get the names of the cutpoint function(s)")
+    if (is.null(mod_names)) stop("Could not get the names of the method function")
+    stopifnot(is.function(metric))
+    metric_name <- as.character(substitute(metric))
 
     #
     # Prep
@@ -202,11 +236,6 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
     if (is.null(pos_class)) pos_class <- assumptions$pos_class
     if (is.null(neg_class)) neg_class <- assumptions$neg_class
 
-    # Save candidate cuts
-    if (is.null(candidate_cuts)) candidate_cuts <- unique(x)
-    if (na.rm) candidate_cuts <- stats::na.omit(candidate_cuts)
-    candidate_cuts <- inf_to_candidate_cuts(candidate_cuts, direction)
-
     #
     # Calculate optimal cutpoint, map to cutpoint function
     #
@@ -221,13 +250,16 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
                            pos_class = ~ pos_class,
                            prevalence = ~ purrr::map_dbl(data, function(g) {
                                mean(g$class == pos_class)
+                               }),
+                           AUC = ~ purrr::map_dbl(data, function(g) {
+                               auc(actual = g$class, predicted = g$x, pos_class)
                                })
                            )
         optcut <- purrr::pmap_df(list(dat$subgroup, dat$data), function(g, d) {
-            optcut <- optcut_func(data = d, x = "x", class = "class",
-                                  candidate_cuts = candidate_cuts,
-                                  direction = direction, pos_class = pos_class,
-                                  neg_class = neg_class, ...) %>%
+            optcut <- method(data = d, x = "x", class = "class",
+                             metric_func = metric,
+                             direction = direction, pos_class = pos_class,
+                             neg_class = neg_class, ...) %>%
                 dplyr::mutate_(subgroup = ~ g)
             sesp <- sesp_from_oc(x = d$x, class = d$class,
                                  oc = optcut$optimal_cutpoint,
@@ -235,6 +267,10 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
                                  neg_class = neg_class)
             optcut$sensitivity <- sesp["Sensitivity"]
             optcut$specificity <- sesp["Specificity"]
+            if (use_midpoints) {
+                optcut$optimal_cutpoint <- midpoint(oc = optcut$optimal_cutpoint,
+                                                    x = d$x, direction = direction)
+            }
             return(optcut)
         })
         optcut <- tibble::as_tibble(optcut) # can pmap_df return a tibble so this is not necessary?
@@ -247,37 +283,45 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
             dplyr::mutate_(pos_class = ~ pos_class,
                            prevalence = ~ purrr::map_dbl(data, function(g) {
                                mean(g$class == pos_class)
+                               }),
+                           AUC = ~ purrr::map_dbl(data, function(g) {
+                               auc(actual = g$class, predicted = g$x, pos_class)
                                })
                            )
         optcut <- purrr::map_df(dat$data, function(d) {
-            optcut <- optcut_func(data = d,  x = "x", class = "class",
-                                  candidate_cuts = candidate_cuts,
-                                  direction = direction, pos_class = pos_class,
-                                  neg_class = neg_class, ...)
+            optcut <- method(data = d,  x = "x", class = "class",
+                             metric_func = metric,
+                             direction = direction, pos_class = pos_class,
+                             neg_class = neg_class, ...)
             sesp <- sesp_from_oc(x = d$x, class = d$class,
                                  oc = optcut$optimal_cutpoint,
                                  direction = direction, pos_class = pos_class,
                                  neg_class = neg_class)
-            optcut$sensitivity = sesp["Sensitivity"]
-            optcut$specificity = sesp["Specificity"]
+            optcut$sensitivity = sesp[, "Sensitivity"]
+            optcut$specificity = sesp[, "Specificity"]
+            if (use_midpoints) {
+                optcut$optimal_cutpoint <- midpoint(oc = optcut$optimal_cutpoint,
+                                                    x = d$x, direction = direction)
+            }
             return(optcut)
         })
         optcut <- tibble::as_tibble(optcut)
         optcut <- dplyr::bind_cols(optcut, dat)
     }
 
-    optcut$direction                     <- direction
-    optcut$predictor                     <- predictor
-    optcut$outcome                       <- outcome
-    optcut$neg_class                     <- neg_class
-    optcut$method                        <- mod_names
+    optcut$direction                        <- direction
+    optcut$predictor                        <- predictor
+    optcut$outcome                          <- outcome
+    optcut$neg_class                        <- neg_class
+    optcut$method                           <- mod_names
+    optcut$metric                           <- metric_name
     if (!missing(subgroup)) optcut$grouping <- subgroup_var
 
     # Reorder for nicer output
     mn <- find_metric_name(colnames(optcut))
     select_cols <- c("subgroup", "direction", "optimal_cutpoint",
-                     mn, "sensitivity", "specificity", "method",
-                     "pos_class", "neg_class", "prevalence",
+                     mn, "sensitivity", "specificity", "method", "metric",
+                     "pos_class", "neg_class", "prevalence", "AUC",
                      "outcome", "predictor", "grouping", "data")
     # subgroup and grouping may not be given
     select_cols <- select_cols[select_cols %in% colnames(optcut)]
@@ -295,12 +339,13 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
     if (boot_runs <= 0) {
         bootstrap <- NULL
     } else {
+        boot_runs <- ceiling(boot_runs)
         bootstrap <- dat %>%
             dplyr::transmute_(boot = ~ purrr::map(data, function(g) {
                 boot_g <- foreach::foreach(rep = 1:boot_runs, .combine = rbind,
                     .packages = "OptimalCutpoints",
-                    .export = c("optcut_func", "direction", "pos_class",
-                    "neg_class", "candidate_cuts", "mn")) %seq_or_par%
+                    .export = c("method", "direction", "pos_class", "metric",
+                    "neg_class", "mn", "use_midpoints")) %seq_or_par%
                     {
                         b_ind   <- sample(1:nrow(g), replace = T, size = nrow(g))
                         if (length(unique(g[b_ind, ]$class)) == 1) {
@@ -308,51 +353,74 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
                             colnames(funcout_b) <- c("optimal_cutpoint", mn)
                             optcut_b <- NA
                         } else {
-                            funcout_b <- optcut_func(data = g[b_ind, ], x = "x",
-                                                     class = "class",
-                                                     candidate_cuts = candidate_cuts,
-                                                     direction = direction,
-                                                     pos_class = pos_class,
-                                                     neg_class = neg_class, ...)
+                            funcout_b <- method(data = g[b_ind, ], x = "x",
+                                                metric_func = metric,
+                                                class = "class",
+                                                direction = direction,
+                                                pos_class = pos_class,
+                                                neg_class = neg_class, ...)
                             optcut_b  <- extract_opt_cut(funcout_b)
+                            if (use_midpoints) {
+                                optcut_b <- midpoint(oc = optcut_b,
+                                                     x = g[b_ind, ]$x,
+                                                     direction = direction)
+                            }
                         }
                         # LOO-Bootstrap
-                        # preds_b <- ifelse(g$x[b_ind] > optcut_b, pos_class, neg_class)
                         preds_b <- ifel_pos_neg(g$x[b_ind] > optcut_b, pos_class, neg_class)
                         cm_b <- conf_mat(obs = g$class[b_ind],  preds = preds_b,
                                                 pos_class = pos_class)
-                        Sens_Spec_b <- sens_spec(tp = cm_b["TP"], fp = cm_b["FP"],
-                                                tn = cm_b["TN"], fn = cm_b["FN"])
-                        Acc_b <- accuracy(tp = cm_b["TP"], fp = cm_b["FP"],
-                                          tn = cm_b["TN"], fn = cm_b["FN"])
-                        # preds_oob <- ifelse(g$x[-b_ind] > optcut_b, pos_class, neg_class)
+                        names(cm_b) <- paste0(names(cm_b), "_b")
+                        Sens_Spec_b <- sens_spec(tp = cm_b["TP_b"], fp = cm_b["FP_b"],
+                                                tn = cm_b["TN_b"], fn = cm_b["FN_b"])
+                        Acc_b <- accuracy(tp = cm_b["TP_b"], fp = cm_b["FP_b"],
+                                          tn = cm_b["TN_b"], fn = cm_b["FN_b"])
+                        kap_b <- kappa_cf(a = cm_b["TP_b"], b = cm_b["FP_b"],
+                                            c = cm_b["FN_b"], d = cm_b["TN_b"])
                         preds_oob <- ifel_pos_neg(g$x[-b_ind] > optcut_b, pos_class, neg_class)
                         cm_oob <- conf_mat(obs = g$class[-b_ind],  preds = preds_oob,
                                            pos_class = pos_class)
-                        Sens_Spec_oob <- sens_spec(tp = cm_oob["TP"], fp = cm_oob["FP"],
-                                                   tn = cm_oob["TN"], fn = cm_oob["FN"])
-                        Acc_oob <- accuracy(tp = cm_oob["TP"], fp = cm_oob["FP"],
-                                            tn = cm_oob["TN"], fn = cm_oob["FN"])
-                        bootstrap <- tibble::as_data_frame(cbind(funcout_b,
-                                                                 Sensitivity_b   = Sens_Spec_b[1],
-                                                                 Specificity_b   = Sens_Spec_b[2],
-                                                                 Accuracy_b      = Acc_b,
-                                                                 Sensitivity_oob = Sens_Spec_oob[1],
-                                                                 Specificity_oob = Sens_Spec_oob[2],
-                                                                 Accuracy_oob    = Acc_oob
-                        ))
+                        names(cm_oob) <- paste0(names(cm_oob), "_oob")
+                        Sens_Spec_oob <- sens_spec(tp = cm_oob["TP_oob"],
+                                                   fp = cm_oob["FP_oob"],
+                                                   tn = cm_oob["TN_oob"],
+                                                   fn = cm_oob["FN_oob"])
+                        Acc_oob <- accuracy(tp = cm_oob["TP_oob"],
+                                            fp = cm_oob["FP_oob"],
+                                            tn = cm_oob["TN_oob"],
+                                            fn = cm_oob["FN_oob"])
+                        kap_oob <- kappa_cf(a = cm_oob["TP_oob"],
+                                            b = cm_oob["FP_oob"],
+                                            c = cm_oob["FN_oob"],
+                                            d = cm_oob["TN_oob"])
+                        metric_oob <- boot_metric_func(tp = cm_oob["TP_oob"],
+                                                       fp = cm_oob["FP_oob"],
+                                                       tn = cm_oob["TN_oob"],
+                                                       fn = cm_oob["FN_oob"])
+                        bootstrap <- cbind(optimal_cutpoint = optcut_b,
+                                           t(metric_oob),
+                                           Accuracy_b       = Acc_b,
+                                           Accuracy_oob     = Acc_oob,
+                                           Sensitivity_b    = Sens_Spec_b[1],
+                                           Sensitivity_oob  = Sens_Spec_oob[1],
+                                           Specificity_b    = Sens_Spec_b[2],
+                                           Specificity_oob  = Sens_Spec_oob[2],
+                                           Kappa_b          = kap_b,
+                                           Kappa_oob        = kap_oob,
+                                           t(cm_b),
+                                           t(cm_oob)
+                        )
+                        bootstrap <- tibble::as_data_frame(bootstrap)
                         return(bootstrap)
                     }
                 lna <- sum(is.na(boot_g))
-                if (lna) warning(paste(lna, "missing values in bootstrap, probably due to sampling of only one class"))
+                if (lna) warning(paste(lna, "Missing values in bootstrap, maybe due to sampling of only one class"))
                 return(boot_g)
             }))
     }
 
     res <- dplyr::bind_cols(optcut, bootstrap)
     class(res) <- c("cutpointr", class(res))
-
     return(res)
 }
-
 

@@ -1,8 +1,8 @@
 Package: cutpointr
 Type: Package
-Title: Methods for determining and evaluating optimal cutpoints in binary
+Title: Determine and evaluate optimal cutpoints in binary
     classification tasks
-Version: 0.0.0.9002
+Version: 0.0.1.9000
 Author: Christian Thiele
 Maintainer: Christian Thiele <c.thiele@hs-osnabrueck.de>
 Description: In addition to finding the cutpoint that maximizes a chosen metric
@@ -28,5 +28,4 @@ Suggests:
     doRNG (>= 1.6),
     doSNOW (>= 1.0.14),
     OptimalCutpoints (>= 1.1-3),
-    ROCR (>= 1.0-7)
     

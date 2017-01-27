@@ -22,9 +22,9 @@ oc_OptimalCutpoints <- function(data, x, class, methods,
     neg_class <- unique(unlist(data[, class]))
     neg_class <- neg_class[neg_class != pos_class]
     # Reverse direction because optimal.cutpoints "thinks" in terms of tag.healthy
-    if (direction == ">") {
+    if (direction == ">=" | direction == ">") {
         direction <- "<"
-    } else if (direction == "<") {
+    } else if (direction == "<=" | direction == "<") {
         direction <- ">"
     }
     mod <- OptimalCutpoints::optimal.cutpoints.default(X = x,

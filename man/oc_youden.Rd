@@ -4,8 +4,8 @@
 \alias{oc_youden}
 \title{Determine optimal cutpoint by maximizing the sum of sensitivity and specificity}
 \usage{
-oc_youden(data, x, class, candidate_cuts = unique(unlist(data[, x])),
-  pos_class = NULL, neg_class = NULL, direction = ">")
+oc_youden(data, x, class, pos_class = NULL, neg_class = NULL,
+  direction = ">")
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x, class and possibly subgroup can be found}
@@ -13,10 +13,6 @@ oc_youden(data, x, class, candidate_cuts = unique(unlist(data[, x])),
 \item{x}{The variable name (with or without quotation marks) to be used for classification, e.g. predictions or test values.}
 
 \item{class}{The variable name (with or without quotation marks) indicating class membership.}
-
-\item{candidate_cuts}{(numeric vector) By default the unique values in x will
-be used as potential cutoffs. Alternatively, a vector of cutoffs to be used can
-be supplied using the candidate_cuts argument.}
 
 \item{pos_class}{(optional) The value of class that indicates the positive class}
 

@@ -4,8 +4,8 @@
 \alias{oc_equalsesp}
 \title{Find optimal cutpoint by minimizing the absolute difference between sensitivity and specificity}
 \usage{
-oc_equalsesp(data, x, class, candidate_cuts = unique(unlist(data[, x])),
-  pos_class = NULL, neg_class = NULL, direction = ">")
+oc_equalsesp(data, x, class, pos_class = NULL, neg_class = NULL,
+  direction = ">", ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x, class and possibly subgroup can be found}
@@ -14,16 +14,14 @@ oc_equalsesp(data, x, class, candidate_cuts = unique(unlist(data[, x])),
 
 \item{class}{The variable name (with or without quotation marks) indicating class membership.}
 
-\item{candidate_cuts}{(numeric vector) By default the unique values in x will
-be used as potential cutoffs. Alternatively, a vector of cutoffs to be used can
-be supplied using the candidate_cuts argument.}
-
 \item{pos_class}{(optional) The value of class that indicates the positive class}
 
 \item{neg_class}{(optional) The value of class that indicates the negative class}
 
 \item{direction}{(character, optional) Use ">" or "<" to indicate whether x
 is supposed to be larger or smaller for the positive class.}
+
+\item{...}{Further optional arguments that will be passed to optcut_func.}
 }
 \value{
 A data frame with one row, the column optimal_cutpoint and the column

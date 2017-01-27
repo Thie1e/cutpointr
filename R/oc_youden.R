@@ -14,7 +14,6 @@
 #' oc_youden(elas, "elas", "status", pos_class = 1, neg_class = 0)
 #' @export
 oc_youden <- function(data, x, class,
-                      candidate_cuts = unique(unlist(data[, x])),
                       pos_class = NULL, neg_class = NULL, direction = ">") {
     data <- as.data.frame(data)
     stopifnot(is.character(x))
@@ -22,27 +21,34 @@ oc_youden <- function(data, x, class,
 
     neg_x <- data[, x][data[, class] == neg_class]
     pos_x <- data[, x][data[, class] == pos_class]
+    candidate_cuts <- unique(unlist(data[, x]))
     candidate_cuts <- inf_to_candidate_cuts(candidate_cuts, direction)
 
-    #
-    # Get optimal cutpoint
-    #
     fh <- stats::ecdf(neg_x)
     gd <- stats::ecdf(pos_x)
     if (direction == ">") {
         youden <- fh(candidate_cuts) - gd(candidate_cuts)
-        oc <- mean(candidate_cuts[youden == max(youden)])
-        youden_oc <- fh(oc) - gd(oc)
-        res <- data.frame(optimal_cutpoint = oc,
-                          youden           = youden_oc)
+        opt <- youden == max(youden)
+        oc <- min(candidate_cuts[opt])
+        if (sum(opt) > 1) {
+            warning(paste("Multiple optimal cutpoints found, returning minimum:",
+                          paste(candidate_cuts[opt], collapse = ", ")))
+        }
+        youden_oc <- max(youden)
+        return(data.frame(optimal_cutpoint = oc,
+                          youden           = youden_oc))
     } else if (direction == "<") {
         youden <- gd(candidate_cuts) - fh(candidate_cuts)
-        oc <- mean(candidate_cuts[youden == max(youden)])
-        youden_oc <- gd(oc) - fh(oc)
-        res <- data.frame(optimal_cutpoint = oc,
-                          youden           = youden_oc)
+        opt <- youden == max(youden)
+        oc <- max(candidate_cuts[opt])
+        if (sum(opt) > 1) {
+            warning(paste("Multiple optimal cutpoints found, returning maximum:",
+                          paste(candidate_cuts[opt], collapse = ", ")))
+        }
+        youden_oc <- max(youden)
+        return(data.frame(optimal_cutpoint = oc,
+                          youden           = youden_oc))
     }
-    return(res)
 }
 
 ### Benchmarks vs. ROCR

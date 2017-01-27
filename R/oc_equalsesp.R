@@ -8,15 +8,15 @@
 #' data(elas)
 #' oc_equalsesp(elas, "elas", "status", pos_class = 1, neg_class = 0, direction = ">")
 #' @export
-oc_equalsesp <- function(data, x, class,
-                         candidate_cuts = unique(unlist(data[, x])),
-                         pos_class = NULL, neg_class = NULL, direction = ">") {
+oc_equalsesp <- function(data, x, class, pos_class = NULL, neg_class = NULL,
+                         direction = ">", ...) {
     stopifnot(is.character(x))
     stopifnot(is.character(class))
     data <- as.data.frame(data)
 
     neg_x <- data[, x][data[, class] == neg_class]
     pos_x <- data[, x][data[, class] == pos_class]
+    candidate_cuts <- unique(unlist(data[, x]))
     candidate_cuts <- inf_to_candidate_cuts(candidate_cuts, direction)
 
     if (direction == ">") {
@@ -25,21 +25,30 @@ oc_equalsesp <- function(data, x, class,
         sens_c <- 1 - gd(candidate_cuts)
         spec_c <- fh(candidate_cuts)
         abs_d_sesp <- abs(sens_c - spec_c)
-        oc <- mean(candidate_cuts[abs_d_sesp == min(abs_d_sesp)])
-        abs_d_sensspec_oc <- abs(1 - gd(oc) - fh(oc))
-        res <- data.frame(optimal_cutpoint = oc,
-                          abs_d_sensspec   = abs_d_sensspec_oc)
+        opt <- abs_d_sesp == min(abs_d_sesp)
+        oc <- min(candidate_cuts[opt])
+        if (sum(opt) > 1) {
+            warning(paste("Multiple optimal cutpoints found, returning minimum:",
+                          paste(candidate_cuts[opt], collapse = ", ")))
+        }
+        abs_d_sesp_oc <- min(abs_d_sesp)
+        return(data.frame(optimal_cutpoint = oc,
+                          abs_d_sesp       = abs_d_sesp_oc))
     } else if (direction == "<") {
         fh <- stats::ecdf(-neg_x)
         gd <- stats::ecdf(-pos_x)
         sens_c <- 1 - gd(-candidate_cuts)
         spec_c <- fh(-candidate_cuts)
         abs_d_sesp <- abs(sens_c - spec_c)
-        oc <- mean(-candidate_cuts[abs_d_sesp == min(abs_d_sesp)])
-        abs_d_sensspec_oc <- abs(1 - gd(oc) - fh(oc))
-        oc <- -oc
-        res <- data.frame(optimal_cutpoint = oc,
-                          abs_d_sensspec   = abs_d_sensspec_oc)
+        opt <- abs_d_sesp == min(abs_d_sesp)
+        oc <- min(candidate_cuts[opt])
+        if (sum(opt) > 1) {
+            warning(paste("Multiple optimal cutpoints found, returning minimum:",
+                          paste(candidate_cuts[opt], collapse = ", ")))
+        }
+        abs_d_sesp_oc <- min(abs_d_sesp)
+        return(data.frame(optimal_cutpoint = oc,
+                          abs_d_sesp       = abs_d_sesp_oc))
     }
     return(res)
 }
