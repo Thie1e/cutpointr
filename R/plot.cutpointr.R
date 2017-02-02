@@ -104,19 +104,25 @@ plot.cutpointr <- function(x, ...) {
         roc_title <- ggplot2::ggtitle("ROC curve", "by class")
     }
     if (any(!is.finite(res_unnested$x))) warning("Infinite values excluded from ROC curve (?)")
+    if (x$direction[1] == ">=") {
+        optcut_coords <- apply(x, 1, function(r) {
+            opt_ind <- which(r$roc_curve$x.sorted <= r$optimal_cutpoint)[1]
+            data.frame(tpr = r$roc_curve$tpr[opt_ind], tnr = r$roc_curve$tnr[opt_ind])
+        })
+    } else if (x$direction[1] == "<=") {
+        optcut_coords <- apply(x, 1, function(r) {
+            opt_ind <- which(r$roc_curve$x.sorted >= r$optimal_cutpoint)[1]
+            data.frame(tpr = r$roc_curve$tpr[opt_ind], tnr = r$roc_curve$tnr[opt_ind])
+        })
+    }
+    optcut_coords <- do.call(rbind, optcut_coords)
     res_unnested <- x %>%
         dplyr::select_(.data = ., .dots = dts_roc) %>%
         tidyr::unnest()
-    if (suppressWarnings(!is.null(x$subgroup))) {
-        res_unnested <- res_unnested %>%
-            dplyr::group_by_(~ subgroup) %>%
-            dplyr::mutate_(n_pos = ~ max(tp),
-                           n_neg = ~ max(tn))
-    }
     roc <- ggplot2::ggplot(res_unnested,
-                           ggplot2::aes_(x = ~ 1 - tn / n_neg, y = ~ tp / n_pos,
-                                         color = clr)) +
+                           ggplot2::aes_(x = ~ 1 - tnr, y = ~ tpr, color = clr)) +
         ggplot2::geom_line() +
+        ggplot2::geom_point(data = optcut_coords, color = "black") +
         roc_title +
         ggplot2::xlab("1 - Specificity") +
         ggplot2::ylab("Sensitivity") +
