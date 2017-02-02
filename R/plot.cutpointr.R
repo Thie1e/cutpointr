@@ -97,7 +97,7 @@ plot.cutpointr <- function(x, ...) {
         ggplot2::xlab("value") +
         ggplot2::theme(legend.position = "none")
 
-    if (x$direction[1] == "<") res_unnested$x <- -res_unnested$x
+    if (x$direction[1] == "<=" | x$direction[1] == "<") res_unnested$x <- -res_unnested$x
     res_unnested <- res_unnested %>%
         ### pos_class should all be the same, maybe map over rows would be cleaner
         dplyr::mutate_(class = ~ ifelse(class == x$pos_class[1], 1, 0))

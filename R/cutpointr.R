@@ -76,7 +76,8 @@
 #' opt_cut
 #' plot(opt_cut)
 #'
-#' opt_cut <- cutpointr(elas, elas, status, direction = "<", pos_class = 0)
+#' opt_cut <- cutpointr(elas, elas, status, direction = "<=", pos_class = 0,
+#'                      method = maximize_metric, metric = youden)
 #' opt_cut
 #' plot(opt_cut)
 #'
@@ -265,8 +266,8 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
                                  oc = optcut$optimal_cutpoint,
                                  direction = direction, pos_class = pos_class,
                                  neg_class = neg_class)
-            optcut$sensitivity <- sesp["Sensitivity"]
-            optcut$specificity <- sesp["Specificity"]
+            optcut$sensitivity <- sesp[, "Sensitivity"]
+            optcut$specificity <- sesp[, "Specificity"]
             if (use_midpoints) {
                 optcut$optimal_cutpoint <- midpoint(oc = optcut$optimal_cutpoint,
                                                     x = d$x, direction = direction)
@@ -314,15 +315,15 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
     optcut$outcome                          <- outcome
     optcut$neg_class                        <- neg_class
     optcut$method                           <- mod_names
-    optcut$metric                           <- metric_name
+    # optcut$metric                           <- metric_name
     if (!missing(subgroup)) optcut$grouping <- subgroup_var
 
     # Reorder for nicer output
     mn <- find_metric_name(colnames(optcut))
     select_cols <- c("subgroup", "direction", "optimal_cutpoint",
-                     mn, "sensitivity", "specificity", "method", "metric",
+                     "sensitivity", "specificity", "method", mn,
                      "pos_class", "neg_class", "prevalence", "AUC",
-                     "outcome", "predictor", "grouping", "data")
+                     "outcome", "predictor", "grouping", "data", "roc_curve")
     # subgroup and grouping may not be given
     select_cols <- select_cols[select_cols %in% colnames(optcut)]
     optcut <- optcut[, select_cols]
@@ -375,8 +376,8 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
                                                 tn = cm_b["TN_b"], fn = cm_b["FN_b"])
                         Acc_b <- accuracy(tp = cm_b["TP_b"], fp = cm_b["FP_b"],
                                           tn = cm_b["TN_b"], fn = cm_b["FN_b"])
-                        kap_b <- kappa_cf(a = cm_b["TP_b"], b = cm_b["FP_b"],
-                                            c = cm_b["FN_b"], d = cm_b["TN_b"])
+                        kap_b <- kappa(tp = cm_b["TP_b"], fp = cm_b["FP_b"],
+                                            fn = cm_b["FN_b"], tn = cm_b["TN_b"])
                         preds_oob <- ifel_pos_neg(g$x[-b_ind] > optcut_b, pos_class, neg_class)
                         cm_oob <- conf_mat(obs = g$class[-b_ind],  preds = preds_oob,
                                            pos_class = pos_class)
@@ -389,16 +390,16 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
                                             fp = cm_oob["FP_oob"],
                                             tn = cm_oob["TN_oob"],
                                             fn = cm_oob["FN_oob"])
-                        kap_oob <- kappa_cf(a = cm_oob["TP_oob"],
-                                            b = cm_oob["FP_oob"],
-                                            c = cm_oob["FN_oob"],
-                                            d = cm_oob["TN_oob"])
-                        metric_oob <- boot_metric_func(tp = cm_oob["TP_oob"],
-                                                       fp = cm_oob["FP_oob"],
-                                                       tn = cm_oob["TN_oob"],
-                                                       fn = cm_oob["FN_oob"])
+                        kap_oob <- kappa(tp = cm_oob["TP_oob"],
+                                            fp = cm_oob["FP_oob"],
+                                            fn = cm_oob["FN_oob"],
+                                            tn = cm_oob["TN_oob"])
+                        metric_oob <- metric(tp = cm_oob["TP_oob"],
+                                             fp = cm_oob["FP_oob"],
+                                             tn = cm_oob["TN_oob"],
+                                             fn = cm_oob["FN_oob"])
                         bootstrap <- cbind(optimal_cutpoint = optcut_b,
-                                           t(metric_oob),
+                                           metric_oob,
                                            Accuracy_b       = Acc_b,
                                            Accuracy_oob     = Acc_oob,
                                            Sensitivity_b    = Sens_Spec_b[1],

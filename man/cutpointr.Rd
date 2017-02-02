@@ -130,7 +130,8 @@ opt_cut <- cutpointr(elas, elas, status)
 opt_cut
 plot(opt_cut)
 
-opt_cut <- cutpointr(elas, elas, status, direction = "<", pos_class = 0)
+opt_cut <- cutpointr(elas, elas, status, direction = "<=", pos_class = 0,
+                     method = maximize_metric, metric = youden)
 opt_cut
 plot(opt_cut)
 

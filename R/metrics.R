@@ -62,6 +62,14 @@ sesp_from_oc <- function(x, class, oc, direction, pos_class, neg_class) {
     sens_spec(tp = cm["TP"], fp = cm["FP"], tn = cm["TN"], fn = cm["FN"])
 }
 
+#' @source Forked from the Metrics package.
+auc <- function(actual, predicted, pos_class) {
+    r <- rank(predicted)
+    n_pos <- sum(actual == pos_class)
+    n_neg <- length(actual) - n_pos
+    (sum(r[actual == pos_class]) - n_pos * (n_pos + 1)/2)/(n_pos * n_neg)
+}
+
 
 #' Calculate accuracy
 #' Calculate accuracy from the elements of a confusion matrix, that is
@@ -79,7 +87,7 @@ accuracy <- function(tp, fp, tn, fn) {
     return(Accuracy)
 }
 
-#' Calculate Youden-Index
+#' Calculate the Youden-Index
 #' Calculate the Youden-Index (J-Index) from the elements of a confusion matrix,
 #' that is true positives, false positives, true negatives and false negatives.
 #' @param tp (numeric) number of true positives
@@ -96,11 +104,43 @@ youden <- function(tp, fp, tn, fn) {
     return(youden)
 }
 
-#' @source Forked from the Metrics package.
-auc <- function(actual, predicted, pos_class) {
-    r <- rank(predicted)
-    n_pos <- sum(actual == pos_class)
-    n_neg <- length(actual) - n_pos
-    (sum(r[actual == pos_class]) - n_pos * (n_pos + 1)/2)/(n_pos * n_neg)
+
+#' Calculate absolute difference of sensitivity and specificity
+#' Calculate the absolute difference of sensitivity and specificity
+#' from the elements of a confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' @param tp (numeric) number of true positives
+#' @param fp (numeric) number of false positives
+#' @param tn (numeric) number of true negatives
+#' @param fn (numeric) number of false negatives
+#' @examples
+#' abs_d_sesp(10, 5, 20, 10)
+#' @export
+abs_d_sesp <- function(tp, fp, tn, fn) {
+    sesp <- sens_spec(tp, fp, tn, fn)
+    abs_d_sesp <- abs(sesp[, 1] - sesp[, 2])
+    abs_d_sesp <- matrix(abs_d_sesp, ncol = 1)
+    colnames(abs_d_sesp) <- "abs_d_sesp"
+    return(abs_d_sesp)
 }
 
+
+#' Calculate the Kappa metric
+#' Calculate the Kappa metric from the elements of a 2x2 confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' @param tp (numeric) number of true positives
+#' @param fp (numeric) number of false positives
+#' @param tn (numeric) number of true negatives
+#' @param fn (numeric) number of false negatives
+#' @examples
+#' kappa(10, 5, 20, 10)
+#' @export
+kappa <- function(tp, fp, tn, fn) {
+    mrg_a <- ((tp + fn) * (tp + fp)) / (tp + fn + fp + tn)
+    mrg_b <- ((fp + tn) * (fn + tn)) / (tp + fn + fp + tn)
+    EA     <- (mrg_a + mrg_b) / (tp + fn + fp + tn)
+    OA     <- (tp + tn) / (tp + fn + fp + tn)
+    res <- matrix((OA - EA) / (1 - EA), ncol = 1)
+    colnames(res) <- "Kappa"
+    return(res)
+}

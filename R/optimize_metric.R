@@ -7,29 +7,32 @@ optimize_metric <- function(data, x, class, metric_func = youden,
                     neg_class = neg_class, direction = direction)
     m <- metric_func(tp = roccurve[, "tp"], fp = roccurve[, "fp"],
                      tn = roccurve[, "tn"], fn = roccurve[, "fn"])
+    roccurve$m <- as.numeric(m)
+    if (!is.null(colnames(m))) metric_name <- colnames(m)
     if (minmax == "max") {
-        opt <- m == max(m)
+        max_m <- max(m)
+        opt <- m == max_m
         oc <- min(roccurve[, "x.sorted"][opt])
         if (sum(opt) > 1) {
             warning(paste("Multiple optimal cutpoints found, returning minimum of:",
                           paste(roccurve[, "x.sorted"][opt], collapse = ", ")))
         }
-        m_oc <- max(m)
-        res <- data.frame(oc, m_oc)
-        colnames(res) <- c("optimal_cutpoint", metric_name)
-        return(res)
+        m_oc <- max_m
     } else if (minmax == "min") {
-        opt <- m == min(m)
+        min_m <- min(m)
+        opt <- m == min_m
         oc <- max(roccurve[, "x.sorted"][opt])
         if (sum(opt) > 1) {
             warning(paste("Multiple optimal cutpoints found, returning maximum of:",
                           paste(roccurve[, "x.sorted"][opt], collapse = ", ")))
         }
-        m_oc <- min(m)
-        res <- data.frame(oc, m_oc)
-        colnames(res) <- c("optimal_cutpoint", metric_name)
-        return(res)
+        m_oc <- min_m
     }
+    res <- tidyr::nest_(roccurve, key_col = "roc_curve",
+                        nest_cols = colnames(roccurve))
+    res$optimal_cutpoint <- oc
+    res[, metric_name] <- m_oc
+    return(res)
 }
 
 #' @export
