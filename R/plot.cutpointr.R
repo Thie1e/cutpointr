@@ -5,12 +5,14 @@ plot.cutpointr <- function(x, ...) {
 
     if (is.null(suppressWarnings(x$subgroup))) {
         dts_boot <- "boot"
+        dts_roc <- "roc_curve"
         dts <- "data"
         fll <- NULL
         clr <- NULL
         transparency <- 1
     } else {
         dts_boot <- c("boot", "subgroup")
+        dts_roc <- c("roc_curve", "subgroup")
         dts <- c("data", "subgroup")
         fll <- ~ subgroup
         clr <- ~ subgroup
@@ -33,14 +35,14 @@ plot.cutpointr <- function(x, ...) {
         boot_cut <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,
                             ggplot2::aes_(x = ~ optimal_cutpoint, fill = fll, color = clr)) +
-                # ggplot2::geom_density(alpha = transparency) +
                 dist_plot +
                 ggplot2::geom_rug(alpha = 0.5) +
                 ggplot2::ggtitle("Bootstrap", "distribution of optimal cutpoints") +
                 ggplot2::xlab("optimal cutpoint") +
                 ggplot2::theme(legend.position = "none")
         )
-        metric_name <- find_metric_name(colnames(res_boot_unnested))
+        met_ind <- which(colnames(res_boot_unnested) == "optimal_cutpoint") + 1
+        metric_name <- colnames(res_boot_unnested)[met_ind]
         if (all(na.omit(get(metric_name, res_boot_unnested) %% 1 == 0))) {
             dist_plot <- ggplot2::geom_histogram(alpha = transparency, position = "identity")
         } else {
@@ -49,7 +51,6 @@ plot.cutpointr <- function(x, ...) {
         boot_metric <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,
                             ggplot2::aes_(x = ~ get(metric_name), fill = fll, color = clr)) +
-                # ggplot2::geom_density(alpha = transparency) +
                 dist_plot +
                 ggplot2::geom_rug(alpha = 0.5) +
                 ggplot2::ggtitle("Bootstrap",
@@ -84,7 +85,6 @@ plot.cutpointr <- function(x, ...) {
     }
     dist <- ggplot2::ggplot(res_unnested,
                             ggplot2::aes_(x = ~ x, fill = fll, color = clr)) +
-        # ggplot2::geom_density(alpha = transparency) +
         dist_plot +
         ggplot2::geom_rug(alpha = 0.5) +
         ggplot2::geom_vline(ggplot2::aes_(xintercept = ~ optimal_cutpoint,
@@ -97,21 +97,26 @@ plot.cutpointr <- function(x, ...) {
         ggplot2::xlab("value") +
         ggplot2::theme(legend.position = "none")
 
-    if (x$direction[1] == "<=" | x$direction[1] == "<") res_unnested$x <- -res_unnested$x
-    res_unnested <- res_unnested %>%
-        ### pos_class should all be the same, maybe map over rows would be cleaner
-        dplyr::mutate_(class = ~ ifelse(class == x$pos_class[1], 1, 0))
+    # if (x$direction[1] == "<=" | x$direction[1] == "<") res_unnested$x <- -res_unnested$x
     if (suppressWarnings(is.null(x$subgroup))) {
         roc_title <- ggplot2::ggtitle("ROC curve")
     } else {
         roc_title <- ggplot2::ggtitle("ROC curve", "by class")
     }
-    if (any(!is.finite(res_unnested$x))) warning("Infinite values excluded from ROC curve")
+    if (any(!is.finite(res_unnested$x))) warning("Infinite values excluded from ROC curve (?)")
+    res_unnested <- x %>%
+        dplyr::select_(.data = ., .dots = dts_roc) %>%
+        tidyr::unnest()
+    if (suppressWarnings(!is.null(x$subgroup))) {
+        res_unnested <- res_unnested %>%
+            dplyr::group_by_(~ subgroup) %>%
+            dplyr::mutate_(n_pos = ~ max(tp),
+                           n_neg = ~ max(tn))
+    }
     roc <- ggplot2::ggplot(res_unnested,
-                           ggplot2::aes_(m = ~ x, d = ~ class,
+                           ggplot2::aes_(x = ~ 1 - tn / n_neg, y = ~ tp / n_pos,
                                          color = clr)) +
-        suppressWarnings(plotROC::geom_roc(n.cuts = 0,# lineend = "round",
-                                           linealpha = transparency)) +
+        ggplot2::geom_line() +
         roc_title +
         ggplot2::xlab("1 - Specificity") +
         ggplot2::ylab("Sensitivity") +
