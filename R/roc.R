@@ -71,5 +71,7 @@ roc <- function(data, x, class,
             fn <- c(n_pos, fn)
         }
     }
-    return(data.frame(x.sorted, tp, fp, tn, fn))
+    tpr <- tp / n_pos
+    tnr <- tn / n_neg
+    return(data.frame(x.sorted, tp, fp, tn, fn, tpr, tnr))
 }
