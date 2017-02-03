@@ -162,7 +162,7 @@ plot(opt_cut)
 ## Different cutpoint function / metric
 set.seed(123)
 opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 200,
-                     optcut_func = oc_equalsesp)
+                     method = minimize_metric, metric = abs_d_sesp)
 opt_cut
 plot(opt_cut)
 
@@ -190,7 +190,7 @@ plot(opt_cut)
 ## Wrapper for optimal.cutpoints
 registerDoRNG(123) # Reproducible parallel loops using doRNG
 opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 2000,
-                     optcut_func = oc_OptimalCutpoints, methods = "Youden",
+                     method = oc_OptimalCutpoints, methods = "Youden",
                      allowParallel = TRUE)
 opt_cut
 plot(opt_cut)

@@ -1,38 +1,4 @@
-# sens_spec <- function(obs, preds, pos_class) {
-#     neg_class <- unique(obs)
-#     neg_class <- neg_class[neg_class != pos_class]
-#     stopifnot(length(neg_class) == 1)
-#     binary_obs <- obs == pos_class
-#     binary_preds <- preds == pos_class
-#     sens <- sum(binary_preds & binary_obs) / sum(binary_obs)
-#     binary_obs <- obs == neg_class
-#     binary_preds <- preds == neg_class
-#     spec <- sum(binary_preds & binary_obs) / sum(binary_obs)
-#     c(Sensitivity = sens, Specificity = spec)
-# }
-#
-#
-# sens_spec <- function(obs, preds, pos_class) {
-#     neg_class <- unique(obs)
-#     neg_class <- neg_class[neg_class != pos_class]
-#     stopifnot(length(neg_class) == 1)
-#     binary_obs <- obs == pos_class
-#     binary_preds <- preds == pos_class
-#     tp <- sum(binary_preds & binary_obs)
-#     fp <- sum(binary_preds & (!binary_obs))
-#     binary_obs <- obs == neg_class
-#     binary_preds <- preds == neg_class
-#     tn <- sum(binary_preds & binary_obs)
-#     fn <- sum(binary_preds & !binary_obs)
-#     sens <- tp / (tp + fn)
-#     spec <- tn / (tn + fp)
-#     c(Sensitivity = sens, Specificity = spec)
-# }
-
-conf_mat <- function(obs, preds, pos_class) {
-    neg_class <- unique(c(obs, preds))
-    neg_class <- neg_class[neg_class != pos_class]
-    if (length(neg_class) == 0) neg_class <- "neg"
+conf_mat <- function(obs, preds, pos_class, neg_class) {
     binary_obs <- obs == pos_class
     binary_preds <- preds == pos_class
     tp <- sum(binary_preds & binary_obs)
@@ -40,9 +6,14 @@ conf_mat <- function(obs, preds, pos_class) {
     binary_obs <- obs == neg_class
     binary_preds <- preds == neg_class
     tn <- sum(binary_preds & binary_obs)
-    fn <- sum(binary_preds & !binary_obs)
+    fn <- sum(binary_preds & (!binary_obs))
     c(TP = tp, FP = fp, TN = tn, FN = fn)
 }
+
+# conf_mat <- function(obs, preds, pos_class) {
+#     cf <- table(obs == pos_class, preds == pos_class)
+#     c(TP = cf[2, 2], FP = cf[1, 2], TN = cf[1, 1], FN = cf[2, 1])
+# }
 
 sens_spec <- function(tp, fp, tn, fn) {
     sens <- tp / (tp + fn)
@@ -54,20 +25,31 @@ sens_spec <- function(tp, fp, tn, fn) {
 
 sesp_from_oc <- function(x, class, oc, direction, pos_class, neg_class) {
     if (direction == ">=") {
-        predictions <- ifel_pos_neg(x > oc, pos_class, neg_class)
+        predictions <- ifel_pos_neg(x >= oc, pos_class, neg_class)
     } else if (direction == "<=") {
-        predictions <- ifel_pos_neg(x < oc, pos_class, neg_class)
+        predictions <- ifel_pos_neg(x <= oc, pos_class, neg_class)
     }
-    cm <- conf_mat(obs = class, preds = predictions, pos_class)
+    cm <- conf_mat(obs = class, preds = predictions, pos_class, neg_class)
     sens_spec(tp = cm["TP"], fp = cm["FP"], tn = cm["TN"], fn = cm["FN"])
 }
 
-#' @source Forked from the Metrics package.
-auc <- function(actual, predicted, pos_class) {
-    r <- rank(predicted)
-    n_pos <- sum(actual == pos_class)
-    n_neg <- length(actual) - n_pos
-    (sum(r[actual == pos_class]) - n_pos * (n_pos + 1)/2)/(n_pos * n_neg)
+sesp_from_oc2 <- function(roc_curve, oc, direction) {
+    if (direction == ">=") {
+        opt_ind <- max(which(roc_curve$x.sorted >= oc))
+    } else if (direction == "<=") {
+        opt_ind <- min(which(roc_curve$x.sorted <= oc))
+    }
+    sens_spec(tp = roc_curve$tp[opt_ind], fp = roc_curve$fp[opt_ind],
+              tn = roc_curve$tn[opt_ind], fn = roc_curve$fn[opt_ind])
+}
+
+#' @source Forked from the AUC package
+auc <- function(tpr, fpr) {
+    res <- 0
+    for (i in 2:length(fpr)) {
+        res <- res + 0.5 * abs(fpr[i] - fpr[i - 1]) * (tpr[i] + tpr[i - 1])
+    }
+    res
 }
 
 

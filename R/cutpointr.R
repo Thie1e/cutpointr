@@ -108,7 +108,7 @@
 #' ## Different cutpoint function / metric
 #' set.seed(123)
 #' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 200,
-#'                      optcut_func = oc_equalsesp)
+#'                      method = minimize_metric, metric = abs_d_sesp)
 #' opt_cut
 #' plot(opt_cut)
 #'
@@ -136,7 +136,7 @@
 #' ## Wrapper for optimal.cutpoints
 #' registerDoRNG(123) # Reproducible parallel loops using doRNG
 #' opt_cut <- cutpointr(elas, elas, status, gender, pos_class = 1, boot_runs = 2000,
-#'                      optcut_func = oc_OptimalCutpoints, methods = "Youden",
+#'                      method = oc_OptimalCutpoints, methods = "Youden",
 #'                      allowParallel = TRUE)
 #' opt_cut
 #' plot(opt_cut)
@@ -251,29 +251,44 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
                            pos_class = ~ pos_class,
                            prevalence = ~ purrr::map_dbl(data, function(g) {
                                mean(g$class == pos_class)
-                               }),
-                           AUC = ~ purrr::map_dbl(data, function(g) {
-                               auc(actual = g$class, predicted = g$x, pos_class)
-                               })
-                           )
+                           })
+            )
         optcut <- purrr::pmap_df(list(dat$subgroup, dat$data), function(g, d) {
             optcut <- method(data = d, x = "x", class = "class",
                              metric_func = metric,
                              direction = direction, pos_class = pos_class,
                              neg_class = neg_class, ...) %>%
                 dplyr::mutate_(subgroup = ~ g)
+            # If method is e.g. oc_OptimalCutpoints roc_curve is missing
+            if (suppressWarnings(is.null(optcut$roc_curve))) {
+                roc_curve <- roc(data = d, x = "x", class = "class",
+                                 pos_class = pos_class, neg_class = neg_class,
+                                 direction = direction)
+                roc_curve <- tidyr::nest_(roc_curve, key_col = "roc_curve",
+                                          nest_cols = colnames(roc_curve))
+                optcut$roc_curve <- roc_curve[[1]]
+            }
             sesp <- sesp_from_oc(x = d$x, class = d$class,
                                  oc = optcut$optimal_cutpoint,
                                  direction = direction, pos_class = pos_class,
                                  neg_class = neg_class)
             optcut$sensitivity <- sesp[, "Sensitivity"]
             optcut$specificity <- sesp[, "Specificity"]
+            sesp <- sesp_from_oc2(optcut$roc_curve[[1]],
+                                  oc = optcut$optimal_cutpoint,
+                                  direction = direction)
+            optcut$sensitivity2 <- sesp[, "Sensitivity"]
+            optcut$specificity2 <- sesp[, "Specificity"]
             if (use_midpoints) {
                 optcut$optimal_cutpoint <- midpoint(oc = optcut$optimal_cutpoint,
                                                     x = d$x, direction = direction)
             }
             return(optcut)
         })
+        optcut <- optcut %>%
+            dplyr::mutate_(AUC = ~ purrr::map_dbl(roc_curve, function(r) {
+                auc(tpr = r$tpr, fpr = r$fpr)
+            }))
         optcut <- tibble::as_tibble(optcut) # can pmap_df return a tibble so this is not necessary?
         optcut <- dplyr::full_join(optcut, dat, by = "subgroup")
     } else {
@@ -284,31 +299,40 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
             dplyr::mutate_(pos_class = ~ pos_class,
                            prevalence = ~ purrr::map_dbl(data, function(g) {
                                mean(g$class == pos_class)
-                               }),
-                           AUC = ~ purrr::map_dbl(data, function(g) {
-                               auc(actual = g$class, predicted = g$x, pos_class)
-                               })
-                           )
+                           })
+            )
         optcut <- purrr::map_df(dat$data, function(d) {
             optcut <- method(data = d,  x = "x", class = "class",
                              metric_func = metric,
                              direction = direction, pos_class = pos_class,
                              neg_class = neg_class, ...)
-            sesp <- sesp_from_oc(x = d$x, class = d$class,
-                                 oc = optcut$optimal_cutpoint,
-                                 direction = direction, pos_class = pos_class,
-                                 neg_class = neg_class)
-            optcut$sensitivity = sesp[, "Sensitivity"]
-            optcut$specificity = sesp[, "Specificity"]
+            if (suppressWarnings(is.null(optcut$roc_curve))) {
+                roc_curve <- roc(data = d, x = "x", class = "class",
+                                 pos_class = pos_class, neg_class = neg_class,
+                                 direction = direction)
+                roc_curve <- tidyr::nest_(roc_curve, key_col = "roc_curve",
+                                          nest_cols = colnames(roc_curve))
+                optcut$roc_curve <- roc_curve[[1]]
+            }
+            sesp <- sesp_from_oc(optcut$roc_curve[[1]],
+                                  oc = optcut$optimal_cutpoint,
+                                  direction = direction)
+            optcut$sensitivity <- sesp[, "Sensitivity"]
+            optcut$specificity <- sesp[, "Specificity"]
             if (use_midpoints) {
                 optcut$optimal_cutpoint <- midpoint(oc = optcut$optimal_cutpoint,
                                                     x = d$x, direction = direction)
             }
             return(optcut)
         })
+        optcut <- optcut %>%
+            dplyr::mutate_(AUC = ~ purrr::map_dbl(roc_curve, function(r) {
+                auc(tpr = r$tpr, fpr = r$fpr)
+            }))
         optcut <- tibble::as_tibble(optcut)
         optcut <- dplyr::bind_cols(optcut, dat)
     }
+
 
     optcut$direction                        <- direction
     optcut$predictor                        <- predictor
@@ -321,7 +345,8 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
     # Reorder for nicer output
     mn <- find_metric_name(colnames(optcut))
     select_cols <- c("subgroup", "direction", "optimal_cutpoint",
-                     "sensitivity", "specificity", "method", mn,
+                     "sensitivity", "specificity", "sensitivity2", "specificity2",
+                     "method", mn,
                      "pos_class", "neg_class", "prevalence", "AUC",
                      "outcome", "predictor", "grouping", "data", "roc_curve")
     # subgroup and grouping may not be given
@@ -333,6 +358,7 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
     # Data are already nested and grouped if necessary
     #
     if (allowParallel) {
+        require(doRNG)
         `%seq_or_par%` <- doRNG::`%dorng%`
     } else {
         `%seq_or_par%` <- `%do%`
@@ -370,7 +396,7 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
                         # LOO-Bootstrap
                         preds_b <- ifel_pos_neg(g$x[b_ind] > optcut_b, pos_class, neg_class)
                         cm_b <- conf_mat(obs = g$class[b_ind],  preds = preds_b,
-                                                pos_class = pos_class)
+                                                pos_class = pos_class, neg_class = neg_class)
                         names(cm_b) <- paste0(names(cm_b), "_b")
                         Sens_Spec_b <- sens_spec(tp = cm_b["TP_b"], fp = cm_b["FP_b"],
                                                 tn = cm_b["TN_b"], fn = cm_b["FN_b"])
@@ -380,7 +406,7 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
                                             fn = cm_b["FN_b"], tn = cm_b["TN_b"])
                         preds_oob <- ifel_pos_neg(g$x[-b_ind] > optcut_b, pos_class, neg_class)
                         cm_oob <- conf_mat(obs = g$class[-b_ind],  preds = preds_oob,
-                                           pos_class = pos_class)
+                                           pos_class = pos_class, neg_class = neg_class)
                         names(cm_oob) <- paste0(names(cm_oob), "_oob")
                         Sens_Spec_oob <- sens_spec(tp = cm_oob["TP_oob"],
                                                    fp = cm_oob["FP_oob"],
@@ -419,7 +445,6 @@ cutpointr <- function(data, x, class, subgroup, pos_class = NULL,
                 return(boot_g)
             }))
     }
-
     res <- dplyr::bind_cols(optcut, bootstrap)
     class(res) <- c("cutpointr", class(res))
     return(res)
