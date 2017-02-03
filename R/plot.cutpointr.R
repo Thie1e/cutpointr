@@ -93,11 +93,11 @@ plot.cutpointr <- function(x, ...) {
         # facet by class because always 2
         ggplot2::facet_wrap(~ class, scales = "free_y") +
         ggplot2::ggtitle("Independent variable",
-                         "distribution by class and optimal cutpoint") +
+                         "optimal cutpoint and distribution by class") +
         ggplot2::xlab("value") +
         ggplot2::theme(legend.position = "none")
 
-    # if (x$direction[1] == "<=" | x$direction[1] == "<") res_unnested$x <- -res_unnested$x
+    if (x$direction[1] == "<=" | x$direction[1] == "<") res_unnested$x <- -res_unnested$x
     if (suppressWarnings(is.null(x$subgroup))) {
         roc_title <- ggplot2::ggtitle("ROC curve")
     } else {

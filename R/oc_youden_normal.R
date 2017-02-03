@@ -7,6 +7,7 @@ oc_youden_normal <- function(data, x, class, pos_class = NULL, neg_class = NULL,
     stopifnot(is.character(x))
     stopifnot(is.character(class))
     iv <- unlist(data[, x])
+    if (any(!is.finite(iv))) stop("Only finite values allowed in oc_youden_normal")
     cla <- unlist(data[, class])
     patients <- iv[cla == pos_class]
     controls <- iv[cla == neg_class]

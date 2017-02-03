@@ -15,7 +15,7 @@
 #' oc_OptimalCutpoints(elas, "elas", "status", methods = "Youden", pos_class = 1,
 #' direction = ">")
 #' @export
-oc_OptimalCutpoints <- function(data, x, class, methods,
+oc_OptimalCutpoints <- function(data, x, class, oc_metric = "Youden",
                                 pos_class, neg_class, direction, ...) {
     cl <- match.call()
     metric_name <- cl$methods
@@ -30,13 +30,13 @@ oc_OptimalCutpoints <- function(data, x, class, methods,
     mod <- OptimalCutpoints::optimal.cutpoints.default(X = x,
                                      status = class,
                                      data = as.data.frame(data), # dislikes tibbles
-                                     methods = methods, tag.healthy = neg_class,
+                                     methods = oc_metric, tag.healthy = neg_class,
                                      direction = direction)
     mod       <- mod[[metric_name]]
-    oc_metric <- mod$Global$optimal.criterion
+    opt_metric <- mod$Global$optimal.criterion
     oc        <- mean(mod$Global$optimal.cutoff$cutoff) # Break ties
     res <- data.frame(optimal_cutpoint = oc,
-                      metric           = oc_metric)
+                      metric           = opt_metric)
     colnames(res) <- c("optimal_cutpoint", metric_name)
     return(res)
 }
