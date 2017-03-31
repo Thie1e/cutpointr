@@ -13,33 +13,24 @@ predict.cutpointr <- function(object, newdata, ...) {
             which(object$subgroup == g)
         })
         optimal_cuts <- object$optimal_cutpoint[opt_cut_ind]
-
-        #-------
-        # if(!any(colnames(newdata) == grouping_name)) stop("grouping variable not found in newdata")
-        # optimal_cut <- object$optimal_cutpoint[object$subgroup == newdata$subgroup]
-        # opt_cut_ind <- purrr::map_int(newdata[, grouping_name], function(g) {
-        #     which(object$subgroup == g)
-        # })
-        # optimal_cuts <- object$optimal_cutpoint[opt_cut_ind]
-        #----------
-        if (object$direction[1] == ">") {
+        if (object$direction[1] == ">=") {
             # preds <- newdata[, predictor_name] > optimal_cuts
-            preds <- indep_var > optimal_cuts
-            preds <- ifelse(preds, pos_class, neg_class)
-        } else if (object$direction[1] == "<") {
-            preds <- indep_var < optimal_cuts
-            preds <- ifelse(preds, pos_class, neg_class)
+            preds <- indep_var >= optimal_cuts
+            preds <- ifel_pos_neg(preds, pos_class, neg_class)
+        } else if (object$direction[1] == "<=") {
+            preds <- indep_var <= optimal_cuts
+            preds <- ifel_pos_neg(preds, pos_class, neg_class)
         }
     } else {
         optimal_cut <- object$optimal_cutpoint
-        if (object$direction[1] == ">") {
+        if (object$direction[1] == ">=") {
             # preds <- newdata[, predictor_name] > optimal_cut
-            preds <- indep_var > optimal_cut
-            preds <- ifelse(preds, pos_class, neg_class)
-        } else if (object$direction[1] == "<") {
+            preds <- indep_var >= optimal_cut
+            preds <- ifel_pos_neg(preds, pos_class, neg_class)
+        } else if (object$direction[1] == "<=") {
             # preds <- newdata[, predictor_name] < optimal_cut
-            preds <- indep_var < optimal_cut
-            preds <- ifelse(preds, pos_class, neg_class)
+            preds <- indep_var <= optimal_cut
+            preds <- ifel_pos_neg(preds, pos_class, neg_class)
         }
     }
     return(preds)

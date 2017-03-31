@@ -4,26 +4,31 @@
 \alias{oc_OptimalCutpoints}
 \title{A tidy wrapper for optimal.cutpoints}
 \usage{
-oc_OptimalCutpoints(data, x, class, methods, pos_class, neg_class, direction,
-  ...)
+oc_OptimalCutpoints(data, x, class, oc_metric, neg_class, direction,
+  break_ties = mean, ...)
 }
 \arguments{
-\item{data}{A data frame or tibble in which the columns that are given in x, class and possibly subgroup can be found}
+\item{data}{A data frame or tibble in which the columns that are given in x
+and class can be found.}
 
-\item{x}{The variable name (with or without quotation marks) to be used for classification, e.g. predictions or test values.}
+\item{x}{The variable name (with quotation marks) to be used for classification,
+e.g. predictions or test values.}
 
-\item{class}{The variable name (with or without quotation marks) indicating class membership.}
+\item{class}{The variable name (with quotation marks) indicating class membership.}
 
-\item{methods}{(character) See ?optimal.cutpoints for available methods.}
+\item{oc_metric}{(character) See ?optimal.cutpoints for available methods.}
 
-\item{pos_class}{(optional) The value of class that indicates the positive class}
+\item{neg_class}{The value of class that indicates the negative class.}
 
-\item{neg_class}{(optional) The value of class that indicates the negative class}
+\item{direction}{(character) Use ">=" or "<=" to indicate whether x}
 
-\item{direction}{(character, optional) Use ">" or "<" to indicate whether x
+\item{break_ties}{(function) A function to handle multiple optimal cutpoints,
+if multiple optimal cutpoints are found.}
+
+\item{...}{To capture further arguments that are always passed to the method
+function by cutpointr. The cutpointr function passes data, x, class,
+metric_func, direction, pos_class and neg_class to the method function.
 is supposed to be larger or smaller for the positive class.}
-
-\item{...}{Further optional arguments that will be passed to optcut_func.}
 }
 \value{
 A data frame with one row, the column optimal_cutpoint and a second
@@ -36,9 +41,10 @@ the optimal cutpoint and the value of the metric, depending on methods, that
 was obtained in-sample.
 }
 \examples{
-library(OptimalCutpoints)
-data(elas)
-oc_OptimalCutpoints(elas, "elas", "status", methods = "Youden", pos_class = 1,
-direction = ">")
+data(suicide)
+if (require(OptimalCutpoints)) {
+  oc_OptimalCutpoints(suicide, "dsi", "suicide", oc_metric = "Youden",
+  neg_class = "no", direction = ">=")
+}
 }
 

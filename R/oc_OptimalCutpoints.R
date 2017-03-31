@@ -5,42 +5,43 @@
 #' the optimal cutpoint and the value of the metric, depending on methods, that
 #' was obtained in-sample.
 #'
-#' @inheritParams cutpointr
-#' @param methods (character) See ?optimal.cutpoints for available methods.
+#' @inheritParams oc_youden_normal
+#' @param oc_metric (character) See ?optimal.cutpoints for available methods.
+#' @param break_ties (function) A function to handle multiple optimal cutpoints,
+#' if multiple optimal cutpoints are found.
 #' @return A data frame with one row, the column optimal_cutpoint and a second
 #' column named after method that gives the obtained metric value.
 #' @examples
-#' library(OptimalCutpoints)
-#' data(elas)
-#' oc_OptimalCutpoints(elas, "elas", "status", methods = "Youden", pos_class = 1,
-#' direction = ">")
+#' data(suicide)
+#' if (require(OptimalCutpoints)) {
+#'   oc_OptimalCutpoints(suicide, "dsi", "suicide", oc_metric = "Youden",
+#'   neg_class = "no", direction = ">=")
+#' }
 #' @export
-oc_OptimalCutpoints <- function(data, x, class, methods,
-                                pos_class, neg_class, direction, ...) {
+oc_OptimalCutpoints <- function(data, x, class, oc_metric,
+                                neg_class, direction, break_ties = mean, ...) {
     cl <- match.call()
-    metric_name <- cl$methods
-    neg_class <- unique(unlist(data[, class]))
-    neg_class <- neg_class[neg_class != pos_class]
+    metric_name <- cl$oc_metric
+
     # Reverse direction because optimal.cutpoints "thinks" in terms of tag.healthy
-    if (direction == ">") {
+    if (direction == ">=" | direction == ">") {
         direction <- "<"
-    } else if (direction == "<") {
+    } else if (direction == "<=" | direction == "<") {
         direction <- ">"
     }
     mod <- OptimalCutpoints::optimal.cutpoints.default(X = x,
                                      status = class,
                                      data = as.data.frame(data), # dislikes tibbles
-                                     methods = methods, tag.healthy = neg_class,
+                                     methods = oc_metric, tag.healthy = neg_class,
                                      direction = direction)
-    mod       <- mod[[metric_name]]
-    oc_metric <- mod$Global$optimal.criterion
-    oc        <- mean(mod$Global$optimal.cutoff$cutoff) # Break ties
+    mod        <- mod[[metric_name]]
+    opt_metric <- mod$Global$optimal.criterion
+
+    oc  <- break_ties(mod$Global$optimal.cutoff$cutoff)
     res <- data.frame(optimal_cutpoint = oc,
-                      metric           = oc_metric)
+                      metric           = opt_metric)
     colnames(res) <- c("optimal_cutpoint", metric_name)
     return(res)
 }
-
-
 
 

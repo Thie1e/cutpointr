@@ -29,19 +29,19 @@ assume_direction_pos_class <- function(x, class, pos_class, neg_class, direction
         warning("After removing NA / Inf only one class left. Guessing pos_class and direction")
         message("Assuming the positive class has higher x values")
         message(paste("Assuming", uc[1], "as the positive class"))
-        return(list(direction = ">", pos_class = uc[1], neg_class = uc[2]))
+        return(list(direction = ">=", pos_class = uc[1], neg_class = uc[2]))
     }
 
     if (is.null(direction) & !is.null(pos_class)) {
         if (mean(x[class != pos_class]) < mean(x[class == pos_class])) {
             message("Assuming the positive class has higher x values")
-            direction <- ">"
+            direction <- ">="
         } else {
             message("Assuming the positive class has lower x values")
-            direction <- "<"
+            direction <- "<="
         }
     }
-    if (is.null(direction) & is.null(pos_class)) direction <- ">"
+    if (is.null(direction) & is.null(pos_class)) direction <- ">="
     if (!is.null(direction) & is.null(pos_class)) {
         if (direction == ">" | direction == ">=") {
             if (mean(x[class == uc[1]]) > mean(x[class == uc[2]])) {
@@ -72,18 +72,5 @@ assume_direction_pos_class <- function(x, class, pos_class, neg_class, direction
     }
     return(list(direction = direction, pos_class = pos_class, neg_class = neg_class))
 }
-
-
-inf_to_candidate_cuts <- function(candidate_cuts, direction) {
-    if (direction == ">" | direction == ">=") {
-        candidate_cuts <- unique(c(-Inf, candidate_cuts))
-    } else {
-        candidate_cuts <- unique(c(candidate_cuts, Inf))
-    }
-    return(candidate_cuts)
-}
-
-
-
 
 
