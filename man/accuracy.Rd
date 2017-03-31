@@ -4,7 +4,8 @@
 \alias{accuracy}
 \title{Calculate accuracy
 Calculate accuracy from the elements of a confusion matrix, that is
-true positives, false positives, true negatives and false negatives.}
+true positives, false positives, true negatives and false negatives.
+The inputs can be vectors of equal length.}
 \usage{
 accuracy(tp, fp, tn, fn)
 }
@@ -21,6 +22,7 @@ accuracy(tp, fp, tn, fn)
 Calculate accuracy
 Calculate accuracy from the elements of a confusion matrix, that is
 true positives, false positives, true negatives and false negatives.
+The inputs can be vectors of equal length.
 }
 \examples{
 accuracy(10, 5, 20, 10)

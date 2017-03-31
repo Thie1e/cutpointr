@@ -1,8 +1,10 @@
 #' Set a manual cutpoint for use with cutpointr
 #'
-#' Mainly useful if bootstrap estimates of the out-of-bag performance of a
+#' This function simply returns the Mainly useful if bootstrap estimates of the out-of-bag performance of a
 #' given cutpoint are desired, e.g. taking a cutpoint value from the literature.
 #'
+#' @inheritParams oc_youden_normal
+#' @param cutpoint (numeric) The fixed cutpoint
 #' @export
 oc_manual <- function(cutpoint, ...) {
     return(data.frame(optimal_cutpoint = cutpoint))

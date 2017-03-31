@@ -74,16 +74,3 @@ assume_direction_pos_class <- function(x, class, pos_class, neg_class, direction
 }
 
 
-inf_to_candidate_cuts <- function(candidate_cuts, direction) {
-    if (direction == ">" | direction == ">=") {
-        candidate_cuts <- unique(c(-Inf, candidate_cuts))
-    } else {
-        candidate_cuts <- unique(c(candidate_cuts, Inf))
-    }
-    return(candidate_cuts)
-}
-
-
-
-
-

@@ -11,3 +11,228 @@ knitr::opts_chunk$set(
   fig.path = "README-"
 )
 ```
+
+## cutpointr
+
+[![Travis-CI Build Status](https://travis-ci.org/Thie1e/cutpointr.svg?branch=master)](https://travis-ci.org/Thie1e/cutpointr)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr)
+[![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
+[![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr) 
+
+**cutpointr** is a package for tidy calculation of "optimal" cutpoints. It 
+supports several methods for calculating cutpoints and includes several 
+metrics that can be maximized or minimized by selecting a cutpoint. Additionally,
+**cutpointr** can automatically bootstrap the variability of the optimal 
+cutpoints and return out-of-bag estimates of various metrics.
+
+### Features
+
+
+### Calculating cutpoints
+
+The included methods for calculating cutpoints are:
+
+- `maximize_metric`: Maximize the metric function
+- `minimize_metric`: Minimize the metric function
+- `oc_manual`: Specify the cutoff value manually
+- `oc_youden_kernel`: Maximize the Youden-Index after kernel smoothing
+the distributions of the two classes
+- `oc_youden_normal`: Maximize the Youden-Index parametrically
+assuming normally distributed data in both classes
+- `oc_OptimalCutpoints`: A tidy wrapper for optimal.cutpoints from the OptimalCutpoints package.
+Supply an additional `oc_metric` argument with the method choice corresponding
+to a method from the OptimalCutpoints package
+
+The included metrics to be used with `minimize_metric` and `maximize_metric` are:
+
+- `accuracy`: Fraction correctly classified
+- `youden`: Youden- or J-Index = sensitivity + specificity - 1
+- `kappa`: Cohen's Kappa
+- `abs_d_sesp`: The absolute difference of sensitivity and specificity
+
+**cutpointr** makes use of nonstandard evaluation for higher usability and to
+allow for easy transformation of the variables. The inputs to the arguments
+`method` and `metric` are functions so that user-defined functions can easily
+be supplied instead of the built in ones.
+
+### Applications
+
+To showcase the functionality, we'll use the included `suicide` data set.
+
+```{r}
+library(cutpointr)
+data(suicide)
+head(suicide)
+opt_cut <- cutpointr(suicide, dsi, suicide)
+opt_cut
+```
+
+**cutpointr** makes assumptions about the direction of the dependency between 
+class and x, if `direction` and / or `pos_class` or `neg_class` are not
+specified. The same result can be achieved by manually defining `direction` and
+the positive / negative classes which is slightly faster:
+
+```{r}
+opt_cut <- cutpointr(suicide, dsi, suicide, direction = ">=", pos_class = "yes",
+                     neg_class = "no", method = maximize_metric, metric = youden)
+opt_cut
+```
+
+`opt_cut` is a tidy data frame that returns the input data in a 
+nested tibble. Methods for summarizing and plotting the data and
+results are included:
+
+```{r}
+summary(opt_cut)
+plot(opt_cut)
+```
+
+Predictions for new data can be made using `predict`:
+
+```{r}
+predict(opt_cut, newdata = data.frame(dsi = 0:5))
+```
+
+Cutpoints can be seperately estimated on a subgroup, gender in this case:
+
+```{r}
+opt_cut <- cutpointr(suicide, dsi, suicide, gender)
+opt_cut
+summary(opt_cut)
+plot(opt_cut)
+```
+
+If `boot_runs` is larger zero, **cutpointr** will carry out the cutpoint
+calculation on the full sample and on `boot_runs` bootstrap samples. 
+
+```{r}
+set.seed(12)
+opt_cut <- cutpointr(suicide, dsi, suicide, boot_runs = 200)
+opt_cut
+```
+
+The returned object has the additional column `boot` which is a nested tibble that
+includes the cutpoints per bootstrap sample along with the metric in `metric` and
+a number of additional metrics:
+
+```{r}
+opt_cut$boot
+```
+
+The summary and plots include additional elements:
+
+```{r}
+summary(opt_cut)
+plot(opt_cut)
+```
+
+If a subgroup is given, the bootstrapping is carried out seperately for every
+subgroup:
+
+```{r}
+set.seed(12)
+opt_cut <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 200)
+opt_cut
+summary(opt_cut)
+plot(opt_cut)
+```
+
+Using `foreach` and `doRNG` the bootstrapping can easily be parallelized. The
+`doRNG` package is being used to make the bootstrap sampling reproducible. It may
+be preferable for long running tasks to specify `direction` and `pos_class` 
+and / or `neg_class` manually to speed up `cutpointr`.
+
+```{r}
+if (require(doSNOW) & require(doRNG)) {
+  cl <- makeCluster(2) # 2 cores
+  registerDoSNOW(cl)
+  registerDoRNG(12) # Reproducible parallel loops using doRNG
+  opt_cut <- cutpointr(suicide, dsi, suicide, gender, pos_class = "yes",
+                 direction = ">=", boot_runs = 200, allowParallel = TRUE)
+  stopCluster(cl)
+  opt_cut
+}
+```
+
+### Nonstandard evaluation
+
+The arguments to `cutpointr` do not need to be enclosed in quotes. This is 
+possible thanks to nonstandard evaluation of the arguments, which are 
+evaluated in `data`. Alternatively, the arguments *can* be enclosed in quotes.
+In that case, transforming the data within the function call is not possible
+and `method` and `metric` functions that are enclosed in quotes are only looked
+up within the **cutpointr** package. As an example of a transformation of the
+`x`, `class` and `subgroup` variable consider:
+
+```{r}
+identical(cutpointr(suicide, dsi, suicide), cutpointr(suicide, "dsi", "suicide"))
+
+set.seed(12)
+opt_cut <- cutpointr(suicide, log(dsi + 1), suicide == "yes",
+    subgroup = dsi %% 2 == 0, boot_runs = 30)
+opt_cut
+summary(opt_cut)
+plot(opt_cut)
+predict(opt_cut, newdata = data.frame(dsi = 0:5))
+```
+
+### cutpointr in the tidyverse
+
+Since `cutpointr` outputs a tidy data frame and `data` is the first argument,
+it can be conveniently used in conjunction with various functions from the "tidyverse". 
+
+```{r}
+opt_cut <- cutpointr(suicide, dsi, suicide)
+class(opt_cut) # the result is also a data.frame
+
+suppressMessages(library(tidyverse))
+suicide %>%
+    group_by(gender) %>%
+    nest() %>%
+    mutate(cutmod1 = map(data, function(x) cutpointr(x, dsi, suicide,
+                                                     metric = accuracy)),
+           cutmod2 = map(data, function(x) cutpointr(x, dsi, suicide,
+                                                     metric = sum_sens_spec)))
+
+suicide %>%
+    cutpointr(dsi, suicide) %>%
+    select(roc_curve) %>%
+    unnest %>%
+    ggplot(aes(x = fp, y = tp)) + geom_point() + geom_line()
+```
+
+
+### User-defined method and metric functions
+
+User defined functions can be supplied to method. As a reference,
+the code of all included method functions can be accessed by simply typing
+their name. To define a new method function, create a function that may take
+as input(s):
+
+- data: A data frame or tbl_df
+- x: (character) The name of the predictor or independent variable
+- class: (character) The name of the class or dependent variable
+- metric_func: A function for calculating a metric, e.g. accuracy. Note
+ that the method function does not necessarily have to accept this argument
+- pos_class: The positive class
+- neg_class: The negative class
+- direction: ">=" if the positive class has higher x values, "<=" otherwise
+
+The `...` argument can be used to avoid an error if not all of the above
+arguments are needed. The function should return a data frame or tbl_df with
+one row, the column "optimal_cutpoint", and a column with an arbitraty name
+with the metric value at the optimal cutpoint.
+
+User defined metric functions can be used as well which can accept the following
+inputs as vectors:
+
+- tp: Vector of true positives
+- fp: Vector of false positives
+- tn: Vector of true negatives
+- fn: Vector of false negatives
+
+Again, if not all inputs are needed `...` can be used to avoid an "unused argument" error.
+The function should return a matrix with one column. If the column is named,
+the named will be included in the output and plots. Avoid using names that
+are identical to the column names that are by default returned by cutpointr.
+

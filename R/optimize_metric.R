@@ -35,6 +35,29 @@ optimize_metric <- function(data, x, class, metric_func = youden,
     return(res)
 }
 
+#' Maximize a metric function in binary classification
+#'
+#' Given a function for computing a metric in metric_func, this function
+#' maximizes that metric by selecting an optimal cutpoint.
+#' The metric function should accept the following inputs:
+#' \itemize{
+#'  \item tp: vector of number of true positives
+#'  \item fp: vector of number of false positives
+#'  \item tn: vector of number of true negatives
+#'  \item fn: vector of number of false negatives
+#' }
+#'
+#' The above inputs are arrived at by using all unique values in x, Inf, and
+#' -Inf as possible cutpoints for classifying the variable in class.
+#'
+#' @return A tibble with the columns optimal_cutpoint, the corresponding metric
+#' value and roccurve, a nested tibble that includes all possible cutoffs
+#' and the corresponding numbers of true and false positives / negatives and
+#' all corresponding metric values.
+#'
+#' @inheritParams oc_youden_normal
+#' @param metric_func (function) A function that computes a single number
+#' metric to be maximized. See description.
 #' @export
 maximize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL,
@@ -46,6 +69,29 @@ maximize_metric <- function(data, x, class, metric_func = youden,
 }
 
 
+#' Minimize a metric function in binary classification
+#'
+#' Given a function for computing a metric in metric_func, this function
+#' minimizes that metric by selecting an optimal cutpoint.
+#' The metric function should accept the following inputs:
+#' \itemize{
+#'  \item tp: vector of number of true positives
+#'  \item fp: vector of number of false positives
+#'  \item tn: vector of number of true negatives
+#'  \item fn: vector of number of false negatives
+#' }
+#'
+#' The above inputs are arrived at by using all unique values in x, Inf, and
+#' -Inf as possible cutoffs for classifying the variable in class.
+#'
+#' @return A tibble with the columns optimal_cutpoint, the corresponding metric
+#' value and roccurve, a nested tibble that includes all possible cutoffs
+#' and the corresponding numbers of true and false positives / negatives and
+#' all corresponding metric values.
+#'
+#' @inheritParams oc_youden_normal
+#' @param metric_func (function) A function that computes a single number
+#' metric to be minimized. See description.
 #' @export
 minimize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL,

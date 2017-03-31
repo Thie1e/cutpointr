@@ -1,3 +1,23 @@
+#' Create ROC curve
+#'
+#' Given a data frame with a numeric predictor variable and a binary outcome
+#' variable this function returns a data frame that includes all elements of
+#' a confusion matrix for every unique value of the predictor variable.
+#' Additionally, the TPR, FPR, TNR and FNR are returned.
+#' @param data A data frame or matrix. Will be converted to a data frame.
+#' @param x A numeric independent (predictor) variable.
+#' @param class A binary vector of outcome values.
+#' @param pos_class The value of 'class' that represents the positive cases.
+#' @param neg_class The value of 'class' that represents the negative cases.
+#' @param direction (character) One of ">=" or "<=". Specifies if the positive
+#' class is associated with higher values of x (default).
+#' @return A data frame with the columns x.sorted, tp, fp, tn, fn, tpr, tnr, fpr,
+#' and fnr.
+#' @examples
+#' ## First two classes of the iris data
+#' dat <- iris[1:100, ]
+#' roc(data = dat, x = "Petal.Width", class = "Species",
+#' pos_class = "versicolor", neg_class = "setosa", direction = ">=")
 #' @export
 roc <- function(data, x, class,
                 pos_class = NULL, neg_class = NULL, direction = ">=") {

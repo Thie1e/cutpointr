@@ -1,35 +1,62 @@
 #' Determine an optimal cutpoint for the Youden-Index assuming normal distributions
 #'
+#' An optimal cutpoint maximizing the Youden- or J-Index
+#' (sensitivity + specificity - 1) is calculated parametrically assuming
+#' normally distributed data.
+#'
+#' @param data A data frame or tibble in which the columns that are given in x
+#' and class can be found.
+#' @param x The variable name (with quotation marks) to be used for classification,
+#' e.g. predictions or test values.
+#' @param class The variable name (with quotation marks) indicating class membership.
+#' @param pos_class The value of class that indicates the positive class.
+#' @param neg_class The value of class that indicates the negative class.
+#' @param direction (character) Use ">=" or "<=" to indicate whether x
+#' @param ... To capture further arguments that are always passed to the method
+#' function by cutpointr. The cutpointr function passes data, x, class,
+#' metric_func, direction, pos_class and neg_class to the method function.
+#' is supposed to be larger or smaller for the positive class.
+#' @examples
+#' data(suicide)
+#' oc_youden_normal(suicide, "dsi", "suicide",
+#'   pos_class = "yes", neg_class = "no", direction = ">=")
 #' @export
 oc_youden_normal <- function(data, x, class, pos_class = NULL, neg_class = NULL,
-                            direction, ...) {
-    if (direction %in% c("<", "<=")) stop("Not yet implemented")
+                             direction, ...) {
     stopifnot(is.character(x))
     stopifnot(is.character(class))
     iv <- unlist(data[, x])
     if (any(!is.finite(iv))) stop("Only finite values allowed in oc_youden_normal")
     cla <- unlist(data[, class])
-    patients <- iv[cla == pos_class]
-    controls <- iv[cla == neg_class]
+    if (direction %in% c(">", ">=")) {
+        patients <- iv[cla == pos_class]
+        controls <- iv[cla == neg_class]
+    } else if (direction %in% c("<", "<=")) {
+        patients <- iv[cla == neg_class]
+        controls <- iv[cla == pos_class]
+    }
     m_h <- mean(controls)
-    sd_h <- sd(controls)
+    sd_h <- stats::sd(controls)
     m_d <- mean(patients)
-    sd_d <- sd(patients)
+    sd_d <- stats::sd(patients)
     if (sd_h == sd_d) {
         c <- (m_h+m_d)/2
     } else if (any(sd_h == 0, sd_d == 0)) {
-        # mit sd_h = 0 und/oder sd_d = 0 wird der cutoff sonst NaN
+        # if sd_h = 0 and/or sd_d = 0 the cutoff would be NaN
         c <- (m_h+m_d)/2
     } else {
         c <- ((m_d*sd_h^2 - m_h*sd_d^2) - sd_h*sd_d*(sqrt((m_h-m_d)^2 + (sd_h^2-sd_d^2) * log(sd_h^2/sd_d^2)))) /
             (sd_h^2-sd_d^2)
     }
-    cut <- ceiling(c)
-    # Die Formel kann extrem niedrige oder hohe Cutoffs ergeben, z.B. wenn m_d < m_h
-    if (cut < min(c(controls, patients))) {
-        cut <- min(c(controls, patients))
-    } else if (cut > max(c(controls, patients))) {
-        cut <- max(c(controls, patients))
+
+    # Extremely high or low cutoffs can result if m_d < m_h and direction = ">="
+    if (c < min(c(controls, patients))) {
+        warning(paste("Cutpoint", c, "was restricted to range of independent variable"))
+        c <- min(c(controls, patients))
+    } else if (c > max(c(controls, patients))) {
+        warning(paste("Cutpoint", c, "was restricted to range of independent variable"))
+        c <- max(c(controls, patients))
     }
-    return(data.frame(optimal_cutpoint = cut))
+    return(data.frame(optimal_cutpoint = c))
 }
+

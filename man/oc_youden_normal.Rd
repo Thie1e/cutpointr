@@ -7,7 +7,34 @@
 oc_youden_normal(data, x, class, pos_class = NULL, neg_class = NULL,
   direction, ...)
 }
+\arguments{
+\item{data}{A data frame or tibble in which the columns that are given in x
+and class can be found.}
+
+\item{x}{The variable name (with quotation marks) to be used for classification,
+e.g. predictions or test values.}
+
+\item{class}{The variable name (with quotation marks) indicating class membership.}
+
+\item{pos_class}{The value of class that indicates the positive class.}
+
+\item{neg_class}{The value of class that indicates the negative class.}
+
+\item{direction}{(character) Use ">=" or "<=" to indicate whether x}
+
+\item{...}{To capture further arguments that are always passed to the method
+function by cutpointr. The cutpointr function passes data, x, class,
+metric_func, direction, pos_class and neg_class to the method function.
+is supposed to be larger or smaller for the positive class.}
+}
 \description{
-Determine an optimal cutpoint for the Youden-Index assuming normal distributions
+An optimal cutpoint maximizing the Youden- or J-Index
+(sensitivity + specificity - 1) is calculated parametrically assuming
+normally distributed data.
+}
+\examples{
+data(suicide)
+oc_youden_normal(suicide, "dsi", "suicide",
+  pos_class = "yes", neg_class = "no", direction = ">=")
 }
 

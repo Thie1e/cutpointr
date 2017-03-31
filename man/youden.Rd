@@ -4,7 +4,8 @@
 \alias{youden}
 \title{Calculate the Youden-Index
 Calculate the Youden-Index (J-Index) from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.}
+that is true positives, false positives, true negatives and false negatives.
+The inputs can be vectors of equal length.}
 \usage{
 youden(tp, fp, tn, fn)
 }
@@ -21,6 +22,7 @@ youden(tp, fp, tn, fn)
 Calculate the Youden-Index
 Calculate the Youden-Index (J-Index) from the elements of a confusion matrix,
 that is true positives, false positives, true negatives and false negatives.
+The inputs can be vectors of equal length.
 }
 \examples{
 youden(10, 5, 20, 10)
