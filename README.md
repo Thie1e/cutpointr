@@ -3,7 +3,7 @@
 cutpointr
 ---------
 
-[![Travis-CI Build Status](https://travis-ci.org/Thie1e/cutpointr.svg?branch=master)](https://travis-ci.org/Thie1e/cutpointr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr) [![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip) [![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr)
+[![Travis-CI Build Status](https://travis-ci.org/Thie1e/cutpointr.svg?branch=master)](https://travis-ci.org/Thie1e/cutpointr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr) [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active) [![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr)
 
 **cutpointr** is a package for tidy calculation of "optimal" cutpoints. It supports several methods for calculating cutpoints and includes several metrics that can be maximized or minimized by selecting a cutpoint. Additionally, **cutpointr** can automatically bootstrap the variability of the optimal cutpoints and return out-of-bag estimates of various metrics.
 
@@ -588,7 +588,7 @@ User defined functions can be supplied to method. As a reference, the code of al
 -   neg\_class: The negative class
 -   direction: "&gt;=" if the positive class has higher x values, "&lt;=" otherwise
 
-The ... argument can be used to avoid an error if not all of the above arguments are needed. The function should return a data frame or tbl\_df with one row, the column "optimal\_cutpoint", and a column with an arbitraty name with the metric value at the optimal cutpoint.
+The `...` argument can be used to avoid an error if not all of the above arguments are needed. The function should return a data frame or tbl\_df with one row, the column "optimal\_cutpoint", and a column with an arbitraty name with the metric value at the optimal cutpoint.
 
 User defined metric functions can be used as well which can accept the following inputs as vectors:
 
@@ -597,4 +597,4 @@ User defined metric functions can be used as well which can accept the following
 -   tn: Vector of true negatives
 -   fn: Vector of false negatives
 
-Again, if not all inputs are needed ... can be used to avoid an "unused argument" error. The function should return a matrix with one column. If the column is named, the named will be included in the output and plots. Avoid using names that are identical to the column names that are by default returned by cutpointr.
+Again, if not all inputs are needed `...` can be used to avoid an "unused argument" error. The function should return a matrix with one column. If the column is named, the named will be included in the output and plots. Avoid using names that are identical to the column names that are by default returned by cutpointr.
