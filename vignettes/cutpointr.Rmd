@@ -1,35 +1,19 @@
 ---
-output: github_document
+title: "An introduction to cutpointr"
+author: "Christian Thiele"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{An introduction to cutpointr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
-```{r, echo = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "README-"
-)
-```
-
-## cutpointr
-
-[![Travis-CI Build Status](https://travis-ci.org/Thie1e/cutpointr.svg?branch=master)](https://travis-ci.org/Thie1e/cutpointr)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr)
-[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr) 
 
 **cutpointr** is an R package for tidy calculation of "optimal" cutpoints. It 
 supports several methods for calculating cutpoints and includes several 
 metrics that can be maximized or minimized by selecting a cutpoint. Additionally,
 **cutpointr** can automatically bootstrap the variability of the optimal 
 cutpoints and return out-of-bag estimates of various metrics.
-
-### Installation
-
-```{r, eval = FALSE}
-devtools::install_github("thie1e/cutpointr")
-```
 
 ### Features
 

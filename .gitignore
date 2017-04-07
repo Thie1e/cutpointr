@@ -28,3 +28,4 @@ packrat/src/
 .Rprofile
 cutpointr_design.pptx
 .DS_Store
+inst/doc

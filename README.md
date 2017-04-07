@@ -5,9 +5,22 @@ cutpointr
 
 [![Travis-CI Build Status](https://travis-ci.org/Thie1e/cutpointr.svg?branch=master)](https://travis-ci.org/Thie1e/cutpointr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr) [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active) [![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr)
 
-**cutpointr** is a package for tidy calculation of "optimal" cutpoints. It supports several methods for calculating cutpoints and includes several metrics that can be maximized or minimized by selecting a cutpoint. Additionally, **cutpointr** can automatically bootstrap the variability of the optimal cutpoints and return out-of-bag estimates of various metrics.
+**cutpointr** is an R package for tidy calculation of "optimal" cutpoints. It supports several methods for calculating cutpoints and includes several metrics that can be maximized or minimized by selecting a cutpoint. Additionally, **cutpointr** can automatically bootstrap the variability of the optimal cutpoints and return out-of-bag estimates of various metrics.
+
+### Installation
+
+``` r
+devtools::install_github("thie1e/cutpointr")
+```
 
 ### Features
+
+-   Calculation of "optimal" cutpoints in binary classification tasks
+-   Tidy output, integrates well with functions from the tidyverse
+-   Bootstrapping for simulating the cutpoint variability and for getting out-of-bag estimates of various metrics (as a form of cross validation)
+-   Multiple methods for calculating cutpoints
+-   Multiple metrics can be chosen for maximization / minimization
+-   Standard/Nonstandard evaluation of the function arguments
 
 ### Calculating cutpoints
 
@@ -23,9 +36,10 @@ The included methods for calculating cutpoints are:
 The included metrics to be used with `minimize_metric` and `maximize_metric` are:
 
 -   `accuracy`: Fraction correctly classified
--   `youden`: Youden- or J-Index = sensitivity + specificity - 1
--   `kappa`: Cohen's Kappa
 -   `abs_d_sesp`: The absolute difference of sensitivity and specificity
+-   `kappa`: Cohen's Kappa
+-   `sum_sens_spec`: sensitivity + specificity
+-   `youden`: Youden- or J-Index = sensitivity + specificity - 1
 
 **cutpointr** makes use of nonstandard evaluation for higher usability and to allow for easy transformation of the variables. The inputs to the arguments `method` and `metric` are functions so that user-defined functions can easily be supplied instead of the built in ones.
 
@@ -105,7 +119,15 @@ summary(opt_cut)
 plot(opt_cut)
 ```
 
-![](README-unnamed-chunk-4-1.png)
+![](README-unnamed-chunk-5-1.png)
+
+If `method` is `maximize_metric` or `minimize_metric` the metric over all possible cutoff values can be plotted using `plot_metric`:
+
+``` r
+plot_metric(opt_cut)
+```
+
+![](README-unnamed-chunk-6-1.png)
 
 Predictions for new data can be made using `predict`:
 
@@ -114,7 +136,7 @@ predict(opt_cut, newdata = data.frame(dsi = 0:5))
 #> [1] "no"  "no"  "yes" "yes" "yes" "yes"
 ```
 
-Cutpoints can be seperately estimated on a subgroup, gender in this case:
+Cutpoints can be separately estimated on a subgroup, gender in this case:
 
 ``` r
 opt_cut <- cutpointr(suicide, dsi, suicide, gender)
@@ -179,7 +201,7 @@ summary(opt_cut)
 plot(opt_cut)
 ```
 
-![](README-unnamed-chunk-6-1.png)
+![](README-unnamed-chunk-8-1.png)
 
 If `boot_runs` is larger zero, **cutpointr** will carry out the cutpoint calculation on the full sample and on `boot_runs` bootstrap samples.
 
@@ -266,9 +288,9 @@ summary(opt_cut)
 plot(opt_cut)
 ```
 
-![](README-unnamed-chunk-9-1.png)
+![](README-unnamed-chunk-11-1.png)
 
-If a subgroup is given, the bootstrapping is carried out seperately for every subgroup:
+If a subgroup is given, the bootstrapping is carried out separately for every subgroup:
 
 ``` r
 set.seed(12)
@@ -366,7 +388,7 @@ plot(opt_cut)
 #> Warning: Removed 2 rows containing non-finite values (stat_density).
 ```
 
-![](README-unnamed-chunk-10-1.png)
+![](README-unnamed-chunk-12-1.png)
 
 Using `foreach` and `doRNG` the bootstrapping can easily be parallelized. The `doRNG` package is being used to make the bootstrap sampling reproducible. It may be preferable for long running tasks to specify `direction` and `pos_class` and / or `neg_class` manually to speed up `cutpointr`.
 
@@ -525,7 +547,7 @@ summary(opt_cut)
 plot(opt_cut)
 ```
 
-![](README-unnamed-chunk-12-1.png)
+![](README-unnamed-chunk-14-1.png)
 
 ``` r
 predict(opt_cut, newdata = data.frame(dsi = 0:5))
@@ -543,7 +565,10 @@ opt_cut <- cutpointr(suicide, dsi, suicide)
 class(opt_cut) # the result is also a data.frame
 #> [1] "cutpointr"  "tbl_df"     "tbl"        "data.frame"
 
-suppressMessages(library(tidyverse))
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
+suppressMessages(library(purrr))
+suppressMessages(library(ggplot2))
 suicide %>%
     group_by(gender) %>%
     nest() %>%
@@ -574,27 +599,148 @@ suicide %>%
 #> Assuming the positive class has higher x values
 ```
 
-![](README-unnamed-chunk-13-1.png)
+![](README-unnamed-chunk-15-1.png)
+
+### Manual plotting
+
+Since **cutpointr** returns a tidy data frame with the supplied data, bootstrap results and the ROC curve in nested tibbles these data can coveniently be plotted manually. This offers additional ways of tweaking these plots as well as the possibility to plot results that are not included in `plot`, `plot_metric`, `plot_cut_boot`, `plot_metric_boot` or `plot_roc`. The relevant nested tibbles are in the columns `data`, `roc_curve` and `boot`. The following is an example of accessing and plotting the grouped data.
+
+``` r
+set.seed(123) # Some missing values expected
+opt_cut <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 100)
+#> Assuming yes as the positive class
+#> Assuming the positive class has higher x values
+#> Warning in .f(.x[[i]], ...): 4 Missing values in bootstrap, maybe due to
+#> sampling of only one class
+head(opt_cut$data)
+#> [[1]]
+#> # A tibble: 392 × 2
+#>      dsi suicide
+#>    <dbl>  <fctr>
+#> 1      1      no
+#> 2      0      no
+#> 3      0      no
+#> 4      0      no
+#> 5      0      no
+#> 6      0      no
+#> 7      0      no
+#> 8      1      no
+#> 9      0      no
+#> 10     0      no
+#> # ... with 382 more rows
+#> 
+#> [[2]]
+#> # A tibble: 140 × 2
+#>      dsi suicide
+#>    <dbl>  <fctr>
+#> 1      0      no
+#> 2      2      no
+#> 3      1      no
+#> 4      0      no
+#> 5      0      no
+#> 6      0      no
+#> 7      1      no
+#> 8      0      no
+#> 9      0      no
+#> 10     0      no
+#> # ... with 130 more rows
+
+opt_cut %>% 
+    select(data, subgroup) %>% 
+    unnest %>% 
+    ggplot(aes(x = suicide, y = dsi)) + 
+    geom_boxplot(alpha = 0.3) + facet_grid(~subgroup)
+```
+
+![](README-unnamed-chunk-16-1.png)
 
 ### User-defined method and metric functions
 
-User defined functions can be supplied to method. As a reference, the code of all included method functions can be accessed by simply typing their name. To define a new method function, create a function that may take as input(s):
+User defined functions can be supplied to method. To define a new method function, create a function that may take as input(s):
 
--   data: A data frame or tbl\_df
--   x: (character) The name of the predictor or independent variable
--   class: (character) The name of the class or dependent variable
--   metric\_func: A function for calculating a metric, e.g. accuracy. Note that the method function does not necessarily have to accept this argument
--   pos\_class: The positive class
--   neg\_class: The negative class
--   direction: "&gt;=" if the positive class has higher x values, "&lt;=" otherwise
+-   `data`: A data frame or tbl\_df
+-   `x`: (character) The name of the predictor or independent variable
+-   `class`: (character) The name of the class or dependent variable
+-   `metric_func`: A function for calculating a metric, e.g. accuracy. Note that the method function does not necessarily have to accept this argument
+-   `pos_class`: The positive class
+-   `neg_class`: The negative class
+-   `direction`: "&gt;=" if the positive class has higher x values, "&lt;=" otherwise
 
-The `...` argument can be used to avoid an error if not all of the above arguments are needed. The function should return a data frame or tbl\_df with one row, the column "optimal\_cutpoint", and a column with an arbitraty name with the metric value at the optimal cutpoint.
+The `...` argument can be used to avoid an error if not all of the above arguments are needed and in order to pass additional arguments to `method`. The function should return a data frame or tbl\_df with one row, the column "optimal\_cutpoint", and an optinal column with an arbitraty name with the metric value at the optimal cutpoint.
 
-User defined metric functions can be used as well which can accept the following inputs as vectors:
+For example, a function for choosing the cutpoint as the mean of the independent variable could look like this:
 
--   tp: Vector of true positives
--   fp: Vector of false positives
--   tn: Vector of true negatives
--   fn: Vector of false negatives
+``` r
+mean_cut <- function(data, x, ...) {
+    oc <- mean(unlist(data[, x]))
+    return(data.frame(optimal_cutpoint = oc))
+}
+```
 
-Again, if not all inputs are needed `...` can be used to avoid an "unused argument" error. The function should return a matrix with one column. If the column is named, the named will be included in the output and plots. Avoid using names that are identical to the column names that are by default returned by cutpointr.
+Since no metric is returned, `Sum_Sens_Spec`, the sum of sensitivity and specificity, is returned as the extra metric column in addition to accuracy, sensitivity and specificity.
+
+Some `method` functions that make use of the additional arguments (that are captured by `...` in `mean_cut`) are already included in **cutpointr**, see the list at the top. Since these functions are arguments to `cutpointr` their code can be accessed by simply typing their name, e.g.:
+
+``` r
+oc_youden_normal
+#> function(data, x, class, pos_class = NULL, neg_class = NULL,
+#>                              direction, ...) {
+#>     stopifnot(is.character(x))
+#>     stopifnot(is.character(class))
+#>     iv <- unlist(data[, x])
+#>     if (any(!is.finite(iv))) stop("Only finite values allowed in oc_youden_normal")
+#>     cla <- unlist(data[, class])
+#>     if (direction %in% c(">", ">=")) {
+#>         patients <- iv[cla == pos_class]
+#>         controls <- iv[cla == neg_class]
+#>     } else if (direction %in% c("<", "<=")) {
+#>         patients <- iv[cla == neg_class]
+#>         controls <- iv[cla == pos_class]
+#>     }
+#>     m_h <- mean(controls)
+#>     sd_h <- stats::sd(controls)
+#>     m_d <- mean(patients)
+#>     sd_d <- stats::sd(patients)
+#>     if (sd_h == sd_d) {
+#>         c <- (m_h+m_d)/2
+#>     } else if (any(sd_h == 0, sd_d == 0)) {
+#>         # if sd_h = 0 and/or sd_d = 0 the cutoff would be NaN
+#>         c <- (m_h+m_d)/2
+#>     } else {
+#>         c <- ((m_d*sd_h^2 - m_h*sd_d^2) - sd_h*sd_d*(sqrt((m_h-m_d)^2 + (sd_h^2-sd_d^2) * log(sd_h^2/sd_d^2)))) /
+#>             (sd_h^2-sd_d^2)
+#>     }
+#> 
+#>     # Extremely high or low cutoffs can result if m_d < m_h and direction = ">="
+#>     if (c < min(c(controls, patients))) {
+#>         warning(paste("Cutpoint", c, "was restricted to range of independent variable"))
+#>         c <- min(c(controls, patients))
+#>     } else if (c > max(c(controls, patients))) {
+#>         warning(paste("Cutpoint", c, "was restricted to range of independent variable"))
+#>         c <- max(c(controls, patients))
+#>     }
+#>     return(data.frame(optimal_cutpoint = c))
+#> }
+#> <environment: namespace:cutpointr>
+```
+
+User defined **metric functions** can be used as well. They are mainly useful in conjunction with `method = maximize_metric` or `method = minimize_metric`. In case of a different `method` function `metric` will only be used as the main out-of-bag metric when plotting the result. The `metric` function should accept the following inputs as vectors:
+
+-   `tp`: Vector of true positives
+-   `fp`: Vector of false positives
+-   `tn`: Vector of true negatives
+-   `fn`: Vector of false negatives
+
+The function should return a **matrix with one column** and the inputs (`tp`, `fp`, `tn`, and `fn`) are **vectors**. If the column is named, the name will be included in the output and plots. Avoid using names that are identical to the column names that are by default returned by cutpointr. The code of the included metric functions can be accessed by simply typing their name.
+
+For example, this is the `accuracy` metric function:
+
+``` r
+accuracy
+#> function(tp, fp, tn, fn) {
+#>     Accuracy = cbind((tp + tn) / (tp + fp + tn + fn))
+#>     colnames(Accuracy) <- "Accuracy"
+#>     return(Accuracy)
+#> }
+#> <environment: namespace:cutpointr>
+```
