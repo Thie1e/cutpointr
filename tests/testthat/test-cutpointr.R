@@ -5,6 +5,8 @@ test_that("Cutpointr returns a cutpointr without NAs and a certain Nr of rows", 
     expect_that(nrow(opt_cut), equals(1))
     expect_that(sum(is.na(opt_cut)), equals(0))
     expect_silent(plot(opt_cut))
+    expect_silent(plot_metric(opt_cut))
+    expect_silent(plot_roc(opt_cut))
 })
 
 test_that("Cutpointr works with different data types", {
@@ -37,18 +39,24 @@ test_that("Cutpointr works with different data types", {
     expect_that(nrow(opt_cut), equals(3))
     expect_that(sum(is.na(opt_cut)), equals(0))
     expect_silent(plot(opt_cut))
+    expect_silent(plot_metric(opt_cut))
+    expect_silent(plot_roc(opt_cut))
 
     tempdat$g <- factor(tempdat$g)
     opt_cut <- cutpointr(tempdat, x, y, g)
     expect_that(nrow(opt_cut), equals(3))
     expect_that(sum(is.na(opt_cut)), equals(0))
     expect_silent(plot(opt_cut))
+    expect_silent(plot_metric(opt_cut))
+    expect_silent(plot_roc(opt_cut))
 
     tempdat$g <- as.character(tempdat$g)
     opt_cut <- cutpointr(tempdat, x, y, g)
     expect_that(nrow(opt_cut), equals(3))
     expect_that(sum(is.na(opt_cut)), equals(0))
     expect_silent(plot(opt_cut))
+    expect_silent(plot_metric(opt_cut))
+    expect_silent(plot_roc(opt_cut))
 })
 
 test_that("Bootstrap does not return duplicate colnames", {
@@ -65,6 +73,30 @@ test_that("Bootstrap does not return duplicate colnames", {
                           g = sample(0:2, size = 300, replace = TRUE))
     opt_cut <- cutpointr(tempdat, x, y, g, boot_runs = 20)
     expect_true(all(table(colnames(opt_cut$boot[[1]])) == 1))
+})
+
+test_that("Plotting with bootstrapping is silent", {
+    set.seed(456)
+    tempdat <- data.frame(x = rnorm(100),
+                          y = sample(0:1, size = 100, replace = TRUE))
+    opt_cut <- cutpointr(tempdat, x, y, boot_runs = 20)
+    expect_silent(plot(opt_cut))
+    expect_silent(plot_metric(opt_cut))
+    expect_silent(plot_roc(opt_cut))
+    expect_silent(plot_cut_boot(opt_cut))
+    expect_silent(plot_metric_boot(opt_cut))
+
+    # With subgroup
+    set.seed(123)
+    tempdat <- data.frame(x = rnorm(300),
+                          y = sample(0:1, size = 300, replace = TRUE),
+                          g = sample(0:2, size = 300, replace = TRUE))
+    opt_cut <- cutpointr(tempdat, x, y, g, boot_runs = 20)
+    expect_silent(plot(opt_cut))
+    expect_silent(plot_metric(opt_cut))
+    expect_silent(plot_roc(opt_cut))
+    expect_silent(plot_cut_boot(opt_cut))
+    expect_silent(plot_metric_boot(opt_cut))
 })
 
 test_that("AUC calculation is correct and works with Inf and -Inf", {
