@@ -32,7 +32,8 @@ plot.cutpointr <- function(x, ...) {
             dplyr::select_(.dots = dts_boot) %>%
             tidyr::unnest_(unnest_cols = "boot")
         if (all(stats::na.omit(res_boot_unnested$optimal_cutpoint %% 1 == 0))) {
-            dist_plot <- ggplot2::geom_histogram(alpha = transparency, position = "identity")
+            dist_plot <- ggplot2::geom_histogram(alpha = 1,
+                                                 position = "dodge")
         } else {
             dist_plot <- ggplot2::geom_density(alpha = transparency)
         }
@@ -49,7 +50,8 @@ plot.cutpointr <- function(x, ...) {
         met_ind <- which(colnames(res_boot_unnested) == "optimal_cutpoint") + 1
         metric_name <- colnames(res_boot_unnested)[met_ind]
         if (all(stats::na.omit(get(metric_name, res_boot_unnested) %% 1 == 0))) {
-            dist_plot <- ggplot2::geom_histogram(alpha = transparency, position = "identity")
+            dist_plot <- ggplot2::geom_histogram(alpha = 1,
+                                                 position = "dodge")
         } else {
             dist_plot <- ggplot2::geom_density(alpha = transparency)
         }
@@ -85,7 +87,7 @@ plot.cutpointr <- function(x, ...) {
         col <- ~ subgroup
     }
     if (all(stats::na.omit(dplyr::select_(res_unnested, .dots = predictor) %% 1 == 0))) {
-        dist_plot <- ggplot2::geom_histogram(alpha = transparency, position = "dodge")
+        dist_plot <- ggplot2::geom_histogram(alpha = 1, position = "dodge")
     } else {
         dist_plot <- ggplot2::geom_density(alpha = transparency)
     }
