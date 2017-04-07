@@ -41,8 +41,9 @@
 #' }
 #'
 #' The ... argument can be used to avoid an error if not all of the above
-#' arguments are needed. The function should return a data frame or tbl_df with
-#' one row, the column "optimal_cutpoint", and a column with an arbitraty name
+#' arguments are needed or in oder to pass additional arguments to `method`.
+#' The function should return a data frame or tbl_df with
+#' one row, the column "optimal_cutpoint", and an optional column with an arbitraty name
 #' with the metric value at the optimal cutpoint.
 #'
 #' Built-in metric functions include:
@@ -63,7 +64,6 @@
 #'  \item fn: Vector of false negatives
 #' }
 #'
-#' If not all inputs are needed ... can be used to avoid an "unused argument" error.
 #' The function should return a matrix with one column. If the column is named,
 #' the named will be included in the output and plots. Avoid using names that
 #' are identical to the column names that are by default returned by cutpointr.
