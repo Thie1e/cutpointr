@@ -7,13 +7,15 @@ cutpointr
 
 **cutpointr** is an R package for tidy calculation of "optimal" cutpoints. It supports several methods for calculating cutpoints and includes several metrics that can be maximized or minimized by selecting a cutpoint. Additionally, **cutpointr** can automatically bootstrap the variability of the optimal cutpoints and return out-of-bag estimates of various metrics.
 
-### Installation
+Installation
+------------
 
 ``` r
 devtools::install_github("thie1e/cutpointr")
 ```
 
-### Features
+Features
+--------
 
 -   Calculation of "optimal" cutpoints in binary classification tasks
 -   Tidy output, integrates well with functions from the tidyverse
@@ -22,7 +24,8 @@ devtools::install_github("thie1e/cutpointr")
 -   Multiple metrics can be chosen for maximization / minimization
 -   Standard/Nonstandard evaluation of the function arguments
 
-### Calculating cutpoints
+Calculating cutpoints
+---------------------
 
 The included methods for calculating cutpoints are:
 
@@ -40,10 +43,12 @@ The included metrics to be used with `minimize_metric` and `maximize_metric` are
 -   `kappa`: Cohen's Kappa
 -   `sum_sens_spec`: sensitivity + specificity
 -   `youden`: Youden- or J-Index = sensitivity + specificity - 1
+-   `odds_ratio`: (Diagnostic) odds ratio
 
 **cutpointr** makes use of nonstandard evaluation for higher usability and to allow for easy transformation of the variables. The inputs to the arguments `method` and `metric` are functions so that user-defined functions can easily be supplied instead of the built in ones.
 
-### Applications
+Applications
+------------
 
 To showcase the functionality, we'll use the included `suicide` data set.
 
@@ -71,7 +76,7 @@ opt_cut
 #> 1   0.8888889   0.8629032 0.9237791       yes        no 0.06766917 suicide
 #>   predictor               data          roc_curve
 #>       <chr>             <list>             <list>
-#> 1       dsi <tibble [532 × 2]> <tibble [14 × 10]>
+#> 1       dsi <tibble [532 × 2]> <tibble [13 × 10]>
 ```
 
 **cutpointr** makes assumptions about the direction of the dependency between class and x, if `direction` and / or `pos_class` or `neg_class` are not specified. The same result can be achieved by manually defining `direction` and the positive / negative classes which is slightly faster:
@@ -89,7 +94,7 @@ opt_cut
 #> 1   0.8888889   0.8629032 0.9237791       yes        no 0.06766917 suicide
 #>   predictor               data          roc_curve
 #>       <chr>             <list>             <list>
-#> 1       dsi <tibble [532 × 2]> <tibble [14 × 10]>
+#> 1       dsi <tibble [532 × 2]> <tibble [13 × 10]>
 ```
 
 `opt_cut` is a tidy data frame that returns the input data in a nested tibble. Methods for summarizing and plotting the data and results are included:
@@ -121,20 +126,14 @@ plot(opt_cut)
 
 ![](README-unnamed-chunk-5-1.png)
 
-If `method` is `maximize_metric` or `minimize_metric` the metric over all possible cutoff values can be plotted using `plot_metric`:
-
-``` r
-plot_metric(opt_cut)
-```
-
-![](README-unnamed-chunk-6-1.png)
-
 Predictions for new data can be made using `predict`:
 
 ``` r
 predict(opt_cut, newdata = data.frame(dsi = 0:5))
 #> [1] "no"  "no"  "yes" "yes" "yes" "yes"
 ```
+
+### Separate subgroups
 
 Cutpoints can be separately estimated on a subgroup, gender in this case:
 
@@ -158,8 +157,8 @@ opt_cut
 #> 2 0.06428571 suicide       dsi   gender <tibble [140 × 2]>
 #>            roc_curve
 #>               <list>
-#> 1 <tibble [12 × 10]>
-#> 2 <tibble [12 × 10]>
+#> 1 <tibble [11 × 10]>
+#> 2 <tibble [11 × 10]>
 summary(opt_cut)
 #> Method: maximize_metric 
 #> Predictor: dsi 
@@ -201,9 +200,11 @@ summary(opt_cut)
 plot(opt_cut)
 ```
 
-![](README-unnamed-chunk-8-1.png)
+![](README-unnamed-chunk-7-1.png)
 
-If `boot_runs` is larger zero, **cutpointr** will carry out the cutpoint calculation on the full sample and on `boot_runs` bootstrap samples.
+### Bootstrapping
+
+If `boot_runs` is larger zero, **cutpointr** will carry out the usual cutpoint calculation on the full sample, just as before, and additionally on `boot_runs` bootstrap samples.
 
 ``` r
 set.seed(12)
@@ -220,10 +221,10 @@ opt_cut
 #> 1   0.8888889   0.8629032 0.9237791       yes        no 0.06766917 suicide
 #>   predictor               data          roc_curve                boot
 #>       <chr>             <list>             <list>              <list>
-#> 1       dsi <tibble [532 × 2]> <tibble [14 × 10]> <tibble [200 × 18]>
+#> 1       dsi <tibble [532 × 2]> <tibble [13 × 10]> <tibble [200 × 18]>
 ```
 
-The returned object has the additional column `boot` which is a nested tibble that includes the cutpoints per bootstrap sample along with the metric in `metric` and a number of additional metrics:
+The returned object has the additional column `boot` which is a nested tibble that includes the cutpoints per bootstrap sample along with the metric calculated using the function in `metric` and a number of additional metrics. The values in the second column that are calculated using the function in `metric` represent out-of-bag results. The other default metrics are suffixed by `_b` to indicate in-bag results or `_oob` to indicate out-of-bag results:
 
 ``` r
 opt_cut$boot
@@ -288,7 +289,7 @@ summary(opt_cut)
 plot(opt_cut)
 ```
 
-![](README-unnamed-chunk-11-1.png)
+![](README-unnamed-chunk-10-1.png)
 
 If a subgroup is given, the bootstrapping is carried out separately for every subgroup:
 
@@ -317,8 +318,8 @@ opt_cut
 #> 2 0.06428571 suicide       dsi   gender <tibble [140 × 2]>
 #>            roc_curve                boot
 #>               <list>              <list>
-#> 1 <tibble [12 × 10]> <tibble [200 × 18]>
-#> 2 <tibble [12 × 10]> <tibble [200 × 18]>
+#> 1 <tibble [11 × 10]> <tibble [200 × 18]>
+#> 2 <tibble [11 × 10]> <tibble [200 × 18]>
 summary(opt_cut)
 #> Method: maximize_metric 
 #> Predictor: dsi 
@@ -388,12 +389,14 @@ plot(opt_cut)
 #> Warning: Removed 2 rows containing non-finite values (stat_density).
 ```
 
-![](README-unnamed-chunk-12-1.png)
+![](README-unnamed-chunk-11-1.png)
+
+### Parallelized bootstrapping
 
 Using `foreach` and `doRNG` the bootstrapping can easily be parallelized. The `doRNG` package is being used to make the bootstrap sampling reproducible. It may be preferable for long running tasks to specify `direction` and `pos_class` and / or `neg_class` manually to speed up `cutpointr`.
 
 ``` r
-if (require(doSNOW) & require(doRNG)) {
+if (suppressPackageStartupMessages(require(doSNOW) & require(doRNG))) {
   cl <- makeCluster(2) # 2 cores
   registerDoSNOW(cl)
   registerDoRNG(12) # Reproducible parallel loops using doRNG
@@ -402,19 +405,6 @@ if (require(doSNOW) & require(doRNG)) {
   stopCluster(cl)
   opt_cut
 }
-#> Loading required package: doSNOW
-#> Loading required package: foreach
-#> Loading required package: iterators
-#> Loading required package: snow
-#> Loading required package: doRNG
-#> Loading required package: rngtools
-#> Loading required package: pkgmaker
-#> Loading required package: registry
-#> 
-#> Attaching package: 'pkgmaker'
-#> The following object is masked from 'package:base':
-#> 
-#>     isNamespaceLoaded
 #> 
 #> Attaching package: 'parallel'
 #> The following objects are masked from 'package:snow':
@@ -440,11 +430,12 @@ if (require(doSNOW) & require(doRNG)) {
 #> 2 0.06428571 suicide       dsi   gender <tibble [140 × 2]>
 #>            roc_curve                boot
 #>               <list>              <list>
-#> 1 <tibble [12 × 10]> <tibble [200 × 18]>
-#> 2 <tibble [12 × 10]> <tibble [200 × 18]>
+#> 1 <tibble [11 × 10]> <tibble [200 × 18]>
+#> 2 <tibble [11 × 10]> <tibble [200 × 18]>
 ```
 
-### Nonstandard evaluation
+Nonstandard evaluation
+----------------------
 
 The arguments to `cutpointr` do not need to be enclosed in quotes. This is possible thanks to nonstandard evaluation of the arguments, which are evaluated in `data`. Alternatively, the arguments *can* be enclosed in quotes. In that case, transforming the data within the function call is not possible and `method` and `metric` functions that are enclosed in quotes are only looked up within the **cutpointr** package. As an example of a transformation of the `x`, `class` and `subgroup` variable consider:
 
@@ -477,8 +468,8 @@ opt_cut
 #> 2 0.05381166 suicide == "yes" log(dsi + 1) dsi%%2 == 0 <tibble [446 × 2]>
 #>           roc_curve               boot
 #>              <list>             <list>
-#> 1 <tibble [8 × 10]> <tibble [30 × 18]>
-#> 2 <tibble [8 × 10]> <tibble [30 × 18]>
+#> 1 <tibble [7 × 10]> <tibble [30 × 18]>
+#> 2 <tibble [7 × 10]> <tibble [30 × 18]>
 summary(opt_cut)
 #> Method: maximize_metric 
 #> Predictor: log(dsi + 1) 
@@ -547,14 +538,15 @@ summary(opt_cut)
 plot(opt_cut)
 ```
 
-![](README-unnamed-chunk-14-1.png)
+![](README-unnamed-chunk-13-1.png)
 
 ``` r
 predict(opt_cut, newdata = data.frame(dsi = 0:5))
 #> [1] FALSE FALSE  TRUE FALSE  TRUE  TRUE
 ```
 
-### cutpointr in the tidyverse
+cutpointr in the tidyverse
+--------------------------
 
 Since `cutpointr` outputs a tidy data frame and `data` is the first argument, it can be conveniently used in conjunction with various functions from the "tidyverse".
 
@@ -589,17 +581,80 @@ suicide %>%
 #>   <fctr>             <list>            <list>            <list>
 #> 1 female <tibble [392 × 3]> <tibble [1 × 15]> <tibble [1 × 15]>
 #> 2   male <tibble [140 × 3]> <tibble [1 × 15]> <tibble [1 × 15]>
+```
 
-suicide %>%
-    cutpointr(dsi, suicide) %>%
-    select(roc_curve) %>%
-    unnest %>%
-    ggplot(aes(x = fp, y = tp)) + geom_point() + geom_line()
+Plotting
+--------
+
+**cutpointr** includes several convenience functions for plotting data from a `cutpointr` object. These include:
+
+-   `plot_cut_boot`: Plot the bootstrapped distribution of optimal cutpoints
+-   `plot_metric`: If `maximize_metric` or `minimize_metric` was used this function plots all possible cutoffs on the x-axis vs. the respective metric values on the y-axis
+-   `plot_metric_boot`: Plot the distribution of out-of-bag metric values
+-   `plot_precision_recall`: Plot the precision recall curve
+-   `plot_roc`: Plot the ROC curve
+-   `plot_x`: Plot the distribution of the predictor variable
+
+``` r
+opt_cut <- cutpointr(suicide, dsi, suicide, gender, method = minimize_metric,
+                     metric = abs_d_sesp, boot_runs = 100)
 #> Assuming yes as the positive class
 #> Assuming the positive class has higher x values
+#> Warning in .f(.x[[i]], ...): 4 Missing values in bootstrap, maybe due to
+#> sampling of only one class
+opt_cut
+#> # A tibble: 2 × 18
+#>   subgroup direction optimal_cutpoint          method abs_d_sesp  accuracy
+#>      <chr>     <chr>            <dbl>           <chr>      <dbl>     <dbl>
+#> 1   female        >=                2 minimize_metric 0.04373415 0.8852041
+#> 2     male        >=                2 minimize_metric 0.03138253 0.8071429
+#>   sensitivity specificity       AUC pos_class neg_class prevalence outcome
+#>         <dbl>       <dbl>     <dbl>    <fctr>    <fctr>      <dbl>   <chr>
+#> 1   0.9259259   0.8821918 0.9446474       yes        no 0.06887755 suicide
+#> 2   0.7777778   0.8091603 0.8617472       yes        no 0.06428571 suicide
+#>   predictor grouping               data          roc_curve
+#>       <chr>    <chr>             <list>             <list>
+#> 1       dsi   gender <tibble [392 × 2]> <tibble [11 × 10]>
+#> 2       dsi   gender <tibble [140 × 2]> <tibble [11 × 10]>
+#>                  boot
+#>                <list>
+#> 1 <tibble [100 × 18]>
+#> 2 <tibble [100 × 18]>
+plot_cut_boot(opt_cut)
 ```
 
 ![](README-unnamed-chunk-15-1.png)
+
+``` r
+plot_metric(opt_cut)
+```
+
+![](README-unnamed-chunk-15-2.png)
+
+``` r
+plot_metric_boot(opt_cut)
+#> Warning: Removed 2 rows containing non-finite values (stat_density).
+```
+
+![](README-unnamed-chunk-15-3.png)
+
+``` r
+plot_precision_recall(opt_cut)
+```
+
+![](README-unnamed-chunk-15-4.png)
+
+``` r
+plot_roc(opt_cut)
+```
+
+![](README-unnamed-chunk-15-5.png)
+
+``` r
+plot_x(opt_cut)
+```
+
+![](README-unnamed-chunk-15-6.png)
 
 ### Manual plotting
 
@@ -654,7 +709,20 @@ opt_cut %>%
 
 ![](README-unnamed-chunk-16-1.png)
 
-### User-defined method and metric functions
+### ROC curve only
+
+When running `cutpointr` a ROC curve is by default returned in the column `roc`. This ROC curve can be plotted using `plot_roc`. Alternatively, if only the ROC curve is desired and no cutpoint needs to be calculated, the ROC curve can be plotted using the `roc` function and, for example, **ggplot2**. Note that the `roc` function, unlike `cutpointr`, does not determine `direction`, `pos_class` or `neg_class` automatically and does not support nonstandard evaluation, so the function arguments have to be enclosed in quotation marks.
+
+``` r
+roc(data = suicide, x = "dsi", class = "suicide", 
+    pos_class = "yes", neg_class = "no") %>% 
+    ggplot(aes(x = fpr, y = tpr)) + geom_line()
+```
+
+![](README-unnamed-chunk-17-1.png)
+
+User-defined method and metric functions
+----------------------------------------
 
 User defined functions can be supplied to method. To define a new method function, create a function that may take as input(s):
 

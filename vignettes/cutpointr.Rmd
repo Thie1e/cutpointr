@@ -4,7 +4,7 @@ author: "Christian Thiele"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{An introduction to cutpointr}
+  %\VignetteIndexEntry{cutpointr}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,7 +15,8 @@ metrics that can be maximized or minimized by selecting a cutpoint. Additionally
 **cutpointr** can automatically bootstrap the variability of the optimal 
 cutpoints and return out-of-bag estimates of various metrics.
 
-### Features
+
+## Features
 
 - Calculation of "optimal" cutpoints in binary classification tasks
 - Tidy output, integrates well with functions from the tidyverse
@@ -25,7 +26,7 @@ out-of-bag estimates of various metrics (as a form of cross validation)
 - Multiple metrics can be chosen for maximization / minimization
 - Standard/Nonstandard evaluation of the function arguments
 
-### Calculating cutpoints
+## Calculating cutpoints
 
 The included methods for calculating cutpoints are:
 
@@ -47,13 +48,14 @@ The included metrics to be used with `minimize_metric` and `maximize_metric` are
 - `kappa`: Cohen's Kappa
 - `sum_sens_spec`: sensitivity + specificity
 - `youden`: Youden- or J-Index = sensitivity + specificity - 1
+- `odds_ratio`: (Diagnostic) odds ratio
 
 **cutpointr** makes use of nonstandard evaluation for higher usability and to
 allow for easy transformation of the variables. The inputs to the arguments
 `method` and `metric` are functions so that user-defined functions can easily
 be supplied instead of the built in ones.
 
-### Applications
+## Applications
 
 To showcase the functionality, we'll use the included `suicide` data set.
 
@@ -85,18 +87,13 @@ summary(opt_cut)
 plot(opt_cut)
 ```
 
-If `method` is `maximize_metric` or `minimize_metric` the metric over all 
-possible cutoff values can be plotted using `plot_metric`:
-
-```{r}
-plot_metric(opt_cut)
-```
-
 Predictions for new data can be made using `predict`:
 
 ```{r}
 predict(opt_cut, newdata = data.frame(dsi = 0:5))
 ```
+
+### Separate subgroups
 
 Cutpoints can be separately estimated on a subgroup, gender in this case:
 
@@ -107,8 +104,11 @@ summary(opt_cut)
 plot(opt_cut)
 ```
 
-If `boot_runs` is larger zero, **cutpointr** will carry out the cutpoint
-calculation on the full sample and on `boot_runs` bootstrap samples. 
+### Bootstrapping
+
+If `boot_runs` is larger zero, **cutpointr** will carry out the usual cutpoint
+calculation on the full sample, just as before, and additionally on 
+`boot_runs` bootstrap samples. 
 
 ```{r}
 set.seed(12)
@@ -117,8 +117,12 @@ opt_cut
 ```
 
 The returned object has the additional column `boot` which is a nested tibble that
-includes the cutpoints per bootstrap sample along with the metric in `metric` and
-a number of additional metrics:
+includes the cutpoints per bootstrap sample along with the metric calculated using 
+the function in `metric` and
+a number of additional metrics. The values in the second column that are calculated
+using the function in `metric` represent out-of-bag results. The other default
+metrics are suffixed by `_b` to indicate in-bag results or `_oob` to indicate
+out-of-bag results:
 
 ```{r}
 opt_cut$boot
@@ -142,13 +146,15 @@ summary(opt_cut)
 plot(opt_cut)
 ```
 
+### Parallelized bootstrapping
+
 Using `foreach` and `doRNG` the bootstrapping can easily be parallelized. The
 `doRNG` package is being used to make the bootstrap sampling reproducible. It may
 be preferable for long running tasks to specify `direction` and `pos_class` 
 and / or `neg_class` manually to speed up `cutpointr`.
 
 ```{r}
-if (require(doSNOW) & require(doRNG)) {
+if (suppressPackageStartupMessages(require(doSNOW) & require(doRNG))) {
   cl <- makeCluster(2) # 2 cores
   registerDoSNOW(cl)
   registerDoRNG(12) # Reproducible parallel loops using doRNG
@@ -159,7 +165,7 @@ if (require(doSNOW) & require(doRNG)) {
 }
 ```
 
-### Nonstandard evaluation
+## Nonstandard evaluation
 
 The arguments to `cutpointr` do not need to be enclosed in quotes. This is 
 possible thanks to nonstandard evaluation of the arguments, which are 
@@ -181,7 +187,7 @@ plot(opt_cut)
 predict(opt_cut, newdata = data.frame(dsi = 0:5))
 ```
 
-### cutpointr in the tidyverse
+## cutpointr in the tidyverse
 
 Since `cutpointr` outputs a tidy data frame and `data` is the first argument,
 it can be conveniently used in conjunction with various functions from the "tidyverse". 
@@ -201,13 +207,34 @@ suicide %>%
                                                      metric = accuracy)),
            cutmod2 = map(data, function(x) cutpointr(x, dsi, suicide,
                                                      metric = sum_sens_spec)))
-
-suicide %>%
-    cutpointr(dsi, suicide) %>%
-    select(roc_curve) %>%
-    unnest %>%
-    ggplot(aes(x = fp, y = tp)) + geom_point() + geom_line()
 ```
+
+## Plotting
+
+**cutpointr** includes several convenience functions for plotting data from a 
+`cutpointr` object. These include:
+
+- `plot_cut_boot`: Plot the bootstrapped distribution of optimal cutpoints
+- `plot_metric`: If `maximize_metric` or `minimize_metric` was used this function
+plots all possible cutoffs on the x-axis vs. the respective metric values on
+the y-axis
+- `plot_metric_boot`: Plot the distribution of out-of-bag metric values
+- `plot_precision_recall`: Plot the precision recall curve
+- `plot_roc`: Plot the ROC curve
+- `plot_x`: Plot the distribution of the predictor variable
+
+```{r, fig.width=4, fig.height=3}
+opt_cut <- cutpointr(suicide, dsi, suicide, gender, method = minimize_metric,
+                     metric = abs_d_sesp, boot_runs = 100)
+opt_cut
+plot_cut_boot(opt_cut)
+plot_metric(opt_cut)
+plot_metric_boot(opt_cut)
+plot_precision_recall(opt_cut)
+plot_roc(opt_cut)
+plot_x(opt_cut)
+```
+
 
 ### Manual plotting
 
@@ -231,8 +258,24 @@ opt_cut %>%
     geom_boxplot(alpha = 0.3) + facet_grid(~subgroup)
 ```
 
+### ROC curve only
 
-### User-defined method and metric functions
+When running `cutpointr` a ROC curve is by default returned in the column `roc`.
+This ROC curve can be plotted using `plot_roc`. Alternatively, if only the
+ROC curve is desired and no cutpoint needs to be calculated, the ROC curve
+can be plotted using the `roc` function and, for example, **ggplot2**. Note that
+the `roc` function, unlike `cutpointr`, does not determine `direction`, `pos_class` or `neg_class`
+automatically and does not support nonstandard evaluation, so the function
+arguments have to be enclosed in quotation marks.
+
+```{r}
+roc(data = suicide, x = "dsi", class = "suicide", 
+    pos_class = "yes", neg_class = "no") %>% 
+    ggplot(aes(x = fpr, y = tpr)) + geom_line()
+```
+
+
+## User-defined method and metric functions
 
 User defined functions can be supplied to method. 
 To define a new method function, create a function that may take
@@ -299,4 +342,5 @@ For example, this is the `accuracy` metric function:
 ```{r}
 accuracy
 ```
+
 
