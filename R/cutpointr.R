@@ -177,7 +177,7 @@
 #'
 #'
 #' @param data A data frame or tibble in which the columns that are given in x,
-#'  class and possibly subgroup can be found
+#'  class and possibly subgroup can be found.
 #' @param x The variable name (with or without quotation marks) to be used for
 #'  classification, e.g. predictions or test values.
 #' @param class The variable name (with or without quotation marks) indicating class membership.
@@ -190,8 +190,8 @@
 #' maximize_metric or minimize_metric as method and and for the
 #' out-of-bag values during bootstrapping. A way of internally validating the performance.
 #' User defined functions can be supplied, see details.
-#' @param pos_class (optional) The value of class that indicates the positive class
-#' @param neg_class (optional) The value of class that indicates the negative class
+#' @param pos_class (optional) The value of class that indicates the positive class.
+#' @param neg_class (optional) The value of class that indicates the negative class.
 #' @param direction (character, optional) Use ">=" or "<=" to indicate whether x
 #' is supposed to be larger or smaller for the positive class.
 #' @param boot_runs (numeric, optional) If positive, this number of bootstrap samples
@@ -227,7 +227,7 @@ cutpointr <- function(data, x, class, subgroup = NULL,
     #
     if (is.character(substitute(x))) x <- as.name(x)
     if (is.character(substitute(class))) class <- as.name(class)
-    if (!missing(subgroup) && is.character(substitute(subgroup))) subgroup <- as.name(subgroup)
+    if (!missing(subgroup) & is.character(substitute(subgroup))) subgroup <- as.name(subgroup)
     predictor <- deparse(substitute(x))
     outcome   <- deparse(substitute(class))
     x <- eval(substitute(x), data, parent.frame())
@@ -237,7 +237,7 @@ cutpointr <- function(data, x, class, subgroup = NULL,
         subgroup <- eval(substitute(subgroup), data, parent.frame())
     }
 
-    # Get cutpoint function
+    # Get method function
     if (length(method) > 1 | !(class(method) %in% c("character", "function"))) {
         stop("method should be character string or a function")
     }
@@ -245,25 +245,41 @@ cutpointr <- function(data, x, class, subgroup = NULL,
         # If a character vec is given the user surely wants to search in the package
         mod_names <- method[1]
         method <- paste0("cutpointr::", method)
-        # method <- lapply(method, function(fun) eval(parse(text = fun)))
         method <- eval(parse(text = method))
     } else {
         cl <- match.call()
         mod_names <- cl$method
         # if default was not changed:
         mod_names <- as.character(substitute(method))
-        mod_names <- mod_names[1]
+        # mod_names <- mod_names[1]
     }
     if (is.null(mod_names)) stop("Could not get the names of the method function")
-    stopifnot(is.function(metric))
-    # metric_name <- as.character(substitute(metric))
+
+    # Get metric function
+    if (length(metric) > 1 | !(class(metric) %in% c("character", "function"))) {
+        stop("method should be character string or a function")
+    }
+    if (is.character(metric)) {
+        # If a character vec is given the user surely wants to search in the package
+        mod_names <- metric[1]
+        metric <- paste0("cutpointr::", metric)
+        metric <- eval(parse(text = metric))
+    } else {
+        cl <- match.call()
+        metric_name <- cl$metric
+        # if default was not changed:
+        metric_name <- as.character(substitute(metric))
+        # metric_name <- metric_name[1]
+    }
+    if (is.null(metric_name)) stop("Could not get the names of the method function")
+
 
     #
     # Prep
     #
 
     #NA
-    if (any(anyNA(c(x, class)) | (!missing(subgroup) && anyNA(subgroup))) &&
+    if (any(anyNA(c(x, class)) | (!missing(subgroup) & anyNA(subgroup))) &
          (missing(na.rm) | !na.rm)) {
         stop("NAs found but na.rm = FALSE")
     }
