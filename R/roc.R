@@ -1,12 +1,12 @@
-#' Create ROC curve
+#' Calculate a ROC curve
 #'
 #' Given a data frame with a numeric predictor variable and a binary outcome
 #' variable this function returns a data frame that includes all elements of
 #' a confusion matrix for every unique value of the predictor variable.
 #' Additionally, the TPR, FPR, TNR and FNR are returned.
 #' @param data A data frame or matrix. Will be converted to a data frame.
-#' @param x A numeric independent (predictor) variable.
-#' @param class A binary vector of outcome values.
+#' @param x (charaacter) The numeric independent (predictor) variable.
+#' @param class (character) A binary vector of outcome values.
 #' @param pos_class The value of 'class' that represents the positive cases.
 #' @param neg_class The value of 'class' that represents the negative cases.
 #' @param direction (character) One of ">=" or "<=". Specifies if the positive
@@ -19,8 +19,7 @@
 #' roc(data = dat, x = "Petal.Width", class = "Species",
 #' pos_class = "versicolor", neg_class = "setosa", direction = ">=")
 #' @export
-roc <- function(data, x, class,
-                pos_class = NULL, neg_class = NULL, direction = ">=") {
+roc <- function(data, x, class, pos_class, neg_class, direction = ">=") {
     stopifnot(direction %in% c(">=", "<="))
     data <- as.data.frame(data)
     stopifnot(is.character(x))
@@ -51,14 +50,6 @@ roc <- function(data, x, class,
             tn <- c(n_neg, tn)
             fn <- c(n_pos, fn)
         }
-        if (!(-Inf %in% x.sorted)) {
-            x.sorted <- c(x.sorted, -Inf)
-            class.sorted <- c(class.sorted, NA)
-            tp <- c(tp, n_pos)
-            fp <- c(fp, n_neg)
-            tn <- c(tn, 0)
-            fn <- c(fn, 0)
-        }
     } else if (direction == "<=") {
         pred.order <- order(x, decreasing = FALSE)
         x.sorted <- x[pred.order]
@@ -74,14 +65,6 @@ roc <- function(data, x, class,
         tn <- n_neg - fp
         fn <- n_pos + n_neg - tp - fp - tn
 
-        if (!(Inf %in% x.sorted)) {
-            x.sorted <- c(x.sorted, Inf)
-            class.sorted <- c(class.sorted, NA)
-            tp <- c(tp, n_pos)
-            fp <- c(fp, n_neg)
-            tn <- c(tn, 0)
-            fn <- c(fn, 0)
-        }
         if (!(-Inf %in% x.sorted)) {
             x.sorted <- c(-Inf, x.sorted)
             class.sorted <- c(NA, class.sorted)
