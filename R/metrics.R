@@ -32,14 +32,6 @@ kappa_from_oc <- function(roc_curve, oc, direction, opt_ind = NULL) {
 }
 
 #' @source Forked from the AUC package
-# auc <- function(tpr, fpr) {
-#     stopifnot(length(tpr) == length(fpr))
-#     res <- 0
-#     for (i in 2:length(fpr)) {
-#         res <- res + 0.5 * abs(fpr[i] - fpr[i - 1]) * (tpr[i] + tpr[i - 1])
-#     }
-#     res
-# }
 auc <- function(tpr, fpr) {
     l_tpr <- length(tpr)
     l_fpr <- length(fpr)
@@ -53,11 +45,11 @@ auc <- function(tpr, fpr) {
 #' Calculate accuracy
 #' Calculate accuracy from the elements of a confusion matrix, that is
 #' true positives, false positives, true negatives and false negatives.
-#' The inputs can be vectors of equal length.
-#' @param tp (numeric) number of true positives
-#' @param fp (numeric) number of false positives
-#' @param tn (numeric) number of true negatives
-#' @param fn (numeric) number of false negatives
+#' The inputs must be vectors of equal length.
+#' @param tp (numeric) number of true positives.
+#' @param fp (numeric) number of false positives.
+#' @param tn (numeric) number of true negatives.
+#' @param fn (numeric) number of false negatives.
 #' @examples
 #' accuracy(10, 5, 20, 10)
 #' @export
@@ -70,11 +62,11 @@ accuracy <- function(tp, fp, tn, fn) {
 #' Calculate the Youden-Index
 #' Calculate the Youden-Index (J-Index) from the elements of a confusion matrix,
 #' that is true positives, false positives, true negatives and false negatives.
-#' The inputs can be vectors of equal length.
-#' @param tp (numeric) number of true positives
-#' @param fp (numeric) number of false positives
-#' @param tn (numeric) number of true negatives
-#' @param fn (numeric) number of false negatives
+#' The inputs must be vectors of equal length.
+#' @param tp (numeric) number of true positives.
+#' @param fp (numeric) number of false positives.
+#' @param tn (numeric) number of true negatives.
+#' @param fn (numeric) number of false negatives.
 #' @examples
 #' youden(10, 5, 20, 10)
 #' @export
@@ -88,11 +80,11 @@ youden <- function(tp, fp, tn, fn) {
 #' Calculate the sum of sensitivity and specificity
 #' Calculate the sum of sensitivity and specificity from the elements of a confusion matrix,
 #' that is true positives, false positives, true negatives and false negatives.
-#' The inputs can be vectors of equal length.
-#' @param tp (numeric) number of true positives
-#' @param fp (numeric) number of false positives
-#' @param tn (numeric) number of true negatives
-#' @param fn (numeric) number of false negatives
+#' The inputs must be vectors of equal length.
+#' @param tp (numeric) number of true positives.
+#' @param fp (numeric) number of false positives.
+#' @param tn (numeric) number of true negatives.
+#' @param fn (numeric) number of false negatives.
 #' @examples
 #' sum_sens_spec(10, 5, 20, 10)
 #' @export
@@ -109,11 +101,11 @@ sum_sens_spec <- function(tp, fp, tn, fn) {
 #' Calculate the absolute difference of sensitivity and specificity
 #' from the elements of a confusion matrix,
 #' that is true positives, false positives, true negatives and false negatives.
-#' The inputs can be vectors of equal length.
-#' @param tp (numeric) number of true positives
-#' @param fp (numeric) number of false positives
-#' @param tn (numeric) number of true negatives
-#' @param fn (numeric) number of false negatives
+#' The inputs must be vectors of equal length.
+#' @param tp (numeric) number of true positives.
+#' @param fp (numeric) number of false positives.
+#' @param tn (numeric) number of true negatives.
+#' @param fn (numeric) number of false negatives.
 #' @examples
 #' abs_d_sesp(10, 5, 20, 10)
 #' @export
@@ -129,11 +121,11 @@ abs_d_sesp <- function(tp, fp, tn, fn) {
 #' Calculate Cohen's Kappa
 #' Calculate the Kappa metric from the elements of a 2x2 confusion matrix,
 #' that is true positives, false positives, true negatives and false negatives.
-#' The inputs can be vectors of equal length.
-#' @param tp (numeric) number of true positives
-#' @param fp (numeric) number of false positives
-#' @param tn (numeric) number of true negatives
-#' @param fn (numeric) number of false negatives
+#' The inputs must be vectors of equal length.
+#' @param tp (numeric) number of true positives.
+#' @param fp (numeric) number of false positives.
+#' @param tn (numeric) number of true negatives.
+#' @param fn (numeric) number of false negatives.
 #' @examples
 #' cohens_kappa(10, 5, 20, 10)
 #' @return A numeric matrix with the column name "Kappa".
@@ -146,4 +138,23 @@ cohens_kappa <- function(tp, fp, tn, fn) {
     res <- matrix((OA - EA) / (1 - EA), ncol = 1)
     colnames(res) <- "Kappa"
     return(res)
+}
+
+#' Calculate the odds ratio
+#' Calculate the (diagnostic) odds ratio from the elements of a confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' The odds ratio is defined as: (TP / FP) / (TN / FN)
+#' The inputs must be vectors of equal length.
+#' @param tp (numeric) number of true positives.
+#' @param fp (numeric) number of false positives.
+#' @param tn (numeric) number of true negatives.
+#' @param fn (numeric) number of false negatives.
+#' @examples
+#' odds_ratio(10, 5, 20, 10)
+#' @export
+odds_ratio <- function(tp, fp, tn, fn) {
+    or <- (tp / fp) / (fn / tn)
+    or <- matrix(or, ncol = 1)
+    colnames(or) <- "odds_ratio"
+    return(or)
 }
