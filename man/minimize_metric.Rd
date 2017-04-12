@@ -11,10 +11,10 @@ minimize_metric(data, x, class, metric_func = youden, pos_class = NULL,
 \item{data}{A data frame or tibble in which the columns that are given in x
 and class can be found.}
 
-\item{x}{The variable name (with quotation marks) to be used for classification,
+\item{x}{(character) The variable name to be used for classification,
 e.g. predictions or test values.}
 
-\item{class}{The variable name (with quotation marks) indicating class membership.}
+\item{class}{(character) The variable name indicating class membership.}
 
 \item{metric_func}{(function) A function that computes a single number
 metric to be minimized. See description.}
@@ -23,7 +23,8 @@ metric to be minimized. See description.}
 
 \item{neg_class}{The value of class that indicates the negative class.}
 
-\item{direction}{(character) Use ">=" or "<=" to indicate whether x}
+\item{direction}{(character) Use ">=" or "<=" to select whether an x value
+>= or <= the cutoff predicts the positive class.}
 }
 \value{
 A tibble with the columns optimal_cutpoint, the corresponding metric

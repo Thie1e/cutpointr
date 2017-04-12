@@ -7,9 +7,9 @@
 plot_cut_boot(x, ...)
 }
 \arguments{
-\item{x}{A cutpointr object}
+\item{x}{A cutpointr object.}
 
-\item{...}{Additional arguments (unused)}
+\item{...}{Additional arguments (unused).}
 }
 \description{
 Given a cutpointr object this function plots the bootstrapped distribution

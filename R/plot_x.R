@@ -2,8 +2,8 @@
 #'
 #' Given a cutpointr object this function plots the distribution(s) of the
 #' independent variable(s) and the respective cutpoints.
-#' @param x A cutpointr object
-#' @param ... Additional arguments (unused)
+#' @param x A cutpointr object.
+#' @param ... Additional arguments (unused).
 #' @export
 plot_x <- function(x, ...) {
 

@@ -7,12 +7,11 @@
 oc_manual(cutpoint, ...)
 }
 \arguments{
-\item{cutpoint}{(numeric) The fixed cutpoint}
+\item{cutpoint}{(numeric) The fixed cutpoint.}
 
 \item{...}{To capture further arguments that are always passed to the method
 function by cutpointr. The cutpointr function passes data, x, class,
-metric_func, direction, pos_class and neg_class to the method function.
-is supposed to be larger or smaller for the positive class.}
+metric_func, direction, pos_class and neg_class to the method function.}
 }
 \description{
 This function simply returns the Mainly useful if bootstrap estimates of the out-of-bag performance of a

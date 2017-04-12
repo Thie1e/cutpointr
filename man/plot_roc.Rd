@@ -4,12 +4,15 @@
 \alias{plot_roc}
 \title{Plot ROC curve from a cutpointr object}
 \usage{
-plot_roc(x, ...)
+plot_roc(x, display_cutpoint = TRUE, ...)
 }
 \arguments{
-\item{x}{A cutpointr object}
+\item{x}{A cutpointr object.}
 
-\item{...}{Additional arguments (unused)}
+\item{display_cutpoint}{(logical) Whether or not to display the optimal
+cutpoint as a dot on the ROC curve.}
+
+\item{...}{Additional arguments (unused).}
 }
 \description{
 Given a cutpointr object this function plots the ROC curve(s)

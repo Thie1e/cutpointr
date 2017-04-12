@@ -5,7 +5,7 @@
 #' works for method functions that return a ROC-curve including the metric
 #' value for every cutpoint along with the optimal cutpoint.
 #'
-#' @param x A cutpointr object
+#' @param x A cutpointr object.
 #' @examples
 #' set.seed(123)
 #' class_a <- rnorm(50, mean = 10)
@@ -27,6 +27,7 @@ plot_metric <- function(x) {
                    "roc_curve - maybe because a method other than",
                    "maximize_metric or minimize_metric was used"))
     }
+    metric_name <- find_metric_name(x)
     if ("subgroup" %in% colnames(x)) {
         res_unnested <- x %>%
             dplyr::select_(.dots = c("roc_curve", "subgroup")) %>%
@@ -36,7 +37,7 @@ plot_metric <- function(x) {
                                                          color = ~ subgroup)) +
             ggplot2::geom_line() + ggplot2::geom_point() +
             ggplot2::ggtitle("Metric values by cutpoint value") +
-            ggplot2::ylab("Metric") + ggplot2::xlab("Cutpoint")
+            ggplot2::ylab(metric_name) + ggplot2::xlab("Cutpoint")
     } else {
         res_unnested <- x %>%
             dplyr::select_(.dots = "roc_curve") %>%
@@ -45,7 +46,7 @@ plot_metric <- function(x) {
                                                          y = ~ m)) +
             ggplot2::geom_line() + ggplot2::geom_point() +
             ggplot2::ggtitle("Metric values by cutpoint value") +
-            ggplot2::ylab("Metric") + ggplot2::xlab("Cutpoint")
+            ggplot2::ylab(metric_name) + ggplot2::xlab("Cutpoint")
     }
     return(p)
 }

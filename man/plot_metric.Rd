@@ -7,7 +7,7 @@
 plot_metric(x)
 }
 \arguments{
-\item{x}{A cutpointr object}
+\item{x}{A cutpointr object.}
 }
 \description{
 If maximize_metric is used as method function in cutpointr the computed

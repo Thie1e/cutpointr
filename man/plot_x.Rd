@@ -7,9 +7,9 @@
 plot_x(x, ...)
 }
 \arguments{
-\item{x}{A cutpointr object}
+\item{x}{A cutpointr object.}
 
-\item{...}{Additional arguments (unused)}
+\item{...}{Additional arguments (unused).}
 }
 \description{
 Given a cutpointr object this function plots the distribution(s) of the

@@ -11,7 +11,7 @@ cutpointr(data, x, class, subgroup = NULL, method = maximize_metric,
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x,
-class and possibly subgroup can be found}
+class and possibly subgroup can be found.}
 
 \item{x}{The variable name (with or without quotation marks) to be used for
 classification, e.g. predictions or test values.}
@@ -30,9 +30,9 @@ maximize_metric or minimize_metric as method and and for the
 out-of-bag values during bootstrapping. A way of internally validating the performance.
 User defined functions can be supplied, see details.}
 
-\item{pos_class}{(optional) The value of class that indicates the positive class}
+\item{pos_class}{(optional) The value of class that indicates the positive class.}
 
-\item{neg_class}{(optional) The value of class that indicates the negative class}
+\item{neg_class}{(optional) The value of class that indicates the negative class.}
 
 \item{direction}{(character, optional) Use ">=" or "<=" to indicate whether x
 is supposed to be larger or smaller for the positive class.}

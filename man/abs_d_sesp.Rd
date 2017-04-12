@@ -6,25 +6,25 @@
 Calculate the absolute difference of sensitivity and specificity
 from the elements of a confusion matrix,
 that is true positives, false positives, true negatives and false negatives.
-The inputs can be vectors of equal length.}
+The inputs must be vectors of equal length.}
 \usage{
 abs_d_sesp(tp, fp, tn, fn)
 }
 \arguments{
-\item{tp}{(numeric) number of true positives}
+\item{tp}{(numeric) number of true positives.}
 
-\item{fp}{(numeric) number of false positives}
+\item{fp}{(numeric) number of false positives.}
 
-\item{tn}{(numeric) number of true negatives}
+\item{tn}{(numeric) number of true negatives.}
 
-\item{fn}{(numeric) number of false negatives}
+\item{fn}{(numeric) number of false negatives.}
 }
 \description{
 Calculate absolute difference of sensitivity and specificity
 Calculate the absolute difference of sensitivity and specificity
 from the elements of a confusion matrix,
 that is true positives, false positives, true negatives and false negatives.
-The inputs can be vectors of equal length.
+The inputs must be vectors of equal length.
 }
 \examples{
 abs_d_sesp(10, 5, 20, 10)

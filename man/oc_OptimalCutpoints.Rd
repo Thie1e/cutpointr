@@ -11,24 +11,24 @@ oc_OptimalCutpoints(data, x, class, oc_metric, neg_class, direction,
 \item{data}{A data frame or tibble in which the columns that are given in x
 and class can be found.}
 
-\item{x}{The variable name (with quotation marks) to be used for classification,
+\item{x}{(character) The variable name to be used for classification,
 e.g. predictions or test values.}
 
-\item{class}{The variable name (with quotation marks) indicating class membership.}
+\item{class}{(character) The variable name indicating class membership.}
 
 \item{oc_metric}{(character) See ?optimal.cutpoints for available methods.}
 
 \item{neg_class}{The value of class that indicates the negative class.}
 
-\item{direction}{(character) Use ">=" or "<=" to indicate whether x}
+\item{direction}{(character) Use ">=" or "<=" to select whether an x value
+>= or <= the cutoff predicts the positive class.}
 
 \item{break_ties}{(function) A function to handle multiple optimal cutpoints,
 if multiple optimal cutpoints are found.}
 
 \item{...}{To capture further arguments that are always passed to the method
 function by cutpointr. The cutpointr function passes data, x, class,
-metric_func, direction, pos_class and neg_class to the method function.
-is supposed to be larger or smaller for the positive class.}
+metric_func, direction, pos_class and neg_class to the method function.}
 }
 \value{
 A data frame with one row, the column optimal_cutpoint and a second

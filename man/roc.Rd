@@ -2,16 +2,16 @@
 % Please edit documentation in R/roc.R
 \name{roc}
 \alias{roc}
-\title{Create ROC curve}
+\title{Calculate a ROC curve}
 \usage{
-roc(data, x, class, pos_class = NULL, neg_class = NULL, direction = ">=")
+roc(data, x, class, pos_class, neg_class, direction = ">=")
 }
 \arguments{
 \item{data}{A data frame or matrix. Will be converted to a data frame.}
 
-\item{x}{A numeric independent (predictor) variable.}
+\item{x}{(charaacter) The numeric independent (predictor) variable.}
 
-\item{class}{A binary vector of outcome values.}
+\item{class}{(character) A binary vector of outcome values.}
 
 \item{pos_class}{The value of 'class' that represents the positive cases.}
 

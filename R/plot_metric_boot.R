@@ -4,7 +4,7 @@
 #' The metric depends on the function that was supplied to `metric` in the
 #' call to cutpointr.
 #' The cutpointr function has to be run with boot_runs` > 0 to enable bootstrapping.
-#' @param x A cutpointr object
+#' @param x A cutpointr object.
 #' @param ... Additional arguments (unused)
 #' @export
 plot_metric_boot <- function(x, ...) {

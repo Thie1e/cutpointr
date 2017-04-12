@@ -6,16 +6,16 @@
 #'
 #' @param data A data frame or tibble in which the columns that are given in x
 #' and class can be found.
-#' @param x The variable name (with quotation marks) to be used for classification,
+#' @param x (character) The variable name to be used for classification,
 #' e.g. predictions or test values.
-#' @param class The variable name (with quotation marks) indicating class membership.
+#' @param class (character) The variable name indicating class membership.
 #' @param pos_class The value of class that indicates the positive class.
 #' @param neg_class The value of class that indicates the negative class.
-#' @param direction (character) Use ">=" or "<=" to indicate whether x
+#' @param direction (character) Use ">=" or "<=" to select whether an x value
+#' >= or <= the cutoff predicts the positive class.
 #' @param ... To capture further arguments that are always passed to the method
 #' function by cutpointr. The cutpointr function passes data, x, class,
 #' metric_func, direction, pos_class and neg_class to the method function.
-#' is supposed to be larger or smaller for the positive class.
 #' @examples
 #' data(suicide)
 #' oc_youden_normal(suicide, "dsi", "suicide",

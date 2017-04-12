@@ -5,18 +5,18 @@
 \title{Calculate Cohen's Kappa
 Calculate the Kappa metric from the elements of a 2x2 confusion matrix,
 that is true positives, false positives, true negatives and false negatives.
-The inputs can be vectors of equal length.}
+The inputs must be vectors of equal length.}
 \usage{
 cohens_kappa(tp, fp, tn, fn)
 }
 \arguments{
-\item{tp}{(numeric) number of true positives}
+\item{tp}{(numeric) number of true positives.}
 
-\item{fp}{(numeric) number of false positives}
+\item{fp}{(numeric) number of false positives.}
 
-\item{tn}{(numeric) number of true negatives}
+\item{tn}{(numeric) number of true negatives.}
 
-\item{fn}{(numeric) number of false negatives}
+\item{fn}{(numeric) number of false negatives.}
 }
 \value{
 A numeric matrix with the column name "Kappa".
@@ -25,7 +25,7 @@ A numeric matrix with the column name "Kappa".
 Calculate Cohen's Kappa
 Calculate the Kappa metric from the elements of a 2x2 confusion matrix,
 that is true positives, false positives, true negatives and false negatives.
-The inputs can be vectors of equal length.
+The inputs must be vectors of equal length.
 }
 \examples{
 cohens_kappa(10, 5, 20, 10)
