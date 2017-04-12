@@ -7,22 +7,26 @@ optimize_metric <- function(data, x, class, metric_func = youden,
                     neg_class = neg_class, direction = direction)
     m <- metric_func(tp = roccurve[, "tp"], fp = roccurve[, "fp"],
                      tn = roccurve[, "tn"], fn = roccurve[, "fn"])
+    if (any(!is.finite(m))) {
+        message("Omitting infinite metric values")
+        m[!is.finite(m)] <- NA
+    }
     roccurve$m <- as.numeric(m)
     if (!is.null(colnames(m))) metric_name <- colnames(m)
     if (minmax == "max") {
-        max_m <- max(m)
-        opt <- m == max_m
+        max_m <- max(m, na.rm = TRUE)
+        opt <- which(m == max_m)
         oc <- min(roccurve[, "x.sorted"][opt])
-        if (sum(opt) > 1) {
+        if (length(opt) > 1) {
             warning(paste("Multiple optimal cutpoints found, returning minimum of:",
                           paste(roccurve[, "x.sorted"][opt], collapse = ", ")))
         }
         m_oc <- max_m
     } else if (minmax == "min") {
-        min_m <- min(m)
-        opt <- m == min_m
+        min_m <- min(m, na.rm = TRUE)
+        opt <- which(m == min_m)
         oc <- max(roccurve[, "x.sorted"][opt])
-        if (sum(opt) > 1) {
+        if (length(opt) > 1) {
             warning(paste("Multiple optimal cutpoints found, returning maximum of:",
                           paste(roccurve[, "x.sorted"][opt], collapse = ", ")))
         }
