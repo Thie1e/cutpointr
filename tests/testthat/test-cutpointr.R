@@ -7,6 +7,8 @@ test_that("Cutpointr returns a cutpointr without NAs and a certain Nr of rows", 
     expect_silent(plot(opt_cut))
     expect_silent(plot_metric(opt_cut))
     expect_silent(plot_roc(opt_cut))
+    expect_silent(plot_x(opt_cut))
+    expect_silent(plot_precision_recall(opt_cut))
 })
 
 test_that("Cutpointr works with different data types", {
@@ -41,6 +43,8 @@ test_that("Cutpointr works with different data types", {
     expect_silent(plot(opt_cut))
     expect_silent(plot_metric(opt_cut))
     expect_silent(plot_roc(opt_cut))
+    expect_silent(plot_x(opt_cut))
+    expect_silent(plot_precision_recall(opt_cut))
 
     tempdat$g <- factor(tempdat$g)
     opt_cut <- cutpointr(tempdat, x, y, g)
@@ -49,6 +53,8 @@ test_that("Cutpointr works with different data types", {
     expect_silent(plot(opt_cut))
     expect_silent(plot_metric(opt_cut))
     expect_silent(plot_roc(opt_cut))
+    expect_silent(plot_x(opt_cut))
+    expect_silent(plot_precision_recall(opt_cut))
 
     tempdat$g <- as.character(tempdat$g)
     opt_cut <- cutpointr(tempdat, x, y, g)
@@ -57,6 +63,8 @@ test_that("Cutpointr works with different data types", {
     expect_silent(plot(opt_cut))
     expect_silent(plot_metric(opt_cut))
     expect_silent(plot_roc(opt_cut))
+    expect_silent(plot_x(opt_cut))
+    expect_silent(plot_precision_recall(opt_cut))
 })
 
 test_that("Bootstrap does not return duplicate colnames", {
@@ -85,6 +93,8 @@ test_that("Plotting with bootstrapping is silent", {
     expect_silent(plot_roc(opt_cut))
     expect_silent(plot_cut_boot(opt_cut))
     expect_silent(plot_metric_boot(opt_cut))
+    expect_silent(plot_x(opt_cut))
+    expect_silent(plot_precision_recall(opt_cut))
 
     # With subgroup
     set.seed(123)
@@ -97,6 +107,8 @@ test_that("Plotting with bootstrapping is silent", {
     expect_silent(plot_roc(opt_cut))
     expect_silent(plot_cut_boot(opt_cut))
     expect_silent(plot_metric_boot(opt_cut))
+    expect_silent(plot_x(opt_cut))
+    expect_silent(plot_precision_recall(opt_cut))
 })
 
 test_that("AUC calculation is correct and works with Inf and -Inf", {
@@ -249,4 +261,23 @@ test_that("Bad metric colnames are detected", {
         return(res)
     }
     expect_error(cutpointr(elas, elas, status, metric = metricfunc))
+})
+
+test_that("SE and NSE interface give identical results", {
+    opt_cut_nse <- cutpointr(suicide, dsi, suicide)
+    opt_cut_se <- cutpointr(suicide, "dsi", "suicide")
+    expect_identical(opt_cut_se, opt_cut_nse)
+
+    opt_cut_nse <- cutpointr(suicide, dsi, suicide)
+    opt_cut_se <- cutpointr(suicide, "dsi", "suicide",
+                            method = "maximize_metric")
+    expect_identical(opt_cut_se, opt_cut_nse)
+
+    opt_cut_nse <- cutpointr(suicide, dsi, suicide, gender)
+    opt_cut_se <- cutpointr(suicide, "dsi", "suicide", "gender")
+    expect_identical(opt_cut_se, opt_cut_nse)
+
+    opt_cut_nse <- cutpointr(suicide, dsi, suicide, gender)
+    opt_cut_se <- cutpointr(suicide, "dsi", "suicide", gender)
+    expect_identical(opt_cut_se, opt_cut_nse)
 })
