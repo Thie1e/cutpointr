@@ -2,7 +2,7 @@ Package: cutpointr
 Type: Package
 Title: Determine and evaluate optimal cutpoints in binary
     classification tasks
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: person("Christian", "Thiele", email = "c.thiele@hs-osnabrueck.de",
   role = c("aut", "cre"))
 Description: In addition to finding the cutpoint that maximizes a chosen metric
@@ -31,5 +31,7 @@ Suggests:
     doSNOW (>= 1.0.14),
     OptimalCutpoints (>= 1.1-3),
     knitr,
-    rmarkdown
+    rmarkdown,
+    microbenchmark,
+    ROCR
 VignetteBuilder: knitr

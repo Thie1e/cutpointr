@@ -7,9 +7,10 @@ optimize_metric <- function(data, x, class, metric_func = youden,
                     neg_class = neg_class, direction = direction)
     m <- metric_func(tp = roccurve[, "tp"], fp = roccurve[, "fp"],
                      tn = roccurve[, "tn"], fn = roccurve[, "fn"])
-    if (any(!is.finite(m))) {
+    finite_m <- is.finite(m)
+    if (any(!finite_m)) {
         message("Omitting infinite metric values")
-        m[!is.finite(m)] <- NA
+        m[!finite_m] <- NA
     }
     roccurve$m <- as.numeric(m)
     if (!is.null(colnames(m))) metric_name <- colnames(m)
