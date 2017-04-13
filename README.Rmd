@@ -275,7 +275,7 @@ opt_cut %>%
 
 ### ROC curve only
 
-When running `cutpointr` a ROC curve is by default returned in the column `roc`.
+When running `cutpointr` a ROC curve is by default returned in the column `roc_curve`.
 This ROC curve can be plotted using `plot_roc`. Alternatively, if only the
 ROC curve is desired and no cutpoint needs to be calculated, the ROC curve
 can be plotted using the `roc` function and, for example, **ggplot2**. Note that
@@ -356,5 +356,143 @@ For example, this is the `accuracy` metric function:
 
 ```{r}
 accuracy
+```
+
+
+## Benchmarks
+
+To offer a comparison to established solutions,
+`cutpointr` will be benchmarked against `optimal.cutpoints` 
+from the `OptimalCutpoints` package and a custom function that relies on 
+functions from the `ROCR` package. By generating data of different sizes 
+the benchmarks will offer a comparison of the scalability of the different 
+solutions.
+
+Using `prediction` and `performance` from the `ROCR` package, we can write a 
+function for computing the cutpoint that maximizes the sum of sensitivity and
+specificity:
+
+```{r}
+# Return cutpoint that maximizes the sum of sensitivity and specificiy
+rocr_sensspec <- function(x, class) {
+    pred <- ROCR::prediction(x, class)
+    perf <- ROCR::performance(pred, "sens", "spec")
+    sens <- slot(perf, "y.values")[[1]]
+    spec <- slot(perf, "x.values")[[1]]
+    cut <- slot(perf, "alpha.values")[[1]]
+    cut[which.max(sens + spec)]
+}
+```
+
+The benchmarking will be carried out using the `microbenchmark` package and
+generated data. The values of the `x` variable are drawn from a normal distribution
+which leads to a lot more unique values than were encountered before in the 
+`suicide` data. Accordingly, the search for an optimal cutpoint is much more 
+demanding, depending on the size of the data.
+
+Benchmarks are run for sample sizes of 100, 500, 1000, 10000, 50000 and 100000.
+For low sample sizes, cutpointr is a few milliseconds slower than the other
+solutions. While this should be of no practical importance, cutpointr scales
+more favorably than the other solutions. For sample sizes > 10000 cutpointr
+is a little faster than the simple function based on `ROCR`. Both of these 
+solutions are generally faster than `OptimalCutpoints` with the exception of
+small samples. `OptimalCutpoints` had to be excluded from benchmarks with 
+more than 10000 observations due to its high memory requirements.
+
+
+```{r}
+n <- 100
+set.seed(123)
+dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
+bench_100 <- microbenchmark::microbenchmark(
+    cutpointr(dat, x, y, pos_class = 1, neg_class = 0, 
+              direction = ">=", metric = youden),
+    rocr_sensspec(dat$x, dat$y),
+    optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
+                      data = dat)
+)
+
+n <- 500
+set.seed(123)
+dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
+bench_500 <- microbenchmark::microbenchmark(
+    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
+              direction = ">=", metric = youden),
+    rocr_sensspec(dat$x, dat$y),
+    optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
+                      data = dat)
+)
+
+n <- 1000
+set.seed(123)
+dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
+bench_1000 <- microbenchmark::microbenchmark(
+    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
+              direction = ">=", metric = youden),
+    rocr_sensspec(dat$x, dat$y),
+    optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
+                      data = dat)
+)
+
+n <- 10000
+set.seed(123)
+dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
+bench_10000 <- microbenchmark::microbenchmark(
+    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
+              direction = ">=", metric = youden),
+    rocr_sensspec(dat$x, dat$y),
+    optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
+                      data = dat),
+    times = 30
+)
+
+n <- 50000
+set.seed(123)
+dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
+bench_50000 <- microbenchmark::microbenchmark(
+    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
+              direction = ">=", metric = youden),
+    rocr_sensspec(dat$x, dat$y),
+    times = 100
+)
+
+n <- 100000
+set.seed(123)
+dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
+bench_100000 <- microbenchmark::microbenchmark(
+    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
+              direction = ">=", metric = youden),
+    rocr_sensspec(dat$x, dat$y),
+    times = 100
+)
+
+results <- rbind(data.frame(time = summary(bench_100)$median,
+                            solution = summary(bench_100)$expr, 
+                            n = 100),
+                 data.frame(time = summary(bench_500)$median,
+                            solution = summary(bench_500)$expr, 
+                            n = 500),
+                 data.frame(time = summary(bench_1000)$median,
+                            solution = summary(bench_1000)$expr, 
+                            n = 1000),
+                 data.frame(time = summary(bench_10000)$median,
+                            solution = summary(bench_10000)$expr, 
+                            n = 10000),
+                 data.frame(time = summary(bench_50000)$median,
+                            solution = summary(bench_50000)$expr, 
+                            n = 50000),
+                 data.frame(time = summary(bench_100000)$median,
+                            solution = summary(bench_100000)$expr, 
+                            n = 100000))
+results$solution <- as.character(results$solution)
+results$solution[grep(pattern = "cutpointr", x = results$solution)] <- "cutpointr"
+results$solution[grep(pattern = "rocr", x = results$solution)] <- "ROCR"
+results$solution[grep(pattern = "optimal", x = results$solution)] <- "OptimalCutpoints"
+
+ggplot(results, aes(x = n, y = time, col = solution, shape = solution)) +
+    geom_point(size = 3) + geom_line() +
+    scale_y_log10() + scale_x_log10() + 
+    ggtitle("Benchmark results", "n = 100, 500, 1000, 10000, 50000, 100000") +
+    ylab("Median time (milliseconds, log scale)") + xlab("log(n)")
 ```
 
