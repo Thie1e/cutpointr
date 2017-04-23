@@ -284,13 +284,19 @@ cutpointr <- function(data, x, class, subgroup = NULL,
         stop("NAs found but na.rm = FALSE")
     }
 
+    # Check number of classes
+    if (na.rm) uc <- unique(stats::na.omit(class)) else uc <- unique(class)
+    luc <- length(uc)
+    if (luc != 2) stop(paste("Expecting two classes, got", luc))
+
     # Determine direction and/or pos_class if necessary:
     if (any(c(is.null(pos_class), is.null(neg_class), is.null(direction)))) {
         assumptions <- assume_direction_pos_class(x = x, class = class,
                                                   pos_class = pos_class,
                                                   neg_class = neg_class,
                                                   direction = direction,
-                                                  na.rm = na.rm)
+                                                  na.rm = na.rm,
+                                                  uc = uc)
     }
     if (is.null(direction)) direction <- assumptions$direction
     stopifnot(direction %in% c("<", ">", ">=", "<="))

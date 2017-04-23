@@ -281,3 +281,21 @@ test_that("SE and NSE interface give identical results", {
     opt_cut_se <- cutpointr(suicide, "dsi", "suicide", gender)
     expect_identical(opt_cut_se, opt_cut_nse)
 })
+
+test_that("cutpointr detects wrong number of classes", {
+    tempdat <- data.frame(cl = factor(c("a", "b", "c")), x = 1:3)
+    expect_error(cutpointr(tempdat, x, cl))
+    expect_error(cutpointr(tempdat, "x", "cl"))
+    expect_error(cutpointr(tempdat, x, cl, pos_class = "a", neg_class = "b",
+                           direction = ">="))
+    expect_error(cutpointr(tempdat, "x", "cl", pos_class = "a", neg_class = "b",
+                           direction = ">="))
+
+    tempdat <- data.frame(cl = factor(c("a", "a", "a")), x = 1:3)
+    expect_error(cutpointr(tempdat, x, cl))
+    expect_error(cutpointr(tempdat, "x", "cl"))
+    expect_error(cutpointr(tempdat, x, cl, pos_class = "a", neg_class = "b",
+                           direction = ">="))
+    expect_error(cutpointr(tempdat, "x", "cl", pos_class = "a", neg_class = "b",
+                           direction = ">="))
+})
