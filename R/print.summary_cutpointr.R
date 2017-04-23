@@ -11,7 +11,7 @@ print.summary_cutpointr <- function(x, ...) {
         cat(paste("Subgroups:", sg), "\n")
     }
     if (!is.null(suppressWarnings(x[[1]]$boot))) {
-        cat(paste("Nr. of bootstraps:", nrow(x[[1]]$boot), "\n"))
+        cat(paste("Nr. of bootstraps:", x[[1]]$boot_runs, "\n"))
     }
 
     for (i in 1:length(x)) {

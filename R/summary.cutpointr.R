@@ -30,6 +30,7 @@ summary.cutpointr <- function(object, ...) {
             x_summary[[r]]$boot <- t(x_summary[[r]]$boot)
             colnames(x_summary[[r]]$boot) <- c("Min.", "1st Qu.", "Median", "Mean",
                                                "3rd Qu.", "Max", "SD")
+            x_summary[[r]]$boot_runs <- nrow(temprow$boot[[1]])
         }
     }
     class(x_summary) <- c("summary_cutpointr")
