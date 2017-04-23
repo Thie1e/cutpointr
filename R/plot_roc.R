@@ -52,7 +52,7 @@ plot_roc <- function(x, display_cutpoint = TRUE, ...) {
         tidyr::unnest_(unnest_cols = "roc_curve")
     roc <- ggplot2::ggplot(res_unnested,
                            ggplot2::aes_(x = ~ 1 - tnr, y = ~ tpr, color = clr_roc)) +
-        ggplot2::geom_line() +
+        ggplot2::geom_step() +
         roc_title +
         ggplot2::xlab("1 - Specificity") +
         ggplot2::ylab("Sensitivity") +

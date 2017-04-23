@@ -133,7 +133,7 @@ plot.cutpointr <- function(x, ...) {
         tidyr::unnest_(unnest_cols = "roc_curve")
     roc <- ggplot2::ggplot(res_unnested,
                            ggplot2::aes_(x = ~ 1 - tnr, y = ~ tpr, color = clr_roc)) +
-        ggplot2::geom_line() +
+        ggplot2::geom_step() +
         ggplot2::geom_point(data = optcut_coords, color = "black") +
         roc_title +
         ggplot2::xlab("1 - Specificity") +
