@@ -16,4 +16,3 @@ Given a cutpointr object this function plots the bootstrapped distribution
 of optimal cutpoints. The cutpointr function has to be run with
 boot_runs` > 0 to enable bootstrapping.
 }
-

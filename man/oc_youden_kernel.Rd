@@ -53,4 +53,3 @@ if (require(KernSmooth)) {
   pos_class = "yes", neg_class = "no", direction = ">=")
 }
 }
-

@@ -17,4 +17,3 @@ The metric depends on the function that was supplied to `metric` in the
 call to cutpointr.
 The cutpointr function has to be run with boot_runs` > 0 to enable bootstrapping.
 }
-

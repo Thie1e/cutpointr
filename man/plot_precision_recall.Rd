@@ -18,4 +18,3 @@ cutpoint as a dot on the precision recall curve.}
 Given a cutpointr object this function plots the precision recall curve(s)
 per subgroup, if given.
 }
-

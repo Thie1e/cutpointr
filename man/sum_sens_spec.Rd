@@ -27,4 +27,3 @@ The inputs must be vectors of equal length.
 \examples{
 sum_sens_spec(10, 5, 20, 10)
 }
-

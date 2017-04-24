@@ -15,4 +15,3 @@ plot_x(x, ...)
 Given a cutpointr object this function plots the distribution(s) of the
 independent variable(s) and the respective cutpoints.
 }
-

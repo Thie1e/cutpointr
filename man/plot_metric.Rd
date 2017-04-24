@@ -29,4 +29,3 @@ opt_cut <- cutpointr(dat, x, y, method = maximize_metric, metric = youden,
   pos_class = 1, direction = ">=")
 plot_metric(opt_cut)
 }
-

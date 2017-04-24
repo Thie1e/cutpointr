@@ -29,4 +29,3 @@ The inputs must be vectors of equal length.
 \examples{
 odds_ratio(10, 5, 20, 10)
 }
-

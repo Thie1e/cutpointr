@@ -36,4 +36,3 @@ dat <- iris[1:100, ]
 roc(data = dat, x = "Petal.Width", class = "Species",
 pos_class = "versicolor", neg_class = "setosa", direction = ">=")
 }
-

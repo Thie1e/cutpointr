@@ -18,4 +18,3 @@ cutpoint as a dot on the ROC curve.}
 Given a cutpointr object this function plots the ROC curve(s)
 per subgroup, if given.
 }
-

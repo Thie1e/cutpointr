@@ -37,4 +37,3 @@ data(suicide)
 oc_youden_normal(suicide, "dsi", "suicide",
   pos_class = "yes", neg_class = "no", direction = ">=")
 }
-

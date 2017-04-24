@@ -30,4 +30,3 @@ The inputs must be vectors of equal length.
 \examples{
 cohens_kappa(10, 5, 20, 10)
 }
-

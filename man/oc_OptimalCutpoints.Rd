@@ -47,4 +47,3 @@ if (require(OptimalCutpoints)) {
   neg_class = "no", direction = ">=")
 }
 }
-
