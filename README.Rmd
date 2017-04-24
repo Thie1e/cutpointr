@@ -19,10 +19,10 @@ knitr::opts_chunk$set(
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr) 
 
-**cutpointr** is an R package for tidy calculation of "optimal" cutpoints. It 
+cutpointr is an R package for tidy calculation of "optimal" cutpoints. It 
 supports several methods for calculating cutpoints and includes several 
 metrics that can be maximized or minimized by selecting a cutpoint. Additionally,
-**cutpointr** can automatically bootstrap the variability of the optimal 
+cutpointr can automatically bootstrap the variability of the optimal 
 cutpoints and return out-of-bag estimates of various metrics.
 
 ## Installation
@@ -65,7 +65,7 @@ The included metrics to be used with `minimize_metric` and `maximize_metric` are
 - `youden`: Youden- or J-Index = sensitivity + specificity - 1
 - `odds_ratio`: (Diagnostic) odds ratio
 
-**cutpointr** makes use of nonstandard evaluation for higher usability and to
+cutpointr makes use of nonstandard evaluation for higher usability and to
 allow for easy transformation of the variables. The inputs to the arguments
 `method` and `metric` are functions so that user-defined functions can easily
 be supplied instead of the built in ones.
@@ -82,7 +82,7 @@ opt_cut <- cutpointr(suicide, dsi, suicide)
 opt_cut
 ```
 
-**cutpointr** makes assumptions about the direction of the dependency between 
+cutpointr makes assumptions about the direction of the dependency between 
 class and x, if `direction` and / or `pos_class` or `neg_class` are not
 specified. The same result can be achieved by manually defining `direction` and
 the positive / negative classes which is slightly faster:
@@ -121,7 +121,7 @@ plot(opt_cut)
 
 ### Bootstrapping
 
-If `boot_runs` is larger zero, **cutpointr** will carry out the usual cutpoint
+If `boot_runs` is larger zero, cutpointr will carry out the usual cutpoint
 calculation on the full sample, just as before, and additionally on 
 `boot_runs` bootstrap samples. 
 
@@ -187,12 +187,10 @@ possible thanks to nonstandard evaluation of the arguments, which are
 evaluated in `data`. Alternatively, the arguments *can* be enclosed in quotes.
 In that case, transforming the data within the function call is not possible
 and `method` and `metric` functions that are enclosed in quotes are only looked
-up within the **cutpointr** package. As an example of a transformation of the
+up within the cutpointr package. As an example of a transformation of the
 `x`, `class` and `subgroup` variable consider:
 
 ```{r}
-identical(cutpointr(suicide, dsi, suicide), cutpointr(suicide, "dsi", "suicide"))
-
 set.seed(12)
 opt_cut <- cutpointr(suicide, log(dsi + 1), suicide == "yes",
     subgroup = dsi %% 2 == 0, boot_runs = 30)
@@ -202,9 +200,22 @@ plot(opt_cut)
 predict(opt_cut, newdata = data.frame(dsi = 0:5))
 ```
 
+Functions that use nonstandard evaluation are usually not suitable for 
+programming with. The use of nonstandard evaluation often leads to scoping 
+problems and subsequent obvious as well as possibly subtle errors. Similar to
+tidyverse functions, cutpointr offers a variant that uses standard evaluation
+which is suffixed by `_`. Thus, `cutpointr_` is suitable for programming with.
+It gives the same results as `cutpointr`, of course, but does not support 
+transforming variables as above. 
+
+```{r}
+identical(cutpointr(suicide, dsi, suicide), cutpointr_(suicide, "dsi", "suicide"))
+```
+
+
 ## cutpointr in the tidyverse
 
-Since `cutpointr` outputs a tidy data frame and `data` is the first argument,
+Since cutpointr outputs a tidy data frame and `data` is the first argument,
 it can be conveniently used in conjunction with various functions from the "tidyverse". 
 
 ```{r}
@@ -267,7 +278,7 @@ opt_cut %>%
 
 ## Plotting
 
-**cutpointr** includes several convenience functions for plotting data from a 
+cutpointr includes several convenience functions for plotting data from a 
 `cutpointr` object. These include:
 
 - `plot_cut_boot`: Plot the bootstrapped distribution of optimal cutpoints
@@ -303,7 +314,7 @@ p + ggtitle("Distribution of dsi") + theme_minimal() + xlab("Depression score")
 
 ### Manual plotting
 
-Since **cutpointr** returns a tidy data frame with the supplied data, bootstrap
+Since cutpointr returns a tidy data frame with the supplied data, bootstrap
 results and the ROC curve in nested tibbles these data can coveniently be 
 plotted manually. This offers additional ways of tweaking these plots as well
 as the possibility to plot results that are not included in `plot`, 
@@ -376,7 +387,7 @@ specificity, is returned as the extra metric column in addition to accuracy,
 sensitivity and specificity.
 
 Some `method` functions that make use of the additional arguments (that are 
-captured by `...` in `mean_cut`) are already included in **cutpointr**, see
+captured by `...` in `mean_cut`) are already included in cutpointr, see
 the list at the top. Since these functions are arguments to `cutpointr` 
 their code can be accessed by simply typing their name, e.g.:
 

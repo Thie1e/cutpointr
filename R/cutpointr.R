@@ -178,13 +178,14 @@
 #'
 #' @param data A data frame or tibble in which the columns that are given in x,
 #'  class and possibly subgroup can be found.
-#' @param x The variable name (with or without quotation marks) to be used for
+#' @param x The variable name without quotation marks to be used for
 #'  classification, e.g. predictions or test values.
-#' @param class The variable name (with or without quotation marks) indicating class membership.
-#' @param subgroup The variable name of an additional covariate that identifies subgroups. Separate
+#' @param class The variable name without quotation marks indicating class membership.
+#' @param subgroup The variable name without quotation marks
+#' of an additional covariate that identifies subgroups. Separate
 #' optimal cutpoints will be determined by group. Numeric, character and factor are
 #' allowed. Also expressions like z > 10 are possible.
-#' @param method (function or character) A function for determining cutpoints. Can
+#' @param method (function) A function for determining cutpoints. Can
 #' be user supplied or use some of the built in methods. See details.
 #' @param metric (function) The function for computing a metric when using
 #' maximize_metric or minimize_metric as method and and for the
@@ -194,7 +195,7 @@
 #' @param neg_class (optional) The value of class that indicates the negative class.
 #' @param direction (character, optional) Use ">=" or "<=" to indicate whether x
 #' is supposed to be larger or smaller for the positive class.
-#' @param boot_runs (numeric, optional) If positive, this number of bootstrap samples
+#' @param boot_runs (numerical) If positive, this number of bootstrap samples
 #' will be used to assess the variability and the out-of-sample performance.
 #' @param use_midpoints (logical) If TRUE (default FALSE) the returned optimal
 #' cutpoint will be the mean of the optimal cutpoint and the next highest
@@ -215,72 +216,139 @@ cutpointr <- function(data, x, class, subgroup = NULL,
                       pos_class = NULL, neg_class = NULL, direction = NULL,
                       boot_runs = 0, use_midpoints = FALSE, na.rm = FALSE,
                       allowParallel = FALSE, ...) {
-
-    args <- list(...)
-    if (as.character(substitute(method)) == "oc_OptimalCutpoints" &
-        is.null(args$oc_metric)) {
-        stop("'oc_metric' argument required for oc_OptimalCutpoints")
-    }
-
     #
     # NSE
     #
-    if (is.character(substitute(x))) x <- as.name(x)
-    if (is.character(substitute(class))) class <- as.name(class)
-    if (!missing(subgroup) & is.character(substitute(subgroup))) subgroup <- as.name(subgroup)
     predictor <- deparse(substitute(x))
     outcome   <- deparse(substitute(class))
     x <- eval(substitute(x), data, parent.frame())
     class <- eval(substitute(class), data, parent.frame())
-    if (!missing(subgroup)) {
         subgroup_var <- deparse(substitute(subgroup))
         subgroup <- eval(substitute(subgroup), data, parent.frame())
-    }
 
     # Get method function
-    if (length(method) > 1 | !(class(method) %in% c("character", "function"))) {
-        stop("method should be character string or a function")
-    }
-    if (is.character(method)) {
-        # If a character vec is given the user surely wants to search in the package
-        mod_names <- method[1]
-        method <- paste0("cutpointr::", method)
-        method <- eval(parse(text = method))
+    if (length(method) > 1 | !(class(method) == "function")) {
+        stop("method should be a function")
     } else {
         cl <- match.call()
-        mod_names <- cl$method
+        mod_name <- cl$method
         # if default was not changed:
-        mod_names <- as.character(substitute(method))
-        # mod_names <- mod_names[1]
+        mod_name <- as.character(substitute(method))
     }
-    if (is.null(mod_names)) stop("Could not get the names of the method function")
+    if (is.null(mod_name)) stop("Could not get the method function")
 
     # Get metric function
-    if (length(metric) > 1 | !(class(metric) %in% c("character", "function"))) {
-        stop("method should be character string or a function")
+    if (length(metric) > 1 | !(class(metric) == "function")) {
+        stop("method should be a function")
     }
-    if (is.character(metric)) {
-        # If a character vec is given the user surely wants to search in the package
-        mod_names <- metric[1]
-        metric <- paste0("cutpointr::", metric)
-        metric <- eval(parse(text = metric))
-    } else {
-        cl <- match.call()
-        metric_name <- cl$metric
-        # if default was not changed:
-        metric_name <- as.character(substitute(metric))
-        # metric_name <- metric_name[1]
-    }
-    if (is.null(metric_name)) stop("Could not get the names of the method function")
+    cl <- match.call()
+    metric_name <- cl$metric
+    # if default was not changed:
+    metric_name <- as.character(substitute(metric))
+    if (is.null(metric_name)) stop("Could not get the metric function")
+    res <- list(x, class, subgroup, method, metric, pos_class, neg_class,
+                direction, boot_runs, use_midpoints, na.rm, allowParallel,
+                predictor, outcome, mod_name, subgroup_var)
+    names(res) <- c("x", "class", "subgroup", "method", "metric",
+                    "pos_class", "neg_class", "direction", "boot_runs",
+                    "use_midpoints", "na.rm", "allowParallel", "predictor",
+                    "outcome", "mod_name", "subgroup_var")
+    cutpointr_internal(cutpointr_eval = res, ...)
+}
 
+#' The standard evaluation version of cutpointr
+#'
+#' This function is equivalent to cutpointr but takes only quoted arguments
+#' for x, class, subgroup, method and metric. This function is suitable for
+#' programming. For details on cutpointr see help("cutpointr").
+#' @export
+#' @inheritParams cutpointr
+#' @param x The variable name with quotation marks to be used for
+#'  classification, e.g. predictions or test values.
+#' @param class The variable name with quotation marks indicating class membership.
+#' @param subgroup The variable name with quotation marks
+#' of an additional covariate that identifies subgroups. Separate
+#' optimal cutpoints will be determined by group. Numeric, character and factor are
+#' allowed. Also expressions like z > 10 are possible.
+#' @param method (character) A function for determining cutpoints. Can
+#' be user supplied or use some of the built in methods. See details.
+#' @param metric (character) The function for computing a metric when using
+#' maximize_metric or minimize_metric as method and and for the
+#' out-of-bag values during bootstrapping. A way of internally validating the performance.
+#' User defined functions can be supplied, see details.
+cutpointr_ <- function(data, x, class, subgroup = NULL,
+                      method = "maximize_metric", metric = "sum_sens_spec",
+                      pos_class = NULL, neg_class = NULL, direction = NULL,
+                      boot_runs = 0, use_midpoints = FALSE, na.rm = FALSE,
+                      allowParallel = FALSE, ...) {
+    #
+    # SE
+    #
+    x <- as.name(x)
+    class <- as.name(class)
+    if (!is.null(subgroup)) subgroup <- as.name(subgroup)
+    predictor <- deparse(substitute(x))
+    outcome   <- deparse(substitute(class))
+    x <- eval(substitute(x), data, parent.frame())
+    class <- eval(substitute(class), data, parent.frame())
+    subgroup_var <- deparse(substitute(subgroup))
+    subgroup <- eval(substitute(subgroup), data, parent.frame())
+
+    # Get method function
+    if (length(method) > 1 | !(class(method) == "character")) {
+        stop("method should be character string")
+    }
+    # If a character vec is given the user surely wants to search in the package
+    mod_name <- method[1]
+    method <- paste0("cutpointr::", method)
+    method <- eval(parse(text = method))
+    if (is.null(mod_name)) stop("Could not get the method function")
+
+    # Get metric function
+    if (length(metric) > 1 | !(class(metric) == "character")) {
+        stop("method should be character string")
+    }
+    # If a character vec is given the user surely wants to search in the package
+    metric_name <- metric[1]
+    metric <- paste0("cutpointr::", metric)
+    metric <- eval(parse(text = metric))
+    if (is.null(metric_name)) stop("Could not get the method function")
+    res <- list(x, class, subgroup, method, metric, pos_class, neg_class,
+                direction, boot_runs, use_midpoints, na.rm, allowParallel,
+                predictor, outcome, mod_name, subgroup_var)
+    names(res) <- c("x", "class", "subgroup", "method", "metric",
+                    "pos_class", "neg_class", "direction", "boot_runs",
+                    "use_midpoints", "na.rm", "allowParallel", "predictor",
+                    "outcome", "mod_names", "subgroup_var")
+    cutpointr_internal(cutpointr_eval = res, ...)
+}
+
+
+cutpointr_internal <- function(cutpointr_eval, ...) {
+    x <- cutpointr_eval$x
+    class <- cutpointr_eval$class
+    subgroup <- cutpointr_eval$subgroup
+    method <- cutpointr_eval$method
+    metric <- cutpointr_eval$metric
+    pos_class <- cutpointr_eval$pos_class
+    neg_class <- cutpointr_eval$neg_class
+    direction <- cutpointr_eval$direction
+    boot_runs <- cutpointr_eval$boot_runs
+    use_midpoints <- cutpointr_eval$use_midpoints
+    na.rm <- cutpointr_eval$na.rm
+    allowParallel <- cutpointr_eval$allowParallel
+    predictor <- cutpointr_eval$predictor
+    outcome <- cutpointr_eval$outcome
+    mod_name <- cutpointr_eval$mod_name
+    subgroup_var <- cutpointr_eval$subgroup_var
 
     #
     # Prep
     #
 
     #NA
-    if (any(anyNA(c(x, class)) | (!missing(subgroup) & anyNA(subgroup))) &
-         (missing(na.rm) | !na.rm)) {
+    if (any(anyNA(c(x, class)) | (!is.null(subgroup) & anyNA(subgroup))) &
+         (!na.rm)) {
         stop("NAs found but na.rm = FALSE")
     }
 
@@ -306,7 +374,7 @@ cutpointr <- function(data, x, class, subgroup = NULL,
     #
     # Calculate optimal cutpoint, map to cutpoint function
     #
-    if (!missing(subgroup)) {
+    if (!is.null(subgroup)) {
         dat <- tibble::tibble_(list(x = ~ x, class = ~ class,
                                     subgroup = ~ subgroup))
         colnames(dat) <- c(predictor, outcome, "subgroup")
@@ -439,8 +507,8 @@ cutpointr <- function(data, x, class, subgroup = NULL,
     optcut$predictor                        <- predictor
     optcut$outcome                          <- outcome
     optcut$neg_class                        <- neg_class
-    optcut$method                           <- mod_names
-    if (!missing(subgroup)) optcut$grouping <- subgroup_var
+    optcut$method                           <- mod_name
+    if (!is.null(subgroup)) optcut$grouping <- subgroup_var
 
     # Reorder for nicer output
     mn <- optcut$metric_name[[1]]

@@ -13,16 +13,17 @@ cutpointr(data, x, class, subgroup = NULL, method = maximize_metric,
 \item{data}{A data frame or tibble in which the columns that are given in x,
 class and possibly subgroup can be found.}
 
-\item{x}{The variable name (with or without quotation marks) to be used for
+\item{x}{The variable name without quotation marks to be used for
 classification, e.g. predictions or test values.}
 
-\item{class}{The variable name (with or without quotation marks) indicating class membership.}
+\item{class}{The variable name without quotation marks indicating class membership.}
 
-\item{subgroup}{The variable name of an additional covariate that identifies subgroups. Separate
+\item{subgroup}{The variable name without quotation marks
+of an additional covariate that identifies subgroups. Separate
 optimal cutpoints will be determined by group. Numeric, character and factor are
 allowed. Also expressions like z > 10 are possible.}
 
-\item{method}{(function or character) A function for determining cutpoints. Can
+\item{method}{(function) A function for determining cutpoints. Can
 be user supplied or use some of the built in methods. See details.}
 
 \item{metric}{(function) The function for computing a metric when using
@@ -37,7 +38,7 @@ User defined functions can be supplied, see details.}
 \item{direction}{(character, optional) Use ">=" or "<=" to indicate whether x
 is supposed to be larger or smaller for the positive class.}
 
-\item{boot_runs}{(numeric, optional) If positive, this number of bootstrap samples
+\item{boot_runs}{(numerical) If positive, this number of bootstrap samples
 will be used to assess the variability and the out-of-sample performance.}
 
 \item{use_midpoints}{(logical) If TRUE (default FALSE) the returned optimal
@@ -234,4 +235,3 @@ plot(opt_cut)
 
 
 }
-

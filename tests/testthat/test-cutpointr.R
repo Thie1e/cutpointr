@@ -265,20 +265,20 @@ test_that("Bad metric colnames are detected", {
 
 test_that("SE and NSE interface give identical results", {
     opt_cut_nse <- cutpointr(suicide, dsi, suicide)
-    opt_cut_se <- cutpointr(suicide, "dsi", "suicide")
+    opt_cut_se <- cutpointr_(suicide, "dsi", "suicide")
     expect_identical(opt_cut_se, opt_cut_nse)
 
     opt_cut_nse <- cutpointr(suicide, dsi, suicide)
-    opt_cut_se <- cutpointr(suicide, "dsi", "suicide",
+    opt_cut_se <- cutpointr_(suicide, "dsi", "suicide",
                             method = "maximize_metric")
     expect_identical(opt_cut_se, opt_cut_nse)
 
     opt_cut_nse <- cutpointr(suicide, dsi, suicide, gender)
-    opt_cut_se <- cutpointr(suicide, "dsi", "suicide", "gender")
+    opt_cut_se <- cutpointr_(suicide, "dsi", "suicide", "gender")
     expect_identical(opt_cut_se, opt_cut_nse)
 
     opt_cut_nse <- cutpointr(suicide, dsi, suicide, gender)
-    opt_cut_se <- cutpointr(suicide, "dsi", "suicide", gender)
+    opt_cut_se <- cutpointr_(suicide, "dsi", "suicide", "gender")
     expect_identical(opt_cut_se, opt_cut_nse)
 })
 
