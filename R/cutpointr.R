@@ -239,7 +239,7 @@ cutpointr <- function(data, x, class, subgroup = NULL,
 
     # Get metric function
     if (length(metric) > 1 | !(class(metric) == "function")) {
-        stop("method should be a function")
+        stop("metric should be a function")
     }
     cl <- match.call()
     metric_name <- cl$metric
