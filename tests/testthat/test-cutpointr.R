@@ -299,3 +299,46 @@ test_that("cutpointr detects wrong number of classes", {
     expect_error(cutpointr(tempdat, "x", "cl", pos_class = "a", neg_class = "b",
                            direction = ">="))
 })
+
+test_that("Bootstrap returns plausible results", {
+    opt_cut <- suppressWarnings(cutpointr(suicide, dsi, suicide, boot_runs = 200))
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+
+    opt_cut <- suppressWarnings(cutpointr_(suicide, "dsi", "suicide",
+                                           boot_runs = 200))
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+
+    opt_cut <- suppressWarnings(cutpointr(suicide, dsi, suicide, boot_runs = 200,
+                         direction = "<="))
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+
+    opt_cut <- suppressWarnings(cutpointr_(suicide, "dsi", "suicide",
+                                           boot_runs = 200, direction = "<="))
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+
+    opt_cut <- suppressWarnings(cutpointr(suicide, dsi, suicide, boot_runs = 200,
+                         pos_class = "no"))
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+
+    opt_cut <- suppressWarnings(cutpointr_(suicide, "dsi", "suicide",
+                                           boot_runs = 200, pos_class = "no"))
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+})
