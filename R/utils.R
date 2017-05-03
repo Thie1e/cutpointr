@@ -46,7 +46,7 @@ get_opt_ind <- function(roc_curve, oc, direction) {
     if (direction == ">=") {
         opt_ind <- max(which(roc_curve$x.sorted >= oc))
     } else if (direction == "<=") {
-        opt_ind <- min(which(roc_curve$x.sorted <= oc))
+        opt_ind <- max(which(roc_curve$x.sorted <= oc))
     }
     return(opt_ind)
 }
