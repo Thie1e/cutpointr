@@ -24,7 +24,7 @@ oc_OptimalCutpoints <- function(data, x, class, oc_metric,
     if(is.null(suppressWarnings(cl$oc_metric)) | missing(oc_metric)) {
         stop("'oc_metric' argument required for oc_OptimalCutpoints")
     }
-    metric_name <- cl$oc_metric
+    metric_name <- oc_metric
 
     # Reverse direction because optimal.cutpoints "thinks" in terms of tag.healthy
     if (direction == ">=" | direction == ">") {
