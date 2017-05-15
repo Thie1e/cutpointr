@@ -39,19 +39,13 @@ plot_precision_recall <- function(x, display_cutpoint = TRUE, ...) {
                            Recall = ~ tp / (tp + fn))
     }
     if (display_cutpoint) {
-        if (x$direction[1] == ">=") {
-            optcut_coords <- apply(x, 1, function(r) {
-                opt_ind <- max(which(r$roc_curve$x.sorted >= r$optimal_cutpoint))
-                data.frame(Precision = r$roc_curve$Precision[opt_ind],
-                           Recall = r$roc_curve$Recall[opt_ind])
-            })
-        } else if (x$direction[1] == "<=") {
-            optcut_coords <- apply(x, 1, function(r) {
-                opt_ind <- min(which(r$roc_curve$x.sorted <= r$optimal_cutpoint))
-                data.frame(Precision = r$roc_curve$Precision[opt_ind],
-                           Recall = r$roc_curve$Recall[opt_ind])
-            })
-        }
+        optcut_coords <- apply(x, 1, function(r) {
+            opt_ind <- get_opt_ind(roc_curve = r$roc_curve,
+                                   oc = r$optimal_cutpoint,
+                                   direction = r$direction)
+            data.frame(Precision = r$roc_curve$Precision[opt_ind],
+                       Recall = r$roc_curve$Recall[opt_ind])
+        })
         optcut_coords <- do.call(rbind, optcut_coords)
     }
     res_unnested <- x %>%
@@ -65,7 +59,7 @@ plot_precision_recall <- function(x, display_cutpoint = TRUE, ...) {
         plot_title +
         ggplot2::xlab("Recall") +
         ggplot2::ylab("Precision") +
-        ggplot2::coord_equal()
+        ggplot2::theme(aspect.ratio = 1)
     if (display_cutpoint) {
         pr <- pr + ggplot2::geom_point(data = optcut_coords, color = "black")
     }
