@@ -56,7 +56,7 @@ plot_roc <- function(x, display_cutpoint = TRUE, ...) {
         roc_title +
         ggplot2::xlab("1 - Specificity") +
         ggplot2::ylab("Sensitivity") +
-        ggplot2::coord_equal()
+        ggplot2::theme(aspect.ratio = 1)
     if (display_cutpoint) {
         roc <- roc + ggplot2::geom_point(data = optcut_coords, color = "black")
     }
