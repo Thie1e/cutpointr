@@ -4,10 +4,13 @@
 \alias{plot_x}
 \title{Plot the distribution of the independent variable and the optimal cutpoints}
 \usage{
-plot_x(x, ...)
+plot_x(x, display_cutpoint = TRUE, ...)
 }
 \arguments{
 \item{x}{A cutpointr object.}
+
+\item{display_cutpoint}{(logical) Whether or not to display the optimal
+cutpoint as a vertical line.}
 
 \item{...}{Additional arguments (unused).}
 }

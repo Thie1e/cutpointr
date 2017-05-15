@@ -3,9 +3,11 @@
 #' Given a cutpointr object this function plots the distribution(s) of the
 #' independent variable(s) and the respective cutpoints.
 #' @param x A cutpointr object.
+#' @param display_cutpoint (logical) Whether or not to display the optimal
+#' cutpoint as a vertical line.
 #' @param ... Additional arguments (unused).
 #' @export
-plot_x <- function(x, ...) {
+plot_x <- function(x, display_cutpoint = TRUE, ...) {
 
     args <- list(...)
     predictor <- as.name(x$predictor[1])
@@ -48,14 +50,14 @@ plot_x <- function(x, ...) {
                                                 fill = fll, color = clr)) +
         dist_plot +
         ggplot2::geom_rug(alpha = 0.5) +
-        ggplot2::geom_vline(ggplot2::aes_(xintercept = ~ optimal_cutpoint,
-                                          color = col),
-                            show.legend = FALSE) +
         # facet by class because always 2
         ggplot2::facet_wrap(outcome, scales = "free_y") +
         ggplot2::ggtitle("Independent variable",
                          "optimal cutpoint and distribution by class") +
         ggplot2::xlab("value")
+    if (display_cutpoint) dist <- dist +
+        ggplot2::geom_vline(ggplot2::aes_(xintercept = ~ optimal_cutpoint,
+                                          color = col), show.legend = FALSE)
 
     return(dist)
 }
