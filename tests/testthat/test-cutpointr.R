@@ -342,3 +342,67 @@ test_that("Bootstrap returns plausible results", {
     expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
                     sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
 })
+
+test_that("Summary by class returns correct stats", {
+    # No subgroup, no NA
+    oc <- cutpointr(suicide, dsi, suicide)
+    s <- summary(oc)
+    my <- mean(suicide[suicide$suicide == "yes", "dsi"])
+    expect_equal(s[[1]]$desc_byclass["yes", "Mean"], my)
+    mn <- mean(suicide[suicide$suicide == "no", "dsi"])
+    expect_equal(s[[1]]$desc_byclass["no", "Mean"], mn)
+
+    # No subgroup, with NA
+    tempdat <- suicide
+    tempdat[10, 1] <- NA
+    tempdat[20, 2] <- NA
+    tempdat[30, 3] <- NA
+    tempdat[40, 4] <- NA
+    oc <- cutpointr(tempdat, dsi, suicide, na.rm = TRUE)
+    s <- summary(oc)
+    my <- mean(tempdat[tempdat$suicide == "yes", "dsi"], na.rm = TRUE)
+    expect_equal(s[[1]]$desc_byclass["yes", "Mean"], my)
+    mn <- mean(tempdat[tempdat$suicide == "no", "dsi"], na.rm = TRUE)
+    expect_equal(s[[1]]$desc_byclass["no", "Mean"], mn)
+
+    # With subgroup, no NA
+    oc <- cutpointr(suicide, dsi, suicide, gender)
+    s <- summary(oc)
+    myf <- mean(suicide[suicide$suicide == "yes" & suicide$gender == "female", "dsi"])
+    expect_equal(s$female$desc_byclass["yes", "Mean"], myf)
+    mnf <- mean(suicide[suicide$suicide == "no" & suicide$gender == "female", "dsi"])
+    expect_equal(s$female$desc_byclass["no", "Mean"], mnf)
+    mym <- mean(suicide[suicide$suicide == "yes" & suicide$gender == "male", "dsi"])
+    expect_equal(s$male$desc_byclass["yes", "Mean"], mym)
+    mnm <- mean(suicide[suicide$suicide == "no" & suicide$gender == "male", "dsi"])
+    expect_equal(s$male$desc_byclass["no", "Mean"], mnm)
+
+    # With subgroup, with NA
+    tempdat <- suicide
+    tempdat[10, 1] <- NA
+    tempdat[20, 2] <- NA
+    tempdat[30, 3] <- NA
+    tempdat[40, 4] <- NA
+    oc <- cutpointr(tempdat, dsi, suicide, gender, na.rm = TRUE)
+    s <- summary(oc)
+    myf <- mean(tempdat[tempdat$suicide == "yes" & tempdat$gender == "female", "dsi"], na.rm = TRUE)
+    expect_equal(s$female$desc_byclass["yes", "Mean"], myf)
+    mnf <- mean(tempdat[tempdat$suicide == "no" & tempdat$gender == "female", "dsi"], na.rm = TRUE)
+    expect_equal(s$female$desc_byclass["no", "Mean"], mnf)
+    mym <- mean(tempdat[tempdat$suicide == "yes" & tempdat$gender == "male", "dsi"], na.rm = TRUE)
+    expect_equal(s$male$desc_byclass["yes", "Mean"], mym)
+    mnm <- mean(tempdat[tempdat$suicide == "no" & tempdat$gender == "male", "dsi"], na.rm = TRUE)
+    expect_equal(s$male$desc_byclass["no", "Mean"], mnm)
+})
+
+test_that("Results are the same as with OptimalCutpoints", {
+    opt_cut_cp <- cutpointr(suicide, dsi, suicide, metric = youden)
+    opt_cut_oc <- cutpointr(suicide, dsi, suicide,
+                             method = oc_OptimalCutpoints, oc_metric = "Youden")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+
+    opt_cut_cp <- cutpointr(suicide, dsi, suicide, gender, metric = youden)
+    opt_cut_oc <- cutpointr(suicide, dsi, suicide, gender,
+                             method = oc_OptimalCutpoints, oc_metric = "Youden")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+})

@@ -31,6 +31,9 @@ print.summary_cutpointr <- function(x, ...) {
         cat("\n")
         cat(paste("Predictor summary:", "\n"))
         print(x[[i]]$desc)
+        cat("\n")
+        cat(paste("Predictor summary per class:", "\n"))
+        print(x[[i]]$desc_byclass)
         if (!is.null(suppressWarnings(x[[i]]$boot))) {
         cat("\n")
         cat(paste("Bootstrap summary:", "\n"))

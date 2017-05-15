@@ -9,6 +9,18 @@ summary.cutpointr <- function(object, ...) {
             dplyr::select_(as.name(temprow$predictor)) %>%
             unlist %>%
             summary_sd
+        x_summary[[r]]$desc_byclass <-
+            split(temprow$data[[1]], temprow$data[[1]][, temprow$outcome]) %>%
+            purrr::map(function(x) {
+                dat <- x[, temprow$predictor]
+                dat <- unlist(dat)
+                summary_sd(dat)
+            })
+        # classnames <- names(x_summary[[r]]$desc_byclass)
+        x_summary[[r]]$desc_byclass <- data.frame(do.call(rbind, x_summary[[r]]$desc_byclass))
+        colnames(x_summary[[r]]$desc_byclass) <- c("Min.", "1st Qu.", "Median",
+                                                   "Mean", "3rd Qu.", "Max", "SD")
+        # x_summary[[r]]$desc_byclass$class <- classnames
         x_summary[[r]]$n_obs <- nrow(temprow$data[[1]])
         x_summary[[r]]$n_pos <- temprow$data[[1]] %>%
             dplyr::select_(as.name(temprow$outcome)) %>%
@@ -36,4 +48,7 @@ summary.cutpointr <- function(object, ...) {
     class(x_summary) <- c("summary_cutpointr")
     return(x_summary)
 }
+
+
+
 
