@@ -37,4 +37,5 @@ grid_arrange_shared_legend <- function(plots, ncol = length(plots), nrow = 1,
     }
     grid::grid.newpage()
     grid::grid.draw(combined)
+    invisible(combined)
 }
