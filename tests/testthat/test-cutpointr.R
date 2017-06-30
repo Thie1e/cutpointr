@@ -395,7 +395,7 @@ test_that("Summary by class returns correct stats", {
     expect_equal(s$male$desc_byclass["no", "Mean"], mnm)
 })
 
-test_that("Results are the same as with OptimalCutpoints", {
+test_that("Results for youden are equal to results by OptimalCutpoints", {
     opt_cut_cp <- cutpointr(suicide, dsi, suicide, metric = youden)
     opt_cut_oc <- cutpointr(suicide, dsi, suicide,
                              method = oc_OptimalCutpoints, oc_metric = "Youden")
@@ -405,4 +405,221 @@ test_that("Results are the same as with OptimalCutpoints", {
     opt_cut_oc <- cutpointr(suicide, dsi, suicide, gender,
                              method = oc_OptimalCutpoints, oc_metric = "Youden")
     expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+})
+
+test_that("Results for p_chisquared are equal to results by OptimalCutpoints", {
+    set.seed(2839)
+    tempdat <- data.frame(x = c(rnorm(50), rnorm(50, mean = 1)) ,
+                          y = c(rep(0, 50), rep(1, 50)),
+                          group = sample(c("a", "b"), size = 100, replace = TRUE))
+    suppressWarnings(
+        opt_cut_cp <- cutpointr(tempdat, x, y, method = minimize_metric,
+                                metric = p_chisquared, direction = ">=",
+                                pos_class = 1)
+    )
+    suppressWarnings(
+        opt_cut_oc <- cutpointr(tempdat, x, y, method = oc_OptimalCutpoints,
+                                oc_metric = "MinPvalue")
+    )
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+
+    suppressWarnings(
+        opt_cut_cp <- cutpointr(tempdat, x, y, group, method = minimize_metric,
+                                metric = p_chisquared, direction = ">=",
+                                pos_class = 1)
+    )
+    suppressWarnings(
+        opt_cut_oc <- cutpointr(tempdat, x, y, group,
+                                method = oc_OptimalCutpoints,
+                                oc_metric = "MinPvalue")
+    )
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+})
+
+test_that("Results for prod_sens_spec are equal to results by OptimalCutpoints", {
+    set.seed(839)
+    tempdat <- data.frame(x = c(rnorm(50), rnorm(50, mean = 1)) ,
+                          y = c(rep(0, 50), rep(1, 50)),
+                          group = sample(c("a", "b"), size = 100, replace = TRUE))
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, method = maximize_metric,
+                            metric = prod_sens_spec, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, method = oc_OptimalCutpoints,
+                            oc_metric = "MaxProdSpSe")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, group, method = maximize_metric,
+                            metric = prod_sens_spec, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, group,
+                            method = oc_OptimalCutpoints,
+                            oc_metric = "MaxProdSpSe")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+})
+
+test_that("Results for abs_d_ppvnpv are equal to results by OptimalCutpoints", {
+    set.seed(389)
+    tempdat <- data.frame(x = c(rnorm(50), rnorm(50, mean = 1)) ,
+                          y = c(rep(0, 50), rep(1, 50)),
+                          group = sample(c("a", "b"), size = 100, replace = TRUE))
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, method = minimize_metric,
+                            metric = abs_d_ppvnpv, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, method = oc_OptimalCutpoints,
+                            oc_metric = "NPVEqualPPV")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, group, method = minimize_metric,
+                            metric = abs_d_ppvnpv, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, group,
+                            method = oc_OptimalCutpoints,
+                            oc_metric = "NPVEqualPPV")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+})
+
+test_that("Results for sum_ppvnpv are equal to results by OptimalCutpoints", {
+    set.seed(389)
+    tempdat <- data.frame(x = c(rnorm(50), rnorm(50, mean = 1)) ,
+                          y = c(rep(0, 50), rep(1, 50)),
+                          group = sample(c("a", "b"), size = 100, replace = TRUE))
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, method = maximize_metric,
+                            metric = sum_ppvnpv, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, method = oc_OptimalCutpoints,
+                            oc_metric = "MaxSumNPVPPV")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, group, method = maximize_metric,
+                            metric = sum_ppvnpv, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, group,
+                            method = oc_OptimalCutpoints,
+                            oc_metric = "MaxSumNPVPPV")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+})
+
+test_that("Results for prod_ppvnpv are equal to results by OptimalCutpoints", {
+    set.seed(389)
+    tempdat <- data.frame(x = c(rnorm(50), rnorm(50, mean = 1)) ,
+                          y = c(rep(0, 50), rep(1, 50)),
+                          group = sample(c("a", "b"), size = 100, replace = TRUE))
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, method = maximize_metric,
+                            metric = prod_ppvnpv, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, method = oc_OptimalCutpoints,
+                            oc_metric = "MaxProdNPVPPV")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, group, method = maximize_metric,
+                            metric = prod_ppvnpv, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, group,
+                            method = oc_OptimalCutpoints,
+                            oc_metric = "MaxProdNPVPPV")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+})
+
+test_that("Results for prod_ppvnpv are equal to results by OptimalCutpoints", {
+    set.seed(389)
+    tempdat <- data.frame(x = c(rnorm(50), rnorm(50, mean = 1)) ,
+                          y = c(rep(0, 50), rep(1, 50)),
+                          group = sample(c("a", "b"), size = 100, replace = TRUE))
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, method = maximize_metric,
+                            metric = prod_ppvnpv, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, method = oc_OptimalCutpoints,
+                            oc_metric = "MaxProdNPVPPV")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, group, method = maximize_metric,
+                            metric = prod_ppvnpv, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, group,
+                            method = oc_OptimalCutpoints,
+                            oc_metric = "MaxProdNPVPPV")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+})
+
+test_that("Results for accuracy are equal to results by OptimalCutpoints", {
+    set.seed(38429)
+    tempdat <- data.frame(x = c(rnorm(100), rnorm(100, mean = 1)) ,
+                          y = c(rep(0, 100), rep(1, 100)),
+                          group = sample(c("a", "b"), size = 200, replace = TRUE))
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, method = maximize_metric,
+                            metric = accuracy, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, method = oc_OptimalCutpoints,
+                            oc_metric = "MaxEfficiency")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, group, method = maximize_metric,
+                            metric = accuracy, direction = ">=",
+                            pos_class = 1)
+    opt_cut_oc <- cutpointr(tempdat, x, y, group,
+                            method = oc_OptimalCutpoints,
+                            oc_metric = "MaxProdNPVPPV")
+    expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+})
+
+if (require(OptimalCutpoints)) {
+    test_that("Results for misclassification_cost are equal to results by OptimalCutpoints", {
+        set.seed(429)
+        tempdat <- data.frame(x = c(rnorm(100), rnorm(100, mean = 1)) ,
+                              y = c(rep(0, 100), rep(1, 100)),
+                              group = sample(c("a", "b"), size = 200, replace = TRUE))
+
+        opt_cut_cp <- cutpointr(tempdat, x, y, method = minimize_metric,
+                                metric = misclassification_cost, direction = ">=",
+                                cost_fp = 1, cost_fn = 3,
+                                pos_class = 1)
+        oc_cont <- control.cutpoints(CFP = 1, CFN = 3)
+        opt_cut_oc <- OptimalCutpoints::optimal.cutpoints(X = "x", status = "y",
+                                                          method = "MCT",
+                                                          tag.healthy = 0,
+                                                          direction = "<",
+                                                          data = tempdat,
+                                                          control = oc_cont)
+        opt_cut_oc <- opt_cut_oc$MCT$Global$optimal.cutoff$cutoff
+        expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc)
+
+        opt_cut_cp <- cutpointr(tempdat, x, y, group, method = minimize_metric,
+                                metric = misclassification_cost, direction = ">=",
+                                cost_fp = 1, cost_fn = 3,
+                                pos_class = 1)
+        oc_cont <- control.cutpoints(CFP = 1, CFN = 3)
+        opt_cut_oc <- OptimalCutpoints::optimal.cutpoints(X = "x", status = "y",
+                                                          categorical.cov = "group",
+                                                          method = "MCT",
+                                                          tag.healthy = 0,
+                                                          direction = "<",
+                                                          data = tempdat,
+                                                          control = oc_cont)
+        opt_cut_oc_a <- opt_cut_oc$MCT$a$optimal.cutoff$cutoff
+        opt_cut_oc_b <- opt_cut_oc$MCT$b$optimal.cutoff$cutoff
+        expect_equal(opt_cut_cp$optimal_cutpoint, c(opt_cut_oc_a, opt_cut_oc_b))
+    })
+}
+
+test_that("LOESS smoothing does not return warnings or errors", {
+    set.seed(38429)
+    tempdat <- data.frame(x = c(rnorm(100), rnorm(100, mean = 1)) ,
+                          y = c(rep(0, 100), rep(1, 100)),
+                          group = sample(c("a", "b"), size = 200, replace = TRUE))
+
+    expect_silent(cutpointr(tempdat, x, y, method = maximize_loess_metric,
+                            user.span = 1,
+                            metric = accuracy, direction = ">=",
+                            pos_class = 1, boot_runs = 100))
+
+    expect_silent(cutpointr(tempdat, x, y, group, method = maximize_loess_metric,
+                            user.span = 1,
+                            metric = accuracy, direction = ">=",
+                            pos_class = 1, boot_runs = 100))
 })
