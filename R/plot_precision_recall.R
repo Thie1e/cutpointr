@@ -59,7 +59,8 @@ plot_precision_recall <- function(x, display_cutpoint = TRUE, ...) {
         plot_title +
         ggplot2::xlab("Recall") +
         ggplot2::ylab("Precision") +
-        ggplot2::theme(aspect.ratio = 1)
+        ggplot2::theme(aspect.ratio = 1) +
+        ggplot2::coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))
     if (display_cutpoint) {
         pr <- pr + ggplot2::geom_point(data = optcut_coords, color = "black")
     }

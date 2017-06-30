@@ -46,7 +46,7 @@ oc_youden_kernel <- function(data, x, class, pos_class, neg_class,
     oc <- stats::optimize(
         f = youden_kern,
         interval = c(min(c(x_pos, x_neg)), max(c(x_pos, x_neg))),
-        maximum = T,
+        maximum = TRUE,
         neg_k = neg_k,
         pos_k = pos_k
     )$maximum

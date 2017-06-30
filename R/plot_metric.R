@@ -32,6 +32,8 @@ plot_metric <- function(x) {
         res_unnested <- x %>%
             dplyr::select_(.dots = c("roc_curve", "subgroup")) %>%
             tidyr::unnest_(unnest_cols = "roc_curve")
+        # After LOESS smoothing metric is NA where x = Inf or -Inf
+        res_unnested <- stats::na.omit(res_unnested)
         p <- ggplot2::ggplot(res_unnested, ggplot2::aes_(x = ~ x.sorted,
                                                          y = ~ m,
                                                          color = ~ subgroup)) +
@@ -42,6 +44,8 @@ plot_metric <- function(x) {
         res_unnested <- x %>%
             dplyr::select_(.dots = "roc_curve") %>%
             tidyr::unnest_(unnest_cols = "roc_curve")
+        # After LOESS smoothing metric is NA where x = Inf or -Inf
+        res_unnested <- stats::na.omit(res_unnested)
         p <- ggplot2::ggplot(res_unnested, ggplot2::aes_(x = ~ x.sorted,
                                                          y = ~ m)) +
             ggplot2::geom_line() + ggplot2::geom_point() +
