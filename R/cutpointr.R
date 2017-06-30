@@ -15,6 +15,10 @@
 #' \itemize{
 #'  \item maximize_metric: Maximize the metric function
 #'  \item minimize_metric: Minimize the metric function
+#'  \item maximize_loess_metric: Maximize the metric function after LOESS
+#'  smoothing
+#'  \item minimize_loess_metric: Minimize the metric function after LOESS
+#'  smoothing
 #'  \item oc_manual: Specify the cutoff value manually
 #'  \item oc_youden_kernel: Maximize the Youden-Index after kernel smoothing
 #'  the distributions of the two classes
@@ -38,6 +42,7 @@
 #'  \item pos_class: The positive class
 #'  \item neg_class: The negative class
 #'  \item direction: ">=" if the positive class has higher x values, "<=" otherwise
+#'  \item ... Further arguments
 #' }
 #'
 #' The ... argument can be used to avoid an error if not all of the above
@@ -51,8 +56,22 @@
 #'  \item accuracy: Fraction correctly classified
 #'  \item youden: Youden- or J-Index = sensitivity + specificity - 1
 #'  \item sum_sens_spec: sensitivity + specificity
+#'  \item sum_ppvnpv: The sum of positive predictive value (PPV) and negative
+#'  predictive value (NPV)
+#'  \item prod_sens_spec: sensitivity * specificity
+#'  \item prod_ppvnpv: The product of positive predictive value (PPV) and
+#'  negative predictive value (NPV)
 #'  \item cohens_kappa: Cohen's Kappa
-#'  \item abs_d_sesp: The absolute difference of sensitivity and specificity
+#'  \item abs_d_sesp: The absolute difference between
+#'  sensitivity and specificity
+#'  \item abs_d_ppvnpv: The absolute difference between positive predictive
+#'  value (PPV) and negative predictive value (NPV)
+#'  \item p_chisquared: The p-value of a chi-squared test on the confusion
+#'  matrix
+#'  \item cost_misclassification: The sum of the misclassification cost of
+#'  false positives and false negatives. Additional arguments: cost_fp, cost_fn
+#'  \item total_utility: The total utility of true / false positives / negatives.
+#'  Additional arguments: utility_tp, utility_tn, cost_fp, cost_fn
 #' }
 #'
 #' User defined metric functions can be used as well which can accept the following
@@ -62,6 +81,8 @@
 #'  \item fp: Vector of false positives
 #'  \item tn: Vector of true negatives
 #'  \item fn: Vector of false negatives
+#'  \item ... If the metric function is used in conjunction with any of the
+#'  maximize / minimize methods, further arguments can be passed
 #' }
 #'
 #' The function should return a matrix with one column. If the column is named,
@@ -207,7 +228,8 @@
 #' @param allowParallel (logical) If TRUE, the bootstrapping will be parallelized
 #' using foreach. A local cluster, for example, should have been started manually
 #' beforehand.
-#' @param ... Further optional arguments that will be passed to optcut_func.
+#' @param ... Further optional arguments that will be passed to method.
+#' minimize_metric and maximize_metric pass ... to metric.
 #' @importFrom purrr %>%
 #' @importFrom foreach %do%
 #' @export
@@ -342,6 +364,8 @@ cutpointr_internal <- function(cutpointr_eval, ...) {
     mod_name <- cutpointr_eval$mod_name
     subgroup_var <- cutpointr_eval$subgroup_var
 
+
+
     #
     # Prep
     #
@@ -383,11 +407,14 @@ cutpointr_internal <- function(cutpointr_eval, ...) {
         dat <- dat %>%
             dplyr::group_by_("subgroup") %>%
             tidyr::nest_(key_col = "data") %>%
-            dplyr::mutate_(subgroup = ~ as.character(subgroup),
-                           pos_class = ~ pos_class,
-                           prevalence = ~ purrr::map_dbl(data, function(g) {
-                               mean(unlist(g[, outcome]) == pos_class)
-                           })
+            dplyr::mutate_(subgroup = ~ as.character(subgroup))
+        dat$pos_class <- pos_class
+        dat %>%
+            dplyr::mutate_(
+                prevalence = ~ purrr::map2(dat$data, dat$pos_class,
+                                           function(g, pc) {
+                                               mean(unlist(g[, outcome]) == pc)
+                                           })
             )
         optcut <- purrr::pmap_df(list(dat$subgroup, dat$data), function(g, d) {
             if (nrow(d) <= 1) stop(paste("Subgroup", g, "has <= 1 observations"))
@@ -536,15 +563,18 @@ cutpointr_internal <- function(cutpointr_eval, ...) {
         bootstrap <- NULL
     } else {
         boot_runs <- ceiling(boot_runs)
+        # bootstrap <- dat %>%
+        #     dplyr::transmute_(boot = ~ purrr::map(data, function(g) {
         bootstrap <- dat %>%
-            dplyr::transmute_(boot = ~ purrr::map(data, function(g) {
+             dplyr::transmute_(boot = ~ purrr::map2(dat$data, dat$pos_class,
+                                                    function(g, pc) {
                 boot_g <- foreach::foreach(rep = 1:boot_runs, .combine = rbind,
                     .packages = "OptimalCutpoints",
-                    .export = c("method", "direction", "pos_class", "metric",
+                    .export = c("method", "direction", "metric",
                     "neg_class", "mn", "use_midpoints",
                     "predictor", "outcome")) %seq_or_par%
                     {
-                        b_ind   <- sample(1:nrow(g), replace = T, size = nrow(g))
+                        b_ind <- sample(1:nrow(g), replace = TRUE, size = nrow(g))
                         if (length(unique(unlist(g[b_ind, outcome]))) == 1) {
                             optcut_b <- data.frame(NA, NA)
                             colnames(optcut_b) <- c("optimal_cutpoint", mn)
@@ -553,7 +583,7 @@ cutpointr_internal <- function(cutpointr_eval, ...) {
                                                 metric_func = metric,
                                                 class = outcome,
                                                 direction = direction,
-                                                pos_class = pos_class,
+                                                pos_class = pc,
                                                 neg_class = neg_class, ...)
                             if (use_midpoints) {
                                 optcut_b$optimal_cutpoint <-
@@ -567,7 +597,7 @@ cutpointr_internal <- function(cutpointr_eval, ...) {
                         if (suppressWarnings(is.null(optcut_b$roc_curve))) {
                             roc_curve_b <- roc(data = g[b_ind, ], x = predictor,
                                                class = outcome,
-                                               pos_class = pos_class, neg_class = neg_class,
+                                               pos_class = pc, neg_class = neg_class,
                                                direction = direction)
                             roc_curve_b <- tidyr::nest_(roc_curve_b, key_col = "roc_curve",
                                                         nest_cols = colnames(roc_curve_b))
@@ -590,7 +620,7 @@ cutpointr_internal <- function(cutpointr_eval, ...) {
                                                opt_ind = opt_ind_b)
                         roc_curve_oob <- roc(data = g[-b_ind, ], x = predictor,
                                              class = outcome,
-                                             pos_class = pos_class, neg_class = neg_class,
+                                             pos_class = pc, neg_class = neg_class,
                                              direction = direction)
                         opt_ind_oob <- get_opt_ind(roc_curve = roc_curve_oob,
                                                  oc = optcut_b$optimal_cutpoint,

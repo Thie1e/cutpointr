@@ -54,7 +54,8 @@ na.rm = FALSE will raise an error.}
 using foreach. A local cluster, for example, should have been started manually
 beforehand.}
 
-\item{...}{Further optional arguments that will be passed to optcut_func.}
+\item{...}{Further optional arguments that will be passed to method.
+minimize_metric and maximize_metric pass ... to metric.}
 }
 \description{
 This function is equivalent to cutpointr but takes only quoted arguments

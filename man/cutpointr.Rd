@@ -54,7 +54,8 @@ na.rm = FALSE will raise an error.}
 using foreach. A local cluster, for example, should have been started manually
 beforehand.}
 
-\item{...}{Further optional arguments that will be passed to optcut_func.}
+\item{...}{Further optional arguments that will be passed to method.
+minimize_metric and maximize_metric pass ... to metric.}
 }
 \description{
 Using predictions (or e.g. biological marker values) and binary class labels, this function
@@ -73,6 +74,10 @@ the method argument. The package includes the following cutpoint functions:
 \itemize{
  \item maximize_metric: Maximize the metric function
  \item minimize_metric: Minimize the metric function
+ \item maximize_loess_metric: Maximize the metric function after LOESS
+ smoothing
+ \item minimize_loess_metric: Minimize the metric function after LOESS
+ smoothing
  \item oc_manual: Specify the cutoff value manually
  \item oc_youden_kernel: Maximize the Youden-Index after kernel smoothing
  the distributions of the two classes
@@ -96,6 +101,7 @@ as input(s):
  \item pos_class: The positive class
  \item neg_class: The negative class
  \item direction: ">=" if the positive class has higher x values, "<=" otherwise
+ \item ... Further arguments
 }
 
 The ... argument can be used to avoid an error if not all of the above
@@ -109,8 +115,22 @@ Built-in metric functions include:
  \item accuracy: Fraction correctly classified
  \item youden: Youden- or J-Index = sensitivity + specificity - 1
  \item sum_sens_spec: sensitivity + specificity
+ \item sum_ppvnpv: The sum of positive predictive value (PPV) and negative
+ predictive value (NPV)
+ \item prod_sens_spec: sensitivity * specificity
+ \item prod_ppvnpv: The product of positive predictive value (PPV) and
+ negative predictive value (NPV)
  \item cohens_kappa: Cohen's Kappa
- \item abs_d_sesp: The absolute difference of sensitivity and specificity
+ \item abs_d_sesp: The absolute difference between
+ sensitivity and specificity
+ \item abs_d_ppvnpv: The absolute difference between positive predictive
+ value (PPV) and negative predictive value (NPV)
+ \item p_chisquared: The p-value of a chi-squared test on the confusion
+ matrix
+ \item cost_misclassification: The sum of the misclassification cost of
+ false positives and false negatives. Additional arguments: cost_fp, cost_fn
+ \item total_utility: The total utility of true / false positives / negatives.
+ Additional arguments: utility_tp, utility_tn, cost_fp, cost_fn
 }
 
 User defined metric functions can be used as well which can accept the following
@@ -120,6 +140,8 @@ inputs as vectors:
  \item fp: Vector of false positives
  \item tn: Vector of true negatives
  \item fn: Vector of false negatives
+ \item ... If the metric function is used in conjunction with any of the
+ maximize / minimize methods, further arguments can be passed
 }
 
 The function should return a matrix with one column. If the column is named,
