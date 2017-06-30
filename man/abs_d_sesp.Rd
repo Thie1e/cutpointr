@@ -2,13 +2,9 @@
 % Please edit documentation in R/metrics.R
 \name{abs_d_sesp}
 \alias{abs_d_sesp}
-\title{Calculate absolute difference of sensitivity and specificity
-Calculate the absolute difference of sensitivity and specificity
-from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.}
+\title{Calculate the absolute difference of sensitivity and specificity}
 \usage{
-abs_d_sesp(tp, fp, tn, fn)
+abs_d_sesp(tp, fp, tn, fn, ...)
 }
 \arguments{
 \item{tp}{(numeric) number of true positives.}
@@ -18,9 +14,10 @@ abs_d_sesp(tp, fp, tn, fn)
 \item{tn}{(numeric) number of true negatives.}
 
 \item{fn}{(numeric) number of false negatives.}
+
+\item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate absolute difference of sensitivity and specificity
 Calculate the absolute difference of sensitivity and specificity
 from the elements of a confusion matrix,
 that is true positives, false positives, true negatives and false negatives.

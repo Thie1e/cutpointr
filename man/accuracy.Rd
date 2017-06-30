@@ -2,12 +2,9 @@
 % Please edit documentation in R/metrics.R
 \name{accuracy}
 \alias{accuracy}
-\title{Calculate accuracy
-Calculate accuracy from the elements of a confusion matrix, that is
-true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.}
+\title{Calculate accuracy}
 \usage{
-accuracy(tp, fp, tn, fn)
+accuracy(tp, fp, tn, fn, ...)
 }
 \arguments{
 \item{tp}{(numeric) number of true positives.}
@@ -17,9 +14,10 @@ accuracy(tp, fp, tn, fn)
 \item{tn}{(numeric) number of true negatives.}
 
 \item{fn}{(numeric) number of false negatives.}
+
+\item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate accuracy
 Calculate accuracy from the elements of a confusion matrix, that is
 true positives, false positives, true negatives and false negatives.
 The inputs must be vectors of equal length.

@@ -2,12 +2,9 @@
 % Please edit documentation in R/metrics.R
 \name{sum_sens_spec}
 \alias{sum_sens_spec}
-\title{Calculate the sum of sensitivity and specificity
-Calculate the sum of sensitivity and specificity from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.}
+\title{Calculate the sum of sensitivity and specificity}
 \usage{
-sum_sens_spec(tp, fp, tn, fn)
+sum_sens_spec(tp, fp, tn, fn, ...)
 }
 \arguments{
 \item{tp}{(numeric) number of true positives.}
@@ -17,9 +14,10 @@ sum_sens_spec(tp, fp, tn, fn)
 \item{tn}{(numeric) number of true negatives.}
 
 \item{fn}{(numeric) number of false negatives.}
+
+\item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate the sum of sensitivity and specificity
 Calculate the sum of sensitivity and specificity from the elements of a confusion matrix,
 that is true positives, false positives, true negatives and false negatives.
 The inputs must be vectors of equal length.

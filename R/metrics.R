@@ -43,6 +43,7 @@ auc <- function(tpr, fpr) {
 
 
 #' Calculate accuracy
+#'
 #' Calculate accuracy from the elements of a confusion matrix, that is
 #' true positives, false positives, true negatives and false negatives.
 #' The inputs must be vectors of equal length.
@@ -50,27 +51,26 @@ auc <- function(tpr, fpr) {
 #' @param fp (numeric) number of false positives.
 #' @param tn (numeric) number of true negatives.
 #' @param fn (numeric) number of false negatives.
+#' @param ... for capturing additional arguments passed by method.
 #' @examples
 #' accuracy(10, 5, 20, 10)
 #' @export
-accuracy <- function(tp, fp, tn, fn) {
-    Accuracy = cbind((tp + tn) / (tp + fp + tn + fn))
+accuracy <- function(tp, fp, tn, fn, ...) {
+    Accuracy <- cbind((tp + tn) / (tp + fp + tn + fn))
     colnames(Accuracy) <- "Accuracy"
     return(Accuracy)
 }
 
 #' Calculate the Youden-Index
+#'
 #' Calculate the Youden-Index (J-Index) from the elements of a confusion matrix,
 #' that is true positives, false positives, true negatives and false negatives.
 #' The inputs must be vectors of equal length.
-#' @param tp (numeric) number of true positives.
-#' @param fp (numeric) number of false positives.
-#' @param tn (numeric) number of true negatives.
-#' @param fn (numeric) number of false negatives.
+#' @inheritParams accuracy
 #' @examples
 #' youden(10, 5, 20, 10)
 #' @export
-youden <- function(tp, fp, tn, fn) {
+youden <- function(tp, fp, tn, fn, ...) {
     sesp <- sens_spec(tp, fp, tn, fn)
     youden <- cbind(rowSums(sesp) - 1)
     colnames(youden) <- "Youden_Index"
@@ -78,17 +78,15 @@ youden <- function(tp, fp, tn, fn) {
 }
 
 #' Calculate the sum of sensitivity and specificity
+#'
 #' Calculate the sum of sensitivity and specificity from the elements of a confusion matrix,
 #' that is true positives, false positives, true negatives and false negatives.
 #' The inputs must be vectors of equal length.
-#' @param tp (numeric) number of true positives.
-#' @param fp (numeric) number of false positives.
-#' @param tn (numeric) number of true negatives.
-#' @param fn (numeric) number of false negatives.
+#' @inheritParams accuracy
 #' @examples
 #' sum_sens_spec(10, 5, 20, 10)
 #' @export
-sum_sens_spec <- function(tp, fp, tn, fn) {
+sum_sens_spec <- function(tp, fp, tn, fn, ...) {
     sesp <- sens_spec(tp, fp, tn, fn)
     sesp <- cbind(rowSums(sesp))
     colnames(sesp) <- "Sum_Sens_Spec"
@@ -96,20 +94,33 @@ sum_sens_spec <- function(tp, fp, tn, fn) {
 }
 
 
+#' Calculate the product of sensitivity and specificity
+#'
+#' Calculate the product of sensitivity and specificity from the elements of a confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' The inputs must be vectors of equal length.
+#' @inheritParams accuracy
+#' @examples
+#' prod_sens_spec(10, 5, 20, 10)
+#' @export
+prod_sens_spec <- function(tp, fp, tn, fn, ...) {
+    sesp <- sens_spec(tp, fp, tn, fn)
+    sesp <- cbind(sesp[, 1] * sesp[, 2])
+    colnames(sesp) <- "Prod_Sens_Spec"
+    return(sesp)
+}
 
-#' Calculate absolute difference of sensitivity and specificity
+#' Calculate the absolute difference of sensitivity and specificity
+#'
 #' Calculate the absolute difference of sensitivity and specificity
 #' from the elements of a confusion matrix,
 #' that is true positives, false positives, true negatives and false negatives.
 #' The inputs must be vectors of equal length.
-#' @param tp (numeric) number of true positives.
-#' @param fp (numeric) number of false positives.
-#' @param tn (numeric) number of true negatives.
-#' @param fn (numeric) number of false negatives.
+#' @inheritParams accuracy
 #' @examples
 #' abs_d_sesp(10, 5, 20, 10)
 #' @export
-abs_d_sesp <- function(tp, fp, tn, fn) {
+abs_d_sesp <- function(tp, fp, tn, fn, ...) {
     sesp <- sens_spec(tp, fp, tn, fn)
     abs_d_sesp <- abs(sesp[, 1] - sesp[, 2])
     abs_d_sesp <- matrix(abs_d_sesp, ncol = 1)
@@ -118,19 +129,77 @@ abs_d_sesp <- function(tp, fp, tn, fn) {
 }
 
 
+#' Calculate the absolute difference of positive and negative predictive value
+#'
+#' Calculate the absolute difference of positive predictive value (PPV) and
+#' negative predictive value (NPV)
+#' from the elements of a confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' The inputs must be vectors of equal length.
+#' @inheritParams accuracy
+#' @examples
+#' abs_d_ppvnpv(10, 5, 20, 10)
+#' @export
+abs_d_ppvnpv <- function(tp, fp, tn, fn, ...) {
+    ppv <- tp / (tp + fp)
+    npv <- tn / (tn + fn)
+    abs_d_ppvnpv <- abs(ppv - npv)
+    abs_d_ppvnpv <- matrix(abs_d_ppvnpv, ncol = 1)
+    colnames(abs_d_ppvnpv) <- "abs_d_ppvnpv"
+    return(abs_d_ppvnpv)
+}
+
+#' Calculate the sum of positive and negative predictive value
+#'
+#' Calculate the sum of positive predictive value (PPV) and
+#' negative predictive value (NPV)
+#' from the elements of a confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' The inputs must be vectors of equal length.
+#' @inheritParams accuracy
+#' @examples
+#' sum_ppvnpv(10, 5, 20, 10)
+#' @export
+sum_ppvnpv <- function(tp, fp, tn, fn, ...) {
+    ppv <- tp / (tp + fp)
+    npv <- tn / (tn + fn)
+    sum_ppvnpv <- ppv + npv
+    sum_ppvnpv <- matrix(sum_ppvnpv, ncol = 1)
+    colnames(sum_ppvnpv) <- "sum_ppvnpv"
+    return(sum_ppvnpv)
+}
+
+#' Calculate the product of positive and negative predictive value
+#'
+#' Calculate the product of positive predictive value (PPV) and
+#' negative predictive value (NPV)
+#' from the elements of a confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' The inputs must be vectors of equal length.
+#' @inheritParams accuracy
+#' @examples
+#' prod_ppvnpv(10, 5, 20, 10)
+#' @export
+prod_ppvnpv <- function(tp, fp, tn, fn, ...) {
+    ppv <- tp / (tp + fp)
+    npv <- tn / (tn + fn)
+    prod_ppvnpv <- ppv * npv
+    prod_ppvnpv <- matrix(prod_ppvnpv, ncol = 1)
+    colnames(prod_ppvnpv) <- "prod_ppvnpv"
+    return(prod_ppvnpv)
+}
+
 #' Calculate Cohen's Kappa
+#'
 #' Calculate the Kappa metric from the elements of a 2x2 confusion matrix,
 #' that is true positives, false positives, true negatives and false negatives.
 #' The inputs must be vectors of equal length.
-#' @param tp (numeric) number of true positives.
-#' @param fp (numeric) number of false positives.
-#' @param tn (numeric) number of true negatives.
-#' @param fn (numeric) number of false negatives.
+#' @inheritParams accuracy
 #' @examples
 #' cohens_kappa(10, 5, 20, 10)
 #' @return A numeric matrix with the column name "Kappa".
 #' @export
-cohens_kappa <- function(tp, fp, tn, fn) {
+cohens_kappa <- function(tp, fp, tn, fn, ...) {
     mrg_a <- ((tp + fn) * (tp + fp)) / (tp + fn + fp + tn)
     mrg_b <- ((fp + tn) * (fn + tn)) / (tp + fn + fp + tn)
     EA     <- (mrg_a + mrg_b) / (tp + fn + fp + tn)
@@ -141,20 +210,80 @@ cohens_kappa <- function(tp, fp, tn, fn) {
 }
 
 #' Calculate the odds ratio
+#'
 #' Calculate the (diagnostic) odds ratio from the elements of a confusion matrix,
 #' that is true positives, false positives, true negatives and false negatives.
 #' The odds ratio is defined as: (TP / FP) / (TN / FN)
 #' The inputs must be vectors of equal length.
-#' @param tp (numeric) number of true positives.
-#' @param fp (numeric) number of false positives.
-#' @param tn (numeric) number of true negatives.
-#' @param fn (numeric) number of false negatives.
+#' @inheritParams accuracy
 #' @examples
 #' odds_ratio(10, 5, 20, 10)
 #' @export
-odds_ratio <- function(tp, fp, tn, fn) {
+odds_ratio <- function(tp, fp, tn, fn, ...) {
     or <- (tp / fp) / (fn / tn)
     or <- matrix(or, ncol = 1)
     colnames(or) <- "odds_ratio"
     return(or)
+}
+
+#' Calculate the p-value of a chi-squared test from a 2x2 confusion matrix
+#'
+#' Calculate the p-value of a chi-squared test from the elements of a confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' The inputs must be vectors of equal length.
+#' @inheritParams accuracy
+#' @examples
+#' p_chisquared(10, 5, 20, 10)
+#' @export
+p_chisquared <- function(tp, fp, tn, fn, ...) {
+    samplesize <- tp + fp + tn + fn
+    chisq <- (samplesize * ((tp * tn - fp * fn) ** 2)) /
+        ((tp + fp) * (fn + tn) * (tp + fn) * (fp + tn))
+    pval <- stats::pchisq(chisq, 1, lower.tail = F)
+    pval <- matrix(pval, ncol = 1)
+    colnames(pval) <- "p_chisquared"
+    return(pval)
+}
+
+#' Calculate the misclassification cost from a 2x2 confusion matrix
+#'
+#' Calculate the misclassification cost from the elements of a confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' The misclassification cost is equal to cost_fp * fp + cost_fn * fn.
+#' The inputs must be vectors of equal length.
+#' @inheritParams accuracy
+#' @param cost_fp (numeric) the cost of a false positive
+#' @param cost_fn (numeric) the cost of a false negative
+#' @examples
+#' misclassification_cost(10, 5, 20, 10, cost_fp = 1, cost_fn = 5)
+#' @export
+misclassification_cost <- function(tp, fp, tn, fn, cost_fp = 1, cost_fn = 1, ...) {
+    misclassification_cost <- cost_fp * fp + cost_fn * fn
+    misclassification_cost <- matrix(misclassification_cost, ncol = 1)
+    colnames(misclassification_cost) <- "misclassification_cost"
+    return(misclassification_cost)
+}
+
+#' Calculate the total utility from a 2x2 confusion matrix
+#'
+#' Calculate the total benefit from the elements of a confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' The total benefit is equal to
+#' utility_tp * tp + utility_tn * tn - cost_fp * fp - cost_fn * fn.
+#' The inputs must be vectors of equal length.
+#' @inheritParams accuracy
+#' @param utility_tp (numeric) the utility of a true positive
+#' @param utility_tn (numeric) the utility of a true negative
+#' @param cost_fp (numeric) the cost of a false positive
+#' @param cost_fn (numeric) the cost of a false negative
+#' @examples
+#' total_utility(10, 5, 20, 10, utility_tp = 3, utility_tn = 3, cost_fp = 1, cost_fn = 5)
+#' @export
+total_utility <- function(tp, fp, tn, fn,
+                          utility_tp = 1, utility_tn = 1,
+                          cost_fp = 1, cost_fn = 1, ...) {
+    utility <- utility_tp * tp + utility_tn * tn - cost_fp * fp - cost_fn * fn
+    utility <- matrix(utility, ncol = 1)
+    colnames(utility) <- "total_utility"
+    return(utility)
 }

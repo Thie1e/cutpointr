@@ -2,13 +2,9 @@
 % Please edit documentation in R/metrics.R
 \name{odds_ratio}
 \alias{odds_ratio}
-\title{Calculate the odds ratio
-Calculate the (diagnostic) odds ratio from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The odds ratio is defined as: (TP / FP) / (TN / FN)
-The inputs must be vectors of equal length.}
+\title{Calculate the odds ratio}
 \usage{
-odds_ratio(tp, fp, tn, fn)
+odds_ratio(tp, fp, tn, fn, ...)
 }
 \arguments{
 \item{tp}{(numeric) number of true positives.}
@@ -18,9 +14,10 @@ odds_ratio(tp, fp, tn, fn)
 \item{tn}{(numeric) number of true negatives.}
 
 \item{fn}{(numeric) number of false negatives.}
+
+\item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate the odds ratio
 Calculate the (diagnostic) odds ratio from the elements of a confusion matrix,
 that is true positives, false positives, true negatives and false negatives.
 The odds ratio is defined as: (TP / FP) / (TN / FN)

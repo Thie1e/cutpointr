@@ -2,12 +2,9 @@
 % Please edit documentation in R/metrics.R
 \name{youden}
 \alias{youden}
-\title{Calculate the Youden-Index
-Calculate the Youden-Index (J-Index) from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.}
+\title{Calculate the Youden-Index}
 \usage{
-youden(tp, fp, tn, fn)
+youden(tp, fp, tn, fn, ...)
 }
 \arguments{
 \item{tp}{(numeric) number of true positives.}
@@ -17,9 +14,10 @@ youden(tp, fp, tn, fn)
 \item{tn}{(numeric) number of true negatives.}
 
 \item{fn}{(numeric) number of false negatives.}
+
+\item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate the Youden-Index
 Calculate the Youden-Index (J-Index) from the elements of a confusion matrix,
 that is true positives, false positives, true negatives and false negatives.
 The inputs must be vectors of equal length.

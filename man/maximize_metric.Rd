@@ -5,7 +5,7 @@
 \title{Maximize a metric function in binary classification}
 \usage{
 maximize_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction)
+  neg_class = NULL, direction, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -25,6 +25,8 @@ metric to be maximized. See description.}
 
 \item{direction}{(character) Use ">=" or "<=" to select whether an x value
 >= or <= the cutoff predicts the positive class.}
+
+\item{...}{Further arguments that will be passed to metric_func}
 }
 \value{
 A tibble with the columns optimal_cutpoint, the corresponding metric

@@ -1,12 +1,14 @@
 optimize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, minmax,
-                            direction, metric_name = "metric") {
+                            direction, metric_name = "metric", loess = FALSE,
+                            ...) {
+    args <- list(...)
     metric_name_call <- as.character(substitute(metric_func))
     if (metric_name_call != "metric_func") metric_name <- metric_name_call
     roccurve <- roc(data = data, x = x, class = class, pos_class = pos_class,
                     neg_class = neg_class, direction = direction)
     m <- metric_func(tp = roccurve[, "tp"], fp = roccurve[, "fp"],
-                     tn = roccurve[, "tn"], fn = roccurve[, "fn"])
+                     tn = roccurve[, "tn"], fn = roccurve[, "fn"], ...)
     finite_m <- is.finite(m)
     if (any(!finite_m)) {
         message("Omitting infinite metric values")
@@ -14,6 +16,21 @@ optimize_metric <- function(data, x, class, metric_func = youden,
     }
     roccurve$m <- as.numeric(m)
     if (!is.null(colnames(m))) metric_name <- colnames(m)
+    if (loess) {
+        if (is.null(args$criterion)) args$criterion = "aicc"
+        if (is.null(args$degree)) args$degree = 1
+        if (is.null(args$family)) args$family = "gaussian"
+        roccurve$m_unsmoothed <- roccurve$m
+        finite_x <- is.finite(roccurve$x.sorted)
+        mod <- fANCOVA::loess.as(x = roccurve$x.sorted[finite_x],
+                        y = roccurve$m[finite_x],
+                        criterion = args$criterion, degree = args$degree,
+                        family = args$family, user.span = args$user.span)
+        roccurve$m <- NA
+        roccurve$m[finite_x] <- mod$fitted
+        m <- rep(NA, nrow(roccurve))
+        m[finite_x] <- mod$fitted
+    }
     if (minmax == "max") {
         max_m <- max(m, na.rm = TRUE)
         opt <- which(m == max_m)
@@ -63,14 +80,15 @@ optimize_metric <- function(data, x, class, metric_func = youden,
 #' @inheritParams oc_youden_normal
 #' @param metric_func (function) A function that computes a single number
 #' metric to be maximized. See description.
+#' @param ... Further arguments that will be passed to metric_func
 #' @export
 maximize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL,
-                            direction) {
+                            direction, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "max",
-                    direction = direction, metric_name = metric_name)
+                    direction = direction, metric_name = metric_name, ...)
 }
 
 
@@ -97,15 +115,118 @@ maximize_metric <- function(data, x, class, metric_func = youden,
 #' @inheritParams oc_youden_normal
 #' @param metric_func (function) A function that computes a single number
 #' metric to be minimized. See description.
+#' @param ... Further arguments that will be passed to metric_func
 #' @export
 minimize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL,
-                            direction) {
+                            direction, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "min",
-                    direction = direction, metric_name = metric_name)
+                    direction = direction, metric_name = metric_name, ...)
+}
+
+#' Maximize a metric function in binary classification after LOESS smoothing
+#'
+#' Given a function for computing a metric in metric_func, this function
+#' smoothes the function of metric value against cutpoint using LOESS. Then, it
+#' maximizes the metric by selecting an optimal cutpoint. For further details
+#' on the LOESS smoothing see ?fANCOVA::loess.as.
+#' The metric function should accept the following inputs:
+#' \itemize{
+#'  \item tp: vector of number of true positives
+#'  \item fp: vector of number of false positives
+#'  \item tn: vector of number of true negatives
+#'  \item fn: vector of number of false negatives
+#' }
+#'
+#' The above inputs are arrived at by using all unique values in x, Inf, and
+#' -Inf as possible cutpoints for classifying the variable in class.
+#'
+#' @return A tibble with the columns optimal_cutpoint, the corresponding metric
+#' value and roccurve, a nested tibble that includes all possible cutoffs
+#' and the corresponding numbers of true and false positives / negatives and
+#' all corresponding metric values.
+#'
+#' @inheritParams oc_youden_normal
+#' @param metric_func (function) A function that computes a single number
+#' metric to be maximized. See description.
+#' @param ... Further arguments that will be passed to metric_func and
+#' additional arguments for the LOESS smoother:
+#' \itemize{
+#'  \item criterion: the criterion for automatic smoothing parameter selection:
+#'  "aicc" denotes bias-corrected AIC criterion, "gcv" denotes generalized
+#'  cross-validation.
+#'  \item degree: the degree of the local polynomials to be used. It can be
+#'  0, 1 or 2.
+#'  \item family: if "gaussian" fitting is by least-squares, and if "symmetric"
+#'  a re-descending M estimator is used with Tukey's biweight function.
+#'  \item user.span: the user-defined parameter which controls the degree of
+#'  smoothing.
+#' }
+#'
+#' @source Xiao-Feng Wang (2010). fANCOVA: Nonparametric Analysis of Covariance.
+#'  https://CRAN.R-project.org/package=fANCOVA
+#' @export
+maximize_loess_metric <- function(data, x, class, metric_func = youden,
+                            pos_class = NULL, neg_class = NULL, direction,
+                            ...) {
+    metric_name <- as.character(substitute(metric_func))
+    optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
+                    pos_class = pos_class, neg_class = neg_class, minmax = "max",
+                    direction = direction, metric_name = metric_name,
+                    loess = TRUE, ...)
 }
 
 
-
+#' Minimize a metric function in binary classification after LOESS smoothing
+#'
+#' Given a function for computing a metric in metric_func, this function
+#' smoothes the function of metric value against cutpoint using LOESS. Then, it
+#' minimizes the metric by selecting an optimal cutpoint. For further details
+#' on the LOESS smoothing see ?fANCOVA::loess.as.
+#' The metric function should accept the following inputs:
+#' \itemize{
+#'  \item tp: vector of number of true positives
+#'  \item fp: vector of number of false positives
+#'  \item tn: vector of number of true negatives
+#'  \item fn: vector of number of false negatives
+#' }
+#'
+#' The above inputs are arrived at by using all unique values in x, Inf, and
+#' -Inf as possible cutpoints for classifying the variable in class.
+#'
+#' @return A tibble with the columns optimal_cutpoint, the corresponding metric
+#' value and roccurve, a nested tibble that includes all possible cutoffs
+#' and the corresponding numbers of true and false positives / negatives and
+#' all corresponding metric values.
+#'
+#' @inheritParams oc_youden_normal
+#' @param metric_func (function) A function that computes a single number
+#' metric to be maximized. See description.
+#' @param ... Further arguments that will be passed to metric_func and
+#' additional arguments for the LOESS smoother:
+#' \itemize{
+#'  \item criterion: the criterion for automatic smoothing parameter selection:
+#'  "aicc" denotes bias-corrected AIC criterion, "gcv" denotes generalized
+#'  cross-validation.
+#'  \item degree: the degree of the local polynomials to be used. It can be
+#'  0, 1 or 2.
+#'  \item family: if "gaussian" fitting is by least-squares, and if "symmetric"
+#'  a re-descending M estimator is used with Tukey's biweight function.
+#'  \item user.span: the user-defined parameter which controls the degree of
+#'  smoothing.
+#' }
+#'
+#' @source Xiao-Feng Wang (2010). fANCOVA: Nonparametric Analysis of Covariance.
+#'  https://CRAN.R-project.org/package=fANCOVA
+#' @export
+minimize_loess_metric <- function(data, x, class, metric_func = youden,
+                            pos_class = NULL, neg_class = NULL, direction,
+                            ...) {
+    metric_name <- as.character(substitute(metric_func))
+    optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
+                    pos_class = pos_class, neg_class = neg_class, minmax = "min",
+                    direction = direction, metric_name = metric_name,
+                    loess = TRUE, ...)
+}
