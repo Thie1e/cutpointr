@@ -8,24 +8,17 @@ Kirill Müller and Hadley Wickham (2017). tibble: Simple Data Frames.
  https://CRAN.R-project.org/package=tibble
 }
 \usage{
-\method{print}{cutpointr}(x, n = NULL, width = NULL, n_extra = NULL, ...)
+\method{print}{cutpointr}(x, n = Inf, ...)
 }
 \arguments{
 \item{x}{a cutpointr object.}
 
 \item{n}{number of rows to print.}
 
-\item{width}{width of text output to generate. This defaults to NULL,
-which displays only the columns that fit on one screen. You can also set
-width = Inf to override this default and always print all columns.}
-
-\item{n_extra}{number of extra columns to print abbreviated information for,
-if the width is too small for the entire tibble.}
-
 \item{...}{further arguements.}
 }
 \description{
 Prints the cutpointr object like a tbl_df.
-With versions of tibble later than 1.3.0 printing tibbles with `width = Inf`
-does not wrap columns nicely so the default has been changed to `width = NULL`.
+With versions of tibble later than 1.3.0 printing tibbles with width = Inf
+does not wrap columns nicely so the default has been changed to width = NULL.
 }

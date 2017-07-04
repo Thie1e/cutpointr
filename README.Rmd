@@ -589,7 +589,7 @@ bench_50000 <- microbenchmark::microbenchmark(
     cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
               direction = ">=", metric = youden),
     rocr_sensspec(dat$x, dat$y),
-    times = 50
+    times = 100
 )
 
 n <- 100000
@@ -599,7 +599,7 @@ bench_100000 <- microbenchmark::microbenchmark(
     cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
               direction = ">=", metric = youden),
     rocr_sensspec(dat$x, dat$y),
-    times = 50
+    times = 100
 )
 
 results <- rbind(data.frame(time = summary(bench_100)$median,
