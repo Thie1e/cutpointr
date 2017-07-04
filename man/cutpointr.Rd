@@ -105,7 +105,7 @@ as input(s):
 }
 
 The ... argument can be used to avoid an error if not all of the above
-arguments are needed or in oder to pass additional arguments to `method`.
+arguments are needed or in oder to pass additional arguments to method.
 The function should return a data frame or tbl_df with
 one row, the column "optimal_cutpoint", and an optional column with an arbitraty name
 with the metric value at the optimal cutpoint.
@@ -126,10 +126,12 @@ Built-in metric functions include:
  \item abs_d_ppvnpv: The absolute difference between positive predictive
  value (PPV) and negative predictive value (NPV)
  \item p_chisquared: The p-value of a chi-squared test on the confusion
- matrix
- \item cost_misclassification: The sum of the misclassification cost of
+ matrix of predictions and observations
+ \item odds_ratio: The odds ratio calculated as (TP / FP) / (FN / TN)
+ \item misclassification_cost: The sum of the misclassification cost of
  false positives and false negatives. Additional arguments: cost_fp, cost_fn
- \item total_utility: The total utility of true / false positives / negatives.
+ \item total_utility: The total utility of true / false positives / negatives
+ calculated as utility_tp * TP + utility_tn * TN - cost_fp * FP - cost_fn * FN.
  Additional arguments: utility_tp, utility_tn, cost_fp, cost_fn
 }
 
@@ -161,9 +163,11 @@ warning including all optimal cutpoints is issued. The first one refers to
 the minimum of the optimal cutpoints if direction = ">=" or to the maximum
 of the optimal cutpoints if direction = "<=".
 
+If use_midpoints = TRUE the mean of the optimal cutpoint and the next
+highest or lowest possible cutpoint is returned, depending on direction.
 If use_midpoints is set to TRUE and multiple optimal cutpoints are found,
 the midpoint of the minimum / maximum of the optimal cutpoints
-and the next highest / lowest observation is returned, as described above. Thus, finding
+and the next highest / lowest observation is returned, as described before. Thus, finding
 multiple optimal cutpoints has no effect on determining the midpoint.
 }
 \examples{

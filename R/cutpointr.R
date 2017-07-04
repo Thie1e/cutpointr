@@ -46,7 +46,7 @@
 #' }
 #'
 #' The ... argument can be used to avoid an error if not all of the above
-#' arguments are needed or in oder to pass additional arguments to `method`.
+#' arguments are needed or in oder to pass additional arguments to method.
 #' The function should return a data frame or tbl_df with
 #' one row, the column "optimal_cutpoint", and an optional column with an arbitraty name
 #' with the metric value at the optimal cutpoint.
@@ -67,10 +67,12 @@
 #'  \item abs_d_ppvnpv: The absolute difference between positive predictive
 #'  value (PPV) and negative predictive value (NPV)
 #'  \item p_chisquared: The p-value of a chi-squared test on the confusion
-#'  matrix
-#'  \item cost_misclassification: The sum of the misclassification cost of
+#'  matrix of predictions and observations
+#'  \item odds_ratio: The odds ratio calculated as (TP / FP) / (FN / TN)
+#'  \item misclassification_cost: The sum of the misclassification cost of
 #'  false positives and false negatives. Additional arguments: cost_fp, cost_fn
-#'  \item total_utility: The total utility of true / false positives / negatives.
+#'  \item total_utility: The total utility of true / false positives / negatives
+#'  calculated as utility_tp * TP + utility_tn * TN - cost_fp * FP - cost_fn * FN.
 #'  Additional arguments: utility_tp, utility_tn, cost_fp, cost_fn
 #' }
 #'
@@ -102,9 +104,11 @@
 #' the minimum of the optimal cutpoints if direction = ">=" or to the maximum
 #' of the optimal cutpoints if direction = "<=".
 #'
+#' If use_midpoints = TRUE the mean of the optimal cutpoint and the next
+#' highest or lowest possible cutpoint is returned, depending on direction.
 #' If use_midpoints is set to TRUE and multiple optimal cutpoints are found,
 #' the midpoint of the minimum / maximum of the optimal cutpoints
-#' and the next highest / lowest observation is returned, as described above. Thus, finding
+#' and the next highest / lowest observation is returned, as described before. Thus, finding
 #' multiple optimal cutpoints has no effect on determining the midpoint.
 #'
 #' @examples
@@ -268,14 +272,9 @@ cutpointr <- function(data, x, class, subgroup = NULL,
     # if default was not changed:
     metric_name <- as.character(substitute(metric))
     if (is.null(metric_name)) stop("Could not get the metric function")
-    res <- list(x, class, subgroup, method, metric, pos_class, neg_class,
-                direction, boot_runs, use_midpoints, na.rm, allowParallel,
-                predictor, outcome, mod_name, subgroup_var)
-    names(res) <- c("x", "class", "subgroup", "method", "metric",
-                    "pos_class", "neg_class", "direction", "boot_runs",
-                    "use_midpoints", "na.rm", "allowParallel", "predictor",
-                    "outcome", "mod_name", "subgroup_var")
-    cutpointr_internal(cutpointr_eval = res, ...)
+    cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
+                       direction, boot_runs, use_midpoints, na.rm, allowParallel,
+                       predictor, outcome, mod_name, subgroup_var, ...)
 }
 
 #' The standard evaluation version of cutpointr
@@ -335,37 +334,16 @@ cutpointr_ <- function(data, x, class, subgroup = NULL,
     metric <- paste0("cutpointr::", metric)
     metric <- eval(parse(text = metric))
     if (is.null(metric_name)) stop("Could not get the method function")
-    res <- list(x, class, subgroup, method, metric, pos_class, neg_class,
-                direction, boot_runs, use_midpoints, na.rm, allowParallel,
-                predictor, outcome, mod_name, subgroup_var)
-    names(res) <- c("x", "class", "subgroup", "method", "metric",
-                    "pos_class", "neg_class", "direction", "boot_runs",
-                    "use_midpoints", "na.rm", "allowParallel", "predictor",
-                    "outcome", "mod_names", "subgroup_var")
-    cutpointr_internal(cutpointr_eval = res, ...)
+    cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
+                       direction, boot_runs, use_midpoints, na.rm, allowParallel,
+                       predictor, outcome, mod_name, subgroup_var, ...)
 }
 
 
-cutpointr_internal <- function(cutpointr_eval, ...) {
-    x <- cutpointr_eval$x
-    class <- cutpointr_eval$class
-    subgroup <- cutpointr_eval$subgroup
-    method <- cutpointr_eval$method
-    metric <- cutpointr_eval$metric
-    pos_class <- cutpointr_eval$pos_class
-    neg_class <- cutpointr_eval$neg_class
-    direction <- cutpointr_eval$direction
-    boot_runs <- cutpointr_eval$boot_runs
-    use_midpoints <- cutpointr_eval$use_midpoints
-    na.rm <- cutpointr_eval$na.rm
-    allowParallel <- cutpointr_eval$allowParallel
-    predictor <- cutpointr_eval$predictor
-    outcome <- cutpointr_eval$outcome
-    mod_name <- cutpointr_eval$mod_name
-    subgroup_var <- cutpointr_eval$subgroup_var
-
-
-
+cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
+                               neg_class, direction, boot_runs,
+                               use_midpoints, na.rm, allowParallel, predictor,
+                               outcome, mod_name, subgroup_var, ...) {
     #
     # Prep
     #
