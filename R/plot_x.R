@@ -39,17 +39,19 @@ plot_x <- function(x, display_cutpoint = TRUE, ...) {
                                          by = "subgroup")
         col <- ~ subgroup
     }
-    if (all(stats::na.omit(dplyr::select_(res_unnested, .dots = predictor) %% 1 == 0))) {
-        dist_plot <- ggplot2::geom_histogram(alpha = 1, position = "dodge",
-                                             bins = 30)
+    if (all(stats::na.omit(dplyr::select_(res_unnested, .dots = predictor)) %% 1 == 0) |
+        all(stats::na.omit(dplyr::select_(res_unnested, .dots = predictor)) ==
+            stats::na.omit(dplyr::select_(res_unnested, .dots = predictor))[1])) {
+        all_integer = TRUE
+        dist_plot <- ggplot2::geom_bar(alpha = transparency, position = "identity")
     } else {
-        dist_plot <- ggplot2::geom_density(alpha = 1)
+        all_integer = FALSE
+        dist_plot <- ggplot2::geom_density(alpha = transparency)
     }
     dist <- ggplot2::ggplot(res_unnested,
                             ggplot2::aes_string(x = predictor,
                                                 fill = fll, color = clr)) +
         dist_plot +
-        ggplot2::geom_rug(alpha = 0.5) +
         # facet by class because always 2
         ggplot2::facet_wrap(outcome, scales = "free_y") +
         ggplot2::ggtitle("Independent variable",
@@ -59,5 +61,6 @@ plot_x <- function(x, display_cutpoint = TRUE, ...) {
         ggplot2::geom_vline(ggplot2::aes_(xintercept = ~ optimal_cutpoint,
                                           color = col), show.legend = FALSE)
 
+    if (!all_integer) dist <- dist + ggplot2::geom_rug(alpha = 0.5)
     return(dist)
 }

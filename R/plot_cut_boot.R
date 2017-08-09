@@ -16,23 +16,27 @@ plot_cut_boot <- function(x, ...) {
         dts <- "data"
         fll <- NULL
         clr <- NULL
-        transparency <- 0.6
+        transparency <- 1
     } else {
         dts_boot <- c("boot", "subgroup")
         dts <- c("data", "subgroup")
         fll <- "subgroup"
         clr <- "subgroup"
-        transparency <- 1
+        transparency <- 0.6
     }
 
     if(!is.null(suppressWarnings(x$boot))) {
         res_boot_unnested <- x %>%
             dplyr::select_(.dots = dts_boot) %>%
             tidyr::unnest_(unnest_cols = "boot")
-        if (all(stats::na.omit(res_boot_unnested$optimal_cutpoint %% 1 == 0))) {
-            dist_plot <- ggplot2::geom_histogram(alpha = 1, bins = 30,
-                                                 position = "dodge")
+        if (all(stats::na.omit(res_boot_unnested$optimal_cutpoint %% 1 == 0)) |
+            all(stats::na.omit(res_boot_unnested$optimal_cutpoint) ==
+                               stats::na.omit(res_boot_unnested$optimal_cutpoint)[1])) {
+            all_integer = TRUE
+            dist_plot <- ggplot2::geom_bar(alpha = transparency,
+                                           position = "identity")
         } else {
+            all_integer = FALSE
             dist_plot <- ggplot2::geom_density(alpha = transparency)
         }
         boot_cut <- suppressMessages(
@@ -40,10 +44,10 @@ plot_cut_boot <- function(x, ...) {
                             ggplot2::aes_string(x = "optimal_cutpoint",
                                                 fill = fll, color = clr)) +
                 dist_plot +
-                ggplot2::geom_rug(alpha = 0.5) +
                 ggplot2::ggtitle("Bootstrap", "distribution of optimal cutpoints") +
                 ggplot2::xlab("optimal cutpoint")
         )
+        if (!all_integer) boot_cut <- boot_cut + ggplot2::geom_rug(alpha = 0.5)
     } else {
         stop("No bootstrap results found. Was boot_runs > 0 in cutpointr?")
     }

@@ -29,12 +29,14 @@ plot_metric_boot <- function(x, ...) {
         res_boot_unnested <- x %>%
             dplyr::select_(.dots = dts_boot) %>%
             tidyr::unnest_(unnest_cols = "boot")
-        met_ind <- which(colnames(res_boot_unnested) == "optimal_cutpoint") + 1
-        metric_name <- colnames(res_boot_unnested)[met_ind]
-        if (all(stats::na.omit(get(metric_name, res_boot_unnested) %% 1 == 0))) {
-            dist_plot <- ggplot2::geom_histogram(alpha = 1, bins = 30,
-                                                 position = "dodge")
+        metric_name <- find_metric_name_boot(res_boot_unnested)
+        if (all(stats::na.omit(get(metric_name, res_boot_unnested) %% 1 == 0)) |
+            all(stats::na.omit(get(metric_name, res_boot_unnested)) ==
+                stats::na.omit(get(metric_name, res_boot_unnested))[1])) {
+            all_integer = TRUE
+            dist_plot <- ggplot2::geom_bar(alpha = 1, position = "dodge")
         } else {
+            all_integer = FALSE
             dist_plot <- ggplot2::geom_density(alpha = transparency)
         }
         boot_metric <- suppressMessages(
@@ -42,11 +44,12 @@ plot_metric_boot <- function(x, ...) {
                             ggplot2::aes_string(x = metric_name,
                                                 fill = fll, color = clr)) +
                 dist_plot +
-                ggplot2::geom_rug(alpha = 0.5) +
                 ggplot2::ggtitle("Bootstrap",
                                  paste("out-of-bag estimates of", metric_name)) +
                 ggplot2::xlab(metric_name)
         )
+        if (!all_integer) boot_metric <- boot_metric +
+            ggplot2::geom_rug(alpha = 0.5)
     } else {
         stop("No bootstrap results found. Was boot_runs > 0 in cutpointr?")
     }
