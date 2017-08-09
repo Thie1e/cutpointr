@@ -14,17 +14,11 @@ knitr::opts_chunk$set(fig.width = 6, fig.height = 5, fig.align = "center")
 ```
 
 
-cutpointr is an R package for tidy calculation of "optimal" cutpoints. It 
+The cutpointr package is an R package for tidy calculation of "optimal" cutpoints. It 
 supports several methods for calculating cutpoints and includes several 
 metrics that can be maximized or minimized by selecting a cutpoint. Additionally,
 cutpointr can automatically bootstrap the variability of the optimal 
 cutpoints and return out-of-bag estimates of various metrics.
-
-## Installation
-
-```{r, eval = FALSE}
-devtools::install_github("thie1e/cutpointr")
-```
 
 ## Features
 
@@ -44,7 +38,13 @@ The included methods for calculating cutpoints are:
 - `minimize_metric`: Minimize the metric function
 - `maximize_loess_metric`: Maximize the metric function after LOESS smoothing
 - `minimize_loess_metric`: Minimize the metric function after LOESS smoothing
+- `maximize_boot_metric`: Maximize the metric function as a mean of
+the optimal cutpoints in bootstrapped samples
+- `minimize_boot_metric`: Minimize the metric function as a mean of
+the optimal cutpoints in bootstrapped samples
 - `oc_manual`: Specify the cutoff value manually
+- `oc_mean`: Use the sample mean as the "optimal" cutpoint
+- `oc_median`: Use the sample median as the "optimal" cutpoint
 - `oc_youden_kernel`: Maximize the Youden-Index after kernel smoothing
 the distributions of the two classes
 - `oc_youden_normal`: Maximize the Youden-Index parametrically
@@ -57,7 +57,7 @@ The included metrics to be used with the minimization and maximization methods
 are:
 
 - `accuracy`: Fraction correctly classified
-- `abs_d_sesp`: The absolute difference of sensitivity and specificity
+- `abs_d_sens_spec`: The absolute difference of sensitivity and specificity
 - `abs_d_ppvnpv`: The absolute difference between positive predictive
 value (PPV) and negative predictive value (NPV)
 - `cohens_kappa`: Cohen's Kappa
@@ -69,6 +69,7 @@ predictive value (NPV)
 negative predictive value (NPV)
 - `youden`: Youden- or J-Index = sensitivity + specificity - 1
 - `odds_ratio`: (Diagnostic) odds ratio
+- `risk_ratio`: risk ratio (relative risk)
 - `p_chisquared`: The p-value of a chi-squared test on the confusion
 matrix
 - `cost_misclassification`: The sum of the misclassification cost of
@@ -249,6 +250,59 @@ metric values by cutpoint value, even after smoothing.
 The unsmoothed metric values are returned in `opt_cut$roc_curve` in the column
 `m_unsmoothed`.
 
+
+### Manual and mean / median cutpoints
+
+Using the `oc_manual` function the "optimal" cutpoint will not be determined 
+based on, for example, a metric but it is instead set manually using the 
+`cutpoint` argument. This is useful for supplying cutpoints that were found
+in the literature or in other external sources. 
+
+The `oc_manual` function could also be used to set the cutpoint to the sample
+mean using `cutpoint = mean(data$x)`. However, this may introduce a bias into the
+bootstrapping validation procedure, since the actual mean of the population is
+not known and thus it should be automatically determined in every resample.
+To do so, the `oc_mean` and `oc_median` functions can be used.
+
+```{r}
+set.seed(100)
+opt_cut_manual <- cutpointr(suicide, dsi, suicide, method = oc_manual, 
+                       cutpoint = mean(suicide$dsi), boot_runs = 200)
+set.seed(100)
+opt_cut_mean <- cutpointr(suicide, dsi, suicide, method = oc_mean, boot_runs = 200)
+```
+
+
+
+### Midpoints
+
+Sometimes it can be favourable to use the mean of the 'optimal' cutpoint and
+the next highest or next lowest possible cutpoint. Assume the following small data set:
+
+```{r}
+sparse_dat <- data.frame(outcome = c("neg", "neg", "neg", 
+                                     "pos", "pos", "pos", "pos"),
+                         pred    = c(1, 2, 3, 
+                                     8, 11, 11, 12))
+```
+
+Since the distance of the optimal cutpoint (8) to the next lowest 
+observation (3) is rather large we arrive at a range of possible cutpoints that
+all maximize the metric. In the case of this kind of sparseness it might for example be
+desirable to classify a new obsevation with a predictor value of 4 as belonging
+to the negative class. When `use_midpoints` is set to `TRUE` the mean of the 
+optimal cutpoint and the next lowest observation is returned as the optimal
+cutpoint if direction is `>=`. The mean of the optimal cutpoint and the next
+highest observation is returned as the optimal cutpoint if `direction = "<="`.
+
+```{r}
+opt_cut <- cutpointr(sparse_dat, x = pred, class = outcome, 
+                     use_midpoints = TRUE)
+plot_x(opt_cut)
+```
+
+
+
 ## Nonstandard evaluation and transforming variables
 
 The arguments to `cutpointr` do not need to be enclosed in quotes. This is 
@@ -304,6 +358,38 @@ suicide %>%
                                                      metric = sum_sens_spec)))
 ```
 
+### AUC and optimal cutpoint for multiple variables
+
+Alternatively we can use the standard evaluation version in `cutpointr_` to 
+loop over column names. In this case, we would like to determine the optimal
+cutpoint along with the AUC of multiple variables in a data set. 
+
+If `direction` and / or `pos_class` and `neg_class` are unspecified, these parameters
+will automatically be determined by cutpointr so that the AUC values for all
+variables will be > 0.5.
+
+```{r}
+dat <- iris %>% 
+    dplyr::filter(Species %in% c("setosa", "virginica"))
+
+purrr::map_df(colnames(dat)[1:4], function(coln) {
+    cutpointr_(dat, x = coln, class = "Species", 
+               pos_class = "setosa", use_midpoints = T) %>% 
+        mutate(variable = coln)
+}) %>% 
+    dplyr::select(variable, direction, optimal_cutpoint, AUC)
+```
+
+To make this task more convenient, the built-in `multi_cutpointr` function can be
+used to achieve the same result.
+
+```{r}
+multi_cutpointr(dat, class = "Species", pos_class = "setosa", 
+                use_midpoints = TRUE, silent = TRUE) %>% 
+    dplyr::select(variable, direction, optimal_cutpoint, AUC)
+```
+
+
 ### Accessing `data`, `roc_curve`, and `boot` 
 
 The object returned by `cutpointr` is of the classes `cutpointr`, `tbl_df`,
@@ -336,9 +422,11 @@ opt_cut %>%
     summarise(m = mean(optimal_cutpoint))
 opt_cut %>%
     select(subgroup, boot) %>% 
-    mutate(summary_b = map(boot, function(x) data.frame(min = min(x$optimal_cutpoint),
-                                                        mean = mean(x$optimal_cutpoint),
-                                                        max = max(x$optimal_cutpoint)))) %>% 
+    mutate(summary_b = map(boot, function(x) {
+        data.frame(min = min(x$optimal_cutpoint),
+                   mean = mean(x$optimal_cutpoint),
+                   max = max(x$optimal_cutpoint))
+    })) %>% 
     select(-boot) %>%
     unnest
 ```
@@ -361,7 +449,7 @@ the y-axis
 
 ```{r, fig.width=4, fig.height=3}
 opt_cut <- cutpointr(suicide, dsi, suicide, gender, method = minimize_metric,
-                     metric = abs_d_sesp, boot_runs = 100)
+                     metric = abs_d_sens_spec, boot_runs = 100)
 opt_cut
 plot_cut_boot(opt_cut)
 plot_metric(opt_cut)
@@ -584,7 +672,7 @@ bench_50000 <- microbenchmark::microbenchmark(
     cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
               direction = ">=", metric = youden),
     rocr_sensspec(dat$x, dat$y),
-    times = 50
+    times = 100
 )
 
 n <- 100000
@@ -594,7 +682,17 @@ bench_100000 <- microbenchmark::microbenchmark(
     cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
               direction = ">=", metric = youden),
     rocr_sensspec(dat$x, dat$y),
-    times = 50
+    times = 100
+)
+
+n <- 1e6
+set.seed(123)
+dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
+bench_1000000 <- microbenchmark::microbenchmark(
+    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
+              direction = ">=", metric = youden),
+    rocr_sensspec(dat$x, dat$y),
+    times = 20
 )
 
 results <- rbind(data.frame(time = summary(bench_100)$median,
@@ -614,7 +712,10 @@ results <- rbind(data.frame(time = summary(bench_100)$median,
                             n = 50000),
                  data.frame(time = summary(bench_100000)$median,
                             solution = summary(bench_100000)$expr, 
-                            n = 100000))
+                            n = 100000),
+                 data.frame(time = summary(bench_1000000)$median,
+                            solution = summary(bench_100000)$expr, 
+                            n = 1000000))
 results$solution <- as.character(results$solution)
 results$solution[grep(pattern = "cutpointr", x = results$solution)] <- "cutpointr"
 results$solution[grep(pattern = "rocr", x = results$solution)] <- "ROCR"
@@ -623,6 +724,7 @@ results$solution[grep(pattern = "optimal", x = results$solution)] <- "OptimalCut
 ggplot(results, aes(x = n, y = time, col = solution, shape = solution)) +
     geom_point(size = 3) + geom_line() +
     scale_y_log10() + scale_x_log10() + 
-    ggtitle("Benchmark results", "n = 100, 500, 1000, 10000, 50000, 100000") +
-    ylab("Median time (milliseconds, log scale)") + xlab("log(n)")
+    ggtitle("Benchmark results", "n = 100, 500, 1000, 10000, 50000, 100000, 1000000") +
+    ylab("Median time (milliseconds, log scale)") + xlab("n (log scale)")
 ```
+
