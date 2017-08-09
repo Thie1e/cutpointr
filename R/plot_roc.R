@@ -34,17 +34,13 @@ plot_roc <- function(x, display_cutpoint = TRUE, ...) {
         roc_title <- ggplot2::ggtitle("ROC curve", "by class")
     }
     if (display_cutpoint) {
-        if (x$direction[1] == ">=") {
-            optcut_coords <- apply(x, 1, function(r) {
-                opt_ind <- max(which(r$roc_curve$x.sorted >= r$optimal_cutpoint))
-                data.frame(tpr = r$roc_curve$tpr[opt_ind], tnr = r$roc_curve$tnr[opt_ind])
-            })
-        } else if (x$direction[1] == "<=") {
-            optcut_coords <- apply(x, 1, function(r) {
-                opt_ind <- min(which(r$roc_curve$x.sorted <= r$optimal_cutpoint))
-                data.frame(tpr = r$roc_curve$tpr[opt_ind], tnr = r$roc_curve$tnr[opt_ind])
-            })
-        }
+        optcut_coords <- apply(x, 1, function(r) {
+            opt_ind <- get_opt_ind(roc_curve = r$roc_curve,
+                                   oc = r$optimal_cutpoint,
+                                   direction = r$direction)
+            data.frame(tpr = r$roc_curve$tpr[opt_ind],
+                       tnr = r$roc_curve$tnr[opt_ind])
+        })
         optcut_coords <- do.call(rbind, optcut_coords)
     }
     res_unnested <- x %>%
@@ -60,6 +56,5 @@ plot_roc <- function(x, display_cutpoint = TRUE, ...) {
     if (display_cutpoint) {
         roc <- roc + ggplot2::geom_point(data = optcut_coords, color = "black")
     }
-
     return(roc)
 }
