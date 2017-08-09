@@ -57,6 +57,9 @@ beforehand.}
 \item{...}{Further optional arguments that will be passed to method.
 minimize_metric and maximize_metric pass ... to metric.}
 }
+\value{
+A cutpointr object which is also a data.frame and tbl_df.
+}
 \description{
 Using predictions (or e.g. biological marker values) and binary class labels, this function
 will determine "optimal" cutpoints using various selectable methods. The
@@ -78,6 +81,10 @@ the method argument. The package includes the following cutpoint functions:
  smoothing
  \item minimize_loess_metric: Minimize the metric function after LOESS
  smoothing
+ \item maximize_boot_metric: Maximize the metric function as a mean of
+ the optimal cutpoints in bootstrapped samples
+ \item minimize_boot_metric: Minimize the metric function as a mean of
+ the optimal cutpoints in bootstrapped samples
  \item oc_manual: Specify the cutoff value manually
  \item oc_youden_kernel: Maximize the Youden-Index after kernel smoothing
  the distributions of the two classes
@@ -121,18 +128,21 @@ Built-in metric functions include:
  \item prod_ppvnpv: The product of positive predictive value (PPV) and
  negative predictive value (NPV)
  \item cohens_kappa: Cohen's Kappa
- \item abs_d_sesp: The absolute difference between
+ \item abs_d_sens_spec: The absolute difference between
  sensitivity and specificity
  \item abs_d_ppvnpv: The absolute difference between positive predictive
  value (PPV) and negative predictive value (NPV)
  \item p_chisquared: The p-value of a chi-squared test on the confusion
  matrix of predictions and observations
  \item odds_ratio: The odds ratio calculated as (TP / FP) / (FN / TN)
+ \item risk_ratio: The risk ratio (relative risk) calculated as
+ (TP / (TP + FN)) / (FP / (FP + TN))
  \item misclassification_cost: The sum of the misclassification cost of
  false positives and false negatives. Additional arguments: cost_fp, cost_fn
  \item total_utility: The total utility of true / false positives / negatives
  calculated as utility_tp * TP + utility_tn * TN - cost_fp * FP - cost_fn * FN.
  Additional arguments: utility_tp, utility_tn, cost_fp, cost_fn
+ \item F1_score: The F1-score (2 * TP) / (2 * TP + FP + FN)
 }
 
 User defined metric functions can be used as well which can accept the following
@@ -146,8 +156,9 @@ inputs as vectors:
  maximize / minimize methods, further arguments can be passed
 }
 
-The function should return a matrix with one column. If the column is named,
-the named will be included in the output and plots. Avoid using names that
+The function should return a numeric vector or a matrix or a data.frame
+with one column. If the column is named,
+the name will be included in the output and plots. Avoid using names that
 are identical to the column names that are by default returned by cutpointr.
 
 If boot_runs is positive, that number of bootstrap samples will be drawn
@@ -218,7 +229,7 @@ predict(opt_cut, newdata = data.frame(dsi = 1:3))
 ## Different cutpoint function / metric
 set.seed(12)
 opt_cut <- cutpointr(suicide, dsi, suicide, gender, pos_class = "yes",
-  boot_runs = 30, method = minimize_metric, metric = abs_d_sesp)
+  boot_runs = 30, method = minimize_metric, metric = abs_d_sens_spec)
 opt_cut
 plot(opt_cut)
 

@@ -118,13 +118,13 @@ prod_sens_spec <- function(tp, fp, tn, fn, ...) {
 #' The inputs must be vectors of equal length.
 #' @inheritParams accuracy
 #' @examples
-#' abs_d_sesp(10, 5, 20, 10)
+#' abs_d_sens_spec(10, 5, 20, 10)
 #' @export
-abs_d_sesp <- function(tp, fp, tn, fn, ...) {
+abs_d_sens_spec <- function(tp, fp, tn, fn, ...) {
     sesp <- sens_spec(tp, fp, tn, fn)
     abs_d_sesp <- abs(sesp[, 1] - sesp[, 2])
     abs_d_sesp <- matrix(abs_d_sesp, ncol = 1)
-    colnames(abs_d_sesp) <- "abs_d_sesp"
+    colnames(abs_d_sesp) <- "abs_d_sens_spec"
     return(abs_d_sesp)
 }
 
@@ -226,6 +226,23 @@ odds_ratio <- function(tp, fp, tn, fn, ...) {
     return(or)
 }
 
+#' Calculate the risk ratio (relative risk)
+#'
+#' Calculate the risk ratio (or relative risk) from the elements of a confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' The risk ratio is defined as: (TP / FP) / (TN / FN)
+#' The inputs must be vectors of equal length.
+#' @inheritParams accuracy
+#' @examples
+#' risk_ratio(10, 5, 20, 10)
+#' @export
+risk_ratio <- function(tp, fp, tn, fn, ...) {
+    rr <- (tp / (tp + fn)) / (fp / (fp + tn))
+    rr <- matrix(rr, ncol = 1)
+    colnames(rr) <- "risk_ratio"
+    return(rr)
+}
+
 #' Calculate the p-value of a chi-squared test from a 2x2 confusion matrix
 #'
 #' Calculate the p-value of a chi-squared test from the elements of a confusion matrix,
@@ -286,4 +303,20 @@ total_utility <- function(tp, fp, tn, fn,
     utility <- matrix(utility, ncol = 1)
     colnames(utility) <- "total_utility"
     return(utility)
+}
+
+#' Calculate the F1-score from a 2x2 confusion matrix
+#'
+#' Calculate the F1-score from the elements of a confusion matrix,
+#' that is true positives, false positives, true negatives and false negatives.
+#' The inputs must be vectors of equal length.
+#' @inheritParams accuracy
+#' @examples
+#' F1_score(10, 5, 20, 10)
+#' @export
+F1_score <- function(tp, fp, tn, fn, ...) {
+    f <- (2 * tp) / (2 * tp + fp + fn)
+    f <- matrix(f, ncol = 1)
+    colnames(f) <- "F1_score"
+    return(f)
 }

@@ -1,6 +1,7 @@
 optimize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, minmax,
                             direction, metric_name = "metric", loess = FALSE,
+                            return_roc = TRUE,
                             ...) {
     args <- list(...)
     metric_name_call <- as.character(substitute(metric_func))
@@ -9,11 +10,7 @@ optimize_metric <- function(data, x, class, metric_func = youden,
                     neg_class = neg_class, direction = direction)
     m <- metric_func(tp = roccurve[, "tp"], fp = roccurve[, "fp"],
                      tn = roccurve[, "tn"], fn = roccurve[, "fn"], ...)
-    finite_m <- is.finite(m)
-    if (any(!finite_m)) {
-        message("Omitting infinite metric values")
-        m[!finite_m] <- NA
-    }
+    m <- sanitize_metric(m, m_name = metric_name, n = nrow(roccurve))
     roccurve$m <- as.numeric(m)
     if (!is.null(colnames(m))) metric_name <- colnames(m)
     if (loess) {
@@ -36,7 +33,7 @@ optimize_metric <- function(data, x, class, metric_func = youden,
         opt <- which(m == max_m)
         oc <- min(roccurve[, "x.sorted"][opt])
         if (length(opt) > 1) {
-            warning(paste("Multiple optimal cutpoints found, returning minimum of:",
+            message(paste("Multiple optimal cutpoints found, returning minimum of:",
                           paste(roccurve[, "x.sorted"][opt], collapse = ", ")))
         }
         m_oc <- max_m
@@ -45,14 +42,16 @@ optimize_metric <- function(data, x, class, metric_func = youden,
         opt <- which(m == min_m)
         oc <- max(roccurve[, "x.sorted"][opt])
         if (length(opt) > 1) {
-            warning(paste("Multiple optimal cutpoints found, returning maximum of:",
+            message(paste("Multiple optimal cutpoints found, returning maximum of:",
                           paste(roccurve[, "x.sorted"][opt], collapse = ", ")))
         }
         m_oc <- min_m
     }
-    res <- tidyr::nest_(roccurve, key_col = "roc_curve",
-                        nest_cols = colnames(roccurve))
-    res$optimal_cutpoint <- oc
+    res <- tibble::tibble(optimal_cutpoint = oc)
+    if (return_roc) {
+        res <- dplyr::bind_cols(res, tidyr::nest_(roccurve, key_col = "roc_curve",
+                                                  nest_cols = colnames(roccurve)))
+    }
     res[, metric_name] <- m_oc
     return(res)
 }
@@ -167,6 +166,10 @@ minimize_metric <- function(data, x, class, metric_func = youden,
 #'
 #' @source Xiao-Feng Wang (2010). fANCOVA: Nonparametric Analysis of Covariance.
 #'  https://CRAN.R-project.org/package=fANCOVA
+#' @source Leeflang, M. M., Moons, K. G., Reitsma, J. B., & Zwinderman, A. H.
+#' (2008). Bias in sensitivity and specificity caused by data-driven selection
+#' of optimal cutoff values: mechanisms, magnitude, and solutions.
+#' Clinical Chemistry, (4), 729–738.
 #' @export
 maximize_loess_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
@@ -220,6 +223,10 @@ maximize_loess_metric <- function(data, x, class, metric_func = youden,
 #'
 #' @source Xiao-Feng Wang (2010). fANCOVA: Nonparametric Analysis of Covariance.
 #'  https://CRAN.R-project.org/package=fANCOVA
+#' @source Leeflang, M. M., Moons, K. G., Reitsma, J. B., & Zwinderman, A. H.
+#' (2008). Bias in sensitivity and specificity caused by data-driven selection
+#' of optimal cutoff values: mechanisms, magnitude, and solutions.
+#' Clinical Chemistry, (4), 729–738.
 #' @export
 minimize_loess_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
@@ -230,3 +237,103 @@ minimize_loess_metric <- function(data, x, class, metric_func = youden,
                     direction = direction, metric_name = metric_name,
                     loess = TRUE, ...)
 }
+
+
+#' Maximize a metric function in binary classification after bootstrapping
+#'
+#' Given a function for computing a metric in metric_func, this function
+#' bootstraps the data boot_cut times and
+#' minimizes the metric by selecting an optimal cutpoint. The returned
+#' optimal cutpoint is the mean of all optimal cutpoints that were
+#' determined in the bootstrap samples.
+#'
+#' The metric function should accept the following inputs:
+#' \itemize{
+#'  \item tp: vector of number of true positives
+#'  \item fp: vector of number of false positives
+#'  \item tn: vector of number of true negatives
+#'  \item fn: vector of number of false negatives
+#' }
+#'
+#' The above inputs are arrived at by using all unique values in x, Inf, and
+#' -Inf as possible cutpoints for classifying the variable in class.
+#'
+#' @return A tibble with the column optimal_cutpoint
+#'
+#' @inheritParams oc_youden_normal
+#' @param metric_func (function) A function that computes a single number
+#' metric to be maximized. See description.
+#' @param boot_cut (numeric) Number of bootstrap repetitions over which the mean
+#' optimal cutpoint is calculated.
+#'
+#' @export
+maximize_boot_metric <- function(data, x, class, metric_func = youden,
+                            pos_class = NULL, neg_class = NULL, direction,
+                            boot_cut = 200,
+                            ...) {
+    metric_name <- as.character(substitute(metric_func))
+    optimal_cutpoints <- rep(NA, boot_cut)
+    for (i in 1:boot_cut) {
+        b_ind <- sample(1:boot_cut, size = boot_cut, replace = TRUE)
+        opt_cut <- optimize_metric(data = data[b_ind, ],
+                                   x = x, class = class,
+                                   metric_func = metric_func,
+                                   pos_class = pos_class, neg_class = neg_class,
+                                   minmax = "max", direction = direction,
+                                   metric_name = metric_name,
+                                   return_roc = FALSE, ...)
+        optimal_cutpoints[i] <- opt_cut$optimal_cutpoint
+    }
+    return(tibble::tibble(optimal_cutpoint = mean(optimal_cutpoints)))
+}
+
+
+#' Minimize a metric function in binary classification after bootstrapping
+#'
+#' Given a function for computing a metric in metric_func, this function
+#' bootstraps the data boot_cut times and
+#' minimizes the metric by selecting an optimal cutpoint. The returned
+#' optimal cutpoint is the mean of all optimal cutpoints that were
+#' determined in the bootstrap samples.
+#'
+#' The metric function should accept the following inputs:
+#' \itemize{
+#'  \item tp: vector of number of true positives
+#'  \item fp: vector of number of false positives
+#'  \item tn: vector of number of true negatives
+#'  \item fn: vector of number of false negatives
+#' }
+#'
+#' The above inputs are arrived at by using all unique values in x, Inf, and
+#' -Inf as possible cutpoints for classifying the variable in class.
+#'
+#' @return A tibble with the column optimal_cutpoint
+#'
+#' @inheritParams oc_youden_normal
+#' @param metric_func (function) A function that computes a single number
+#' metric to be maximized. See description.
+#' @param boot_cut (numeric) Number of bootstrap repetitions over which the mean
+#' optimal cutpoint is calculated.
+#'
+#' @export
+minimize_boot_metric <- function(data, x, class, metric_func = youden,
+                            pos_class = NULL, neg_class = NULL, direction,
+                            boot_cut = 200,
+                            ...) {
+    metric_name <- as.character(substitute(metric_func))
+    optimal_cutpoints <- rep(NA, boot_cut)
+    for (i in 1:boot_cut) {
+        b_ind <- sample(1:boot_cut, size = boot_cut, replace = TRUE)
+        opt_cut <- optimize_metric(data = data[b_ind, ],
+                                   x = x, class = class,
+                                   metric_func = metric_func,
+                                   pos_class = pos_class, neg_class = neg_class,
+                                   minmax = "min", direction = direction,
+                                   metric_name = metric_name,
+                                   return_roc = FALSE, ...)
+        optimal_cutpoints[i] <- opt_cut$optimal_cutpoint
+    }
+    return(tibble::tibble(optimal_cutpoint = mean(optimal_cutpoints)))
+}
+
+
