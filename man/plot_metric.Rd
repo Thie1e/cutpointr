@@ -4,10 +4,13 @@
 \alias{plot_metric}
 \title{Plot a metric over all possible cutoffs}
 \usage{
-plot_metric(x)
+plot_metric(x, conf_lvl = 0.95)
 }
 \arguments{
 \item{x}{A cutpointr object.}
+
+\item{conf_lvl}{The confidence level of the bootstrap confidence interval.
+Set to 0 to draw no bootstrap confidence interval.}
 }
 \description{
 If maximize_metric is used as method function in cutpointr the computed
