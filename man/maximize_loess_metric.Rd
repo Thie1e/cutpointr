@@ -6,6 +6,11 @@
 \source{
 Xiao-Feng Wang (2010). fANCOVA: Nonparametric Analysis of Covariance.
  https://CRAN.R-project.org/package=fANCOVA
+
+Leeflang, M. M., Moons, K. G., Reitsma, J. B., & Zwinderman, A. H.
+(2008). Bias in sensitivity and specificity caused by data-driven selection
+of optimal cutoff values: mechanisms, magnitude, and solutions.
+Clinical Chemistry, (4), 729–738.
 }
 \usage{
 maximize_loess_metric(data, x, class, metric_func = youden,

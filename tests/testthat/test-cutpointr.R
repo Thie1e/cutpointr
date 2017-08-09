@@ -208,7 +208,7 @@ test_that("Correct cutpoints with example data", {
     exdat <- data.frame(obs = c(0, 0, 1, 1),
                         preds = c(0, 0, 1, 1))
     optcut <- cutpointr(exdat, preds, obs, method = minimize_metric,
-                        metric = abs_d_sesp)
+                        metric = abs_d_sens_spec)
     expect_equal(optcut$optimal_cutpoint, 1)
     optcut <- cutpointr(exdat, preds, obs, method = maximize_metric,
                         metric = accuracy)
@@ -221,7 +221,7 @@ test_that("Correct cutpoints with example data", {
     exdat <- data.frame(obs = c(NA, 0, 0, 1, 1),
                         preds = c(1, 0, 0, 1, 1))
     optcut <- cutpointr(exdat, preds, obs, method = minimize_metric,
-                        metric = abs_d_sesp, na.rm = T)
+                        metric = abs_d_sens_spec, na.rm = T)
     expect_equal(optcut$optimal_cutpoint, 1)
     expect_silent(plot(optcut))
     optcut <- cutpointr(exdat, preds, obs, method = maximize_metric,
@@ -285,18 +285,18 @@ test_that("SE and NSE interface give identical results", {
 test_that("cutpointr detects wrong number of classes", {
     tempdat <- data.frame(cl = factor(c("a", "b", "c")), x = 1:3)
     expect_error(cutpointr(tempdat, x, cl))
-    expect_error(cutpointr(tempdat, "x", "cl"))
+    expect_error(cutpointr_(tempdat, "x", "cl"))
     expect_error(cutpointr(tempdat, x, cl, pos_class = "a", neg_class = "b",
                            direction = ">="))
-    expect_error(cutpointr(tempdat, "x", "cl", pos_class = "a", neg_class = "b",
+    expect_error(cutpointr_(tempdat, "x", "cl", pos_class = "a", neg_class = "b",
                            direction = ">="))
 
     tempdat <- data.frame(cl = factor(c("a", "a", "a")), x = 1:3)
     expect_error(cutpointr(tempdat, x, cl))
-    expect_error(cutpointr(tempdat, "x", "cl"))
+    expect_error(cutpointr_(tempdat, "x", "cl"))
     expect_error(cutpointr(tempdat, x, cl, pos_class = "a", neg_class = "b",
                            direction = ">="))
-    expect_error(cutpointr(tempdat, "x", "cl", pos_class = "a", neg_class = "b",
+    expect_error(cutpointr_(tempdat, "x", "cl", pos_class = "a", neg_class = "b",
                            direction = ">="))
 })
 
@@ -566,6 +566,21 @@ test_that("Results for accuracy are equal to results by OptimalCutpoints", {
                             method = oc_OptimalCutpoints,
                             oc_metric = "MaxProdNPVPPV")
     expect_equal(opt_cut_cp$optimal_cutpoint, opt_cut_oc$optimal_cutpoint)
+})
+
+test_that("Results for F1_score are equal to results by ROCR", {
+    set.seed(38429)
+    tempdat <- data.frame(x = c(rnorm(100), rnorm(100, mean = 1)) ,
+                          y = c(rep(0, 100), rep(1, 100)),
+                          group = sample(c("a", "b"), size = 200, replace = TRUE))
+
+    f1_cp <- cutpointr(tempdat, x, y, method = maximize_metric,
+                            metric = F1_score, direction = ">=",
+                            pos_class = 1)
+    rocr_pred <- ROCR::prediction(tempdat$x, tempdat$y)
+    f1_rocr <- ROCR::performance(rocr_pred, "f")
+    expect_identical(round(f1_rocr@y.values[[1]], 4)[-1],
+                     round(f1_cp$roc_curve[[1]]$m, 4)[-1])
 })
 
 if (require(OptimalCutpoints)) {

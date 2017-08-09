@@ -16,11 +16,9 @@ summary.cutpointr <- function(object, ...) {
                 dat <- unlist(dat)
                 summary_sd(dat)
             })
-        # classnames <- names(x_summary[[r]]$desc_byclass)
         x_summary[[r]]$desc_byclass <- data.frame(do.call(rbind, x_summary[[r]]$desc_byclass))
         colnames(x_summary[[r]]$desc_byclass) <- c("Min.", "1st Qu.", "Median",
                                                    "Mean", "3rd Qu.", "Max", "SD")
-        # x_summary[[r]]$desc_byclass$class <- classnames
         x_summary[[r]]$n_obs <- nrow(temprow$data[[1]])
         x_summary[[r]]$n_pos <- temprow$data[[1]] %>%
             dplyr::select_(as.name(temprow$outcome)) %>%
