@@ -7,10 +7,10 @@
 cutpointr_(data, x, class, subgroup = NULL, method = "maximize_metric",
   metric = "sum_sens_spec", pos_class = NULL, neg_class = NULL,
   direction = NULL, boot_runs = 0, use_midpoints = FALSE, na.rm = FALSE,
-  allowParallel = FALSE, ...)
+  allowParallel = FALSE, silent = FALSE, ...)
 }
 \arguments{
-\item{data}{A data frame or tibble in which the columns that are given in x,
+\item{data}{A data frame or tibble in which the columns that may be given in x,
 class and possibly subgroup can be found.}
 
 \item{x}{The variable name with quotation marks to be used for
@@ -53,6 +53,8 @@ na.rm = FALSE will raise an error.}
 \item{allowParallel}{(logical) If TRUE, the bootstrapping will be parallelized
 using foreach. A local cluster, for example, should have been started manually
 beforehand.}
+
+\item{silent}{(logical) If TRUE suppresses all messages.}
 
 \item{...}{Further optional arguments that will be passed to method.
 minimize_metric and maximize_metric pass ... to metric.}

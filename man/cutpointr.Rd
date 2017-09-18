@@ -4,24 +4,26 @@
 \alias{cutpointr}
 \title{Determine and evaluate optimal cutpoints}
 \usage{
-cutpointr(data, x, class, subgroup = NULL, method = maximize_metric,
-  metric = sum_sens_spec, pos_class = NULL, neg_class = NULL,
-  direction = NULL, boot_runs = 0, use_midpoints = FALSE, na.rm = FALSE,
-  allowParallel = FALSE, ...)
+cutpointr(data = NULL, x, class, subgroup = NULL,
+  method = maximize_metric, metric = sum_sens_spec, pos_class = NULL,
+  neg_class = NULL, direction = NULL, boot_runs = 0,
+  use_midpoints = FALSE, na.rm = FALSE, allowParallel = FALSE,
+  silent = FALSE, ...)
 }
 \arguments{
-\item{data}{A data frame or tibble in which the columns that are given in x,
+\item{data}{A data frame or tibble in which the columns that may be given in x,
 class and possibly subgroup can be found.}
 
 \item{x}{The variable name without quotation marks to be used for
-classification, e.g. predictions or test values.}
+classification, e.g. predictions or test values, or the raw data if data = NULL.}
 
-\item{class}{The variable name without quotation marks indicating class membership.}
+\item{class}{The variable name without quotation marks indicating class membership
+or the raw data if data = NULL.}
 
 \item{subgroup}{The variable name without quotation marks
-of an additional covariate that identifies subgroups. Separate
-optimal cutpoints will be determined by group. Numeric, character and factor are
-allowed. Also expressions like z > 10 are possible.}
+of an additional covariate that identifies subgroups or the raw data if
+data = NULL. Separate optimal cutpoints will be determined by group.
+Numeric, character and factor are allowed.}
 
 \item{method}{(function) A function for determining cutpoints. Can
 be user supplied or use some of the built in methods. See details.}
@@ -53,6 +55,8 @@ na.rm = FALSE will raise an error.}
 \item{allowParallel}{(logical) If TRUE, the bootstrapping will be parallelized
 using foreach. A local cluster, for example, should have been started manually
 beforehand.}
+
+\item{silent}{(logical) If TRUE suppresses all messages.}
 
 \item{...}{Further optional arguments that will be passed to method.
 minimize_metric and maximize_metric pass ... to metric.}
@@ -191,6 +195,10 @@ opt_cut
 summary(opt_cut)
 plot(opt_cut)
 predict(opt_cut, newdata = data.frame(dsi = 0:5))
+
+## Supplying raw data
+## Same result
+cutpointr(x = suicide$dsi, class = suicide$suicide)
 
 ## direction, class labels, method and metric can be defined manually
 opt_cut <- cutpointr(suicide, dsi, suicide, direction = ">=", pos_class = "yes",

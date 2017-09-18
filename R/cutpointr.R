@@ -130,6 +130,10 @@
 #' plot(opt_cut)
 #' predict(opt_cut, newdata = data.frame(dsi = 0:5))
 #'
+#' ## Supplying raw data
+#' ## Same result
+#' cutpointr(x = suicide$dsi, class = suicide$suicide)
+#'
 #'## direction, class labels, method and metric can be defined manually
 #' opt_cut <- cutpointr(suicide, dsi, suicide, direction = ">=", pos_class = "yes",
 #'                      method = maximize_metric, metric = youden)
@@ -209,15 +213,16 @@
 #'
 #'
 #'
-#' @param data A data frame or tibble in which the columns that are given in x,
+#' @param data A data frame or tibble in which the columns that may be given in x,
 #'  class and possibly subgroup can be found.
 #' @param x The variable name without quotation marks to be used for
-#'  classification, e.g. predictions or test values.
-#' @param class The variable name without quotation marks indicating class membership.
+#'  classification, e.g. predictions or test values, or the raw data if data = NULL.
+#' @param class The variable name without quotation marks indicating class membership
+#' or the raw data if data = NULL.
 #' @param subgroup The variable name without quotation marks
-#' of an additional covariate that identifies subgroups. Separate
-#' optimal cutpoints will be determined by group. Numeric, character and factor are
-#' allowed. Also expressions like z > 10 are possible.
+#' of an additional covariate that identifies subgroups or the raw data if
+#' data = NULL. Separate optimal cutpoints will be determined by group.
+#' Numeric, character and factor are allowed.
 #' @param method (function) A function for determining cutpoints. Can
 #' be user supplied or use some of the built in methods. See details.
 #' @param metric (function) The function for computing a metric when using
@@ -240,28 +245,52 @@
 #' @param allowParallel (logical) If TRUE, the bootstrapping will be parallelized
 #' using foreach. A local cluster, for example, should have been started manually
 #' beforehand.
+#' @param silent (logical) If TRUE suppresses all messages.
 #' @param ... Further optional arguments that will be passed to method.
 #' minimize_metric and maximize_metric pass ... to metric.
 #' @importFrom purrr %>%
 #' @importFrom foreach %do%
 #' @return A cutpointr object which is also a data.frame and tbl_df.
+#' @useDynLib cutpointr
+#' @importFrom Rcpp sourceCpp
 #' @export
-cutpointr <- function(data, x, class, subgroup = NULL,
+cutpointr <- function(data = NULL, x, class, subgroup = NULL,
                       method = maximize_metric, metric = sum_sens_spec,
                       pos_class = NULL, neg_class = NULL, direction = NULL,
                       boot_runs = 0, use_midpoints = FALSE, na.rm = FALSE,
-                      allowParallel = FALSE, ...) {
+                      allowParallel = FALSE, silent = FALSE, ...) {
 
     #
     # NSE
     #
-    predictor <- deparse(substitute(x))
-    outcome   <- deparse(substitute(class))
-    x <- eval(substitute(x), data, parent.frame())
-    class <- eval(substitute(class), data, parent.frame())
-    subgroup_var <- deparse(substitute(subgroup))
-    validate_colnames(c(predictor, outcome, subgroup_var))
-    subgroup <- eval(substitute(subgroup), data, parent.frame())
+    if (is.null(data)) {
+        predictor <- "x"
+        outcome <- "class"
+        subgroup_var <- "subgroup"
+    } else {
+        predictor <- deparse(substitute(x))
+        outcome   <- deparse(substitute(class))
+        x <- tryCatch(eval(substitute(x), data, parent.frame()),
+                      error = function(cond) {
+                          stop(paste("If the data argument is specified,",
+                                     "x and class should refer to columns",
+                                     "in data."))
+                      })
+        class <- tryCatch(eval(substitute(class), data, parent.frame()),
+                          error = function(cond) {
+                              stop(paste("If the data argument is specified,",
+                                         "x and class should refer to columns",
+                                         "in data."))
+                          })
+        subgroup_var <- deparse(substitute(subgroup))
+        # validate_colnames(c(predictor, outcome, subgroup_var))
+        subgroup <- tryCatch(eval(substitute(subgroup), data, parent.frame()),
+                             error = function(cond) {
+                                 stop(paste("If the data argument is specified,",
+                                            "subgroup should refer to a column",
+                                            "in data."))
+                             })
+    }
 
     # Get method function
     if (length(method) > 1 | !(class(method) == "function")) {
@@ -283,9 +312,17 @@ cutpointr <- function(data, x, class, subgroup = NULL,
     # if default was not changed:
     metric_name <- as.character(substitute(metric))
     if (is.null(metric_name)) stop("Could not get the metric function")
-    cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
-                       direction, boot_runs, use_midpoints, na.rm, allowParallel,
-                       predictor, outcome, mod_name, subgroup_var, ...)
+    if (silent) {
+        suppressMessages(
+            cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
+                               direction, boot_runs, use_midpoints, na.rm, allowParallel,
+                               predictor, outcome, mod_name, subgroup_var, ...)
+        )
+    } else {
+        cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
+                           direction, boot_runs, use_midpoints, na.rm, allowParallel,
+                           predictor, outcome, mod_name, subgroup_var, ...)
+    }
 }
 
 #' The standard evaluation version of cutpointr
@@ -312,11 +349,11 @@ cutpointr_ <- function(data, x, class, subgroup = NULL,
                       method = "maximize_metric", metric = "sum_sens_spec",
                       pos_class = NULL, neg_class = NULL, direction = NULL,
                       boot_runs = 0, use_midpoints = FALSE, na.rm = FALSE,
-                      allowParallel = FALSE, ...) {
+                      allowParallel = FALSE, silent = FALSE, ...) {
     #
     # SE
     #
-    validate_colnames(c(x, class, subgroup))
+    # validate_colnames(c(x, class, subgroup))
     x <- as.name(x)
     class <- as.name(class)
     if (!is.null(subgroup)) subgroup <- as.name(subgroup)
@@ -346,9 +383,17 @@ cutpointr_ <- function(data, x, class, subgroup = NULL,
     metric <- paste0("cutpointr::", metric)
     metric <- eval(parse(text = metric))
     if (is.null(metric_name)) stop("Could not get the method function")
-    cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
-                       direction, boot_runs, use_midpoints, na.rm, allowParallel,
-                       predictor, outcome, mod_name, subgroup_var, ...)
+    if (silent) {
+        suppressMessages(
+            cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
+                               direction, boot_runs, use_midpoints, na.rm, allowParallel,
+                               predictor, outcome, mod_name, subgroup_var, ...)
+        )
+    } else {
+        cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
+                           direction, boot_runs, use_midpoints, na.rm, allowParallel,
+                           predictor, outcome, mod_name, subgroup_var, ...)
+    }
 }
 
 
@@ -389,8 +434,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
     # Calculate optimal cutpoint, map to cutpoint function
     #
     if (!is.null(subgroup)) {
-        dat <- tibble::tibble_(list(x = ~ x, class = ~ class,
-                                    subgroup = ~ subgroup))
+        dat <- tibble::tibble_(list(x = ~ x, class = ~ class, subgroup = ~ subgroup))
         colnames(dat) <- c(predictor, outcome, "subgroup")
         if (na.rm) dat <- stats::na.omit(dat)
         g <- unique(dat$subgroup)
@@ -399,13 +443,6 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
             tidyr::nest_(key_col = "data") %>%
             dplyr::mutate_(subgroup = ~ as.character(subgroup))
         dat$pos_class <- pos_class
-        dat %>%
-            dplyr::mutate_(
-                prevalence = ~ purrr::map2(dat$data, dat$pos_class,
-                                           function(g, pc) {
-                                               mean(unlist(g[, outcome]) == pc)
-                                           })
-            )
         optcut <- purrr::pmap_df(list(dat$subgroup, dat$data), function(g, d) {
             if (nrow(d) <= 1) stop(paste("Subgroup", g, "has <= 1 observations"))
             optcut <- tibble::tibble_(list(subgroup = ~ g))
@@ -453,9 +490,14 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
             return(optcut)
         })
         optcut <- optcut %>%
-            dplyr::mutate_(AUC = ~ purrr::map_dbl(roc_curve, function(r) {
-                auc(tpr = r$tpr, fpr = r$fpr)
-            }))
+            dplyr::mutate_(
+                AUC = ~ purrr::map_dbl(roc_curve, function(r) {
+                    auc(tpr = r$tpr, fpr = r$fpr)
+                }),
+                prevalence = ~ purrr::map_dbl(roc_curve, function(r) {
+                    tail(r$tp, 1) / (tail(r$tp, 1) + tail(r$fp, 1))
+                })
+            )
         optcut <- tibble::as_tibble(optcut)
         optcut <- dplyr::full_join(optcut, dat, by = "subgroup")
     } else {
@@ -463,12 +505,8 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
         colnames(dat) <- c(predictor, outcome)
         if (na.rm) dat <- stats::na.omit(dat)
         dat <- dat %>%
-            tidyr::nest_(key_col = "data", nest_cols = colnames(dat)) %>%
-            dplyr::mutate_(pos_class = ~ pos_class,
-                           prevalence = ~ purrr::map_dbl(data, function(g) {
-                               mean(unlist(g[, outcome]) == pos_class)
-                           })
-            )
+            tidyr::nest_(key_col = "data")
+        dat$pos_class <- pos_class
         optcut <- purrr::map_df(dat$data, function(d) {
             optcut <- method(data = d,  x = predictor, class = outcome,
                              metric_func = metric,
@@ -513,9 +551,14 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
             return(optcut)
         })
         optcut <- optcut %>%
-            dplyr::mutate_(AUC = ~ purrr::map_dbl(roc_curve, function(r) {
-                auc(tpr = r$tpr, fpr = r$fpr)
-            }))
+            dplyr::mutate_(
+                AUC = ~ purrr::map_dbl(roc_curve, function(r) {
+                    auc(tpr = r$tpr, fpr = r$fpr)
+                }),
+                prevalence = ~ purrr::map_dbl(roc_curve, function(r) {
+                    tail(r$tp, 1) / (tail(r$tp, 1) + tail(r$fp, 1))
+                })
+            )
         optcut <- tibble::as_tibble(optcut)
         optcut <- dplyr::bind_cols(optcut, dat)
     }
@@ -558,13 +601,12 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
              dplyr::transmute_(boot = ~ purrr::map2(dat$data, dat$pos_class,
                                                     function(g, pc) {
                 boot_g <- foreach::foreach(rep = 1:boot_runs, .combine = rbind,
-                    .packages = "OptimalCutpoints",
                     .export = c("method", "direction", "metric",
                     "neg_class", "mn", "use_midpoints",
                     "predictor", "outcome")) %seq_or_par%
                     {
                         b_ind <- sample(1:nrow(g), replace = TRUE, size = nrow(g))
-                        if (all(unlist(g[b_ind, outcome]) == unlist(g[b_ind, outcome])[1])) {
+                        if (only_one_unique(unlist(g[b_ind, outcome]))) {
                             optcut_b <- data.frame(NA, NA)
                             colnames(optcut_b) <- c("optimal_cutpoint", mn)
                         } else {
@@ -574,6 +616,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                                 direction = direction,
                                                 pos_class = pc,
                                                 neg_class = neg_class, ...)
+                            optcut_b <- tibble::as_tibble(optcut_b)
                             if (use_midpoints) {
                                 optcut_b$optimal_cutpoint <- midpoint(
                                     oc = optcut_b$optimal_cutpoint,
@@ -588,13 +631,10 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                                class = outcome,
                                                pos_class = pc, neg_class = neg_class,
                                                direction = direction)
-                            roc_curve_b <- tidyr::nest_(roc_curve_b, key_col = "roc_curve",
-                                                        nest_cols = colnames(roc_curve_b))
-                            optcut_b$roc_curve <- roc_curve_b[[1]]
+                            roc_curve_b <- tidyr::nest_(roc_curve_b,
+                                                        key_col = "roc_curve")
+                            optcut_b <- dplyr::bind_cols(optcut_b, roc_curve_b)
                         }
-                        roc_curve_b <- tidyr::nest_(optcut_b$roc_curve[[1]],
-                                                    key_col = "roc_curve_b",
-                                                    nest_cols = colnames(optcut_b$roc_curve[[1]]))
                         opt_ind_b <- get_opt_ind(roc_curve = optcut_b$roc_curve[[1]],
                                                  oc = optcut_b$optimal_cutpoint,
                                                  direction = direction)
@@ -612,6 +652,10 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                                oc = optcut_b$optimal_cutpoint,
                                                direction = direction,
                                                opt_ind = opt_ind_b)
+                        metric_b <- metric(tp = optcut_b$roc_curve[[1]]$tp[opt_ind_b],
+                                             fp = optcut_b$roc_curve[[1]]$fp[opt_ind_b],
+                                             tn = optcut_b$roc_curve[[1]]$tn[opt_ind_b],
+                                             fn = optcut_b$roc_curve[[1]]$fn[opt_ind_b])
                         roc_curve_oob <- roc(data = g[-b_ind, ], x = predictor,
                                              class = outcome,
                                              pos_class = pc, neg_class = neg_class,
@@ -619,6 +663,8 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                         opt_ind_oob <- get_opt_ind(roc_curve = roc_curve_oob,
                                                  oc = optcut_b$optimal_cutpoint,
                                                  direction = direction)
+                        auc_oob <- auc(tpr = roc_curve_oob$tpr,
+                                       fpr = roc_curve_oob$fpr)
                         Sens_Spec_oob <- sesp_from_oc(roc_curve_oob,
                                                      oc = optcut_b$optimal_cutpoint,
                                                      direction = direction,
@@ -635,29 +681,36 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                              fp = roc_curve_oob$fp[opt_ind_oob],
                                              tn = roc_curve_oob$tn[opt_ind_oob],
                                              fn = roc_curve_oob$fn[opt_ind_oob])
-                        colnames(metric_oob) <- make.names(colnames(metric_oob))
-                        bootstrap <- cbind(optimal_cutpoint = optcut_b$optimal_cutpoint,
-                                           AUC_b            = auc_b,
-                                           metric_oob,
-                                           Accuracy_b       = as.numeric(Acc_b),
-                                           Accuracy_oob     = as.numeric(Acc_oob),
-                                           Sensitivity_b    = Sens_Spec_b[1],
-                                           Sensitivity_oob  = Sens_Spec_oob[1],
-                                           Specificity_b    = Sens_Spec_b[2],
-                                           Specificity_oob  = Sens_Spec_oob[2],
-                                           Kappa_b          = as.numeric(kap_b),
-                                           Kappa_oob        = as.numeric(kap_oob),
-                                           TP_b = optcut_b$roc_curve[[1]]$tp[opt_ind_b],
-                                           FP_b = optcut_b$roc_curve[[1]]$fp[opt_ind_b],
-                                           TN_b = optcut_b$roc_curve[[1]]$tn[opt_ind_b],
-                                           FN_b = optcut_b$roc_curve[[1]]$fn[opt_ind_b],
-                                           TP_oob = roc_curve_oob$tp[opt_ind_oob],
-                                           FP_oob = roc_curve_oob$fp[opt_ind_oob],
-                                           TN_oob = roc_curve_oob$tn[opt_ind_oob],
-                                           FN_oob = roc_curve_oob$fn[opt_ind_oob],
-                                           roc_curve_b = roc_curve_b
+                        mn <- make.names(colnames(metric_oob))
+
+                        bootstrap <- tibble::tibble(
+                            optimal_cutpoint =  optcut_b$optimal_cutpoint,
+                            AUC_b             =  auc_b,
+                            AUC_oob           =  auc_oob,
+                            metric_b          =  as.numeric(metric_b),
+                            metric_oob        =  as.numeric(metric_oob),
+                            Accuracy_b       =  as.numeric(Acc_b),
+                            Accuracy_oob     =  as.numeric(Acc_oob),
+                            Sensitivity_b    =  Sens_Spec_b[1],
+                            Sensitivity_oob  =  Sens_Spec_oob[1],
+                            Specificity_b    =  Sens_Spec_b[2],
+                            Specificity_oob  =  Sens_Spec_oob[2],
+                            Kappa_b          =  as.numeric(kap_b),
+                            Kappa_oob        =  as.numeric(kap_oob),
+                            TP_b =  optcut_b$roc_curve[[1]]$tp[opt_ind_b],
+                            FP_b =  optcut_b$roc_curve[[1]]$fp[opt_ind_b],
+                            TN_b =  optcut_b$roc_curve[[1]]$tn[opt_ind_b],
+                            FN_b =  optcut_b$roc_curve[[1]]$fn[opt_ind_b],
+                            TP_oob =  roc_curve_oob$tp[opt_ind_oob],
+                            FP_oob =  roc_curve_oob$fp[opt_ind_oob],
+                            TN_oob =  roc_curve_oob$tn[opt_ind_oob],
+                            FN_oob =  roc_curve_oob$fn[opt_ind_oob],
+                            roc_curve_b =  optcut_b$roc_curve
                         )
-                        bootstrap <- tibble::as_data_frame(bootstrap)
+                        colnames(bootstrap)[4:5] <- paste0(mn, c("_b", "_oob"))
+                        roc_curve_oob <- tidyr::nest_(roc_curve_oob,
+                                                      key_col = "roc_curve_oob")
+                        bootstrap <- dplyr::bind_cols(bootstrap, roc_curve_oob)
                         return(bootstrap)
                     }
                 lna <- sum(is.na(boot_g))
@@ -683,6 +736,15 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
 #' @param class The name of the outcome / independent variable.
 #' @param silent Whether to display messages.
 #' @param ... Further arguements to be passed to cutpointr.
+#' @examples
+#' library(cutpointr)
+#'
+#' multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
+#'                 pos_class = "yes")
+#'
+#' multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
+#'                 subgroup = "gender", pos_class = "yes")
+#'
 #' @return A data frame.
 #' @importFrom purrr %>%
 #' @export
@@ -695,20 +757,12 @@ multi_cutpointr <- function(data, x = colnames(data)[colnames(data) != class],
     if ("subgroup" %in% names(args)) {
         x <- x[x != args$subgroup]
     }
-    if (silent) {
-        suppressMessages(
-            res <- purrr::map_df(x, function(coln) {
-            cutpointr_(data, coln, class, ...) %>%
-                dplyr::mutate(variable = coln)
-            })
-        )
-    } else {
-        res <- purrr::map_df(x, function(coln) {
-            message(paste0(coln, ":"))
-            cutpointr_(data, coln, class, ...) %>%
-                dplyr::mutate(variable = coln)
-        })
-    }
+    res <- purrr::map_df(x, function(coln) {
+        if (!silent) message(paste0(coln, ":"))
+        cutpointr_(data, coln, class, silent = silent, ...) %>%
+            dplyr::mutate(variable = coln)
+    })
     res <- res[, c("variable", colnames(res)[colnames(res) != "variable"])]
+    class(res) <- c("multi_cutpointr", class(res))
     return(res)
 }

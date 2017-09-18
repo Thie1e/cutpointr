@@ -26,3 +26,13 @@ Runs cutpointr_ over multiple predictor variables. By default, cutpointr
 will be run using all columns in the data set as predictors except for the
 variable in class.
 }
+\examples{
+library(cutpointr)
+
+multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
+                pos_class = "yes")
+
+multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
+                subgroup = "gender", pos_class = "yes")
+
+}
