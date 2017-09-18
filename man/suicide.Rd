@@ -3,7 +3,7 @@
 \docType{data}
 \name{suicide}
 \alias{suicide}
-\title{Suicide attempts and DSI sum scores of 532 patients}
+\title{Suicide attempts and DSI sum scores of 532 subjects}
 \format{A data frame with 532 rows and 4 variables:
 \describe{
   \item{age}{(numeric) Age of participants in years}

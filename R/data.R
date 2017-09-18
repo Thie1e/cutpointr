@@ -1,4 +1,4 @@
-#' Suicide attempts and DSI sum scores of 532 patients
+#' Suicide attempts and DSI sum scores of 532 subjects
 #'
 #' Various personality and clinical psychological characteristics were assessed
 #' as part of an online-study preventing suicide. To identify persons at risk
