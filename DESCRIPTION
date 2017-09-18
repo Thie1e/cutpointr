@@ -2,7 +2,7 @@ Package: cutpointr
 Type: Package
 Title: Determine and evaluate optimal cutpoints in binary
     classification tasks
-Version: 0.3.2
+Version: 0.4.0
 Authors@R: person("Christian", "Thiele", email = "c.thiele@hs-osnabrueck.de",
   role = c("aut", "cre"))
 Description: In addition to finding the cutpoint that maximizes a chosen metric
@@ -12,6 +12,7 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     R (>= 3.3.1)
+LinkingTo: Rcpp
 Imports:
     gridExtra (>= 2.2.1),
     foreach (>= 1.4.3),
@@ -20,6 +21,7 @@ Imports:
     purrr (>= 0.2.2),
     tibble (>= 1.2),
     ggplot2 (>= 2.2.0),
+    Rcpp (>= 0.12.12),
     stats,
     utils
 RoxygenNote: 6.0.1
@@ -33,5 +35,6 @@ Suggests:
     knitr,
     rmarkdown,
     microbenchmark,
-    ROCR
+    ROCR,
+    pROC
 VignetteBuilder: knitr

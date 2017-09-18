@@ -1,3 +1,20 @@
+# cutpointr 0.4.0
+
+- cutpointr() now also works on vectors of raw data, that is without the `data`
+argument. Thus, it can be used as before by specifying `data`, `x`, and `class`
+or alternatively without specifying `data` and directly supplying the vectors
+of predictions and outcomes as `x` and `class`.
+- `silent` argument for optionally suppressing messages (e.g. which class
+is assumed to be the positive one)
+- Parts of the code were rewritten using Rcpp which leads to roughly a threefold
+speedup with larger n (n > 1e5)
+- The automatic determination of the positive / negative classes and direction
+now uses the median of the predictor values per class instead of the mean so 
+that the AUC is always >= 0.5
+- The bootstrapping now also returns the in-bag main metric, the out-of-bag 
+ROC curve, and the out-of-bag AUC
+
+
 # cutpointr 0.3.2
 
 - Add multi_cutpointr for running cutpointr_ on multiple predictor variables
