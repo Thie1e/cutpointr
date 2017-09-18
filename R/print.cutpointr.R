@@ -1,8 +1,6 @@
 #' Print cutpointr objects
 #'
-#' Prints the cutpointr object like a tbl_df.
-#' With versions of tibble later than 1.3.0 printing tibbles with width = Inf
-#' does not wrap columns nicely so the default has been changed to width = NULL.
+#' Prints the cutpointr object with infinite width like a tbl_df.
 #'
 #' @source Kirill Müller and Hadley Wickham (2017). tibble: Simple Data Frames.
 #'  https://CRAN.R-project.org/package=tibble
