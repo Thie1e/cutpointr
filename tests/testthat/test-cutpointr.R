@@ -301,46 +301,76 @@ test_that("cutpointr detects wrong number of classes", {
 })
 
 test_that("Bootstrap returns plausible results", {
-    opt_cut <- suppressWarnings(cutpointr(suicide, dsi, suicide, boot_runs = 200))
-    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
-                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
-    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
-                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+    set.seed(123)
+    opt_cut <- suppressWarnings(cutpointr(suicide, dsi, suicide, boot_runs = 50))
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 1)
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 1)
 
+    set.seed(123)
     opt_cut <- suppressWarnings(cutpointr_(suicide, "dsi", "suicide",
-                                           boot_runs = 200))
-    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
-                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
-    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
-                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+                                           boot_runs = 50))
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 1)
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 1)
 
-    opt_cut <- suppressWarnings(cutpointr(suicide, dsi, suicide, boot_runs = 200,
+    set.seed(123)
+    opt_cut <- suppressWarnings(cutpointr(suicide, dsi, suicide, boot_runs = 30,
                          direction = "<="))
-    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
-                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
-    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
-                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 1)
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 1)
 
+    set.seed(123)
     opt_cut <- suppressWarnings(cutpointr_(suicide, "dsi", "suicide",
-                                           boot_runs = 200, direction = "<="))
-    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
-                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
-    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
-                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+                                           boot_runs = 30, direction = "<="))
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 1)
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 1)
 
-    opt_cut <- suppressWarnings(cutpointr(suicide, dsi, suicide, boot_runs = 200,
+    set.seed(123)
+    opt_cut <- suppressWarnings(cutpointr(suicide, dsi, suicide, boot_runs = 30,
                          pos_class = "no"))
-    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
-                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
-    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
-                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 1)
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 1)
 
+    set.seed(123)
     opt_cut <- suppressWarnings(cutpointr_(suicide, "dsi", "suicide",
-                                           boot_runs = 200, pos_class = "no"))
-    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec) > 1.3 &
-                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec) < 3)
-    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec) > 0.02 &
-                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec) < 1)
+                                           boot_runs = 30, pos_class = "no"))
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_b) < 1)
+    expect_true(mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 1.3 &
+                    mean(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 3)
+    expect_true(sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) > 0.02 &
+                    sd(opt_cut$boot[[1]]$Sum_Sens_Spec_oob) < 1)
 })
 
 test_that("Summary by class returns correct stats", {
@@ -631,10 +661,79 @@ test_that("LOESS smoothing does not return warnings or errors", {
     expect_silent(cutpointr(tempdat, x, y, method = maximize_loess_metric,
                             user.span = 1,
                             metric = accuracy, direction = ">=",
-                            pos_class = 1, boot_runs = 100))
+                            pos_class = 1, boot_runs = 10))
 
     expect_silent(cutpointr(tempdat, x, y, group, method = maximize_loess_metric,
                             user.span = 1,
                             metric = accuracy, direction = ">=",
-                            pos_class = 1, boot_runs = 100))
+                            pos_class = 1, boot_runs = 10))
+})
+
+test_that("cutpointr returns same result with NSE interface and raw data", {
+    oc1 <- cutpointr(suicide, dsi, suicide, metric = prod_sens_spec)
+    oc2 <- cutpointr(x = suicide$dsi, class = suicide$suicide,
+                     metric = prod_sens_spec)
+    expect_true(oc1$optimal_cutpoint == 2)
+    expect_true(oc2$optimal_cutpoint == 2)
+    expect_true(oc1$Prod_Sens_Spec == oc2$Prod_Sens_Spec)
+
+    oc1 <- cutpointr(suicide, dsi, suicide, gender, metric = prod_sens_spec)
+    oc2 <- cutpointr(x = suicide$dsi, class = suicide$suicide,
+                     subgroup = suicide$gender, metric = prod_sens_spec)
+    expect_true(all(oc1$Prod_Sens_Spec == oc2$Prod_Sens_Spec))
+    expect_true(all(oc1$optimal_cutpoint == oc2$optimal_cutpoint))
+})
+
+test_that("Prevalence is correctly calculated", {
+    tempdat <- data.frame(x = 1:100,
+                          y = c(rep(0, 10), rep(1, 90)))
+    oc <- cutpointr(tempdat, x, y, pos_class = 1, direction = ">=")
+    expect_equal(oc$prevalence, 0.9)
+
+    tempdat <- data.frame(x = 100:1,
+                          y = c(rep(0, 10), rep(1, 90)))
+    oc <- cutpointr(tempdat, x, y, pos_class = 1, direction = ">=")
+    expect_equal(oc$prevalence, 0.9)
+
+    tempdat <- data.frame(x = 1:100,
+                          y = c(rep(0, 10), rep(1, 90)))
+    oc <- cutpointr(tempdat, x, y, pos_class = 1, direction = "<=")
+    expect_equal(oc$prevalence, 0.9)
+
+    tempdat <- data.frame(x = 100:1,
+                          y = c(rep(0, 10), rep(1, 90)))
+    oc <- cutpointr(tempdat, x, y, pos_class = 1, direction = "<=")
+    expect_equal(oc$prevalence, 0.9)
+})
+
+test_that("multi_cutpointr runs without errors", {
+    mc <- multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
+                          pos_class = "yes")
+    expect_equal(mc$optimal_cutpoint, c(55, 2))
+
+    mc <- multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
+                          subgroup = "gender", pos_class = "yes")
+    expect_equal(mc$optimal_cutpoint, c(55, 21, 2, 3))
+})
+
+test_that("AUC is always >= 0.5 with automatic assumptions", {
+    tempdat <- data.frame(x = c(5:1, 100), y = c(2,2,2,1,1,1))
+    oc <- cutpointr(tempdat, x, y)
+    expect_true(oc$AUC >= 0.5)
+
+    oc <- cutpointr(tempdat, x, y, pos_class = 2)
+    expect_true(oc$AUC >= 0.5)
+})
+
+test_that("find_metric_name_boot finds correct metric", {
+    oc <- cutpointr(x = suicide$dsi, class = suicide$suicide,
+                    metric = abs_d_sens_spec, method = minimize_metric,
+                    boot_runs = 10)
+    expect_true(cutpointr:::find_metric_name_boot(oc$boot[[1]]) == "abs_d_sens_spec_oob")
+
+    oc <- cutpointr(x = suicide$dsi, class = suicide$suicide,
+                    subgroup = suicide$gender,
+                    metric = abs_d_sens_spec, method = minimize_metric,
+                    boot_runs = 10)
+    expect_true(cutpointr:::find_metric_name_boot(oc$boot[[1]]) == "abs_d_sens_spec_oob")
 })
