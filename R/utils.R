@@ -1,9 +1,3 @@
-extract_opt_cut <- function(df) {
-    optcut <- df$optimal_cutpoint
-    if (!is.null(optcut)) return(optcut)
-    return(df[1, 1])
-}
-
 find_metric_name <- function(object) {
     if ("subgroup" %in% colnames(object)) {
         return(colnames(object)[5])
@@ -14,9 +8,9 @@ find_metric_name <- function(object) {
 
 find_metric_name_boot <- function(object) {
     if ("subgroup" %in% colnames(object)) {
-        return(colnames(object)[4])
+        return(colnames(object)[6])
     } else {
-        return(colnames(object)[3])
+        return(colnames(object)[5])
     }
 }
 
@@ -38,6 +32,12 @@ validate_colnames <- function(coln) {
     if (any(invalid_names)) {
         warning(paste("Invalid column names:", coln[invalid_names]))
     }
+}
+
+ensure_two_classes <- function(x) {
+    uc <- unique(class)
+    luc <- length(uc)
+    if (luc != 2) stop(paste("Expecting two classes, got", luc))
 }
 
 ifel_pos_neg <- function(logi_vec, pos_class, neg_class) {
@@ -103,4 +103,32 @@ sanitize_metric <- function(m, m_name, n) {
     return(res)
 }
 
+only_one_unique <- function(x) {
+    if (is.character(x) | is.factor(x)) {
+        one_unique_char(x)
+    } else {
+        one_unique_num(x)
+    }
+}
 
+which_cpp <- function(x, y) {
+    if (is.numeric(x)) {
+        return(which_are_num(x, y))
+    } else {
+        return(which_are_char(x, y))
+    }
+}
+
+is_equal_cpp <- function(x, y) {
+    if (is.numeric(x)) {
+        return(is_equal_cpp_num(x, y))
+    } else {
+        return(is_equal_cpp_char(x, as.character(y)))
+    }
+}
+
+na_inf_omit <- function(x) {
+    x <- stats::na.omit(x)
+    x <- x[is.finite(x)]
+    return(x)
+}

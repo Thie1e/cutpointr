@@ -30,19 +30,23 @@ roc <- function(data, x, class, pos_class, neg_class, direction = ">=") {
     if (direction == ">=") {
         pred.order <- order(x, decreasing = TRUE)
         x.sorted <- x[pred.order]
-        dups <- rev(duplicated(rev(x.sorted)))
+        # dups <- rev(duplicated(rev(x.sorted)))
+        dups <- get_rev_dups(x.sorted)
         x.sorted <- x.sorted[!dups]
         class.sorted <- class[pred.order]
-        tp <- cumsum(class.sorted == pos_class)
+        # tp <- cumsum(class.sorted == pos_class)
+        tp <- cumsum(is_equal_cpp(class.sorted, pos_class))
         tp <- tp[!dups]
-        fp <- cumsum(class.sorted == neg_class)
+        # fp <- cumsum(class.sorted == neg_class)
+        fp <- cumsum(is_equal_cpp(class.sorted, neg_class))
         fp <- fp[!dups]
-        n_pos <- sum(class == pos_class)
+        # n_pos <- sum(class == pos_class)
+        n_pos <- tp[length(tp)]
         n_neg <- length(class) - n_pos
         tn <- n_neg - fp
         fn <- n_pos + n_neg - tp - fp - tn
 
-        if (!(Inf %in% x.sorted)) {
+        if (!(any_inf(x.sorted))) {
             x.sorted <- c(Inf, x.sorted)
             class.sorted <- c(NA, class.sorted)
             tp <- c(0, tp)
@@ -53,19 +57,23 @@ roc <- function(data, x, class, pos_class, neg_class, direction = ">=") {
     } else if (direction == "<=") {
         pred.order <- order(x, decreasing = FALSE)
         x.sorted <- x[pred.order]
-        dups <- rev(duplicated(rev(x.sorted)))
+        # dups <- rev(duplicated(rev(x.sorted)))
+        dups <- get_rev_dups(x.sorted)
         x.sorted <- x.sorted[!dups]
         class.sorted <- class[pred.order]
-        tp <- cumsum(class.sorted == pos_class)
+        # tp <- cumsum(class.sorted == pos_class)
+        tp <- cumsum(is_equal_cpp(class.sorted, pos_class))
         tp <- tp[!dups]
-        fp <- cumsum(class.sorted == neg_class)
+        # fp <- cumsum(class.sorted == neg_class)
+        fp <- cumsum(is_equal_cpp(class.sorted, neg_class))
         fp <- fp[!dups]
-        n_pos <- sum(class == pos_class)
+        # n_pos <- sum(class == pos_class)
+        n_pos <- tp[length(tp)]
         n_neg <- length(class) - n_pos
         tn <- n_neg - fp
         fn <- n_pos + n_neg - tp - fp - tn
 
-        if (!(-Inf %in% x.sorted)) {
+        if (!(any_inf(x.sorted))) {
             x.sorted <- c(-Inf, x.sorted)
             class.sorted <- c(NA, class.sorted)
             tp <- c(0, tp)

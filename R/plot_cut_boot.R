@@ -29,9 +29,8 @@ plot_cut_boot <- function(x, ...) {
         res_boot_unnested <- x %>%
             dplyr::select_(.dots = dts_boot) %>%
             tidyr::unnest_(unnest_cols = "boot")
-        if (all(stats::na.omit(res_boot_unnested$optimal_cutpoint %% 1 == 0)) |
-            all(stats::na.omit(res_boot_unnested$optimal_cutpoint) ==
-                               stats::na.omit(res_boot_unnested$optimal_cutpoint)[1])) {
+        if (all(na_inf_omit(res_boot_unnested$optimal_cutpoint %% 1 == 0)) |
+            only_one_unique(na_inf_omit(res_boot_unnested$optimal_cutpoint))) {
             all_integer = TRUE
             dist_plot <- ggplot2::geom_bar(alpha = transparency,
                                            position = "identity")

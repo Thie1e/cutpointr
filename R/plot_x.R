@@ -39,9 +39,10 @@ plot_x <- function(x, display_cutpoint = TRUE, ...) {
                                          by = "subgroup")
         col <- ~ subgroup
     }
-    if (all(stats::na.omit(dplyr::select_(res_unnested, .dots = predictor)) %% 1 == 0) |
-        all(stats::na.omit(dplyr::select_(res_unnested, .dots = predictor)) ==
-            stats::na.omit(dplyr::select_(res_unnested, .dots = predictor))[1])) {
+    if (all(na_inf_omit(unlist(dplyr::select_(res_unnested, .dots = predictor))) %% 1 == 0) |
+        only_one_unique(
+            na_inf_omit(unlist(dplyr::select_(res_unnested, .dots = predictor)))
+        )) {
         all_integer = TRUE
         dist_plot <- ggplot2::geom_bar(alpha = transparency, position = "identity")
     } else {

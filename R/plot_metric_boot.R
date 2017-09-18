@@ -30,9 +30,8 @@ plot_metric_boot <- function(x, ...) {
             dplyr::select_(.dots = dts_boot) %>%
             tidyr::unnest_(unnest_cols = "boot")
         metric_name <- find_metric_name_boot(res_boot_unnested)
-        if (all(stats::na.omit(get(metric_name, res_boot_unnested) %% 1 == 0)) |
-            all(stats::na.omit(get(metric_name, res_boot_unnested)) ==
-                stats::na.omit(get(metric_name, res_boot_unnested))[1])) {
+        if (all(na_inf_omit(get(metric_name, res_boot_unnested) %% 1 == 0)) |
+            only_one_unique(na_inf_omit(get(metric_name, res_boot_unnested)))) {
             all_integer = TRUE
             dist_plot <- ggplot2::geom_bar(alpha = 1, position = "dodge")
         } else {
