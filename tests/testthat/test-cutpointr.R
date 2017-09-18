@@ -737,3 +737,16 @@ test_that("find_metric_name_boot finds correct metric", {
                     boot_runs = 10)
     expect_true(cutpointr:::find_metric_name_boot(oc$boot[[1]]) == "abs_d_sens_spec_oob")
 })
+
+test_that("Calculation, bootstrapping and plotting with user-defined function", {
+    # Returns unnamed values
+    acc <- function(tp, fp, tn, fn) (tp + tn) / (tp + fp + tn + fn)
+    expect_silent(oc <- cutpointr(suicide, dsi, suicide, metric = acc,
+                                  boot_runs = 10, silent = TRUE))
+    expect_true(oc$metric > 0.9)
+    expect_true(oc$metric == oc$accuracy)
+    expect_silent(plot(oc))
+    expect_silent(plot_cut_boot(oc))
+    expect_silent(plot_metric(oc))
+    expect_silent(plot_metric_boot(oc))
+})
