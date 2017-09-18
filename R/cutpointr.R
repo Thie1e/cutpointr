@@ -681,7 +681,6 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                              fp = roc_curve_oob$fp[opt_ind_oob],
                                              tn = roc_curve_oob$tn[opt_ind_oob],
                                              fn = roc_curve_oob$fn[opt_ind_oob])
-                        mn <- make.names(colnames(metric_oob))
 
                         bootstrap <- tibble::tibble(
                             optimal_cutpoint =  optcut_b$optimal_cutpoint,
