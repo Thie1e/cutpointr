@@ -1,3 +1,8 @@
+# cutpointr 0.4.1
+
+- Fix naming the metric in the bootstrap if the supplied function returns an
+unnamed vector
+
 # cutpointr 0.4.0
 
 - cutpointr() now also works on vectors of raw data, that is without the `data`
