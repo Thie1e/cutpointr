@@ -34,7 +34,7 @@ summary.cutpointr <- function(object, ...) {
                                                           observation = c(as.character(temprow$pos_class),
                                                                           as.character(temprow$neg_class)))
         if (!is.null(suppressWarnings(temprow$boot))) {
-            x_summary[[r]]$boot <- purrr::map_df(temprow$boot[[1]][, 1:10], function(x) {
+            x_summary[[r]]$boot <- purrr::map_df(temprow$boot[[1]][, 1:13], function(x) {
                 round(summary_sd(x), 4)
             })
             x_summary[[r]]$boot <- t(x_summary[[r]]$boot)
