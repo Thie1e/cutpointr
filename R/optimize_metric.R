@@ -282,18 +282,26 @@ minimize_loess_metric <- function(data, x, class, metric_func = youden,
 #' @inheritParams oc_youden_normal
 #' @param metric_func (function) A function that computes a single number
 #' metric to be maximized. See description.
+#' @param summary_func (function) After obtaining the bootstrapped optimal
+#' cutpoints this function, e.g. mean or median, is applied to arrive at a single cutpoint.
 #' @param boot_cut (numeric) Number of bootstrap repetitions over which the mean
 #' optimal cutpoint is calculated.
+#' @param inf_rm (logical) whether to remove infinite cutpoints before
+#' calculating the summary.
 #'
+#' @examples
+#' set.seed(100)
+#' cutpointr(suicide, dsi, suicide, method = maximize_boot_metric,
+#'           metric = accuracy, boot_cut = 30)
 #' @export
 maximize_boot_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
-                            boot_cut = 200,
+                            summary_func = mean, boot_cut = 50, inf_rm = TRUE,
                             ...) {
     metric_name <- as.character(substitute(metric_func))
     optimal_cutpoints <- rep(NA, boot_cut)
     for (i in 1:boot_cut) {
-        b_ind <- sample(1:boot_cut, size = boot_cut, replace = TRUE)
+        b_ind <- sample(1:nrow(data), size = nrow(data), replace = TRUE)
         opt_cut <- optimize_metric(data = data[b_ind, ],
                                    x = x, class = class,
                                    metric_func = metric_func,
@@ -303,7 +311,8 @@ maximize_boot_metric <- function(data, x, class, metric_func = youden,
                                    return_roc = FALSE, ...)
         optimal_cutpoints[i] <- opt_cut$optimal_cutpoint
     }
-    return(tibble::tibble(optimal_cutpoint = mean(optimal_cutpoints)))
+    if (inf_rm) optimal_cutpoints <- optimal_cutpoints[is.finite(optimal_cutpoints)]
+    return(data.frame(optimal_cutpoint = summary_func(optimal_cutpoints)))
 }
 
 
@@ -314,6 +323,9 @@ maximize_boot_metric <- function(data, x, class, metric_func = youden,
 #' minimizes the metric by selecting an optimal cutpoint. The returned
 #' optimal cutpoint is the mean of all optimal cutpoints that were
 #' determined in the bootstrap samples.
+#'
+#' The reported metric represents the usual in-sample performance of the
+#' determined cutpoint.
 #'
 #' The metric function should accept the following inputs:
 #' \itemize{
@@ -331,18 +343,26 @@ maximize_boot_metric <- function(data, x, class, metric_func = youden,
 #' @inheritParams oc_youden_normal
 #' @param metric_func (function) A function that computes a single number
 #' metric to be maximized. See description.
+#' @param summary_func (function) After obtaining the bootstrapped optimal
+#' cutpoints this function, e.g. mean or median, is applied to arrive at a single cutpoint.
 #' @param boot_cut (numeric) Number of bootstrap repetitions over which the mean
 #' optimal cutpoint is calculated.
+#' @param inf_rm (logical) whether to remove infinite cutpoints before
+#' calculating the summary.
 #'
+#' @examples
+#' set.seed(100)
+#' cutpointr(suicide, dsi, suicide, method = minimize_boot_metric,
+#'           metric = abs_d_sens_spec, boot_cut = 30)
 #' @export
 minimize_boot_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
-                            boot_cut = 200,
+                            summary_func = mean, boot_cut = 50, inf_rm = TRUE,
                             ...) {
     metric_name <- as.character(substitute(metric_func))
     optimal_cutpoints <- rep(NA, boot_cut)
     for (i in 1:boot_cut) {
-        b_ind <- sample(1:boot_cut, size = boot_cut, replace = TRUE)
+        b_ind <- sample(1:nrow(data), size = nrow(data), replace = TRUE)
         opt_cut <- optimize_metric(data = data[b_ind, ],
                                    x = x, class = class,
                                    metric_func = metric_func,
@@ -352,7 +372,8 @@ minimize_boot_metric <- function(data, x, class, metric_func = youden,
                                    return_roc = FALSE, ...)
         optimal_cutpoints[i] <- opt_cut$optimal_cutpoint
     }
-    return(tibble::tibble(optimal_cutpoint = mean(optimal_cutpoints)))
+    if (inf_rm) optimal_cutpoints <- optimal_cutpoints[is.finite(optimal_cutpoints)]
+    return(data.frame(optimal_cutpoint = summary_func(optimal_cutpoints)))
 }
 
 
