@@ -132,3 +132,7 @@ na_inf_omit <- function(x) {
     x <- x[is.finite(x)]
     return(x)
 }
+
+.onUnload <- function (libpath) {
+    library.dynam.unload("cutpointr", libpath)
+}
