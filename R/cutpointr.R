@@ -345,15 +345,24 @@ cutpointr <- function(data = NULL, x, class, subgroup = NULL,
 #' maximize_metric or minimize_metric as method and and for the
 #' out-of-bag values during bootstrapping. A way of internally validating the performance.
 #' User defined functions can be supplied, see details.
+#' @examples
+#' library(cutpointr)
+#'
+#' ## Optimal cutpoint for dsi
+#' data(suicide)
+#' opt_cut <- cutpointr_(suicide, "dsi", "suicide")
+#' opt_cut
+#' summary(opt_cut)
+#' plot(opt_cut)
+#' predict(opt_cut, newdata = data.frame(dsi = 0:5))
 cutpointr_ <- function(data, x, class, subgroup = NULL,
-                      method = "maximize_metric", metric = "sum_sens_spec",
+                      method = maximize_metric, metric = sum_sens_spec,
                       pos_class = NULL, neg_class = NULL, direction = NULL,
                       boot_runs = 0, use_midpoints = FALSE, na.rm = FALSE,
                       allowParallel = FALSE, silent = FALSE, ...) {
     #
     # SE
     #
-    # validate_colnames(c(x, class, subgroup))
     x <- as.name(x)
     class <- as.name(class)
     if (!is.null(subgroup)) subgroup <- as.name(subgroup)
@@ -365,24 +374,26 @@ cutpointr_ <- function(data, x, class, subgroup = NULL,
     subgroup <- eval(substitute(subgroup), data, parent.frame())
 
     # Get method function
-    if (length(method) > 1 | !(class(method) == "character")) {
-        stop("method should be character string")
+    if (length(method) > 1 | !(class(method) == "function")) {
+        stop("method should be a function")
+    } else {
+        cl <- match.call()
+        mod_name <- cl$method
+        # if default was not changed:
+        mod_name <- as.character(substitute(method))
     }
-    # If a character vec is given the user surely wants to search in the package
-    mod_name <- method[1]
-    method <- paste0("cutpointr::", method)
-    method <- eval(parse(text = method))
     if (is.null(mod_name)) stop("Could not get the method function")
 
     # Get metric function
-    if (length(metric) > 1 | !(class(metric) == "character")) {
-        stop("method should be character string")
+    if (length(metric) > 1 | !(class(metric) == "function")) {
+        stop("metric should be a function")
     }
-    # If a character vec is given the user surely wants to search in the package
-    metric_name <- metric[1]
-    metric <- paste0("cutpointr::", metric)
-    metric <- eval(parse(text = metric))
-    if (is.null(metric_name)) stop("Could not get the method function")
+    cl <- match.call()
+    metric_name <- cl$metric
+    # if default was not changed:
+    metric_name <- as.character(substitute(metric))
+    if (is.null(metric_name)) stop("Could not get the metric function")
+
     if (silent) {
         suppressMessages(
             cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
