@@ -14,23 +14,66 @@ find_metric_name_boot <- function(object) {
     }
 }
 
-check_colnames <- function(metric_name) {
-    default_cols <- c("subgroup", "direction", "optimal_cutpoint",
-                     "method", "accuracy", "sensitivity", "specificity", "AUC",
-                     "pos_class", "neg_class", "prevalence",
-                     "outcome", "predictor", "grouping", "data", "roc_curve")
-    if (metric_name %in% default_cols)
-        stop(paste("The metric function should return a matrix or data.frame",
-                   "with a colname that differs from the default colnames of",
-                   "cutpointr to avoid duplicates"))
+default_cols <- c("m", "subgroup", "direction", "optimal_cutpoint",
+                  "method", "acc", "sensitivity", "specificity", "AUC",
+                  "pos_class", "neg_class", "prevalence",
+                  "outcome", "predictor", "grouping", "data", "roc_curve",
+                  "tn", "fn", "tp", "fp", "tpr", "tnr", "fpr", "fnr")
+
+check_method_cols <- function(method_result) {
+    cn <- colnames(method_result)
+    n_col <- ncol(method_result)
+    identified_cols <- 0
+    oc_col <- which(cn == "optimal_cutpoint")
+    if (!is.null(oc_col)) identified_cols <- identified_cols + 1
+    if ("roc_curve" %in% cn) {
+        roc_col <- which(cn == "roc_curve")
+        identified_cols <- identified_cols + 1
+    }
+    if (identified_cols < n_col) {
+        metric_col <- (1:n_col)[-c(oc_col, roc_col)]
+        if (length(metric_col) >= 2) {
+            stop(paste("method function returned too many columns.",
+                       "Should return optimal_cutpoint, roc_curve (optional)",
+                       "and a metric column (optional)."))
+        }
+        metric_name <- cn[metric_col]
+        if (metric_name %in% default_cols) {
+            colnames(method_result)[metric_col] <- paste0("metric_", metric_name)
+        }
+    }
+    return(method_result)
 }
 
-validate_colnames <- function(coln) {
-    valid_names <- make.names(coln)
-    valid_names[valid_names == "NULL."] <- "NULL"
-    invalid_names <- valid_names != coln
-    if (any(invalid_names)) {
-        warning(paste("Invalid column names:", coln[invalid_names]))
+check_metric_name <- function(met) {
+    # Numeric vector
+    if (!is.array(met) & is.numeric(met)) return(met)
+    cn <- colnames(met)
+    if (cn %in% default_cols) {
+        colnames(met) <- paste0("metric_", cn)
+        return(met)
+    } else {
+        return(met)
+    }
+}
+
+check_colnames <- function(cutpointr_object) {
+    if ("subgroup" %in% colnames(cutpointr_object)) col_nr <- 4 else col_nr <- 3
+    metric_name <- colnames(cutpointr_object)[col_nr]
+    if (metric_name %in% default_cols) {
+        metric_name2 <- paste0("metric_", metric_name)
+        colnames(cutpointr_object)[col_nr] <- metric_name2
+        cutpointr_object$metric_name <- metric_name2
+    } else {
+        cutpointr_object$metric_name <- metric_name
+    }
+    return(cutpointr_object)
+}
+
+check_roc_curve <- function(object) {
+    if (!("roc_cutpointr" %in% class(object$roc_curve[[1]]))) {
+        stop(paste("roc_curve as returned by the method function is not an",
+                   "object of the class roc_cutpointr"))
     }
 }
 
