@@ -49,3 +49,6 @@ The metric function should accept the following inputs:
 The above inputs are arrived at by using all unique values in x, Inf, and
 -Inf as possible cutpoints for classifying the variable in class.
 }
+\examples{
+cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
+}

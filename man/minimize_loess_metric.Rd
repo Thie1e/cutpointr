@@ -72,3 +72,9 @@ The metric function should accept the following inputs:
 The above inputs are arrived at by using all unique values in x, Inf, and
 -Inf as possible cutpoints for classifying the variable in class.
 }
+\examples{
+oc <- cutpointr(suicide, dsi, suicide, gender, method = minimize_loess_metric,
+criterion = "aicc", family = "symmetric", degree = 2, user.span = 0.7,
+metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
+plot_metric(oc)
+}

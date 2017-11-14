@@ -5,7 +5,8 @@
 \title{Maximize a metric function in binary classification after bootstrapping}
 \usage{
 maximize_boot_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction, boot_cut = 200, ...)
+  neg_class = NULL, direction, summary_func = mean, boot_cut = 50,
+  inf_rm = TRUE, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -26,8 +27,14 @@ metric to be maximized. See description.}
 \item{direction}{(character) Use ">=" or "<=" to select whether an x value
 >= or <= the cutoff predicts the positive class.}
 
+\item{summary_func}{(function) After obtaining the bootstrapped optimal
+cutpoints this function, e.g. mean or median, is applied to arrive at a single cutpoint.}
+
 \item{boot_cut}{(numeric) Number of bootstrap repetitions over which the mean
 optimal cutpoint is calculated.}
+
+\item{inf_rm}{(logical) whether to remove infinite cutpoints before
+calculating the summary.}
 
 \item{...}{To capture further arguments that are always passed to the method
 function by cutpointr. The cutpointr function passes data, x, class,
@@ -44,6 +51,9 @@ optimal cutpoint is the mean of all optimal cutpoints that were
 determined in the bootstrap samples.
 }
 \details{
+The reported metric represents the usual in-sample performance of the
+determined cutpoint.
+
 The metric function should accept the following inputs:
 \itemize{
  \item tp: vector of number of true positives
@@ -54,4 +64,9 @@ The metric function should accept the following inputs:
 
 The above inputs are arrived at by using all unique values in x, Inf, and
 -Inf as possible cutpoints for classifying the variable in class.
+}
+\examples{
+set.seed(100)
+cutpointr(suicide, dsi, suicide, method = maximize_boot_metric,
+          metric = accuracy, boot_cut = 30)
 }
