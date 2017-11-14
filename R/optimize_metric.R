@@ -19,14 +19,16 @@ optimize_metric <- function(data, x, class, metric_func = youden,
         if (is.null(args$family)) args$family = "gaussian"
         roccurve$m_unsmoothed <- roccurve$m
         finite_x <- is.finite(roccurve$x.sorted)
-        mod <- fANCOVA::loess.as(x = roccurve$x.sorted[finite_x],
-                        y = roccurve$m[finite_x],
+        finite_m <- is.finite(roccurve$m)
+        finite_roc <- (finite_x + finite_m) == 2
+        mod <- fANCOVA::loess.as(x = roccurve$x.sorted[finite_roc],
+                        y = roccurve$m[finite_roc],
                         criterion = args$criterion, degree = args$degree,
                         family = args$family, user.span = args$user.span)
         roccurve$m <- NA
-        roccurve$m[finite_x] <- mod$fitted
+        roccurve$m[finite_roc] <- mod$fitted
         m <- rep(NA, nrow(roccurve))
-        m[finite_x] <- mod$fitted
+        m[finite_roc] <- mod$fitted
     }
     if (minmax == "max") {
         max_m <- max(m, na.rm = TRUE)
@@ -49,9 +51,9 @@ optimize_metric <- function(data, x, class, metric_func = youden,
     }
     res <- tibble::tibble(optimal_cutpoint = oc)
     if (return_roc) {
-        res <- dplyr::bind_cols(res, tidyr::nest_(roccurve, key_col = "roc_curve",
-                                                  nest_cols = colnames(roccurve)))
+        res <- dplyr::bind_cols(res, tidyr::nest_(roccurve, key_col = "roc_curve"))
     }
+    if (loess) metric_name <- paste0("loess_", metric_name)
     res[, metric_name] <- m_oc
     return(res)
 }
