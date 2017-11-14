@@ -21,7 +21,7 @@ plot_metric <- function(x, conf_lvl = 0.95) {
                    "maximize_metric or minimize_metric was used"))
     }
 
-    if ("boot" %in% colnames(x)) {
+    if ("boot" %in% colnames(x) & conf_lvl != 0) {
         if ("subgroup" %in% colnames(x)) {
             roc_b_unnested <- x %>%
                 dplyr::select_(.dots = c("boot", "subgroup")) %>%
@@ -32,8 +32,8 @@ plot_metric <- function(x, conf_lvl = 0.95) {
             roc_b_unnested <- roc_b_unnested %>%
                 dplyr::select_(.dots = c("x.sorted", "m", "subgroup")) %>%
                 dplyr::group_by_(.dots = c("x.sorted", "subgroup")) %>%
-                dplyr::summarise_(ymin = ~ quantile(m, (1 - conf_lvl) / 2),
-                                  ymax = ~ quantile(m, 1 - (1 - conf_lvl) / 2))
+                dplyr::summarise_(ymin = ~ stats::quantile(m, (1 - conf_lvl) / 2, na.rm = TRUE),
+                                  ymax = ~ stats::quantile(m, 1 - (1 - conf_lvl) / 2, na.rm = TRUE))
         } else {
             roc_b_unnested <- x$boot[[1]] %>%
                 tidyr::unnest_(unnest_cols = "roc_curve_b")
@@ -41,8 +41,8 @@ plot_metric <- function(x, conf_lvl = 0.95) {
             roc_b_unnested <- roc_b_unnested %>%
                 dplyr::select_(.dots = c("x.sorted", "m")) %>%
                 dplyr::group_by_(.dots = "x.sorted") %>%
-                dplyr::summarise_(ymin = ~ quantile(m, (1 - conf_lvl) / 2),
-                                  ymax = ~ quantile(m, 1 - (1 - conf_lvl) / 2))
+                dplyr::summarise_(ymin = ~ stats::quantile(m, (1 - conf_lvl) / 2, na.rm = TRUE),
+                                  ymax = ~ stats::quantile(m, 1 - (1 - conf_lvl) / 2, na.rm = TRUE))
         }
     }
     metric_name <- find_metric_name(x)
@@ -52,7 +52,7 @@ plot_metric <- function(x, conf_lvl = 0.95) {
             tidyr::unnest_(unnest_cols = "roc_curve")
         res_unnested <- res_unnested[is.finite(res_unnested$x.sorted),
                                      c("x.sorted", "m", "subgroup")]
-        if ("boot" %in% colnames(x)) {
+        if ("boot" %in% colnames(x) & conf_lvl != 0) {
             res_unnested <- merge(res_unnested,
                                   roc_b_unnested[, c("subgroup", "x.sorted", "ymin", "ymax")],
                                   by = c("x.sorted", "subgroup"))
@@ -81,7 +81,7 @@ plot_metric <- function(x, conf_lvl = 0.95) {
             tidyr::unnest_(unnest_cols = "roc_curve")
         res_unnested <- res_unnested[is.finite(res_unnested$x.sorted),
                                      (c("x.sorted", "m"))]
-        if ("boot" %in% colnames(x)) {
+        if ("boot" %in% colnames(x) & conf_lvl != 0) {
             res_unnested <- merge(res_unnested,
                                   roc_b_unnested[, c("x.sorted", "ymin", "ymax")],
                                   by = "x.sorted")
