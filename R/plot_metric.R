@@ -64,7 +64,8 @@ plot_metric <- function(x, conf_lvl = 0.95) {
                                                              fill = ~ subgroup)) +
                 ggplot2::geom_line() +
                 ggplot2::geom_point() +
-                ggplot2::ggtitle("Metric values by cutpoint value") +
+                ggplot2::ggtitle("Metric values by cutpoint value",
+                                 "in-sample results") +
                 ggplot2::ylab(metric_name) + ggplot2::xlab("Cutpoint") +
                 ggplot2::geom_ribbon(alpha = 0.2)
         } else {
@@ -72,7 +73,8 @@ plot_metric <- function(x, conf_lvl = 0.95) {
                                                                    y = ~ m,
                                                                    color = ~ subgroup)) +
                 ggplot2::geom_line() + ggplot2::geom_point() +
-                ggplot2::ggtitle("Metric values by cutpoint value") +
+                ggplot2::ggtitle("Metric values by cutpoint value",
+                                 "in-sample results") +
                 ggplot2::ylab(metric_name) + ggplot2::xlab("Cutpoint")
         }
     } else {
@@ -90,14 +92,16 @@ plot_metric <- function(x, conf_lvl = 0.95) {
                                                              ymax = ~ ymax,
                                                              ymin = ~ ymin)) +
                 ggplot2::geom_line() + ggplot2::geom_point() +
-                ggplot2::ggtitle("Metric values by cutpoint value") +
+                ggplot2::ggtitle("Metric values by cutpoint value",
+                                 "in-sample results") +
                 ggplot2::ylab(metric_name) + ggplot2::xlab("Cutpoint") +
                 ggplot2::geom_ribbon(alpha = 0.2)
         } else {
             p <- ggplot2::ggplot(res_unnested, ggplot2::aes_(x = ~ x.sorted,
                                                              y = ~ m)) +
                 ggplot2::geom_line() + ggplot2::geom_point() +
-                ggplot2::ggtitle("Metric values by cutpoint value") +
+                ggplot2::ggtitle("Metric values by cutpoint value",
+                                 "in-sample results") +
                 ggplot2::ylab(metric_name) + ggplot2::xlab("Cutpoint")
         }
     }
