@@ -82,6 +82,8 @@ optimize_metric <- function(data, x, class, metric_func = youden,
 #' @param metric_func (function) A function that computes a single number
 #' metric to be maximized. See description.
 #' @param ... Further arguments that will be passed to metric_func
+#' @examples
+#' cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
 #' @export
 maximize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL,
@@ -117,6 +119,8 @@ maximize_metric <- function(data, x, class, metric_func = youden,
 #' @param metric_func (function) A function that computes a single number
 #' metric to be minimized. See description.
 #' @param ... Further arguments that will be passed to metric_func
+#' @examples
+#' cutpointr(suicide, dsi, suicide, method = minimize_metric, metric = abs_d_sens_spec)
 #' @export
 minimize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL,
@@ -172,6 +176,11 @@ minimize_metric <- function(data, x, class, metric_func = youden,
 #' (2008). Bias in sensitivity and specificity caused by data-driven selection
 #' of optimal cutoff values: mechanisms, magnitude, and solutions.
 #' Clinical Chemistry, (4), 729–738.
+#' @examples
+#' oc <- cutpointr(suicide, dsi, suicide, gender, method = maximize_loess_metric,
+#' criterion = "aicc", family = "symmetric", degree = 2, user.span = 0.7,
+#' metric = accuracy)
+#' plot_metric(oc)
 #' @export
 maximize_loess_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
@@ -229,6 +238,11 @@ maximize_loess_metric <- function(data, x, class, metric_func = youden,
 #' (2008). Bias in sensitivity and specificity caused by data-driven selection
 #' of optimal cutoff values: mechanisms, magnitude, and solutions.
 #' Clinical Chemistry, (4), 729–738.
+#' @examples
+#' oc <- cutpointr(suicide, dsi, suicide, gender, method = minimize_loess_metric,
+#' criterion = "aicc", family = "symmetric", degree = 2, user.span = 0.7,
+#' metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
+#' plot_metric(oc)
 #' @export
 minimize_loess_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
@@ -248,6 +262,9 @@ minimize_loess_metric <- function(data, x, class, metric_func = youden,
 #' minimizes the metric by selecting an optimal cutpoint. The returned
 #' optimal cutpoint is the mean of all optimal cutpoints that were
 #' determined in the bootstrap samples.
+#'
+#' The reported metric represents the usual in-sample performance of the
+#' determined cutpoint.
 #'
 #' The metric function should accept the following inputs:
 #' \itemize{
