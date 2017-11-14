@@ -1,10 +1,14 @@
-#' Plot the bootstrapped distribution of optimal cutpoints
+#' Plot the bootstrapped distribution of optimal cutpoints from a cutpointr object
 #'
 #' Given a cutpointr object this function plots the bootstrapped distribution
 #' of optimal cutpoints. The cutpointr function has to be run with
 #' boot_runs` > 0 to enable bootstrapping.
 #' @param x A cutpointr object.
 #' @param ... Additional arguments (unused).
+#' @examples
+#' set.seed(100)
+#' opt_cut <- cutpointr(suicide, dsi, suicide, boot_runs = 10)
+#' plot_cut_boot(opt_cut)
 #' @export
 plot_cut_boot <- function(x, ...) {
 

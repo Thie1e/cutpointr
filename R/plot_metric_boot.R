@@ -1,11 +1,16 @@
-#' Plot the bootstrapped metric distribution
+#' Plot the bootstrapped metric distribution from a cutpointr object
 #'
-#' Given a cutpointr object this function plots the bootstrapped metric distribution.
+#' Given a cutpointr object this function plots the bootstrapped metric distribution,
+#' i.e. the distribution of out-of-bag metric values.
 #' The metric depends on the function that was supplied to `metric` in the
 #' call to cutpointr.
 #' The cutpointr function has to be run with boot_runs` > 0 to enable bootstrapping.
 #' @param x A cutpointr object.
 #' @param ... Additional arguments (unused)
+#' @examples
+#' set.seed(300)
+#' opt_cut <- cutpointr(suicide, dsi, suicide, boot_runs = 10)
+#' plot_metric_boot(opt_cut)
 #' @export
 plot_metric_boot <- function(x, ...) {
 
@@ -43,8 +48,7 @@ plot_metric_boot <- function(x, ...) {
                             ggplot2::aes_string(x = metric_name,
                                                 fill = fll, color = clr)) +
                 dist_plot +
-                ggplot2::ggtitle("Bootstrap",
-                                 paste("out-of-bag estimates of", metric_name)) +
+                ggplot2::ggtitle("Bootstrap", "out-of-bag estimates") +
                 ggplot2::xlab(metric_name)
         )
         if (!all_integer) boot_metric <- boot_metric +

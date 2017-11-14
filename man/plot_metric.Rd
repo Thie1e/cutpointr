@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_metric.R
 \name{plot_metric}
 \alias{plot_metric}
-\title{Plot a metric over all possible cutoffs}
+\title{Plot a metric over all possible cutoffs from a cutpointr object}
 \usage{
 plot_metric(x, conf_lvl = 0.95)
 }
@@ -19,16 +19,6 @@ works for method functions that return a ROC-curve including the metric
 value for every cutpoint along with the optimal cutpoint.
 }
 \examples{
-set.seed(123)
-class_a <- rnorm(50, mean = 10)
-set.seed(234)
-class_b <- rnorm(50, mean = 11)
-dat <- data.frame(x = c(class_a, class_b), y = c(rep(0, 50), c(rep(1, 50))))
-opt_cut <- cutpointr(dat, x, y)
-plot_metric(opt_cut)
-
-## The same as:
-opt_cut <- cutpointr(dat, x, y, method = maximize_metric, metric = youden,
-  pos_class = 1, direction = ">=")
+opt_cut <- cutpointr(suicide, dsi, suicide)
 plot_metric(opt_cut)
 }

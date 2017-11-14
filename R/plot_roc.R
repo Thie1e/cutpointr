@@ -6,6 +6,12 @@
 #' @param display_cutpoint (logical) Whether or not to display the optimal
 #' cutpoint as a dot on the ROC curve.
 #' @param ... Additional arguments (unused).
+#' @examples
+#' opt_cut <- cutpointr(suicide, dsi, suicide)
+#' plot_roc(opt_cut, display_cutpoint = FALSE)
+#'
+#' opt_cut_2groups <- cutpointr(suicide, dsi, suicide, gender)
+#' plot_roc(opt_cut_2groups, display_cutpoint = TRUE)
 #' @export
 plot_roc <- function(x, display_cutpoint = TRUE, ...) {
 

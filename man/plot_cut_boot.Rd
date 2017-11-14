@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_cut_boot.R
 \name{plot_cut_boot}
 \alias{plot_cut_boot}
-\title{Plot the bootstrapped distribution of optimal cutpoints}
+\title{Plot the bootstrapped distribution of optimal cutpoints from a cutpointr object}
 \usage{
 plot_cut_boot(x, ...)
 }
@@ -15,4 +15,9 @@ plot_cut_boot(x, ...)
 Given a cutpointr object this function plots the bootstrapped distribution
 of optimal cutpoints. The cutpointr function has to be run with
 boot_runs` > 0 to enable bootstrapping.
+}
+\examples{
+set.seed(100)
+opt_cut <- cutpointr(suicide, dsi, suicide, boot_runs = 10)
+plot_cut_boot(opt_cut)
 }

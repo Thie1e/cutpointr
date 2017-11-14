@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_metric_boot.R
 \name{plot_metric_boot}
 \alias{plot_metric_boot}
-\title{Plot the bootstrapped metric distribution}
+\title{Plot the bootstrapped metric distribution from a cutpointr object}
 \usage{
 plot_metric_boot(x, ...)
 }
@@ -12,8 +12,14 @@ plot_metric_boot(x, ...)
 \item{...}{Additional arguments (unused)}
 }
 \description{
-Given a cutpointr object this function plots the bootstrapped metric distribution.
+Given a cutpointr object this function plots the bootstrapped metric distribution,
+i.e. the distribution of out-of-bag metric values.
 The metric depends on the function that was supplied to `metric` in the
 call to cutpointr.
 The cutpointr function has to be run with boot_runs` > 0 to enable bootstrapping.
+}
+\examples{
+set.seed(300)
+opt_cut <- cutpointr(suicide, dsi, suicide, boot_runs = 10)
+plot_metric_boot(opt_cut)
 }

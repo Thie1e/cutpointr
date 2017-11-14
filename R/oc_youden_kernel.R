@@ -1,4 +1,4 @@
-#' Determine an optimal cutpoint maximizing the Youden-Index based on smoothed histograms
+#' Determine an optimal cutpoint maximizing the Youden-Index based on kernel smoothed densities
 #'
 #' Instead of searching for an optimal cutpoint to maximize (sensitivity +
 #' specificity - 1) on the ROC curve, this function first smoothes the empirical
@@ -21,6 +21,8 @@
 #' if (require(KernSmooth)) {
 #'   oc_youden_kernel(suicide, "dsi", "suicide", oc_metric = "Youden",
 #'   pos_class = "yes", neg_class = "no", direction = ">=")
+#'   ## Within cutpointr
+#'   cutpointr(suicide, dsi, suicide, method = oc_youden_kernel)
 #' }
 #' @export
 oc_youden_kernel <- function(data, x, class, pos_class, neg_class,

@@ -36,4 +36,5 @@ normally distributed data.
 data(suicide)
 oc_youden_normal(suicide, "dsi", "suicide",
   pos_class = "yes", neg_class = "no", direction = ">=")
+cutpointr(suicide, dsi, suicide, method = oc_youden_normal)
 }

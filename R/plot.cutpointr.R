@@ -1,3 +1,17 @@
+#' Plot cutpointr objects
+#'
+#' The plot layout depends on whether subgroups were defined and whether
+#' bootstrapping was run.
+#'
+#' The ... argument can be used to apply ggplot2 functions to every individual
+#' plot, for example for changing the theme.
+#'
+#' @param x A cutpointr object.
+#' @param ... Further arguments.
+#' @examples
+#' opt_cut <- cutpointr(suicide, dsi, suicide, gender)
+#' plot(opt_cut)
+#' plot(opt_cut, ggplot2::theme_bw())
 #' @export
 plot.cutpointr <- function(x, ...) {
     args <- list(...)

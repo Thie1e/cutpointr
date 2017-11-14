@@ -1,4 +1,4 @@
-#' Plot a metric over all possible cutoffs
+#' Plot a metric over all possible cutoffs from a cutpointr object
 #'
 #' If maximize_metric is used as method function in cutpointr the computed
 #' metric values over all possible cutoffs can be plotted. Generally, this
@@ -9,17 +9,7 @@
 #' @param conf_lvl The confidence level of the bootstrap confidence interval.
 #' Set to 0 to draw no bootstrap confidence interval.
 #' @examples
-#' set.seed(123)
-#' class_a <- rnorm(50, mean = 10)
-#' set.seed(234)
-#' class_b <- rnorm(50, mean = 11)
-#' dat <- data.frame(x = c(class_a, class_b), y = c(rep(0, 50), c(rep(1, 50))))
-#' opt_cut <- cutpointr(dat, x, y)
-#' plot_metric(opt_cut)
-#'
-#' ## The same as:
-#' opt_cut <- cutpointr(dat, x, y, method = maximize_metric, metric = youden,
-#'   pos_class = 1, direction = ">=")
+#' opt_cut <- cutpointr(suicide, dsi, suicide)
 #' plot_metric(opt_cut)
 #' @importFrom dplyr %>%
 #' @export

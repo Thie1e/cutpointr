@@ -2,7 +2,7 @@
 % Please edit documentation in R/oc_youden_kernel.R
 \name{oc_youden_kernel}
 \alias{oc_youden_kernel}
-\title{Determine an optimal cutpoint maximizing the Youden-Index based on smoothed histograms}
+\title{Determine an optimal cutpoint maximizing the Youden-Index based on kernel smoothed densities}
 \source{
 Fluss, R., Faraggi, D., & Reiser, B. (2005). Estimation of the
 Youden Index and its associated cutoff point. Biometrical Journal, 47(4), 458–472.
@@ -51,5 +51,7 @@ data(suicide)
 if (require(KernSmooth)) {
   oc_youden_kernel(suicide, "dsi", "suicide", oc_metric = "Youden",
   pos_class = "yes", neg_class = "no", direction = ">=")
+  ## Within cutpointr
+  cutpointr(suicide, dsi, suicide, method = oc_youden_kernel)
 }
 }

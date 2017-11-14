@@ -27,4 +27,5 @@ The sample mean is calculated and returned as the "optimal" cutpoint.
 \examples{
 data(suicide)
 oc_mean(suicide, "dsi")
+cutpointr(suicide, dsi, suicide, method = oc_mean)
 }

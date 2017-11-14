@@ -15,6 +15,7 @@
 #' @examples
 #' data(suicide)
 #' oc_mean(suicide, "dsi")
+#' cutpointr(suicide, dsi, suicide, method = oc_mean)
 #' @export
 oc_mean <- function(data, x, trim = 0, ...) {
     stopifnot(is.character(x))

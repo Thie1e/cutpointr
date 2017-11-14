@@ -23,4 +23,5 @@ The sample median is calculated and returned as the "optimal" cutpoint.
 \examples{
 data(suicide)
 oc_median(suicide, "dsi")
+cutpointr(suicide, dsi, suicide, method = oc_median)
 }

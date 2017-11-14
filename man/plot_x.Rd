@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_x.R
 \name{plot_x}
 \alias{plot_x}
-\title{Plot the distribution of the independent variable and the optimal cutpoints}
+\title{Plot the distribution of the independent variable per class from a cutpointr object}
 \usage{
 plot_x(x, display_cutpoint = TRUE, ...)
 }
@@ -16,5 +16,13 @@ cutpoint as a vertical line.}
 }
 \description{
 Given a cutpointr object this function plots the distribution(s) of the
-independent variable(s) and the respective cutpoints.
+independent variable(s) and the respective cutpoints per class.
+}
+\examples{
+opt_cut <- cutpointr(suicide, dsi, suicide)
+plot_x(opt_cut)
+
+## With subgroup
+opt_cut_2groups <- cutpointr(suicide, dsi, suicide, gender)
+plot_x(opt_cut_2groups)
 }

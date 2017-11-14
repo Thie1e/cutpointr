@@ -6,13 +6,18 @@
 #' @param display_cutpoint (logical) Whether or not to display the optimal
 #' cutpoint as a dot on the precision recall curve.
 #' @param ... Additional arguments (unused).
+#' @examples
+#' library(cutpointr)
+#'
+#' ## Optimal cutpoint for dsi
+#' data(suicide)
+#' opt_cut <- cutpointr(suicide, dsi, suicide)
+#' plot_precision_recall(opt_cut)
 #' @export
 plot_precision_recall <- function(x, display_cutpoint = TRUE, ...) {
 
     stopifnot("cutpointr" %in% class(x))
     args <- list(...)
-    predictor <- as.name(x$predictor[1])
-    outcome <- as.name(x$outcome[1])
 
     if (is.null(suppressWarnings(x$subgroup))) {
         dts_pr <- "roc_curve"
