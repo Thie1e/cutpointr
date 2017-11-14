@@ -26,6 +26,13 @@ Runs cutpointr_ over multiple predictor variables. By default, cutpointr
 will be run using all columns in the data set as predictors except for the
 variable in class.
 }
+\details{
+The automatic determination of positive / negative classes and direction
+will be carried out separately for every predictor variable. That way, if
+direction and the classes are not specified, the reported AUC for every
+variable will be >= 0.5. AUC may be < 0.5 in the case of subgroups as
+direction is equal in every subgroup.
+}
 \examples{
 library(cutpointr)
 
