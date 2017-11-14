@@ -2,10 +2,16 @@
 #'
 #' Given a data frame with a numeric predictor variable and a binary outcome
 #' variable this function returns a data frame that includes all elements of
-#' a confusion matrix for every unique value of the predictor variable.
-#' Additionally, the TPR, FPR, TNR and FNR are returned.
+#' the confusion matrix (true positives, false positives, true negatives,
+#' and false negatives) for every unique value of the predictor variable.
+#' Additionally, the true positive rate (tpr), false positive rate (fpr),
+#' true negative rate (tnr) and false negative rate (fnr) are returned.
+#'
+#' To enable classifying all observations as belonging to only one class the
+#' predictor values will be augmented by Inf or -Inf.
+#'
 #' @param data A data frame or matrix. Will be converted to a data frame.
-#' @param x (charaacter) The numeric independent (predictor) variable.
+#' @param x (character) The numeric independent (predictor) variable.
 #' @param class (character) A binary vector of outcome values.
 #' @param pos_class The value of 'class' that represents the positive cases.
 #' @param neg_class The value of 'class' that represents the negative cases.
@@ -19,6 +25,8 @@
 #' roc(data = dat, x = "Petal.Width", class = "Species",
 #' pos_class = "versicolor", neg_class = "setosa", direction = ">=")
 #' @export
+#' @source
+#' Forked from the ROCR package
 roc <- function(data, x, class, pos_class, neg_class, direction = ">=") {
     stopifnot(direction %in% c(">=", "<="))
     data <- as.data.frame(data)
@@ -30,17 +38,13 @@ roc <- function(data, x, class, pos_class, neg_class, direction = ">=") {
     if (direction == ">=") {
         pred.order <- order(x, decreasing = TRUE)
         x.sorted <- x[pred.order]
-        # dups <- rev(duplicated(rev(x.sorted)))
         dups <- get_rev_dups(x.sorted)
         x.sorted <- x.sorted[!dups]
         class.sorted <- class[pred.order]
-        # tp <- cumsum(class.sorted == pos_class)
         tp <- cumsum(is_equal_cpp(class.sorted, pos_class))
         tp <- tp[!dups]
-        # fp <- cumsum(class.sorted == neg_class)
         fp <- cumsum(is_equal_cpp(class.sorted, neg_class))
         fp <- fp[!dups]
-        # n_pos <- sum(class == pos_class)
         n_pos <- tp[length(tp)]
         n_neg <- length(class) - n_pos
         tn <- n_neg - fp
@@ -57,17 +61,13 @@ roc <- function(data, x, class, pos_class, neg_class, direction = ">=") {
     } else if (direction == "<=") {
         pred.order <- order(x, decreasing = FALSE)
         x.sorted <- x[pred.order]
-        # dups <- rev(duplicated(rev(x.sorted)))
         dups <- get_rev_dups(x.sorted)
         x.sorted <- x.sorted[!dups]
         class.sorted <- class[pred.order]
-        # tp <- cumsum(class.sorted == pos_class)
         tp <- cumsum(is_equal_cpp(class.sorted, pos_class))
         tp <- tp[!dups]
-        # fp <- cumsum(class.sorted == neg_class)
         fp <- cumsum(is_equal_cpp(class.sorted, neg_class))
         fp <- fp[!dups]
-        # n_pos <- sum(class == pos_class)
         n_pos <- tp[length(tp)]
         n_neg <- length(class) - n_pos
         tn <- n_neg - fp
@@ -86,5 +86,9 @@ roc <- function(data, x, class, pos_class, neg_class, direction = ">=") {
     tnr <- tn / n_neg
     fpr <- 1 - tnr
     fnr <- 1 - tpr
-    return(data.frame(x.sorted, tp, fp, tn, fn, tpr, tnr, fpr, fnr))
+    res <- data.frame(x.sorted, tp, fp, tn, fn, tpr, tnr, fpr, fnr)
+    class(res) <- c(class(res), "roc_cutpointr")
+    if (is.nan(res$tpr[1])) warning("ROC curve contains no positives")
+    if (res$fpr[1] == 0 & res$fpr[nrow(res)] == 0) warning("ROC curve contains no negatives")
+    return(res)
 }

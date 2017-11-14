@@ -3,13 +3,16 @@
 \name{roc}
 \alias{roc}
 \title{Calculate a ROC curve}
+\source{
+Forked from the ROCR package
+}
 \usage{
 roc(data, x, class, pos_class, neg_class, direction = ">=")
 }
 \arguments{
 \item{data}{A data frame or matrix. Will be converted to a data frame.}
 
-\item{x}{(charaacter) The numeric independent (predictor) variable.}
+\item{x}{(character) The numeric independent (predictor) variable.}
 
 \item{class}{(character) A binary vector of outcome values.}
 
@@ -27,8 +30,14 @@ and fnr.
 \description{
 Given a data frame with a numeric predictor variable and a binary outcome
 variable this function returns a data frame that includes all elements of
-a confusion matrix for every unique value of the predictor variable.
-Additionally, the TPR, FPR, TNR and FNR are returned.
+the confusion matrix (true positives, false positives, true negatives,
+and false negatives) for every unique value of the predictor variable.
+Additionally, the true positive rate (tpr), false positive rate (fpr),
+true negative rate (tnr) and false negative rate (fnr) are returned.
+}
+\details{
+To enable classifying all observations as belonging to only one class the
+predictor values will be augmented by Inf or -Inf.
 }
 \examples{
 ## First two classes of the iris data
