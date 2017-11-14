@@ -4,8 +4,8 @@
 \alias{cutpointr_}
 \title{The standard evaluation version of cutpointr}
 \usage{
-cutpointr_(data, x, class, subgroup = NULL, method = "maximize_metric",
-  metric = "sum_sens_spec", pos_class = NULL, neg_class = NULL,
+cutpointr_(data, x, class, subgroup = NULL, method = maximize_metric,
+  metric = sum_sens_spec, pos_class = NULL, neg_class = NULL,
   direction = NULL, boot_runs = 0, use_midpoints = FALSE, na.rm = FALSE,
   allowParallel = FALSE, silent = FALSE, ...)
 }
@@ -63,4 +63,15 @@ minimize_metric and maximize_metric pass ... to metric.}
 This function is equivalent to cutpointr but takes only quoted arguments
 for x, class, subgroup, method and metric. This function is suitable for
 programming. For details on cutpointr see help("cutpointr").
+}
+\examples{
+library(cutpointr)
+
+## Optimal cutpoint for dsi
+data(suicide)
+opt_cut <- cutpointr_(suicide, "dsi", "suicide")
+opt_cut
+summary(opt_cut)
+plot(opt_cut)
+predict(opt_cut, newdata = data.frame(dsi = 0:5))
 }

@@ -68,15 +68,15 @@ A cutpointr object which is also a data.frame and tbl_df.
 Using predictions (or e.g. biological marker values) and binary class labels, this function
 will determine "optimal" cutpoints using various selectable methods. The
 methods for cutpoint determination can be evaluated using bootstrapping. An
-estimate of the cutpoint variability and the out-of-sample performance will
+estimate of the cutpoint variability and the out-of-sample performance will then
 be returned.
 }
 \details{
 If direction and/or pos_class and neg_class are not given, the function will
-assume that higher values indicate the positive class and assign the class
-with a higher mean as the positive class.
+assume that higher values indicate the positive class and use the class
+with a higher median as the positive class.
 
-Different methods can be used for determining the "optimal" cutpoint via
+Different methods can be selected for determining the optimal cutpoint via
 the method argument. The package includes the following cutpoint functions:
 \itemize{
  \item maximize_metric: Maximize the metric function
@@ -89,17 +89,14 @@ the method argument. The package includes the following cutpoint functions:
  the optimal cutpoints in bootstrapped samples
  \item minimize_boot_metric: Minimize the metric function as a mean of
  the optimal cutpoints in bootstrapped samples
- \item oc_manual: Specify the cutoff value manually
+ \item oc_manual: Specify the cutpoint manually
  \item oc_youden_kernel: Maximize the Youden-Index after kernel smoothing
  the distributions of the two classes
  \item oc_youden_normal: Maximize the Youden-Index parametrically
  assuming normally distributed data in both classes
- \item oc_OptimalCutpoints: A wrapper for optimal.cutpoints from the OptimalCutpoints package.
- Supply an additional "oc_metric" argument with the method choice corresponding
- to a method from the OptimalCutpoints package
 }
 
-User defined functions can be supplied to method, too. As a reference,
+User-defined functions can be supplied to method, too. As a reference,
 the code of all included method functions can be accessed by simply typing
 their name. To define a new method function, create a function that may take
 as input(s):
@@ -117,7 +114,7 @@ as input(s):
 
 The ... argument can be used to avoid an error if not all of the above
 arguments are needed or in oder to pass additional arguments to method.
-The function should return a data frame or tbl_df with
+The function should return a data.frame or tbl_df with
 one row, the column "optimal_cutpoint", and an optional column with an arbitraty name
 with the metric value at the optimal cutpoint.
 
@@ -126,15 +123,15 @@ Built-in metric functions include:
  \item accuracy: Fraction correctly classified
  \item youden: Youden- or J-Index = sensitivity + specificity - 1
  \item sum_sens_spec: sensitivity + specificity
- \item sum_ppvnpv: The sum of positive predictive value (PPV) and negative
+ \item sum_ppv_npv: The sum of positive predictive value (PPV) and negative
  predictive value (NPV)
  \item prod_sens_spec: sensitivity * specificity
- \item prod_ppvnpv: The product of positive predictive value (PPV) and
+ \item prod_ppv_npv: The product of positive predictive value (PPV) and
  negative predictive value (NPV)
  \item cohens_kappa: Cohen's Kappa
  \item abs_d_sens_spec: The absolute difference between
  sensitivity and specificity
- \item abs_d_ppvnpv: The absolute difference between positive predictive
+ \item abs_d_ppv_npv: The absolute difference between positive predictive
  value (PPV) and negative predictive value (NPV)
  \item p_chisquared: The p-value of a chi-squared test on the confusion
  matrix of predictions and observations
@@ -167,11 +164,9 @@ are identical to the column names that are by default returned by cutpointr.
 
 If boot_runs is positive, that number of bootstrap samples will be drawn
 and the optimal cutpoint using method will be determined. Additionally,
-as a form of cross validation, the function in metric will be used to
+as a way of validation, the function in metric will be used to
 score the out-of-bag predictions using the cutpoints determined by
-method. Accuracy,
-Sensitivity, Specificity, Kappa, true positives/negatives and false
-positives/negatives are always included in the bootstrap results.
+method. Various default metrics are always included in the bootstrap results.
 
 If multiple optimal cutpoints are found, the first one is returned and a
 warning including all optimal cutpoints is issued. The first one refers to
@@ -182,8 +177,7 @@ If use_midpoints = TRUE the mean of the optimal cutpoint and the next
 highest or lowest possible cutpoint is returned, depending on direction.
 If use_midpoints is set to TRUE and multiple optimal cutpoints are found,
 the midpoint of the minimum / maximum of the optimal cutpoints
-and the next highest / lowest observation is returned, as described before. Thus, finding
-multiple optimal cutpoints has no effect on determining the midpoint.
+and the next highest / lowest observation is returned, as described before.
 }
 \examples{
 library(cutpointr)
@@ -194,88 +188,52 @@ opt_cut <- cutpointr(suicide, dsi, suicide)
 opt_cut
 summary(opt_cut)
 plot(opt_cut)
+
+\dontrun{
+## Predict class for new observations
 predict(opt_cut, newdata = data.frame(dsi = 0:5))
 
-## Supplying raw data
-## Same result
+## Supplying raw data, same result
 cutpointr(x = suicide$dsi, class = suicide$suicide)
 
 ## direction, class labels, method and metric can be defined manually
-opt_cut <- cutpointr(suicide, dsi, suicide, direction = ">=", pos_class = "yes",
-                     method = maximize_metric, metric = youden)
-opt_cut
+## Again, same result
+cutpointr(suicide, dsi, suicide, direction = ">=", pos_class = "yes",
+          method = maximize_metric, metric = youden)
 
 ## Optimal cutpoint for dsi, as before, but for the separate subgroups
 opt_cut <- cutpointr(suicide, dsi, suicide, gender)
 opt_cut
-summary(opt_cut)
-plot(opt_cut)
-
-## Bootstrapping to assess cutpoint variability and out-of-sample performance
-set.seed(12)
-opt_cut <- cutpointr(suicide, dsi, suicide, boot_runs = 30)
-opt_cut
-summary(opt_cut)
-plot(opt_cut)
 
 ## Bootstrapping also works on individual subgroups
-set.seed(12)
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 30)
+## low boot_runs for illustrative purposes
+set.seed(30)
+opt_cut <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 5)
 opt_cut
 summary(opt_cut)
 plot(opt_cut)
 
 ## Transforming variables (unrealistic, just to show the functionality)
-set.seed(12)
-opt_cut <- cutpointr(suicide, log(dsi + 1), suicide == "yes",
-    subgroup = dsi \%\% 2 == 0, boot_runs = 30)
+opt_cut <- cutpointr(suicide, x = log(dsi + 1), class = suicide == "yes",
+    subgroup = dsi \%\% 2 == 0)
 opt_cut
-summary(opt_cut)
-plot(opt_cut)
 predict(opt_cut, newdata = data.frame(dsi = 1:3))
 
-## Different cutpoint function / metric
-set.seed(12)
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, pos_class = "yes",
-  boot_runs = 30, method = minimize_metric, metric = abs_d_sens_spec)
-opt_cut
-plot(opt_cut)
-
-## Handling of NA values
-suicide_na <- suicide
-suicide_na$dsi[10] <- NA
-suicide_na$suicide[20] <- NA
-suicide_na$gender[30] <- NA
-opt_cut_na <- cutpointr(suicide_na, dsi, suicide, gender, na.rm = TRUE)
-opt_cut_na
-plot(opt_cut_na)
-
-## Parallelized bootstrapping (warning expected)
-if (require(doSNOW) & require(doRNG)) {
+## Parallelized bootstrapping
   cl <- makeCluster(2) # 2 cores
-  registerDoSNOW(cl)
+  registerDoParallel(cl)
   registerDoRNG(12) # Reproducible parallel loops using doRNG
-  opt_cut <- cutpointr(suicide, dsi, suicide, gender, pos_class = "yes",
-                 direction = ">=", boot_runs = 100, allowParallel = TRUE)
+  opt_cut <- cutpointr(suicide, dsi, suicide, gender,
+                       boot_runs = 10, allowParallel = TRUE)
   stopCluster(cl)
   opt_cut
   plot(opt_cut)
-}
 
-
-## Wrapper for optimal.cutpoints
-if (require(OptimalCutpoints)) {
-  opt_cut <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 30,
-                       method = oc_OptimalCutpoints, oc_metric = "Youden")
-  opt_cut
-  plot(opt_cut)
-}
-
-## Cutpoint function assuming normally distributed data
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 30,
-                     method = oc_youden_normal)
+## Robust cutpoint method using kernel smoothing for optimizing Youden-Index
+opt_cut <- cutpointr(suicide, dsi, suicide, gender,
+                     method = oc_youden_kernel)
 opt_cut
-plot(opt_cut)
+}
 
 
 
