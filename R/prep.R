@@ -8,8 +8,6 @@ assume_direction_pos_class <- function(x, class, pos_class, neg_class, direction
         complete_ind <- !(na_indx + na_indc)
         x <- x[complete_ind]
         class <- class[complete_ind]
-    } else {
-        if (anyNA(c(x, class))) stop("NAs in x or class but na.rm = FALSE")
     }
 
     if (is.null(direction) & !is.null(pos_class)) {
