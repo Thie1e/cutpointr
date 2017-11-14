@@ -1,7 +1,32 @@
-# cutpointr 0.4.1
+# cutpointr 0.5.0
 
+- `cutpointr_` now accepts functions instead of character strings as `method` 
+or `metric`
 - Fix naming the metric in the bootstrap if the supplied function returns an
 unnamed vector
+- Fix help for the `use_midpoints` parameter. If TRUE (default FALSE) the
+returned optimal cutpoint will be the mean of the optimal cutpoint and the next
+lowest observation (for `direction = ">="`) or the next highest observation
+(for `direction = "<="`)
+- Rename `sum_ppvnpv`, `prod_ppvnpv`, and `abs_d_ppvnpv` to `sum_ppv_npv`,
+`prod_ppv_npv`, and `abs_d_ppvnpv` to match the naming scheme to the names of 
+the metrics that optimize sensitivity and specificity
+- Also all metric names that are returned by the metric functions are now
+lower case
+- The `summary_sd` function now also returns 5% and 95% percentiles that are
+included in the output of `summary`
+- The default number of bootstrap repeats in `minimize_boot_metric` and 
+`maximize_boot_metric` was changed from 200 to 50
+- The message "Running bootstrap..." is now displayed before executing the
+bootstrap so that possible messages or warnings can be attributed to the main
+cutpoint estimation or cutpoint estimation during the bootstrapping
+- The `summary` function now returns a data.frame instead of a list, also
+the printing method for `summary_cutpointr` has been slightly modified
+- Add `plot_sensitivity_specificity` for plotting cutpoints vs. 
+sensitivity and specificity on the y-axis
+- Remove `oc_optimalCutpoints` function
+- Remove dependencies `ROCR` and `OptimalCutpoints` by rewriting tests and 
+storing benchmark results
 
 # cutpointr 0.4.0
 

@@ -5,10 +5,6 @@ any_inf <- function(x) {
     .Call('_cutpointr_any_inf', PACKAGE = 'cutpointr', x)
 }
 
-any_naC <- function(x) {
-    .Call('_cutpointr_any_naC', PACKAGE = 'cutpointr', x)
-}
-
 get_rev_dups <- function(x) {
     .Call('_cutpointr_get_rev_dups', PACKAGE = 'cutpointr', x)
 }

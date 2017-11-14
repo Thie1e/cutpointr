@@ -16,17 +16,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// any_naC
-bool any_naC(NumericVector x);
-RcppExport SEXP _cutpointr_any_naC(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(any_naC(x));
-    return rcpp_result_gen;
-END_RCPP
-}
 // get_rev_dups
 LogicalVector get_rev_dups(NumericVector x);
 RcppExport SEXP _cutpointr_get_rev_dups(SEXP xSEXP) {
@@ -111,7 +100,6 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_cutpointr_any_inf", (DL_FUNC) &_cutpointr_any_inf, 1},
-    {"_cutpointr_any_naC", (DL_FUNC) &_cutpointr_any_naC, 1},
     {"_cutpointr_get_rev_dups", (DL_FUNC) &_cutpointr_get_rev_dups, 1},
     {"_cutpointr_is_equal_cpp_char", (DL_FUNC) &_cutpointr_is_equal_cpp_char, 2},
     {"_cutpointr_is_equal_cpp_num", (DL_FUNC) &_cutpointr_is_equal_cpp_num, 2},

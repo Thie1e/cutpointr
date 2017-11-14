@@ -29,3 +29,6 @@ packrat/src/
 cutpointr_design.pptx
 .DS_Store
 inst/doc
+*.o
+*.so
+*.dll
