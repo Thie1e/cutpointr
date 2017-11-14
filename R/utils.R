@@ -112,19 +112,27 @@ get_opt_ind <- function(roc_curve, oc, direction) {
     return(opt_ind)
 }
 
-summary_sd <- function(x) {
-    c(summary(x)[1:6], SD = stats::sd(x, na.rm = TRUE))
+summary_sd <- function(x, round_digits = 4) {
+    s <- summary(x)[1:6]
+    result <- c(s[1],
+                stats::quantile(x, 0.05, na.rm = TRUE),
+                s[2:5],
+                stats::quantile(x, 0.95, na.rm = TRUE),
+                s[6],
+                SD = stats::sd(x, na.rm = TRUE))
+    round(result, round_digits)
 }
 
 # If the output of the metric function is no named matrix with one column,
 # convert it to one. Also run some checks.
-sanitize_metric <- function(m, m_name, n) {
+sanitize_metric <- function(m, m_name, n, silent = TRUE) {
     if ("data.frame" %in% class(m)) {
         m <- as.matrix(m)
     }
     if (!is.null(dim(m))) {
         if (dim(m)[2] == 1 & class(m) == "matrix") {
             res <- m
+            if (is.null(colnames(res))) colnames(res) <- m_name
         } else {
             stop(paste("The metric function should return a numeric vector",
                        "or a one-column matrix or data.frame."))
@@ -136,7 +144,7 @@ sanitize_metric <- function(m, m_name, n) {
     }
     finite_res <- is.finite(res)
     if (any(!finite_res)) {
-        message("Converting infinite metric values to NA")
+        if (!silent) message("Converting infinite metric values to NA")
         res[!finite_res] <- NA
     }
     if (nrow(res) != n) {
