@@ -1,3 +1,10 @@
+# cutpointr 0.5.1
+
+- In preparation for a new version of tibble that will restore the old printing
+behaviour and in order to pass the CRAN check the print method for cutpointr
+has been altered depending on the loaded version of tibble.
+- `silent` argument for roc().
+
 # cutpointr 0.5.0
 
 - `cutpointr_` now accepts functions instead of character strings as `method` 

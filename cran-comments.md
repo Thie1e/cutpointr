@@ -8,11 +8,11 @@
 ## R CMD check results
 There were no ERRORs or WARNINGs. 
 
-There was 1 NOTE:
+There was 1 NOTE: 
 
-* Unexported object imported by a ':::' call: ‘tibble:::shrink_mat’
+* Unexported objects imported by ':::' calls: ‘tibble:::print.tbl_df’ ‘tibble:::shrink_mat’
 
-To nicely print the cutpointr object the print.tbl_df behaviour of tibble versions < 1.3.0 is needed. As soon as it is restored in a later version of tibble, the call to ::: will be removed and the print.cutpointr method will be simplified. See the corresponding issue at https://github.com/tidyverse/tibble/issues/268
+To nicely print the cutpointr object the print.tbl_df behaviour of tibble versions < 1.3.0 is needed in print.cutpointr. As soon as it is restored in a later version of tibble the calls to ::: will be removed and the print.cutpointr method will be simplified. See the corresponding issue at https://github.com/tidyverse/tibble/issues/268
 
 ## devtools::revdep_check()
 
