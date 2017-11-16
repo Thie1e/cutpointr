@@ -16,7 +16,7 @@ multi_cutpointr(data, x = colnames(data)[colnames(data) != class], class,
 
 \item{silent}{Whether to display messages.}
 
-\item{...}{Further arguements to be passed to cutpointr.}
+\item{...}{Further arguments to be passed to cutpointr.}
 }
 \value{
 A data frame.

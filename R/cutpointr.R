@@ -47,9 +47,9 @@
 #' }
 #'
 #' The ... argument can be used to avoid an error if not all of the above
-#' arguments are needed or in oder to pass additional arguments to method.
+#' arguments are needed or in order to pass additional arguments to method.
 #' The function should return a data.frame or tbl_df with
-#' one row, the column "optimal_cutpoint", and an optional column with an arbitraty name
+#' one row, the column "optimal_cutpoint", and an optional column with an arbitrary name
 #' with the metric value at the optimal cutpoint.
 #'
 #' Built-in metric functions include:
@@ -721,7 +721,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
 #' @param x Character vector of predictor variables.
 #' @param class The name of the outcome / independent variable.
 #' @param silent Whether to display messages.
-#' @param ... Further arguements to be passed to cutpointr.
+#' @param ... Further arguments to be passed to cutpointr.
 #' @examples
 #' library(cutpointr)
 #'

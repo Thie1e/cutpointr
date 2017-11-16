@@ -18,7 +18,7 @@ plot_cutpointr(x, xvar = cutpoint, yvar = sum_sens_spec, conf_lvl = 0.95,
 a confidence interval at the level of conf_lvl can be plotted. To plot no
 confidence interval set conf_lvl = 0.}
 
-\item{aspect_ratio}{(numeric) Set to 1 to obtain a quadtratic canvas.}
+\item{aspect_ratio}{(numeric) Set to 1, to obtain a quadratic plot.}
 }
 \description{
 Flexibly plot various metrics against all cutpoints or any other metric.

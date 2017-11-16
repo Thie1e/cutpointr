@@ -26,7 +26,7 @@
 #' @param conf_lvl (numeric) If bootstrapping was run and x is a cutpointr object,
 #' a confidence interval at the level of conf_lvl can be plotted. To plot no
 #' confidence interval set conf_lvl = 0.
-#' @param aspect_ratio (numeric) Set to 1 to obtain a quadtratic canvas.
+#' @param aspect_ratio (numeric) Set to 1, to obtain a quadratic plot.
 #'
 #' @examples
 #' set.seed(1)
