@@ -211,7 +211,7 @@ if (suppressPackageStartupMessages(require(doParallel) & require(doRNG))) {
 
 ### Bootstrapped cutpoints
 
-It has been shown that bagging can substantially improve performance of a wide range of types of models in regression as well as in classification tasks. In the setting of generating a numerical output, a number of bootstrap samples is drawn and the final result is the average of all models that were fit to the bootstrap samples. We make this pricinple available for cutpoint estimation via the `maximize_boot_metric` and `minimize_boot_metric` functions. If one of these functions is used as `method`, `boot_cut` bootstrap samples are drawn, the cutpoint optimization is carried out in each one and the mean of the resulting optimal cutpoints on the bootstrap samples is returned as the optimal cutpoint in `cutpointr`. Note that if bootstrap validation is run, i.e. if `boot_runs` is larger zero, a double bootstrap will be executed, as in the bootstrap validation routine `boot_runs` bootstrap samples are generated and each one is again bootstrapped `boot_cut` times. This may lead to long run times, so activating the built-in parallelization may be advisable. The advantages of the bootstrapped cutpoints are that they don't have tuneable parameters, unlike the LOESS smoothing, that they don't rely on assumptions, unlike the Normal method, and that they are applicable to every metric that can be used with `minimize_metric` or `maximize_metric`, unlike the Kernel method. Furthermore, like Random Forests cannot be overfit by increasing the number of trees [@breiman_random_2001], the bootstrapped cutpoints cannot be overfit by running an excessive amount of repetitions. 
+It has been shown that bagging can substantially improve performance of a wide range of types of models in regression as well as in classification tasks. In the setting of generating a numerical output, a number of bootstrap samples is drawn and the final result is the average of all models that were fit to the bootstrap samples. We make this pricinple available for cutpoint estimation via the `maximize_boot_metric` and `minimize_boot_metric` functions. If one of these functions is used as `method`, `boot_cut` bootstrap samples are drawn, the cutpoint optimization is carried out in each one and the mean of the resulting optimal cutpoints on the bootstrap samples is returned as the optimal cutpoint in `cutpointr`. Note that if bootstrap validation is run, i.e. if `boot_runs` is larger zero, a double bootstrap will be executed, as in the bootstrap validation routine `boot_runs` bootstrap samples are generated and each one is again bootstrapped `boot_cut` times. This may lead to long run times, so activating the built-in parallelization may be advisable. The advantages of the bootstrapped cutpoints are that they don't have tuneable parameters, unlike the LOESS smoothing, that they don't rely on assumptions, unlike the Normal method, and that they are applicable to every metric that can be used with `minimize_metric` or `maximize_metric`, unlike the Kernel method. Furthermore, like Random Forests cannot be overfit by increasing the number of trees, the bootstrapped cutpoints cannot be overfit by running an excessive amount of repetitions. 
 
 ```{r}
 set.seed(100)
@@ -385,8 +385,8 @@ suicide %>%
 
 ## AUC and optimal cutpoint for multiple variables
 
-Alternatively we can use the standard evaluation version in `cutpointr_` to 
-loop over column names. In this case, we would like to determine the optimal
+Alternatively, we can map the standard evaluation version `cutpointr_` to 
+the column names. In this case, we would like to determine the optimal
 cutpoint along with the AUC of multiple variables in a data set. 
 
 If `direction` and / or `pos_class` and `neg_class` are unspecified, these parameters
@@ -794,7 +794,7 @@ results <- structure(list(time = c(26.3713185, 3.0188215, 8.7898475, 56.833018,
 ggplot(results, aes(x = n, y = time, col = solution, shape = solution)) +
     geom_point(size = 3) + geom_line() +
     scale_y_log10() + scale_x_log10() + 
-    ggtitle("Benchmark results", "n = 100, 1000, 10000, 1e5, 1e6, 1e7") +
+    ggtitle("Benchmark results", "n = 1000, 10000, 1e5, 1e6, 1e7") +
     ylab("Median time (milliseconds, log scale)") + xlab("n (log scale)")
 ```
 
@@ -920,7 +920,7 @@ results <- structure(list(time = c(1.2604925, 1.1883875, 8.8934655, 2.6160905,
 ggplot(results, aes(x = n, y = time, col = solution, shape = solution)) +
     geom_point(size = 3) + geom_line() +
     scale_y_log10() + scale_x_log10() + 
-    ggtitle("Benchmark results", "n = 100, 1000, 10000, 1e5, 1e6, 1e7") +
+    ggtitle("Benchmark results", "n = 1000, 10000, 1e5, 1e6, 1e7") +
     ylab("Median time (milliseconds, log scale)") + xlab("n (log scale)")
 ```
 
