@@ -6,7 +6,7 @@
 #' density estimate. The bandwidth is automatically selected using the direct
 #' plug-in method.
 #'
-#' The functions for calculating the kernel density estimate and the bandwith
+#' The functions for calculating the kernel density estimate and the bandwidth
 #' are both from the KernSmooth package with default parameters, except for
 #' the bandwidth selection, which uses the standard deviation as scale estimate.
 #'
