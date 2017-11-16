@@ -144,7 +144,7 @@ sanitize_metric <- function(m, m_name, n, silent = TRUE) {
     }
     finite_res <- is.finite(res)
     if (any(!finite_res)) {
-        if (!silent) message("Converting infinite metric values to NA")
+        if (!silent) message("Converting non-finite metric values to NA")
         res[!finite_res] <- NA
     }
     if (nrow(res) != n) {

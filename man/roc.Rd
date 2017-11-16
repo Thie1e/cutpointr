@@ -7,7 +7,7 @@
 Forked from the ROCR package
 }
 \usage{
-roc(data, x, class, pos_class, neg_class, direction = ">=")
+roc(data, x, class, pos_class, neg_class, direction = ">=", silent = FALSE)
 }
 \arguments{
 \item{data}{A data frame or matrix. Will be converted to a data frame.}
@@ -22,6 +22,9 @@ roc(data, x, class, pos_class, neg_class, direction = ">=")
 
 \item{direction}{(character) One of ">=" or "<=". Specifies if the positive
 class is associated with higher values of x (default).}
+
+\item{silent}{If FALSE and the ROC curve contains no positives or negatives,
+a warning is generated.}
 }
 \value{
 A data frame with the columns x.sorted, tp, fp, tn, fn, tpr, tnr, fpr,

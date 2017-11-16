@@ -17,6 +17,8 @@
 #' @param neg_class The value of 'class' that represents the negative cases.
 #' @param direction (character) One of ">=" or "<=". Specifies if the positive
 #' class is associated with higher values of x (default).
+#' @param silent If FALSE and the ROC curve contains no positives or negatives,
+#' a warning is generated.
 #' @return A data frame with the columns x.sorted, tp, fp, tn, fn, tpr, tnr, fpr,
 #' and fnr.
 #' @examples
@@ -27,7 +29,8 @@
 #' @export
 #' @source
 #' Forked from the ROCR package
-roc <- function(data, x, class, pos_class, neg_class, direction = ">=") {
+roc <- function(data, x, class, pos_class, neg_class, direction = ">=",
+                silent = FALSE) {
     stopifnot(direction %in% c(">=", "<="))
     data <- as.data.frame(data)
     stopifnot(is.character(x))

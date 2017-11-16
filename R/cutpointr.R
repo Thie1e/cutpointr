@@ -608,7 +608,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                             roc_curve_b <- roc(data = g[b_ind, ], x = predictor,
                                                class = outcome,
                                                pos_class = pc, neg_class = neg_class,
-                                               direction = direction)
+                                               direction = direction, silent = TRUE)
                             roc_curve_b <- tidyr::nest_(roc_curve_b,
                                                         key_col = "roc_curve")
                             optcut_b <- dplyr::bind_cols(optcut_b, roc_curve_b)
@@ -638,7 +638,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                         roc_curve_oob <- roc(data = g[-b_ind, ], x = predictor,
                                              class = outcome,
                                              pos_class = pc, neg_class = neg_class,
-                                             direction = direction)
+                                             direction = direction, silent = TRUE)
                         opt_ind_oob <- get_opt_ind(roc_curve = roc_curve_oob,
                                                  oc = optcut_b$optimal_cutpoint,
                                                  direction = direction)
