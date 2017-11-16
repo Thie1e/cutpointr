@@ -15,7 +15,7 @@ Kirill Müller and Hadley Wickham (2017). tibble: Simple Data Frames.
 
 \item{n}{number of rows to print.}
 
-\item{...}{further arguements.}
+\item{...}{further arguments.}
 }
 \description{
 Prints the multi_cutpointr object with infinite width like a tbl_df.

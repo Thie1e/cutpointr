@@ -6,7 +6,7 @@
 #'  https://CRAN.R-project.org/package=tibble
 #' @param x a multi_cutpointr object.
 #' @param n number of rows to print.
-#' @param ... further arguements.
+#' @param ... further arguments.
 #' @export
 print.multi_cutpointr <- function(x, n = Inf, ...) {
     print.cutpointr(x, n = n, ...)

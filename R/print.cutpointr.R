@@ -7,7 +7,7 @@
 #' @param x a cutpointr object.
 #' @param width width of output.
 #' @param n number of rows to print.
-#' @param ... further arguements.
+#' @param ... further arguments.
 #' @export
 print.cutpointr <- function(x, width = 1000, n = 50, ...) {
     if (utils::packageVersion("tibble") <= "1.3.4") {

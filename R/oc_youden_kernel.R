@@ -3,7 +3,7 @@
 #' Instead of searching for an optimal cutpoint to maximize (sensitivity +
 #' specificity - 1) on the ROC curve, this function first smoothes the empirical
 #' distributions of x per class. The smoothing is done using a binned kernel
-#' density estimate. The bandwith is automatically selected using the direct
+#' density estimate. The bandwidth is automatically selected using the direct
 #' plug-in method.
 #'
 #' The functions for calculating the kernel density estimate and the bandwith
