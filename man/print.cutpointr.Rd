@@ -8,15 +8,17 @@ Kirill Müller and Hadley Wickham (2017). tibble: Simple Data Frames.
  https://CRAN.R-project.org/package=tibble
 }
 \usage{
-\method{print}{cutpointr}(x, n = Inf, ...)
+\method{print}{cutpointr}(x, width = 1000, n = 50, ...)
 }
 \arguments{
 \item{x}{a cutpointr object.}
+
+\item{width}{width of output.}
 
 \item{n}{number of rows to print.}
 
 \item{...}{further arguements.}
 }
 \description{
-Prints the cutpointr object with infinite width like a tbl_df.
+Prints the cutpointr object with full width like a tbl_df.
 }
