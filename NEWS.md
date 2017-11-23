@@ -1,9 +1,17 @@
+# cutpointr 0.5.2
+- Reformat docs 
+- Remove superfluous check in `plot_cutpointr`
+- Add metrics `plr` (positive likelihood ratio), `nlr` (negative likelihood ratio),
+`false_discovery_rate`, and `false_omission_rate`
+
 # cutpointr 0.5.1
 
 - In preparation for a new version of tibble that will restore the old printing
 behaviour and in order to pass the CRAN check the print method for cutpointr
 has been altered depending on the loaded version of tibble.
 - `silent` argument for roc().
+- Reformat docs to include better formatted equations
+- Remove superfluous check in plot_cutpointr
 
 # cutpointr 0.5.0
 
