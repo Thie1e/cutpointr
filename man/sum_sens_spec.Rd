@@ -18,10 +18,14 @@ sum_sens_spec(tp, fp, tn, fn, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate the sum of sensitivity and specificity from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+Calculate the sum of sensitivity and specificity from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+sensitivity = tp / (tp + fn) \cr
+specificity = tn / (tn + fp) \cr
+sum_sens_spec = sensitivity + specificity \cr
 }
 \examples{
 sum_sens_spec(10, 5, 20, 10)
+sum_sens_spec(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

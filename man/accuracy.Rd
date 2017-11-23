@@ -18,10 +18,12 @@ accuracy(tp, fp, tn, fn, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate accuracy from the elements of a confusion matrix, that is
+Calculate accuracy from
 true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+The inputs must be vectors of equal length. \cr \cr
+accuracy = (tp + tn) / (tp + fp + tn + fn)
 }
 \examples{
 accuracy(10, 5, 20, 10)
+accuracy(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

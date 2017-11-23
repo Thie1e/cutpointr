@@ -60,28 +60,28 @@ optimize_metric <- function(data, x, class, metric_func = youden,
 
 #' Maximize a metric function in binary classification
 #'
-#' Given a function for computing a metric in metric_func, this function
+#' Given a function for computing a metric in \code{metric_func}, this function
 #' maximizes that metric by selecting an optimal cutpoint.
 #' The metric function should accept the following inputs:
 #' \itemize{
-#'  \item tp: vector of number of true positives
-#'  \item fp: vector of number of false positives
-#'  \item tn: vector of number of true negatives
-#'  \item fn: vector of number of false negatives
+#'  \item \code{tp}: vector of number of true positives
+#'  \item \code{fp}: vector of number of false positives
+#'  \item \code{tn}: vector of number of true negatives
+#'  \item \code{fn}: vector of number of false negatives
 #' }
 #'
-#' The above inputs are arrived at by using all unique values in x, Inf, and
+#' The above inputs are arrived at by using all unique values in \code{x}, Inf, or
 #' -Inf as possible cutpoints for classifying the variable in class.
 #'
-#' @return A tibble with the columns optimal_cutpoint, the corresponding metric
-#' value and roccurve, a nested tibble that includes all possible cutoffs
+#' @return A tibble with the columns \code{optimal_cutpoint}, the corresponding metric
+#' value and \code{roc_curve}, a nested tibble that includes all possible cutoffs
 #' and the corresponding numbers of true and false positives / negatives and
 #' all corresponding metric values.
 #'
 #' @inheritParams oc_youden_normal
-#' @param metric_func (function) A function that computes a single number
+#' @param metric_func (function) A function that computes a
 #' metric to be maximized. See description.
-#' @param ... Further arguments that will be passed to metric_func
+#' @param ... Further arguments that will be passed to \code{metric_func}
 #' @examples
 #' cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
 #' @export
@@ -97,26 +97,27 @@ maximize_metric <- function(data, x, class, metric_func = youden,
 
 #' Minimize a metric function in binary classification
 #'
-#' Given a function for computing a metric in metric_func, this function
+#' Given a function for computing a metric in \code{metric_func}, this function
 #' minimizes that metric by selecting an optimal cutpoint.
 #' The metric function should accept the following inputs:
+#'
 #' \itemize{
-#'  \item tp: vector of number of true positives
-#'  \item fp: vector of number of false positives
-#'  \item tn: vector of number of true negatives
-#'  \item fn: vector of number of false negatives
+#'  \item \code{tp}: vector of number of true positives
+#'  \item \code{fp}: vector of number of false positives
+#'  \item \code{tn}: vector of number of true negatives
+#'  \item \code{fn}: vector of number of false negatives
 #' }
 #'
-#' The above inputs are arrived at by using all unique values in x, Inf, and
-#' -Inf as possible cutoffs for classifying the variable in class.
+#' The above inputs are arrived at by using all unique values in \code{x}, Inf, or
+#' -Inf as possible cutpoints for classifying the variable in class.
 #'
-#' @return A tibble with the columns optimal_cutpoint, the corresponding metric
-#' value and roccurve, a nested tibble that includes all possible cutoffs
+#' @return A tibble with the columns \code{optimal_cutpoint}, the corresponding metric
+#' value and \code{roc_curve}, a nested tibble that includes all possible cutoffs
 #' and the corresponding numbers of true and false positives / negatives and
 #' all corresponding metric values.
 #'
 #' @inheritParams oc_youden_normal
-#' @param metric_func (function) A function that computes a single number
+#' @param metric_func (function) A function that computes a
 #' metric to be minimized. See description.
 #' @param ... Further arguments that will be passed to metric_func
 #' @examples
@@ -133,28 +134,28 @@ minimize_metric <- function(data, x, class, metric_func = youden,
 
 #' Maximize a metric function in binary classification after LOESS smoothing
 #'
-#' Given a function for computing a metric in metric_func, this function
-#' smoothes the function of metric value against cutpoint using LOESS. Then, it
+#' Given a function for computing a metric in \code{metric_func}, this function
+#' smoothes the function of metric value per cutpoint using LOESS. Then it
 #' maximizes the metric by selecting an optimal cutpoint. For further details
-#' on the LOESS smoothing see ?fANCOVA::loess.as.
-#' The metric function should accept the following inputs:
+#' on the LOESS smoothing see \code{?fANCOVA::loess.as}.
+#' The \code{metric} function should accept the following inputs:
 #' \itemize{
-#'  \item tp: vector of number of true positives
-#'  \item fp: vector of number of false positives
-#'  \item tn: vector of number of true negatives
-#'  \item fn: vector of number of false negatives
+#'  \item \code{tp}: vector of number of true positives
+#'  \item \code{fp}: vector of number of false positives
+#'  \item \code{tn}: vector of number of true negatives
+#'  \item \code{fn}: vector of number of false negatives
 #' }
 #'
-#' The above inputs are arrived at by using all unique values in x, Inf, and
+#' The above inputs are arrived at by using all unique values in \code{x}, Inf, and
 #' -Inf as possible cutpoints for classifying the variable in class.
 #'
-#' @return A tibble with the columns optimal_cutpoint, the corresponding metric
-#' value and roccurve, a nested tibble that includes all possible cutoffs
+#' @return A tibble with the columns \code{optimal_cutpoint}, the corresponding metric
+#' value and \code{roc_curve}, a nested tibble that includes all possible cutoffs
 #' and the corresponding numbers of true and false positives / negatives and
 #' all corresponding metric values.
 #'
 #' @inheritParams oc_youden_normal
-#' @param metric_func (function) A function that computes a single number
+#' @param metric_func (function) A function that computes a
 #' metric to be maximized. See description.
 #' @param ... Further arguments that will be passed to metric_func and
 #' additional arguments for the LOESS smoother:
@@ -195,23 +196,23 @@ maximize_loess_metric <- function(data, x, class, metric_func = youden,
 
 #' Minimize a metric function in binary classification after LOESS smoothing
 #'
-#' Given a function for computing a metric in metric_func, this function
-#' smoothes the function of metric value against cutpoint using LOESS. Then, it
+#' Given a function for computing a metric in \code{metric_func}, this function
+#' smoothes the function of metric value per cutpoint using LOESS. Then it
 #' minimizes the metric by selecting an optimal cutpoint. For further details
 #' on the LOESS smoothing see ?fANCOVA::loess.as.
-#' The metric function should accept the following inputs:
+#' The \code{metric} function should accept the following inputs:
 #' \itemize{
-#'  \item tp: vector of number of true positives
-#'  \item fp: vector of number of false positives
-#'  \item tn: vector of number of true negatives
-#'  \item fn: vector of number of false negatives
+#'  \item \code{tp}: vector of number of true positives
+#'  \item \code{fp}: vector of number of false positives
+#'  \item \code{tn}: vector of number of true negatives
+#'  \item \code{fn}: vector of number of false negatives
 #' }
 #'
 #' The above inputs are arrived at by using all unique values in x, Inf, and
 #' -Inf as possible cutpoints for classifying the variable in class.
 #'
-#' @return A tibble with the columns optimal_cutpoint, the corresponding metric
-#' value and roccurve, a nested tibble that includes all possible cutoffs
+#' @return A tibble with the columns \code{optimal_cutpoint}, the corresponding metric
+#' value and \code{roc_curve}, a nested tibble that includes all possible cutoffs
 #' and the corresponding numbers of true and false positives / negatives and
 #' all corresponding metric values.
 #'
@@ -257,27 +258,27 @@ minimize_loess_metric <- function(data, x, class, metric_func = youden,
 
 #' Maximize a metric function in binary classification after bootstrapping
 #'
-#' Given a function for computing a metric in metric_func, this function
-#' bootstraps the data boot_cut times and
-#' minimizes the metric by selecting an optimal cutpoint. The returned
-#' optimal cutpoint is the mean of all optimal cutpoints that were
-#' determined in the bootstrap samples.
+#' Given a function for computing a metric in \code{metric_func}, this function
+#' bootstraps the data \code{boot_cut} times and
+#' maximizes the metric by selecting an optimal cutpoint. The returned
+#' optimal cutpoint is the result of applying \code{summary_func}, e.g. the mean,
+#' to all optimal cutpoints that were determined in the bootstrap samples.
+#' The \code{metric} function should accept the following inputs:
+#' \itemize{
+#'  \item \code{tp}: vector of number of true positives
+#'  \item \code{fp}: vector of number of false positives
+#'  \item \code{tn}: vector of number of true negatives
+#'  \item \code{fn}: vector of number of false negatives
+#' }
 #'
+#' The above inputs are arrived at by using all unique values in \code{x}, Inf, and
+#' -Inf as possible cutpoints for classifying the variable in class.
 #' The reported metric represents the usual in-sample performance of the
 #' determined cutpoint.
 #'
-#' The metric function should accept the following inputs:
-#' \itemize{
-#'  \item tp: vector of number of true positives
-#'  \item fp: vector of number of false positives
-#'  \item tn: vector of number of true negatives
-#'  \item fn: vector of number of false negatives
-#' }
 #'
-#' The above inputs are arrived at by using all unique values in x, Inf, and
-#' -Inf as possible cutpoints for classifying the variable in class.
 #'
-#' @return A tibble with the column optimal_cutpoint
+#' @return A tibble with the column \code{optimal_cutpoint}
 #'
 #' @inheritParams oc_youden_normal
 #' @param metric_func (function) A function that computes a single number
@@ -318,25 +319,24 @@ maximize_boot_metric <- function(data, x, class, metric_func = youden,
 
 #' Minimize a metric function in binary classification after bootstrapping
 #'
-#' Given a function for computing a metric in metric_func, this function
-#' bootstraps the data boot_cut times and
+#' Given a function for computing a metric in \code{metric_func}, this function
+#' bootstraps the data \code{boot_cut} times and
 #' minimizes the metric by selecting an optimal cutpoint. The returned
-#' optimal cutpoint is the mean of all optimal cutpoints that were
-#' determined in the bootstrap samples.
+#' optimal cutpoint is the result of applying \code{summary_func}, e.g. the mean,
+#' to all optimal cutpoints that were determined in the bootstrap samples.
+#' The \code{metric} function should accept the following inputs:
+#' \itemize{
+#'  \item \code{tp}: vector of number of true positives
+#'  \item \code{fp}: vector of number of false positives
+#'  \item \code{tn}: vector of number of true negatives
+#'  \item \code{fn}: vector of number of false negatives
+#' }
 #'
+#' The above inputs are arrived at by using all unique values in \code{x}, Inf, and
+#' -Inf as possible cutpoints for classifying the variable in class.
 #' The reported metric represents the usual in-sample performance of the
 #' determined cutpoint.
 #'
-#' The metric function should accept the following inputs:
-#' \itemize{
-#'  \item tp: vector of number of true positives
-#'  \item fp: vector of number of false positives
-#'  \item tn: vector of number of true negatives
-#'  \item fn: vector of number of false negatives
-#' }
-#'
-#' The above inputs are arrived at by using all unique values in x, Inf, and
-#' -Inf as possible cutpoints for classifying the variable in class.
 #'
 #' @return A tibble with the column optimal_cutpoint
 #'

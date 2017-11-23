@@ -1,6 +1,6 @@
 #' Plot ROC curve from a cutpointr object
 #'
-#' Given a cutpointr object this function plots the ROC curve(s)
+#' Given a \code{cutpointr} object this function plots the ROC curve(s)
 #' per subgroup, if given.
 #' @param x A cutpointr object.
 #' @param display_cutpoint (logical) Whether or not to display the optimal

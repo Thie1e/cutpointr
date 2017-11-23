@@ -30,7 +30,7 @@ metric_func, direction, pos_class and neg_class to the method function.}
 \description{
 An optimal cutpoint maximizing the Youden- or J-Index
 (sensitivity + specificity - 1) is calculated parametrically assuming
-normally distributed data.
+normal distributions per class.
 }
 \examples{
 data(suicide)

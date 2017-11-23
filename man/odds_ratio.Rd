@@ -18,11 +18,12 @@ odds_ratio(tp, fp, tn, fn, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate the (diagnostic) odds ratio from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The odds ratio is defined as: (TP / FP) / (TN / FN)
-The inputs must be vectors of equal length.
+Calculate the (diagnostic) odds ratio from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+odds_ratio = (tp / fp) / (fn / tn) \cr
 }
 \examples{
 odds_ratio(10, 5, 20, 10)
+odds_ratio(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

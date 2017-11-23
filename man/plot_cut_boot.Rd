@@ -13,8 +13,8 @@ plot_cut_boot(x, ...)
 }
 \description{
 Given a cutpointr object this function plots the bootstrapped distribution
-of optimal cutpoints. The cutpointr function has to be run with
-boot_runs` > 0 to enable bootstrapping.
+of optimal cutpoints. \code{cutpointr} has to be run with \code{boot_runs}` > 0
+to enable bootstrapping.
 }
 \examples{
 set.seed(100)

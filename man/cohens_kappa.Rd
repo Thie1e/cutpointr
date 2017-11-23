@@ -18,13 +18,19 @@ cohens_kappa(tp, fp, tn, fn, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \value{
-A numeric matrix with the column name "Kappa".
+A numeric matrix with the column name "cohens_kappa".
 }
 \description{
-Calculate the Kappa metric from the elements of a 2x2 confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+Calculate the Kappa metric from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+mrg_a = ((tp + fn) * (tp + fp)) / (tp + fn + fp + tn) \cr
+mrg_b = ((fp + tn) * (fn + tn)) / (tp + fn + fp + tn) \cr
+expec_agree = (mrg_a + mrg_b) / (tp + fn + fp + tn) \cr
+obs_agree = (tp + tn) / (tp + fn + fp + tn) \cr
+cohens_kappa = (obs_agree - expec_agree) / (1 - expec_agree) \cr
 }
 \examples{
 cohens_kappa(10, 5, 20, 10)
+cohens_kappa(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

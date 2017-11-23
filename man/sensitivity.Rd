@@ -14,10 +14,12 @@ sensitivity(tp, fn, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate sensitivity from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+Calculate sensitivity from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+sensitivity = tp / (tp + fn) \cr
 }
 \examples{
 sensitivity(10, 5, 20, 10)
+sensitivity(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

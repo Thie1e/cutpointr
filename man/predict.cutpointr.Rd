@@ -15,9 +15,9 @@ variable}
 \item{...}{further arguments.}
 }
 \description{
-Predictions are made on the data.frame in newdata. That data.frame should
-contain a column with a name that is equal to the predictor name in
-the cutpointr object. The class of the output is identical to the class
+Predictions are made on the \code{data.frame} in \code{newdata}
+using either the variable name or by applying the same transformation to
+the data as in \code{cutpointr}. The class of the output will be identical to the class
 of the predictor.
 }
 \examples{

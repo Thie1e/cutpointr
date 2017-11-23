@@ -14,7 +14,8 @@ function by cutpointr. The cutpointr function passes data, x, class,
 metric_func, direction, pos_class and neg_class to the method function.}
 }
 \description{
-This function simply returns the Mainly useful if bootstrap estimates of the out-of-bag performance of a
+This function simply returns \code{cutpoint} as the optimal cutpoint.
+Mainly useful if bootstrap estimates of the out-of-bag performance of a
 given cutpoint are desired, e.g. taking a cutpoint value from the literature.
 }
 \examples{

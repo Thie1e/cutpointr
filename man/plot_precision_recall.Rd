@@ -15,7 +15,7 @@ cutpoint as a dot on the precision recall curve.}
 \item{...}{Additional arguments (unused).}
 }
 \description{
-Given a cutpointr object this function plots the precision recall curve(s)
+Given a \code{cutpointr} object this function plots the precision recall curve(s)
 per subgroup, if given.
 }
 \examples{

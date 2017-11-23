@@ -27,13 +27,18 @@ fnr(tp, fn, ...)
 \item{tn}{(numeric) number of true negatives.}
 }
 \description{
-Calculate the true positive rate (tpr, equal to sensitivity),
-the false positive rate (fpr), the true negative rate (tnr, equal to sensitivity),
-or the false negative rate (fnr)
-from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+Calculate the true positive rate (tpr, equal to sensitivity and recall),
+the false positive rate (fpr, equal to fall-out),
+the true negative rate (tnr, equal to specificity),
+or the false negative rate (fnr) from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+tpr = tp / (tp + fn) \cr
+fpr = fp / (fp + tn) \cr
+tnr = tn / (tn + fp) \cr
+fnr = fn / (fn + tp) \cr
 }
 \examples{
 tpr(10, 5, 20, 10)
+tpr(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

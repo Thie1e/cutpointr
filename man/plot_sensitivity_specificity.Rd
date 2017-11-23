@@ -15,7 +15,7 @@ cutpoint as a dot on the precision recall curve.}
 \item{...}{Additional arguments (unused).}
 }
 \description{
-Given a cutpointr object this function plots the sensitivity and specificity
+Given a \code{cutpointr} object this function plots the sensitivity and specificity
 curve(s) per subgroup, if the latter is given.
 }
 \examples{

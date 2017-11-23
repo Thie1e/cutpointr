@@ -50,22 +50,22 @@ additional arguments for the LOESS smoother:
 }}
 }
 \value{
-A tibble with the columns optimal_cutpoint, the corresponding metric
-value and roccurve, a nested tibble that includes all possible cutoffs
+A tibble with the columns \code{optimal_cutpoint}, the corresponding metric
+value and \code{roc_curve}, a nested tibble that includes all possible cutoffs
 and the corresponding numbers of true and false positives / negatives and
 all corresponding metric values.
 }
 \description{
-Given a function for computing a metric in metric_func, this function
-smoothes the function of metric value against cutpoint using LOESS. Then, it
+Given a function for computing a metric in \code{metric_func}, this function
+smoothes the function of metric value per cutpoint using LOESS. Then it
 minimizes the metric by selecting an optimal cutpoint. For further details
 on the LOESS smoothing see ?fANCOVA::loess.as.
-The metric function should accept the following inputs:
+The \code{metric} function should accept the following inputs:
 \itemize{
- \item tp: vector of number of true positives
- \item fp: vector of number of false positives
- \item tn: vector of number of true negatives
- \item fn: vector of number of false negatives
+ \item \code{tp}: vector of number of true positives
+ \item \code{fp}: vector of number of false positives
+ \item \code{tn}: vector of number of true negatives
+ \item \code{fn}: vector of number of false negatives
 }
 }
 \details{

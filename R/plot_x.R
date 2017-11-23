@@ -1,6 +1,6 @@
 #' Plot the distribution of the independent variable per class from a cutpointr object
 #'
-#' Given a cutpointr object this function plots the distribution(s) of the
+#' Given a \code{cutpointr} object this function plots the distribution(s) of the
 #' independent variable(s) and the respective cutpoints per class.
 #' @param x A cutpointr object.
 #' @param display_cutpoint (logical) Whether or not to display the optimal

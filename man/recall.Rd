@@ -18,11 +18,12 @@ recall(tp, fp, tn, fn, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate recall (equal to sensitivity)
-from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+Calculate recall (equal to sensitivity) from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+recall = tp / (tp + fn) \cr
 }
 \examples{
 recall(10, 5, 20, 10)
+recall(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

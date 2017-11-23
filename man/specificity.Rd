@@ -14,10 +14,11 @@ specificity(fp, tn, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate specificity from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+Calculate specificity from true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+specificity = tn / (tn + fp) \cr
 }
 \examples{
 specificity(10, 5, 20, 10)
+specificity(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

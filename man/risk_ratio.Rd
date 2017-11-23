@@ -18,11 +18,12 @@ risk_ratio(tp, fp, tn, fn, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate the risk ratio (or relative risk) from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The risk ratio is defined as: (TP / FP) / (TN / FN)
-The inputs must be vectors of equal length.
+Calculate the risk ratio (or relative risk) from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+risk_ratio = (tp / (tp + fn)) / (fp / (fp + tn)) \cr
 }
 \examples{
 risk_ratio(10, 5, 20, 10)
+risk_ratio(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

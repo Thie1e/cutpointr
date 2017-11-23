@@ -20,5 +20,5 @@ Kirill Müller and Hadley Wickham (2017). tibble: Simple Data Frames.
 \item{...}{further arguments.}
 }
 \description{
-Prints the cutpointr object with full width like a tbl_df.
+Prints the \code{cutpointr} object with full width like a \code{tbl_df}.
 }

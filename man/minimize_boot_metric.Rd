@@ -44,26 +44,24 @@ metric_func, direction, pos_class and neg_class to the method function.}
 A tibble with the column optimal_cutpoint
 }
 \description{
-Given a function for computing a metric in metric_func, this function
-bootstraps the data boot_cut times and
+Given a function for computing a metric in \code{metric_func}, this function
+bootstraps the data \code{boot_cut} times and
 minimizes the metric by selecting an optimal cutpoint. The returned
-optimal cutpoint is the mean of all optimal cutpoints that were
-determined in the bootstrap samples.
+optimal cutpoint is the result of applying \code{summary_func}, e.g. the mean,
+to all optimal cutpoints that were determined in the bootstrap samples.
+The \code{metric} function should accept the following inputs:
+\itemize{
+ \item \code{tp}: vector of number of true positives
+ \item \code{fp}: vector of number of false positives
+ \item \code{tn}: vector of number of true negatives
+ \item \code{fn}: vector of number of false negatives
+}
 }
 \details{
+The above inputs are arrived at by using all unique values in \code{x}, Inf, and
+-Inf as possible cutpoints for classifying the variable in class.
 The reported metric represents the usual in-sample performance of the
 determined cutpoint.
-
-The metric function should accept the following inputs:
-\itemize{
- \item tp: vector of number of true positives
- \item fp: vector of number of false positives
- \item tn: vector of number of true negatives
- \item fn: vector of number of false negatives
-}
-
-The above inputs are arrived at by using all unique values in x, Inf, and
--Inf as possible cutpoints for classifying the variable in class.
 }
 \examples{
 set.seed(100)

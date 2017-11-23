@@ -19,11 +19,14 @@ abs_d_ppv_npv(tp, fp, tn, fn, ...)
 }
 \description{
 Calculate the absolute difference of positive predictive value (PPV) and
-negative predictive value (NPV)
-from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+negative predictive value (NPV) from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+ppv = tp / (tp + fp) \cr
+npv = tn / (tn + fn) \cr
+abs\_d\_ppv\_npv = |ppv - npv| \cr
 }
 \examples{
 abs_d_ppv_npv(10, 5, 20, 10)
+abs_d_ppv_npv(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

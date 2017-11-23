@@ -13,7 +13,7 @@ plot_metric(x, conf_lvl = 0.95)
 Set to 0 to draw no bootstrap confidence interval.}
 }
 \description{
-If maximize_metric is used as method function in cutpointr the computed
+If \code{maximize_metric} is used as \code{method} function in cutpointr the computed
 metric values over all possible cutoffs can be plotted. Generally, this
 works for method functions that return a ROC-curve including the metric
 value for every cutpoint along with the optimal cutpoint.

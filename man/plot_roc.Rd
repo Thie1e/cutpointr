@@ -15,7 +15,7 @@ cutpoint as a dot on the ROC curve.}
 \item{...}{Additional arguments (unused).}
 }
 \description{
-Given a cutpointr object this function plots the ROC curve(s)
+Given a \code{cutpointr} object this function plots the ROC curve(s)
 per subgroup, if given.
 }
 \examples{

@@ -16,7 +16,7 @@ The plot layout depends on whether subgroups were defined and whether
 bootstrapping was run.
 }
 \details{
-The ... argument can be used to apply ggplot2 functions to every individual
+The \code{...} argument can be used to apply \pkg{ggplot2} functions to every individual
 plot, for example for changing the theme.
 }
 \examples{

@@ -25,7 +25,7 @@ e.g. predictions or test values.}
 
 \item{class}{(character) The variable name indicating class membership.}
 
-\item{metric_func}{(function) A function that computes a single number
+\item{metric_func}{(function) A function that computes a
 metric to be maximized. See description.}
 
 \item{pos_class}{The value of class that indicates the positive class.}
@@ -50,26 +50,26 @@ additional arguments for the LOESS smoother:
 }}
 }
 \value{
-A tibble with the columns optimal_cutpoint, the corresponding metric
-value and roccurve, a nested tibble that includes all possible cutoffs
+A tibble with the columns \code{optimal_cutpoint}, the corresponding metric
+value and \code{roc_curve}, a nested tibble that includes all possible cutoffs
 and the corresponding numbers of true and false positives / negatives and
 all corresponding metric values.
 }
 \description{
-Given a function for computing a metric in metric_func, this function
-smoothes the function of metric value against cutpoint using LOESS. Then, it
+Given a function for computing a metric in \code{metric_func}, this function
+smoothes the function of metric value per cutpoint using LOESS. Then it
 maximizes the metric by selecting an optimal cutpoint. For further details
-on the LOESS smoothing see ?fANCOVA::loess.as.
-The metric function should accept the following inputs:
+on the LOESS smoothing see \code{?fANCOVA::loess.as}.
+The \code{metric} function should accept the following inputs:
 \itemize{
- \item tp: vector of number of true positives
- \item fp: vector of number of false positives
- \item tn: vector of number of true negatives
- \item fn: vector of number of false negatives
+ \item \code{tp}: vector of number of true positives
+ \item \code{fp}: vector of number of false positives
+ \item \code{tn}: vector of number of true negatives
+ \item \code{fn}: vector of number of false negatives
 }
 }
 \details{
-The above inputs are arrived at by using all unique values in x, Inf, and
+The above inputs are arrived at by using all unique values in \code{x}, Inf, and
 -Inf as possible cutpoints for classifying the variable in class.
 }
 \examples{

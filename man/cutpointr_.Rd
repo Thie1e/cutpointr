@@ -10,23 +10,21 @@ cutpointr_(data, x, class, subgroup = NULL, method = maximize_metric,
   allowParallel = FALSE, silent = FALSE, ...)
 }
 \arguments{
-\item{data}{A data frame or tibble in which the columns that may be given in x,
-class and possibly subgroup can be found.}
+\item{data}{A data.frame with the data needed for x, class and subgroup.}
 
-\item{x}{The variable name with quotation marks to be used for
+\item{x}{(character) The variable name to be used for
 classification, e.g. predictions or test values.}
 
-\item{class}{The variable name with quotation marks indicating class membership.}
+\item{class}{(character) The variable name indicating class membership.}
 
-\item{subgroup}{The variable name with quotation marks
+\item{subgroup}{(character) The variable name
 of an additional covariate that identifies subgroups. Separate
-optimal cutpoints will be determined by group. Numeric, character and factor are
-allowed. Also expressions like z > 10 are possible.}
+optimal cutpoints will be determined per group.}
 
-\item{method}{(character) A function for determining cutpoints. Can
+\item{method}{(function) A function for determining cutpoints. Can
 be user supplied or use some of the built in methods. See details.}
 
-\item{metric}{(character) The function for computing a metric when using
+\item{metric}{(function) The function for computing a metric when using
 maximize_metric or minimize_metric as method and and for the
 out-of-bag values during bootstrapping. A way of internally validating the performance.
 User defined functions can be supplied, see details.}
@@ -60,9 +58,9 @@ beforehand.}
 minimize_metric and maximize_metric pass ... to metric.}
 }
 \description{
-This function is equivalent to cutpointr but takes only quoted arguments
-for x, class, subgroup, method and metric. This function is suitable for
-programming. For details on cutpointr see help("cutpointr").
+This function is equivalent to \code{cutpointr} but takes only quoted arguments
+for \code{x}, \code{class} and \code{subgroup}. This function is suitable for
+programming with. For details on \code{cutpointr} see help("cutpointr").
 }
 \examples{
 library(cutpointr)

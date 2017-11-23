@@ -1,6 +1,6 @@
 #' Print multi_cutpointr objects
 #'
-#' Prints the multi_cutpointr object with infinite width like a tbl_df.
+#' Prints the \code{multi_cutpointr} object with infinite width like a \code{tbl_df}.
 #'
 #' @source Kirill Müller and Hadley Wickham (2017). tibble: Simple Data Frames.
 #'  https://CRAN.R-project.org/package=tibble

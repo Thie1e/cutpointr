@@ -19,11 +19,14 @@ prod_ppv_npv(tp, fp, tn, fn, ...)
 }
 \description{
 Calculate the product of positive predictive value (PPV) and
-negative predictive value (NPV)
-from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+negative predictive value (NPV) from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+ppv = tp / (tp + fp) \cr
+npv = tn / (tn + fn) \cr
+prod_ppv_npv = ppv * npv \cr
 }
 \examples{
 prod_ppv_npv(10, 5, 20, 10)
+prod_ppv_npv(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

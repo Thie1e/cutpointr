@@ -1,6 +1,6 @@
 #' Plot a metric over all possible cutoffs from a cutpointr object
 #'
-#' If maximize_metric is used as method function in cutpointr the computed
+#' If \code{maximize_metric} is used as \code{method} function in cutpointr the computed
 #' metric values over all possible cutoffs can be plotted. Generally, this
 #' works for method functions that return a ROC-curve including the metric
 #' value for every cutpoint along with the optimal cutpoint.

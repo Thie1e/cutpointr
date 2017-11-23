@@ -1,23 +1,24 @@
 #' Plot metrics
 #'
 #' Flexibly plot various metrics against all cutpoints or any other metric.
-#' The function can plot any metric based on a cutpointr or roc_cutpointr
-#' object. If cutpointr was run with bootstrapping, bootstrapped confidence
+#' The function can plot any metric based on a \code{cutpointr} or \code{roc_cutpointr}
+#' object. If \code{cutpointr} was run with bootstrapping, bootstrapped confidence
 #' intervals can be plotted. These represent the quantiles of the distribution
 #' of the y-variable grouped by x-variable over all bootstrap repetitions.
 #'
-#' The arguments to xvar and yvar should be metric functions. Any metric
-#' function that is suitable for cutpointr can also be used in plot_cutpointr.
+#' The arguments to \code{xvar} and \code{yvar} should be metric functions. Any metric
+#' function that is suitable for \code{cutpointr} can also be used in \code{plot_cutpointr}.
 #' Anonymous functions are also allowed.
-#' To plot all possible cutpoints, the utility function cutpoint can be used.
+#' To plot all possible cutpoints, the utility function \code{cutpoint} can be used.
 #'
-#' The functions for xvar and yvar may accept any or all of the arguments
-#' tp, fp, tn, or fn and return a numeric vector, a matrix or a data.frame.
-#' For more details on metric functions see ?cutpointr.
+#' The functions for \code{xvar} and \code{yvar} may accept any or all of the arguments
+#' \code{tp}, \code{fp}, \code{tn}, or \code{fn} and return a numeric vector,
+#' a matrix or a \code{data.frame}.
+#' For more details on metric functions see \code{vignette("cutpointr")}.
 #'
-#' Note that confidence intervals can only be correctly plotted if the values of xvar
+#' Note that confidence intervals can only be correctly plotted if the values of \code{xvar}
 #' are constant across bootstrap samples. For example, confidence intervals for
-#' tpr by fpr (a ROC curve) cannot be plotted, as the values of the false positive
+#' \code{tpr} by \code{fpr} (a ROC curve) cannot be plotted, as the values of the false positive
 #' rate vary per bootstrap sample.
 #'
 #' @param x A cutpointr or roc_cutpointr object.
@@ -46,11 +47,6 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
                            conf_lvl = 0.95, aspect_ratio = NULL) {
     stopifnot("cutpointr" %in% class(x) | "roc_cutpointr" %in% class(x))
     if ("cutpointr" %in% class(x)) {
-        if (suppressWarnings(is.null(x$roc_curve[[1]]$m))) {
-            stop(paste("The cutpointr object does not include a metric column in",
-                       "roc_curve - maybe because a method other than",
-                       "maximize_metric or minimize_metric was used"))
-        }
         rocdat <- x$roc_curve
         subgroup <- suppressWarnings(x$subgroup)
     } else {

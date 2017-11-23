@@ -19,10 +19,11 @@ precision(tp, fp, tn, fn, ...)
 }
 \description{
 Calculate precision (equal to the positive predictive value)
-from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+from true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+precision = tp / (tp + fp) \cr
 }
 \examples{
 precision(10, 5, 20, 10)
+precision(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

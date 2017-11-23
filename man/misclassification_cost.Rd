@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.R
 \name{misclassification_cost}
 \alias{misclassification_cost}
-\title{Calculate the misclassification cost from a 2x2 confusion matrix}
+\title{Calculate the misclassification cost}
 \usage{
 misclassification_cost(tp, fp, tn, fn, cost_fp = 1, cost_fn = 1, ...)
 }
@@ -22,11 +22,13 @@ misclassification_cost(tp, fp, tn, fn, cost_fp = 1, cost_fn = 1, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate the misclassification cost from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The misclassification cost is equal to cost_fp * fp + cost_fn * fn.
-The inputs must be vectors of equal length.
+Calculate the misclassification cost from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+misclassification_cost = cost_fp * fp + cost_fn * fn \cr
 }
 \examples{
 misclassification_cost(10, 5, 20, 10, cost_fp = 1, cost_fn = 5)
+misclassification_cost(c(10, 8), c(5, 7), c(20, 12), c(10, 18),
+                       cost_fp = 1, cost_fn = 5)
 }

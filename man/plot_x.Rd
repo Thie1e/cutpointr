@@ -15,7 +15,7 @@ cutpoint as a vertical line.}
 \item{...}{Additional arguments (unused).}
 }
 \description{
-Given a cutpointr object this function plots the distribution(s) of the
+Given a \code{cutpointr} object this function plots the distribution(s) of the
 independent variable(s) and the respective cutpoints per class.
 }
 \examples{

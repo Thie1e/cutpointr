@@ -14,7 +14,7 @@ multi_cutpointr(data, x = colnames(data)[colnames(data) != class], class,
 
 \item{class}{The name of the outcome / independent variable.}
 
-\item{silent}{Whether to display messages.}
+\item{silent}{Whether to suppress messages.}
 
 \item{...}{Further arguments to be passed to cutpointr.}
 }
@@ -22,16 +22,16 @@ multi_cutpointr(data, x = colnames(data)[colnames(data) != class], class,
 A data frame.
 }
 \description{
-Runs cutpointr_ over multiple predictor variables. By default, cutpointr
+Runs \code{cutpointr_} over multiple predictor variables. By default, \code{cutpointr_}
 will be run using all columns in the data set as predictors except for the
-variable in class.
+variable in \code{class}.
 }
 \details{
-The automatic determination of positive / negative classes and direction
+The automatic determination of positive / negative classes and \code{direction}
 will be carried out separately for every predictor variable. That way, if
-direction and the classes are not specified, the reported AUC for every
-variable will be >= 0.5. AUC may be < 0.5 in the case of subgroups as
-direction is equal in every subgroup.
+\code{direction} and the classes are not specified, the reported AUC for every
+variable will be >= 0.5. AUC may be < 0.5 if subgroups are specified as
+\code{direction} is equal within every subgroup.
 }
 \examples{
 library(cutpointr)

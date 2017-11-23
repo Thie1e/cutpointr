@@ -1,6 +1,6 @@
 #' Sensitivity and specificity plot from a cutpointr object
 #'
-#' Given a cutpointr object this function plots the sensitivity and specificity
+#' Given a \code{cutpointr} object this function plots the sensitivity and specificity
 #' curve(s) per subgroup, if the latter is given.
 #' @param x A cutpointr object.
 #' @param display_cutpoint (logical) Whether or not to display the optimal

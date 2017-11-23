@@ -28,13 +28,12 @@ fn(fn, ...)
 }
 \description{
 Extract the number of true positives (tp), false positives (fp),
-true negatives (tn), or false negatives (fn)
-from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+true negatives (tn), or false negatives (fn).
+The inputs must be vectors of equal length. Mainly useful for \code{plot_cutpointr}.
 }
 \examples{
 tp(10, 5, 20, 10)
+tp(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 fp(10, 5, 20, 10)
 tn(10, 5, 20, 10)
 fn(10, 5, 20, 10)

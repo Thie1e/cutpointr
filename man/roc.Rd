@@ -4,13 +4,13 @@
 \alias{roc}
 \title{Calculate a ROC curve}
 \source{
-Forked from the ROCR package
+Forked from the \pkg{ROCR} package
 }
 \usage{
 roc(data, x, class, pos_class, neg_class, direction = ">=", silent = FALSE)
 }
 \arguments{
-\item{data}{A data frame or matrix. Will be converted to a data frame.}
+\item{data}{A data.frame or matrix. Will be converted to a data.frame.}
 
 \item{x}{(character) The numeric independent (predictor) variable.}
 
@@ -31,8 +31,8 @@ A data frame with the columns x.sorted, tp, fp, tn, fn, tpr, tnr, fpr,
 and fnr.
 }
 \description{
-Given a data frame with a numeric predictor variable and a binary outcome
-variable this function returns a data frame that includes all elements of
+Given a \code{data.frame} with a numeric predictor variable and a binary outcome
+variable this function returns a \code{data.frame} that includes all elements of
 the confusion matrix (true positives, false positives, true negatives,
 and false negatives) for every unique value of the predictor variable.
 Additionally, the true positive rate (tpr), false positive rate (fpr),

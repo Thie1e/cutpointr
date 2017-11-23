@@ -15,8 +15,8 @@ cutpoints(x, ...)
 \item{...}{Further arguments.}
 }
 \description{
-This is a utility function for extracting the cutpoints from a roc_cutpointr
-object. Mainly useful in conjunction with the plot_cutpointr function if
+This is a utility function for extracting the cutpoints from a \code{roc_cutpointr}
+object. Mainly useful in conjunction with the \code{plot_cutpointr} function if
 cutpoints are to be plotted on the x-axis.
 }
 \examples{

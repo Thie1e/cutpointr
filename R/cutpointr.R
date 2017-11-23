@@ -6,27 +6,27 @@
 #' estimate of the cutpoint variability and the out-of-sample performance will then
 #' be returned.
 #'
-#' If direction and/or pos_class and neg_class are not given, the function will
+#' If \code{direction} and/or \code{pos_class} and \code{neg_class} are not given, the function will
 #' assume that higher values indicate the positive class and use the class
 #' with a higher median as the positive class.
 #'
 #' Different methods can be selected for determining the optimal cutpoint via
 #' the method argument. The package includes the following cutpoint functions:
 #' \itemize{
-#'  \item maximize_metric: Maximize the metric function
-#'  \item minimize_metric: Minimize the metric function
-#'  \item maximize_loess_metric: Maximize the metric function after LOESS
+#'  \item \code{maximize_metric}: Maximize the metric function
+#'  \item \code{minimize_metric}: Minimize the metric function
+#'  \item \code{maximize_loess_metric}: Maximize the metric function after LOESS
 #'  smoothing
-#'  \item minimize_loess_metric: Minimize the metric function after LOESS
+#'  \item \code{minimize_loess_metric}: Minimize the metric function after LOESS
 #'  smoothing
-#'  \item maximize_boot_metric: Maximize the metric function as a mean of
+#'  \item \code{maximize_boot_metric}: Maximize the metric function as a summary of
 #'  the optimal cutpoints in bootstrapped samples
-#'  \item minimize_boot_metric: Minimize the metric function as a mean of
+#'  \item \code{minimize_boot_metric}: Minimize the metric function as a summary of
 #'  the optimal cutpoints in bootstrapped samples
-#'  \item oc_manual: Specify the cutpoint manually
-#'  \item oc_youden_kernel: Maximize the Youden-Index after kernel smoothing
+#'  \item \code{oc_manual}: Specify the cutpoint manually
+#'  \item \code{oc_youden_kernel}: Maximize the Youden-Index after kernel smoothing
 #'  the distributions of the two classes
-#'  \item oc_youden_normal: Maximize the Youden-Index parametrically
+#'  \item \code{oc_youden_normal}: Maximize the Youden-Index parametrically
 #'  assuming normally distributed data in both classes
 #' }
 #'
@@ -35,81 +35,94 @@
 #' their name. To define a new method function, create a function that may take
 #' as input(s):
 #' \itemize{
-#'  \item data: A data frame or tbl_df
-#'  \item x: (character) The name of the predictor or independent variable
-#'  \item class: (character) The name of the class or dependent variable
-#'  \item metric_func: A function for calculating a metric, e.g. accuracy. Note
-#'  that the method function does not necessarily have to accept this argument
-#'  \item pos_class: The positive class
-#'  \item neg_class: The negative class
-#'  \item direction: ">=" if the positive class has higher x values, "<=" otherwise
-#'  \item ... Further arguments
+#'  \item \code{data}: A \code{data.frame} or \code{tbl_df}
+#'  \item \code{x}: (character) The name of the predictor or independent variable
+#'  \item \code{class}: (character) The name of the class or dependent variable
+#'  \item \code{metric_func}: A function for calculating a metric, e.g. accuracy
+#'  \item \code{pos_class}: The positive class
+#'  \item \code{neg_class}: The negative class
+#'  \item \code{direction}: ">=" if the positive class has higher x values, "<=" otherwise
+#'  \item \code{...} Further arguments
 #' }
 #'
-#' The ... argument can be used to avoid an error if not all of the above
+#' The \code{...} argument can be used to avoid an error if not all of the above
 #' arguments are needed or in order to pass additional arguments to method.
-#' The function should return a data.frame or tbl_df with
+#' The function should return a \code{data.frame} or \code{tbl_df} with
 #' one row, the column "optimal_cutpoint", and an optional column with an arbitrary name
 #' with the metric value at the optimal cutpoint.
 #'
 #' Built-in metric functions include:
 #' \itemize{
-#'  \item accuracy: Fraction correctly classified
-#'  \item youden: Youden- or J-Index = sensitivity + specificity - 1
-#'  \item sum_sens_spec: sensitivity + specificity
-#'  \item sum_ppv_npv: The sum of positive predictive value (PPV) and negative
+#'  \item \code{accuracy}: Fraction correctly classified
+#'  \item \code{youden}: Youden- or J-Index = sensitivity + specificity - 1
+#'  \item \code{sum_sens_spec}: sensitivity + specificity
+#'  \item \code{sum_ppv_npv}: The sum of positive predictive value (PPV) and negative
 #'  predictive value (NPV)
-#'  \item prod_sens_spec: sensitivity * specificity
-#'  \item prod_ppv_npv: The product of positive predictive value (PPV) and
+#'  \item \code{prod_sens_spec}: sensitivity * specificity
+#'  \item \code{prod_ppv_npv}: The product of positive predictive value (PPV) and
 #'  negative predictive value (NPV)
-#'  \item cohens_kappa: Cohen's Kappa
-#'  \item abs_d_sens_spec: The absolute difference between
+#'  \item \code{cohens_kappa}: Cohen's Kappa
+#'  \item \code{abs_d_sens_spec}: The absolute difference between
 #'  sensitivity and specificity
-#'  \item abs_d_ppv_npv: The absolute difference between positive predictive
+#'  \item \code{abs_d_ppv_npv}: The absolute difference between positive predictive
 #'  value (PPV) and negative predictive value (NPV)
-#'  \item p_chisquared: The p-value of a chi-squared test on the confusion
+#'  \item \code{p_chisquared}: The p-value of a chi-squared test on the confusion
 #'  matrix of predictions and observations
-#'  \item odds_ratio: The odds ratio calculated as (TP / FP) / (FN / TN)
-#'  \item risk_ratio: The risk ratio (relative risk) calculated as
+#'  \item \code{odds_ratio}: The odds ratio calculated as (TP / FP) / (FN / TN)
+#'  \item \code{risk_ratio}: The risk ratio (relative risk) calculated as
 #'  (TP / (TP + FN)) / (FP / (FP + TN))
-#'  \item misclassification_cost: The sum of the misclassification cost of
-#'  false positives and false negatives. Additional arguments: cost_fp, cost_fn
-#'  \item total_utility: The total utility of true / false positives / negatives
+#'  \item positive and negative likelihood ratio calculated as
+#'  \code{plr} = true positive rate / false positive rate and
+#'  \code{nlr} = false negative rate / true negative rate
+#'  \item \code{misclassification_cost}: The sum of the misclassification cost of
+#'  false positives and false negatives fp * cost_fp + fn * cost_fn.
+#'  Additional arguments to cutpointr: \code{cost_fp}, \code{cost_fn}
+#'  \item \code{total_utility}: The total utility of true / false positives / negatives
 #'  calculated as utility_tp * TP + utility_tn * TN - cost_fp * FP - cost_fn * FN.
-#'  Additional arguments: utility_tp, utility_tn, cost_fp, cost_fn
-#'  \item F1_score: The F1-score (2 * TP) / (2 * TP + FP + FN)
+#'  Additional arguments to cutpointr: \code{utility_tp}, \code{utility_tn},
+#'  \code{cost_fp}, \code{cost_fn}
+#'  \item \code{F1_score}: The F1-score (2 * TP) / (2 * TP + FP + FN)
 #' }
+#'
+#' Furthermore, the following functions are included which can be used as metric
+#' functions but are more useful for plotting purposes, for example in
+#' plot_cutpointr, or for defining new metric functions:
+#' \code{tp}, \code{fp}, \code{tn}, \code{fn}, \code{tpr}, \code{fpr},
+#' \code{tnr}, \code{fnr}, \code{false_omission_rate},
+#' \code{false_discovery_rate}, \code{ppv}, \code{npv}, \code{precision},
+#' \code{recall}, \code{sensitivity}, and \code{specificity}.
+#'
 #'
 #' User defined metric functions can be used as well which can accept the following
 #' inputs as vectors:
 #' \itemize{
-#'  \item tp: Vector of true positives
-#'  \item fp: Vector of false positives
-#'  \item tn: Vector of true negatives
-#'  \item fn: Vector of false negatives
-#'  \item ... If the metric function is used in conjunction with any of the
+#'  \item \code{tp}: Vector of true positives
+#'  \item \code{fp}: Vector of false positives
+#'  \item \code{tn}: Vector of true negatives
+#'  \item \code{fn}: Vector of false negatives
+#'  \item \code{...} If the metric function is used in conjunction with any of the
 #'  maximize / minimize methods, further arguments can be passed
 #' }
 #'
-#' The function should return a numeric vector or a matrix or a data.frame
+#' The function should return a numeric vector or a matrix or a \code{data.frame}
 #' with one column. If the column is named,
 #' the name will be included in the output and plots. Avoid using names that
-#' are identical to the column names that are by default returned by cutpointr.
+#' are identical to the column names that are by default returned by \pkg{cutpointr}.
 #'
-#' If boot_runs is positive, that number of bootstrap samples will be drawn
-#' and the optimal cutpoint using method will be determined. Additionally,
-#' as a way of validation, the function in metric will be used to
+#' If \code{boot_runs} is positive, that number of bootstrap samples will be drawn
+#' and the optimal cutpoint using \code{method} will be determined. Additionally,
+#' as a way of internal validation, the function in \code{metric} will be used to
 #' score the out-of-bag predictions using the cutpoints determined by
-#' method. Various default metrics are always included in the bootstrap results.
+#' \code{method}. Various default metrics are always included in the bootstrap results.
 #'
 #' If multiple optimal cutpoints are found, the first one is returned and a
 #' warning including all optimal cutpoints is issued. The first one refers to
 #' the minimum of the optimal cutpoints if direction = ">=" or to the maximum
 #' of the optimal cutpoints if direction = "<=".
 #'
-#' If use_midpoints = TRUE the mean of the optimal cutpoint and the next
-#' highest or lowest possible cutpoint is returned, depending on direction.
-#' If use_midpoints is set to TRUE and multiple optimal cutpoints are found,
+#' If \code{use_midpoints = TRUE} the mean of the optimal cutpoint and the next
+#' highest or lowest possible cutpoint is returned, depending on \code{direction}.
+#' If \code{use_midpoints} is set to \code{TRUE} and multiple optimal cutpoints are found,
 #' the midpoint of the minimum / maximum of the optimal cutpoints
 #' and the next highest / lowest observation is returned, as described before.
 #'
@@ -171,15 +184,13 @@
 #'
 #'
 #'
-#' @param data A data frame or tibble in which the columns that may be given in x,
-#'  class and possibly subgroup can be found.
-#' @param x The variable name without quotation marks to be used for
+#' @param data A data.frame with the data needed for x, class and subgroup.
+#' @param x The variable to be used for
 #'  classification, e.g. predictions or test values, or the raw data if data = NULL.
-#' @param class The variable name without quotation marks indicating class membership
+#' @param class The variable indicating class membership
 #' or the raw data if data = NULL.
-#' @param subgroup The variable name without quotation marks
-#' of an additional covariate that identifies subgroups or the raw data if
-#' data = NULL. Separate optimal cutpoints will be determined by group.
+#' @param subgroup An additional covariate that identifies subgroups or the raw data if
+#' data = NULL. Separate optimal cutpoints will be determined per group.
 #' Numeric, character and factor are allowed.
 #' @param method (function) A function for determining cutpoints. Can
 #' be user supplied or use some of the built in methods. See details.
@@ -284,24 +295,17 @@ cutpointr <- function(data = NULL, x, class, subgroup = NULL,
 
 #' The standard evaluation version of cutpointr
 #'
-#' This function is equivalent to cutpointr but takes only quoted arguments
-#' for x, class, subgroup, method and metric. This function is suitable for
-#' programming. For details on cutpointr see help("cutpointr").
+#' This function is equivalent to \code{cutpointr} but takes only quoted arguments
+#' for \code{x}, \code{class} and \code{subgroup}. This function is suitable for
+#' programming with. For details on \code{cutpointr} see help("cutpointr").
 #' @export
 #' @inheritParams cutpointr
-#' @param x The variable name with quotation marks to be used for
+#' @param x (character) The variable name to be used for
 #'  classification, e.g. predictions or test values.
-#' @param class The variable name with quotation marks indicating class membership.
-#' @param subgroup The variable name with quotation marks
+#' @param class (character) The variable name indicating class membership.
+#' @param subgroup (character) The variable name
 #' of an additional covariate that identifies subgroups. Separate
-#' optimal cutpoints will be determined by group. Numeric, character and factor are
-#' allowed. Also expressions like z > 10 are possible.
-#' @param method (character) A function for determining cutpoints. Can
-#' be user supplied or use some of the built in methods. See details.
-#' @param metric (character) The function for computing a metric when using
-#' maximize_metric or minimize_metric as method and and for the
-#' out-of-bag values during bootstrapping. A way of internally validating the performance.
-#' User defined functions can be supplied, see details.
+#' optimal cutpoints will be determined per group.
 #' @examples
 #' library(cutpointr)
 #'
@@ -707,20 +711,20 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
 
 #' Calculate optimal cutpoints and further statistics for multiple predictors
 #'
-#' Runs cutpointr_ over multiple predictor variables. By default, cutpointr
+#' Runs \code{cutpointr_} over multiple predictor variables. By default, \code{cutpointr_}
 #' will be run using all columns in the data set as predictors except for the
-#' variable in class.
+#' variable in \code{class}.
 #'
-#' The automatic determination of positive / negative classes and direction
+#' The automatic determination of positive / negative classes and \code{direction}
 #' will be carried out separately for every predictor variable. That way, if
-#' direction and the classes are not specified, the reported AUC for every
-#' variable will be >= 0.5. AUC may be < 0.5 in the case of subgroups as
-#' direction is equal in every subgroup.
+#' \code{direction} and the classes are not specified, the reported AUC for every
+#' variable will be >= 0.5. AUC may be < 0.5 if subgroups are specified as
+#' \code{direction} is equal within every subgroup.
 #'
 #' @param data A data frame.
 #' @param x Character vector of predictor variables.
 #' @param class The name of the outcome / independent variable.
-#' @param silent Whether to display messages.
+#' @param silent Whether to suppress messages.
 #' @param ... Further arguments to be passed to cutpointr.
 #' @examples
 #' library(cutpointr)

@@ -1,7 +1,7 @@
 #' Calculate a ROC curve
 #'
-#' Given a data frame with a numeric predictor variable and a binary outcome
-#' variable this function returns a data frame that includes all elements of
+#' Given a \code{data.frame} with a numeric predictor variable and a binary outcome
+#' variable this function returns a \code{data.frame} that includes all elements of
 #' the confusion matrix (true positives, false positives, true negatives,
 #' and false negatives) for every unique value of the predictor variable.
 #' Additionally, the true positive rate (tpr), false positive rate (fpr),
@@ -10,7 +10,7 @@
 #' To enable classifying all observations as belonging to only one class the
 #' predictor values will be augmented by Inf or -Inf.
 #'
-#' @param data A data frame or matrix. Will be converted to a data frame.
+#' @param data A data.frame or matrix. Will be converted to a data.frame.
 #' @param x (character) The numeric independent (predictor) variable.
 #' @param class (character) A binary vector of outcome values.
 #' @param pos_class The value of 'class' that represents the positive cases.
@@ -28,7 +28,7 @@
 #' pos_class = "versicolor", neg_class = "setosa", direction = ">=")
 #' @export
 #' @source
-#' Forked from the ROCR package
+#' Forked from the \pkg{ROCR} package
 roc <- function(data, x, class, pos_class, neg_class, direction = ">=",
                 silent = FALSE) {
     stopifnot(direction %in% c(">=", "<="))
@@ -91,7 +91,9 @@ roc <- function(data, x, class, pos_class, neg_class, direction = ">=",
     fnr <- 1 - tpr
     res <- data.frame(x.sorted, tp, fp, tn, fn, tpr, tnr, fpr, fnr)
     class(res) <- c(class(res), "roc_cutpointr")
-    if (is.nan(res$tpr[1])) warning("ROC curve contains no positives")
-    if (res$fpr[1] == 0 & res$fpr[nrow(res)] == 0) warning("ROC curve contains no negatives")
+    if (!silent) {
+        if (is.nan(res$tpr[1])) warning("ROC curve contains no positives")
+        if (res$fpr[1] == 0 & res$fpr[nrow(res)] == 0) warning("ROC curve contains no negatives")
+    }
     return(res)
 }

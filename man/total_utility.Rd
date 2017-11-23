@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.R
 \name{total_utility}
 \alias{total_utility}
-\title{Calculate the total utility from a 2x2 confusion matrix}
+\title{Calculate the total utility}
 \usage{
 total_utility(tp, fp, tn, fn, utility_tp = 1, utility_tn = 1, cost_fp = 1,
   cost_fn = 1, ...)
@@ -27,12 +27,13 @@ total_utility(tp, fp, tn, fn, utility_tp = 1, utility_tn = 1, cost_fp = 1,
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate the total benefit from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The total benefit is equal to
-utility_tp * tp + utility_tn * tn - cost_fp * fp - cost_fn * fn.
+Calculate the total utility from
+true positives, false positives, true negatives and false negatives. \cr \cr
+total_utility = utility_tp * tp + utility_tn * tn - cost_fp * fp - cost_fn * fn \cr \cr
 The inputs must be vectors of equal length.
 }
 \examples{
 total_utility(10, 5, 20, 10, utility_tp = 3, utility_tn = 3, cost_fp = 1, cost_fn = 5)
+total_utility(c(10, 8), c(5, 7), c(20, 12), c(10, 18),
+              utility_tp = 3, utility_tn = 3, cost_fp = 1, cost_fn = 5)
 }

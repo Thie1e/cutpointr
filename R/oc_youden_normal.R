@@ -2,7 +2,7 @@
 #'
 #' An optimal cutpoint maximizing the Youden- or J-Index
 #' (sensitivity + specificity - 1) is calculated parametrically assuming
-#' normally distributed data.
+#' normal distributions per class.
 #'
 #' @param data A data frame or tibble in which the columns that are given in x
 #' and class can be found.

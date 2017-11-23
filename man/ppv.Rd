@@ -18,11 +18,12 @@ ppv(tp, fp, tn, fn, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate the positive predictive value (PPV)
-from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+Calculate the positive predictive value (PPV) from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+ppv = tp / (tp + fp) \cr
 }
 \examples{
 ppv(10, 5, 20, 10)
+ppv(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

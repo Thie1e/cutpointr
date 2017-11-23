@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.R
 \name{p_chisquared}
 \alias{p_chisquared}
-\title{Calculate the p-value of a chi-squared test from a 2x2 confusion matrix}
+\title{Calculate the p-value of a chi-squared test}
 \usage{
 p_chisquared(tp, fp, tn, fn, ...)
 }
@@ -18,10 +18,11 @@ p_chisquared(tp, fp, tn, fn, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate the p-value of a chi-squared test from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
+Calculate the p-value of a chi-squared test from
+true positives, false positives, true negatives and false negatives.
 The inputs must be vectors of equal length.
 }
 \examples{
 p_chisquared(10, 5, 20, 10)
+p_chisquared(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

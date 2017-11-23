@@ -1,6 +1,6 @@
 #' Use the sample mean as cutpoint
 #'
-#' The sample mean is calculated and returned as the "optimal" cutpoint.
+#' The sample mean is calculated and returned as the optimal cutpoint.
 #'
 #' @param data A data frame or tibble in which the columns that are given in x
 #' and class can be found.

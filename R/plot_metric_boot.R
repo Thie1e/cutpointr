@@ -1,10 +1,10 @@
 #' Plot the bootstrapped metric distribution from a cutpointr object
 #'
-#' Given a cutpointr object this function plots the bootstrapped metric distribution,
+#' Given a \code{cutpointr} object this function plots the bootstrapped metric distribution,
 #' i.e. the distribution of out-of-bag metric values.
-#' The metric depends on the function that was supplied to `metric` in the
-#' call to cutpointr.
-#' The cutpointr function has to be run with boot_runs` > 0 to enable bootstrapping.
+#' The metric depends on the function that was supplied to \code{metric} in the
+#' call to \code{cutpointr}.
+#' The \code{cutpointr} function has to be run with \code{boot_runs}` > 0 to enable bootstrapping.
 #' @param x A cutpointr object.
 #' @param ... Additional arguments (unused)
 #' @examples

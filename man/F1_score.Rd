@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.R
 \name{F1_score}
 \alias{F1_score}
-\title{Calculate the F1-score from a 2x2 confusion matrix}
+\title{Calculate the F1-score}
 \usage{
 F1_score(tp, fp, tn, fn, ...)
 }
@@ -18,10 +18,12 @@ F1_score(tp, fp, tn, fn, ...)
 \item{...}{for capturing additional arguments passed by method.}
 }
 \description{
-Calculate the F1-score from the elements of a confusion matrix,
-that is true positives, false positives, true negatives and false negatives.
-The inputs must be vectors of equal length.
+Calculate the F1-score from
+true positives, false positives, true negatives and false negatives.
+The inputs must be vectors of equal length. \cr \cr
+F1_score = (2 * tp) / (2 * tp + fp + fn) \cr
 }
 \examples{
 F1_score(10, 5, 20, 10)
+F1_score(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 }

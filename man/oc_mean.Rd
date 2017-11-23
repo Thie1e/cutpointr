@@ -22,7 +22,7 @@ function by cutpointr. The cutpointr function passes data, x, class,
 metric_func, direction, pos_class and neg_class to the method function.}
 }
 \description{
-The sample mean is calculated and returned as the "optimal" cutpoint.
+The sample mean is calculated and returned as the optimal cutpoint.
 }
 \examples{
 data(suicide)
