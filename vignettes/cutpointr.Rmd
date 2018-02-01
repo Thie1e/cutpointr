@@ -14,6 +14,14 @@ knitr::opts_chunk$set(fig.width = 6, fig.height = 5, fig.align = "center")
 ```
 
 
+# cutpointr
+
+[![Travis-CI Build Status](https://travis-ci.org/Thie1e/cutpointr.svg?branch=master)](https://travis-ci.org/Thie1e/cutpointr)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr)
+[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr) 
+
+
 **cutpointr** is an R package for tidy calculation of "optimal" cutpoints. It 
 supports several methods for calculating cutpoints and includes several 
 metrics that can be maximized or minimized by selecting a cutpoint. Some of these
@@ -21,6 +29,16 @@ methods are designed to be more robust than the simple empirical optimization
 of a metric. Additionally,
 **cutpointr** can automatically bootstrap the variability of the optimal 
 cutpoints and return out-of-bag estimates of various performance metrics.
+
+The "optimal" cutpoint for the included data set is 6 when maximizing accuracy.
+
+```{r}
+library(cutpointr)
+data(suicide)
+head(suicide)
+cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
+```
+
 
 ## Features
 
@@ -42,6 +60,8 @@ The included methods for calculating cutpoints are:
 - `minimize_metric`: Minimize the metric function
 - `maximize_loess_metric`: Maximize the metric function after LOESS smoothing
 - `minimize_loess_metric`: Minimize the metric function after LOESS smoothing
+- `maximize_spline_metric`: Maximize the metric function after spline smoothing
+- `minimize_spline_metric`: Minimize the metric function after spline smoothing
 - `maximize_boot_metric`: Maximize the metric function as a summary of
 the optimal cutpoints in bootstrapped samples
 - `minimize_boot_metric`: Minimize the metric function as a summary of
@@ -283,6 +303,32 @@ values are returned in `opt_cut$roc_curve` in the column
 `m_unsmoothed`.
 
 
+## Spline smoothing for selecting a cutpoint
+
+In a similar fashion the function of metric values per cutpoint can be smoothed 
+using smoothing splines. By default, the number of knots is automatically 
+chosen using the `cutpoint_knots` function. That function implements a rule of 
+thumb for selecting the number of knots as $\lceil 0.1 * log(n / n_{cut}) * n_{cut} \rceil + 1$
+where $n$ is the number of observations and $n_{cut}$ is the number of unique
+cutpoints found in the data.
+
+Alternatively, the number of knots
+can be set manually or the other smoothing parameters of `stats::smooth.spline`
+can be set as desired. For details see `?maximize_spline_metric`. 
+
+```{r}
+opt_cut <- cutpointr(suicide, dsi, suicide, gender, 
+                     method = minimize_spline_metric,
+                     metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
+opt_cut
+```
+
+```{r}
+plot_metric(opt_cut)
+```
+
+
+
 ## Manual and mean / median cutpoints
 
 Using the `oc_manual` function the optimal cutpoint will not be determined 
@@ -312,10 +358,8 @@ So far - which is the default in `cutpointr` - we have considered all unique val
 Assume the following small data set:
 
 ```{r}
-sparse_dat <- data.frame(outcome = c("neg", "neg", "neg", 
-                                     "pos", "pos", "pos", "pos"),
-                         pred    = c(1, 2, 3, 
-                                     8, 11, 11, 12))
+dat <- data.frame(outcome = c("neg", "neg", "neg", "pos", "pos", "pos", "pos"),
+                  pred    = c(1, 2, 3, 8, 11, 11, 12))
 ```
 
 Since the distance of the optimal cutpoint (8) to the next lowest 
@@ -328,8 +372,7 @@ cutpoint if direction is `>=`. The mean of the optimal cutpoint and the next
 highest observation is returned as the optimal cutpoint if `direction = "<="`.
 
 ```{r}
-opt_cut <- cutpointr(sparse_dat, x = pred, class = outcome, 
-                     use_midpoints = TRUE)
+opt_cut <- cutpointr(dat, x = pred, class = outcome, use_midpoints = TRUE)
 plot_x(opt_cut)
 ```
 
@@ -375,9 +418,11 @@ suicide %>%
     group_by(gender) %>%
     nest() %>%
     mutate(cutmod1 = map(data, function(x) cutpointr(x, dsi, suicide,
-                                                     metric = accuracy)),
+                                                     metric = accuracy,
+                                                     silent = TRUE)),
            cutmod2 = map(data, function(x) cutpointr(x, dsi, suicide,
-                                                     metric = sum_sens_spec)))
+                                                     metric = sum_sens_spec,
+                                                     silent = TRUE)))
 ```
 
 ## AUC and optimal cutpoint for multiple variables
