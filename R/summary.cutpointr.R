@@ -28,10 +28,13 @@ summary.cutpointr <- function(object, ...) {
             unlist %>% (function(x) sum(x == temprow$pos_class))
         x_summary[[r]]$n_neg <- x_summary[[r]]$n_obs - x_summary[[r]]$n_pos
         # Confusion Matrix
-        oi <- get_opt_ind(temprow$roc_curve[[1]], oc = temprow$optimal_cutpoint,
+        oi <- get_opt_ind(temprow$roc_curve[[1]],
+                          oc = unlist(temprow$optimal_cutpoint),
                           direction = temprow$direction)
-        x_summary[[r]]$confusion_matrix <- data.frame(temprow$roc_curve[[1]][oi, c("tp", "fn", "fp", "tn")],
-                                                      row.names = "")
+        x_summary[[r]]$confusion_matrix <- data.frame(
+            cutpoint = unlist(temprow$optimal_cutpoint),
+            temprow$roc_curve[[1]][oi, c("tp", "fn", "fp", "tn")]
+        )
         if (!is.null(suppressWarnings(temprow$boot))) {
             x_summary[[r]]$boot <- purrr::map(temprow$boot[[1]][, 1:13], function(x) {
                 round(summary_sd(x), 4)

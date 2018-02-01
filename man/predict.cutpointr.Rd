@@ -4,13 +4,17 @@
 \alias{predict.cutpointr}
 \title{Predict using a cutpointr object}
 \usage{
-\method{predict}{cutpointr}(object, newdata, ...)
+\method{predict}{cutpointr}(object, newdata, cutpoint_nr = 1, ...)
 }
 \arguments{
 \item{object}{a cutpointr object.}
 
 \item{newdata}{a data.frame with a column that contains the predictor
-variable}
+variable.}
+
+\item{cutpoint_nr}{if multiple optimal cutpoints were found this parameter
+defines which one should be used for predictions. Can be a vector if
+different cutpoint numbers are desired for different subgroups.}
 
 \item{...}{further arguments.}
 }

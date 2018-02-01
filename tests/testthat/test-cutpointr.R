@@ -796,3 +796,45 @@ test_that("plot_cutpointr runs", {
         cutpointr(suicide, dsi, suicide, gender, boot_runs = 5), fpr, tpr
     ))
 })
+
+test_that("smoothing splines lead to plausible results", {
+    cp <- cutpointr(suicide, dsi, suicide, method = maximize_spline_metric)
+    expect_equal(cp$optimal_cutpoint, 2)
+
+    cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric)
+    expect_equal(cp$optimal_cutpoint, c(2, 2))
+
+    cp <- cutpointr(suicide, dsi, suicide, method = maximize_spline_metric,
+                    nknots = 5, spar = 0.3)
+    expect_equal(cp$optimal_cutpoint, 3)
+
+    cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric,
+                    nknots = 5, spar = 0.3)
+    expect_equal(cp$optimal_cutpoint, c(3, 3))
+})
+
+test_that("cutpointr handles multiple optimal cutpoints correctly", {
+    tempdat <- data.frame(y = c(0,0,0,1,0,1,1,1),
+                          x = 1:8)
+    expect_message(cp <- cutpointr(tempdat, x = x, class = y, break_ties = c,
+                                   pos_class = 1, direction = ">="))
+    expect_equal(cp$optimal_cutpoint[[1]], c(6, 4))
+    expect_message(cp <- cutpointr(tempdat, x = x, class = y, break_ties = c,
+                                   use_midpoints = TRUE, pos_class = 1,
+                                   direction = ">="))
+    expect_equal(cp$optimal_cutpoint[[1]], c(5.5, 3.5))
+
+    tempdat_g <- data.frame(g = c(rep(1, 8), rep(2, 8)),
+                            y = c(tempdat$y, tempdat$y),
+                            x = c(tempdat$x, tempdat$x + 2))
+    expect_message(cp <- cutpointr(tempdat_g, x = x, class = y, pos_class = 1,
+                                   direction = ">=", subgroup = g, break_ties = c))
+    preds <- predict(object = cp,
+                     newdata = data.frame(x = c(3,6,7,1), g = c(1,2,2,1)),
+                     cutpoint_nr = 2)
+    expect_equal(preds, c(0,1,1,0))
+    preds <- predict(object = cp,
+                     newdata = data.frame(x = c(3,4,5,8), g = c(1,1,2,2)),
+                     cutpoint_nr = c(2, 1))
+    expect_equal(preds, c(0,1,0,1))
+})

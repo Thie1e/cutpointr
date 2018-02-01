@@ -9,7 +9,9 @@ sens_spec <- function(tp, fp, tn, fn) {
 
 sesp_from_oc <- function(roc_curve, oc, direction, opt_ind = NULL) {
     if (is.null(opt_ind)) {
-        opt_ind <- get_opt_ind(roc_curve = roc_curve, oc = oc, direction = direction)
+        opt_ind <- purrr::map_dbl(oc[[1]], function(x) {
+            get_opt_ind(roc_curve = roc_curve, oc = x, direction = direction)
+        })
     }
     sens_spec(tp = roc_curve$tp[opt_ind], fp = roc_curve$fp[opt_ind],
               tn = roc_curve$tn[opt_ind], fn = roc_curve$fn[opt_ind])
@@ -17,6 +19,9 @@ sesp_from_oc <- function(roc_curve, oc, direction, opt_ind = NULL) {
 
 accuracy_from_oc <- function(roc_curve, oc, direction, opt_ind = NULL) {
     if (is.null(opt_ind)) {
+        opt_ind <- purrr::map_dbl(oc[[1]], function(x) {
+            get_opt_ind(roc_curve = roc_curve, oc = x, direction = direction)
+        })
         opt_ind <- get_opt_ind(roc_curve = roc_curve, oc = oc, direction = direction)
     }
     accuracy(tp = roc_curve$tp[opt_ind], fp = roc_curve$fp[opt_ind],
@@ -25,6 +30,9 @@ accuracy_from_oc <- function(roc_curve, oc, direction, opt_ind = NULL) {
 
 kappa_from_oc <- function(roc_curve, oc, direction, opt_ind = NULL) {
     if (is.null(opt_ind)) {
+        opt_ind <- purrr::map_dbl(oc[[1]], function(x) {
+            get_opt_ind(roc_curve = roc_curve, oc = x, direction = direction)
+        })
         opt_ind <- get_opt_ind(roc_curve = roc_curve, oc = oc, direction = direction)
     }
     cohens_kappa(tp = roc_curve$tp[opt_ind], fp = roc_curve$fp[opt_ind],

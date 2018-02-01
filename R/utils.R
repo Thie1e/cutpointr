@@ -77,42 +77,62 @@ check_roc_curve <- function(object) {
     }
 }
 
-ensure_two_classes <- function(x) {
-    uc <- unique(class)
-    luc <- length(uc)
-    if (luc != 2) stop(paste("Expecting two classes, got", luc))
-}
-
 ifel_pos_neg <- function(logi_vec, pos_class, neg_class) {
     predictions <- rep(neg_class, length(logi_vec))
     predictions[logi_vec] <- pos_class
     return(predictions)
 }
 
-midpoint <- function(oc, x, direction) {
-    x <- c(oc, x)
-    if (direction == ">=") {
-        x <- sort(unique(x))
+get_fnth <- function(x, n = 1) {
+    x <- unlist(x)
+    if (length(x) == 1) {
+        return(x[1])
     } else {
-        x <- sort(unique(x), decreasing = TRUE)
+        return(x[n])
     }
-    if (direction == ">=") {
-        mean(c(oc, x[utils::tail(which(x <= oc), 1) - 1]))
-    } else if (direction == "<=") {
-        mean(c(oc, x[utils::tail(which(x >= oc), 1) - 1]))
+    stop("no conditions apply in get_fnth")
+}
+
+midpoint <- function(oc, x, direction) {
+    sapply(oc, function(oc) {
+        x <- c(oc, x)
+        if (direction == ">=") {
+            x <- sort(unique(x))
+        } else {
+            x <- sort(unique(x), decreasing = TRUE)
+        }
+        if (direction == ">=") {
+            mean(c(oc, x[utils::tail(which(x <= oc), 1) - 1]))
+        } else if (direction == "<=") {
+            mean(c(oc, x[utils::tail(which(x >= oc), 1) - 1]))
+        }
+    })
+}
+
+apply_break_ties <- function(oc, f) {
+    stopifnot(nrow(oc) == 1)
+    optimal_cutpoint <- f(oc[["optimal_cutpoint"]][[1]])
+    if (length(optimal_cutpoint) > 1) {
+        optimal_cutpoint <- list(optimal_cutpoint)
     }
+    oc$optimal_cutpoint <- optimal_cutpoint
+    return(oc)
 }
 
 get_opt_ind <- function(roc_curve, oc, direction) {
-    if (direction == ">=") {
-        opt_ind <- max(which(roc_curve$x.sorted >= oc))
-    } else if (direction == "<=") {
-        opt_ind <- max(which(roc_curve$x.sorted <= oc))
-    }
-    return(opt_ind)
+    stopifnot(is.numeric(oc) | is.na(oc))
+    sapply(oc, function(x) {
+        if (direction == ">=") {
+            opt_ind <- max(which(roc_curve$x.sorted >= x))
+        } else if (direction == "<=") {
+            opt_ind <- max(which(roc_curve$x.sorted <= x))
+        }
+        return(opt_ind)
+    })
 }
 
 summary_sd <- function(x, round_digits = 4) {
+    x <- unlist(x)
     s <- summary(x)[1:6]
     result <- c(s[1],
                 stats::quantile(x, 0.05, na.rm = TRUE),
@@ -186,4 +206,13 @@ na_inf_omit <- function(x) {
 
 .onUnload <- function (libpath) {
     library.dynam.unload("cutpointr", libpath)
+}
+
+add_list <- function(x, y, name) {
+    if (length(y) > 1) {
+        x[[name]] <- list(y)
+    } else {
+        x[[name]] <- y
+    }
+    return(x)
 }

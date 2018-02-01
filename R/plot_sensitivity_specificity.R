@@ -40,7 +40,9 @@ plot_sensitivity_specificity <- function(x, display_cutpoint = TRUE, ...) {
     }
     res_unnested <- x %>%
         dplyr::select_(.dots = dts_pr) %>%
-        tidyr::unnest_(unnest_cols = "roc_curve")
+        tidyr::unnest_(unnest_cols = c("roc_curve"))
+    res_unnested <- x %>%
+        tidyr::unnest_(unnest_cols = c("roc_curve"))
     # Drop possible NaN at x.sorted = Inf or -Inf
     res_unnested <- stats::na.omit(res_unnested)
     res_unnested <- tidyr::gather_(res_unnested, key_col = "metric",
@@ -55,18 +57,22 @@ plot_sensitivity_specificity <- function(x, display_cutpoint = TRUE, ...) {
         ggplot2::ylab("Sensitivity and Specificity")
     if (display_cutpoint) {
         if (is.null(suppressWarnings(x$subgroup))) {
-            res_unnested <- res_unnested %>%
-                dplyr::summarise_(optimal_cutpoint = ~ unique(optimal_cutpoint))
+            res_cutpoints <- x %>%
+                dplyr::select_(.dots = "optimal_cutpoint")
+            if (is.list(res_cutpoints$optimal_cutpoint)) {
+                res_cutpoints <- tidyr::unnest_(res_cutpoints)
+            }
         } else {
-            res_unnested <- res_unnested %>%
-                dplyr::group_by_("subgroup") %>%
-                dplyr::summarise_(optimal_cutpoint = ~ unique(optimal_cutpoint))
+            res_cutpoints <- x %>%
+                dplyr::select_(.dots = list("optimal_cutpoint", "subgroup"))
+            if (is.list(res_cutpoints$optimal_cutpoint)) {
+                res_cutpoints <- tidyr::unnest_(res_cutpoints)
+            }
         }
         pr <- pr +
-            ggplot2::geom_vline(data = res_unnested,
+            ggplot2::geom_vline(data = res_cutpoints,
                                 ggplot2::aes_(xintercept = ~ optimal_cutpoint,
                                               linetype = ltype))
     }
-
     return(pr)
 }

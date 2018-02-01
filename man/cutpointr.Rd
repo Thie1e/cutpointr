@@ -2,22 +2,36 @@
 % Please edit documentation in R/cutpointr.R
 \name{cutpointr}
 \alias{cutpointr}
+\alias{cutpointr.default}
+\alias{cutpointr.numeric}
 \title{Determine and evaluate optimal cutpoints}
 \usage{
-cutpointr(data = NULL, x, class, subgroup = NULL,
+cutpointr(...)
+
+\method{cutpointr}{default}(data, x, class, subgroup = NULL,
   method = maximize_metric, metric = sum_sens_spec, pos_class = NULL,
   neg_class = NULL, direction = NULL, boot_runs = 0,
-  use_midpoints = FALSE, na.rm = FALSE, allowParallel = FALSE,
-  silent = FALSE, ...)
+  use_midpoints = FALSE, break_ties = median, na.rm = FALSE,
+  allowParallel = FALSE, silent = FALSE, ...)
+
+\method{cutpointr}{numeric}(x, class, subgroup = NULL,
+  method = maximize_metric, metric = sum_sens_spec, pos_class = NULL,
+  neg_class = NULL, direction = NULL, boot_runs = 0,
+  use_midpoints = FALSE, break_ties = median, na.rm = FALSE,
+  allowParallel = FALSE, silent = FALSE, ...)
 }
 \arguments{
+\item{...}{Further optional arguments that will be passed to method.
+minimize_metric and maximize_metric pass ... to metric.}
+
 \item{data}{A data.frame with the data needed for x, class and subgroup.}
 
-\item{x}{The variable to be used for
-classification, e.g. predictions or test values, or the raw data if data = NULL.}
+\item{x}{The variable name without quotes to be used for classification,
+e.g. predictions, or an expression. The raw vector of values if the data argument
+is unused.}
 
-\item{class}{The variable indicating class membership
-or the raw data if data = NULL.}
+\item{class}{The variable name without quotes indicating class membership
+or an expression. The raw vector of values if the data argument is unused.}
 
 \item{subgroup}{An additional covariate that identifies subgroups or the raw data if
 data = NULL. Separate optimal cutpoints will be determined per group.
@@ -46,18 +60,18 @@ cutpoint will be the mean of the optimal cutpoint and the next highest
 observation (for direction = ">") or the next lowest observation
 (for direction = "<").}
 
+\item{break_ties}{If multiple cutpoints are found, they can be summarized using
+this function, e.g. mean or median. To return all cutpoints use c as the function.}
+
 \item{na.rm}{(logical) Set to TRUE (default FALSE) to keep only complete
 cases of x, class and subgroup (if specified). Missing values with
 na.rm = FALSE will raise an error.}
 
 \item{allowParallel}{(logical) If TRUE, the bootstrapping will be parallelized
-using foreach. A local cluster, for example, should have been started manually
+using foreach. A local cluster, for example, should be started manually
 beforehand.}
 
 \item{silent}{(logical) If TRUE suppresses all messages.}
-
-\item{...}{Further optional arguments that will be passed to method.
-minimize_metric and maximize_metric pass ... to metric.}
 }
 \value{
 A cutpointr object which is also a data.frame and tbl_df.
@@ -75,7 +89,7 @@ assume that higher values indicate the positive class and use the class
 with a higher median as the positive class.
 
 Different methods can be selected for determining the optimal cutpoint via
-the method argument. The package includes the following cutpoint functions:
+the method argument. The package includes the following method functions:
 \itemize{
  \item \code{maximize_metric}: Maximize the metric function
  \item \code{minimize_metric}: Minimize the metric function
@@ -83,15 +97,19 @@ the method argument. The package includes the following cutpoint functions:
  smoothing
  \item \code{minimize_loess_metric}: Minimize the metric function after LOESS
  smoothing
+ \item \code{maximize_spline_metric}: Maximize the metric function after spline
+ smoothing
+ \item \code{minimize_spline_metric}: Minimize the metric function after spline
+ smoothing
  \item \code{maximize_boot_metric}: Maximize the metric function as a summary of
  the optimal cutpoints in bootstrapped samples
  \item \code{minimize_boot_metric}: Minimize the metric function as a summary of
  the optimal cutpoints in bootstrapped samples
- \item \code{oc_manual}: Specify the cutpoint manually
  \item \code{oc_youden_kernel}: Maximize the Youden-Index after kernel smoothing
  the distributions of the two classes
  \item \code{oc_youden_normal}: Maximize the Youden-Index parametrically
  assuming normally distributed data in both classes
+ \item \code{oc_manual}: Specify the cutpoint manually
 }
 
 User-defined functions can be supplied to method, too. As a reference,
@@ -156,7 +174,7 @@ plot_cutpointr, or for defining new metric functions:
 \code{false_discovery_rate}, \code{ppv}, \code{npv}, \code{precision},
 \code{recall}, \code{sensitivity}, and \code{specificity}.
 
-User defined metric functions can be used as well which can accept the following
+User defined metric functions can be created as well which can accept the following
 inputs as vectors:
 \itemize{
  \item \code{tp}: Vector of true positives
@@ -178,16 +196,11 @@ as a way of internal validation, the function in \code{metric} will be used to
 score the out-of-bag predictions using the cutpoints determined by
 \code{method}. Various default metrics are always included in the bootstrap results.
 
-If multiple optimal cutpoints are found, the first one is returned and a
-warning including all optimal cutpoints is issued. The first one refers to
-the minimum of the optimal cutpoints if direction = ">=" or to the maximum
-of the optimal cutpoints if direction = "<=".
+If multiple optimal cutpoints are found, the column optimal_cutpoint becomes a
+list that contains the vector(s) of the optimal cutpoints.
 
 If \code{use_midpoints = TRUE} the mean of the optimal cutpoint and the next
 highest or lowest possible cutpoint is returned, depending on \code{direction}.
-If \code{use_midpoints} is set to \code{TRUE} and multiple optimal cutpoints are found,
-the midpoint of the minimum / maximum of the optimal cutpoints
-and the next highest / lowest observation is returned, as described before.
 }
 \examples{
 library(cutpointr)

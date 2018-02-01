@@ -33,14 +33,21 @@ plot_cut_boot <- function(x, ...) {
         res_boot_unnested <- x %>%
             dplyr::select_(.dots = dts_boot) %>%
             tidyr::unnest_(unnest_cols = "boot")
-        if (all(na_inf_omit(res_boot_unnested$optimal_cutpoint %% 1 == 0)) |
-            only_one_unique(na_inf_omit(res_boot_unnested$optimal_cutpoint))) {
+        cutpoints <- unlist(res_boot_unnested$optimal_cutpoint)
+        if (all(na_inf_omit(cutpoints %% 1 == 0)) |
+            only_one_unique(na_inf_omit(cutpoints))) {
             all_integer = TRUE
             dist_plot <- ggplot2::geom_bar(alpha = transparency,
                                            position = "identity")
         } else {
             all_integer = FALSE
             dist_plot <- ggplot2::geom_density(alpha = transparency)
+        }
+        # If multiple optimal cutpoints optimal_cutpoint is a list
+        if (is.list(res_boot_unnested$optimal_cutpoint)) {
+            res_boot_unnested <- res_boot_unnested %>%
+                dplyr::select_(.dots = list("-roc_curve_b", "-roc_curve_oob")) %>%
+                tidyr::unnest_()
         }
         boot_cut <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,

@@ -10,16 +10,9 @@
 #' @param ... further arguments.
 #' @export
 print.cutpointr <- function(x, width = 1000, n = 50, ...) {
-    if (utils::packageVersion("tibble") <= "1.3.4") {
-        x %>%
-            utils::head(n = n) %>%
-            as.data.frame() %>%
-            tibble:::shrink_mat(width = width, rows = NA, n = n, star = FALSE) %>%
-            `[[`("table") %>%
-            print()
-        invisible(x)
-    } else {
-        tibble:::print.tbl_df(x, width = width, n = n)
-        invisible(x)
-    }
+    # print.tbl_df is not exported by tibble, avoid :::
+    class(x) <- c("tbl_df", "tbl", "data.frame")
+    print(x, width = width, n = n)
+    class(x) <- c("cutpointr", "tbl_df", "tbl", "data.frame")
+    invisible(x)
 }

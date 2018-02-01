@@ -33,7 +33,13 @@ plot_metric_boot <- function(x, ...) {
     if(!is.null(suppressWarnings(x$boot))) {
         res_boot_unnested <- x %>%
             dplyr::select_(.dots = dts_boot) %>%
-            tidyr::unnest_(unnest_cols = "boot")
+            tidyr::unnest_(unnest_cols = "boot") %>%
+            dplyr::select_(.dots = list("-roc_curve_b", "-roc_curve_oob"))
+        # If multiple optimal cutpoints optimal_cutpoint is a list
+        if (is.list(res_boot_unnested$optimal_cutpoint)) {
+            res_boot_unnested <- res_boot_unnested %>%
+                tidyr::unnest_()
+        }
         metric_name <- find_metric_name_boot(res_boot_unnested)
         if (all(na_inf_omit(get(metric_name, res_boot_unnested) %% 1 == 0)) |
             only_one_unique(na_inf_omit(get(metric_name, res_boot_unnested)))) {

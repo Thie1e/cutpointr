@@ -6,8 +6,9 @@
 \usage{
 cutpointr_(data, x, class, subgroup = NULL, method = maximize_metric,
   metric = sum_sens_spec, pos_class = NULL, neg_class = NULL,
-  direction = NULL, boot_runs = 0, use_midpoints = FALSE, na.rm = FALSE,
-  allowParallel = FALSE, silent = FALSE, ...)
+  direction = NULL, boot_runs = 0, use_midpoints = FALSE,
+  break_ties = median, na.rm = FALSE, allowParallel = FALSE,
+  silent = FALSE, ...)
 }
 \arguments{
 \item{data}{A data.frame with the data needed for x, class and subgroup.}
@@ -44,12 +45,15 @@ cutpoint will be the mean of the optimal cutpoint and the next highest
 observation (for direction = ">") or the next lowest observation
 (for direction = "<").}
 
+\item{break_ties}{If multiple cutpoints are found, they can be summarized using
+this function, e.g. mean or median. To return all cutpoints use c as the function.}
+
 \item{na.rm}{(logical) Set to TRUE (default FALSE) to keep only complete
 cases of x, class and subgroup (if specified). Missing values with
 na.rm = FALSE will raise an error.}
 
 \item{allowParallel}{(logical) If TRUE, the bootstrapping will be parallelized
-using foreach. A local cluster, for example, should have been started manually
+using foreach. A local cluster, for example, should be started manually
 beforehand.}
 
 \item{silent}{(logical) If TRUE suppresses all messages.}

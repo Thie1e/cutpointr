@@ -22,12 +22,14 @@ plot_x <- function(x, display_cutpoint = TRUE, ...) {
 
     if (is.null(suppressWarnings(x$subgroup))) {
         dts <- "data"
+        dts_cutpoint <- "optimal_cutpoint"
         fll <- NULL
         clr <- NULL
         clr_roc <- NULL
         transparency <- 1
     } else {
         dts <- c("data", "subgroup")
+        dts_cutpoint <- c("subgroup", "optimal_cutpoint")
         fll <- "subgroup"
         clr <- "subgroup"
         clr_roc <- ~ subgroup
@@ -38,7 +40,7 @@ plot_x <- function(x, display_cutpoint = TRUE, ...) {
         dplyr::select_(.dots = dts) %>%
         tidyr::unnest_(unnest_cols = "data")
     if (is.null(suppressWarnings(x$subgroup))) {
-        res_unnested$optimal_cutpoint <- x$optimal_cutpoint
+        # res_unnested$optimal_cutpoint <- x$optimal_cutpoint
         col <- NULL
     } else {
         res_unnested <- dplyr::full_join(res_unnested,
@@ -65,9 +67,17 @@ plot_x <- function(x, display_cutpoint = TRUE, ...) {
         ggplot2::ggtitle("Independent variable",
                          "optimal cutpoint and distribution by class") +
         ggplot2::xlab("value")
-    if (display_cutpoint) dist <- dist +
-        ggplot2::geom_vline(ggplot2::aes_(xintercept = ~ optimal_cutpoint,
+    if (display_cutpoint) {
+        cutpoint_dat <- x %>%
+            dplyr::select_(.dots = dts_cutpoint)
+        if (is.list(x$optimal_cutpoint)) {
+            cutpoint_dat <- tidyr::unnest_(cutpoint_dat)
+        }
+        dist <- dist +
+        ggplot2::geom_vline(data = cutpoint_dat,
+                            ggplot2::aes_(xintercept = ~ optimal_cutpoint,
                                           color = col), show.legend = FALSE)
+    }
 
     if (!all_integer) dist <- dist + ggplot2::geom_rug(alpha = 0.5)
     return(dist)
