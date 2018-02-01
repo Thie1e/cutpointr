@@ -14,7 +14,8 @@ Clinical Chemistry, (4), 729–738.
 }
 \usage{
 minimize_loess_metric(data, x, class, metric_func = youden,
-  pos_class = NULL, neg_class = NULL, direction, ...)
+  pos_class = NULL, neg_class = NULL, direction, criterion = "aicc",
+  degree = 1, family = "symmetric", ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -35,19 +36,18 @@ metric to be maximized. See description.}
 \item{direction}{(character) Use ">=" or "<=" to select whether an x value
 >= or <= the cutoff predicts the positive class.}
 
-\item{...}{Further arguments that will be passed to metric_func and
-additional arguments for the LOESS smoother:
-\itemize{
- \item criterion: the criterion for automatic smoothing parameter selection:
- "aicc" denotes bias-corrected AIC criterion, "gcv" denotes generalized
- cross-validation.
- \item degree: the degree of the local polynomials to be used. It can be
- 0, 1 or 2.
- \item family: if "gaussian" fitting is by least-squares, and if "symmetric"
- a re-descending M estimator is used with Tukey's biweight function.
- \item user.span: the user-defined parameter which controls the degree of
- smoothing.
-}}
+\item{criterion}{the criterion for automatic smoothing parameter selection:
+"aicc" denotes bias-corrected AIC criterion, "gcv" denotes generalized
+cross-validation.}
+
+\item{degree}{the degree of the local polynomials to be used. It can be
+0, 1 or 2.}
+
+\item{family}{if "gaussian" fitting is by least-squares, and if "symmetric"
+a re-descending M estimator is used with Tukey's biweight function.}
+
+\item{...}{Further arguments that will be passed to metric_func or the
+loess smoother.}
 }
 \value{
 A tibble with the columns \code{optimal_cutpoint}, the corresponding metric

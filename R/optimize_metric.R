@@ -38,20 +38,20 @@ optimize_metric <- function(data, x, class, metric_func = youden,
         }
         if (!is.null(args[["df"]])) {
             mod <- stats::smooth.spline(x = roccurve$x.sorted[finite_roc],
-                                 y = roccurve$m[finite_roc],
-                                 w = args[["w"]], spar = args[["spar"]],
-                                 cv = FALSE, df = args[["df"]],
-                                 nknots = nknots, df.offset = args[["df_offset"]],
-                                 penalty = args[["penalty"]],
-                                 control.spar = args[["control_spar"]])
+                                        y = roccurve$m[finite_roc],
+                                        w = args[["w"]], spar = args[["spar"]],
+                                        cv = FALSE, df = args[["df"]],
+                                        nknots = nknots, df.offset = args[["df_offset"]],
+                                        penalty = args[["penalty"]],
+                                        control.spar = args[["control_spar"]])
         } else {
             mod <- stats::smooth.spline(x = roccurve$x.sorted[finite_roc],
-                                 y = roccurve$m[finite_roc],
-                                 w = args[["w"]], spar = args[["spar"]],
-                                 cv = FALSE,
-                                 nknots = nknots, df.offset = args[["df_offset"]],
-                                 penalty = args[["penalty"]],
-                                 control.spar = args[["control_spar"]])
+                                        y = roccurve$m[finite_roc],
+                                        w = args[["w"]], spar = args[["spar"]],
+                                        cv = FALSE,
+                                        nknots = nknots, df.offset = args[["df_offset"]],
+                                        penalty = args[["penalty"]],
+                                        control.spar = args[["control_spar"]])
         }
         roccurve$m <- NA
         roccurve$m[finite_roc] <- rev(mod$y)
@@ -471,17 +471,32 @@ minimize_spline_metric <- function(data, x, class, metric_func = youden,
                                    pos_class = NULL, neg_class = NULL, direction,
                                    w = NULL, df = NULL, spar = NULL,
                                    nknots = cutpoint_knots,
-                                   df_offset = df_offset, penalty = 1,
+                                   df_offset = NULL, penalty = 1,
                                    control_spar = list(), ...) {
     metric_name <- as.character(substitute(metric_func))
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
-                    pos_class = pos_class, neg_class = neg_class, minmax = "max",
+                    pos_class = pos_class, neg_class = neg_class, minmax = "min",
                     direction = direction, metric_name = metric_name,
                     w = w, df = df, spar = spar, nknots = nknots,
                     df_offset = df_offset, penalty = penalty,
                     control_spar = control_spar, spline = TRUE, ...)
 }
 
+#' Calculate number of knots to use in spline smoothing
+#'
+#' This function implements a rule of thumb for picking a number of knots
+#' when using smoothing splines for smoothing a function of metric values per
+#' cutpoint value.
+#'
+#' The number of knots is equal to ceiling(0.1 * log(n) / n_cut) * n_cut) + 1
+#' where n is the number of observations and n_cut is the number of unique
+#' cutpoints found in the data.
+#'
+#' @param data A data frame
+#' @param x (character) The name of the predictor variable
+#' @examples
+#' cutpoint_knots(suicide, "dsi")
+#' @export
 cutpoint_knots <- function(data, x) {
     n_cut <- length(unique(data[[x]]))
     ceiling(0.1 * log(nrow(data) / n_cut) * n_cut) + 1
