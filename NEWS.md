@@ -1,3 +1,7 @@
+# cutpointr 0.6.0
+- Return multiple optimal cutpoints
+- Add spline smoothing method
+
 # cutpointr 0.5.2
 - Reformat docs 
 - Remove superfluous check in `plot_cutpointr`

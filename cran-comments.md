@@ -1,19 +1,12 @@
 ## Test environments
-* local Ubuntu 16 install, R 3.4.2
-* local MacOS 10.12.6 install, R 3.4.2
-* win-builder (devel 2017-09-12 r73242)
+* local Ubuntu 16 install, R 3.4.3
+* win-builder (R Under development (unstable) (2018-01-31 r74188))
 * ubuntu 14.04 (on travis-ci), R 3.4.2
-* Appveyor
+* Appveyor R version 3.4.3 Patched (2018-01-29 r74188), Platform: i386-w64-mingw32/i386 (32-bit), Running under: Windows Server 2012 R2 x64 (build 9600)
+
 
 ## R CMD check results
-There were no ERRORs or WARNINGs. 
-
-There was 1 NOTE: 
-
-* Unexported objects imported by ':::' calls: ‘tibble:::print.tbl_df’ ‘tibble:::shrink_mat’
-
-To nicely print the cutpointr object the print.tbl_df behaviour of tibble versions < 1.3.0 is needed in print.cutpointr. As soon as it is restored in a later version of tibble the calls to ::: will be removed and the print.cutpointr method will be simplified. See the corresponding issue at https://github.com/tidyverse/tibble/issues/268
+There were no ERRORs, WARNINGs or NOTEs. 
 
 ## devtools::revdep_check()
-
 No ERRORs or WARNINGs found
