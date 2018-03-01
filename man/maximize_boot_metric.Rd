@@ -2,11 +2,16 @@
 % Please edit documentation in R/optimize_metric.R
 \name{maximize_boot_metric}
 \alias{maximize_boot_metric}
-\title{Maximize a metric function in binary classification after bootstrapping}
+\alias{minimize_boot_metric}
+\title{Optimize a metric function in binary classification after bootstrapping}
 \usage{
 maximize_boot_metric(data, x, class, metric_func = youden, pos_class = NULL,
   neg_class = NULL, direction, summary_func = mean, boot_cut = 50,
-  inf_rm = TRUE, ...)
+  inf_rm = TRUE, tol_metric, ...)
+
+minimize_boot_metric(data, x, class, metric_func = youden, pos_class = NULL,
+  neg_class = NULL, direction, summary_func = mean, boot_cut = 50,
+  inf_rm = TRUE, tol_metric, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -36,6 +41,12 @@ optimal cutpoint is calculated.}
 \item{inf_rm}{(logical) whether to remove infinite cutpoints before
 calculating the summary.}
 
+\item{tol_metric}{All cutpoints will be passed to \code{summary_func}
+that lead to a metric
+value in the interval [m_max - tol_metric, m_max + tol_metric] where
+m_max is the maximum achievable metric value. This can be used to return
+multiple decent cutpoints and to avoid floating-point problems.}
+
 \item{...}{To capture further arguments that are always passed to the method
 function by cutpointr. The cutpointr function passes data, x, class,
 metric_func, direction, pos_class and neg_class to the method function.}
@@ -44,9 +55,9 @@ metric_func, direction, pos_class and neg_class to the method function.}
 A tibble with the column \code{optimal_cutpoint}
 }
 \description{
-Given a function for computing a metric in \code{metric_func}, this function
-bootstraps the data \code{boot_cut} times and
-maximizes the metric by selecting an optimal cutpoint. The returned
+Given a function for computing a metric in \code{metric_func}, these functions
+bootstrap the data \code{boot_cut} times and
+maximize or minimize the metric by selecting an optimal cutpoint. The returned
 optimal cutpoint is the result of applying \code{summary_func}, e.g. the mean,
 to all optimal cutpoints that were determined in the bootstrap samples.
 The \code{metric} function should accept the following inputs:
@@ -67,4 +78,7 @@ determined cutpoint.
 set.seed(100)
 cutpointr(suicide, dsi, suicide, method = maximize_boot_metric,
           metric = accuracy, boot_cut = 30)
+set.seed(100)
+cutpointr(suicide, dsi, suicide, method = minimize_boot_metric,
+          metric = abs_d_sens_spec, boot_cut = 30)
 }

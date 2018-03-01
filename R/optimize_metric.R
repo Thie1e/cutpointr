@@ -1,8 +1,8 @@
 optimize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, minmax,
                             direction, metric_name = "metric", loess = FALSE,
-                            spline = FALSE, return_roc = TRUE,
-                            ...) {
+                            spline = FALSE, gam = FALSE, return_roc = TRUE,
+                            tol_metric, ...) {
     args <- list(...)
     metric_name_call <- as.character(substitute(metric_func))
     if (metric_name_call != "metric_func") metric_name <- metric_name_call
@@ -43,7 +43,8 @@ optimize_metric <- function(data, x, class, metric_func = youden,
                                         cv = FALSE, df = args[["df"]],
                                         nknots = nknots, df.offset = args[["df_offset"]],
                                         penalty = args[["penalty"]],
-                                        control.spar = args[["control_spar"]])
+                                        control.spar = args[["control_spar"]],
+                                        tol = 1e-100)
         } else {
             mod <- stats::smooth.spline(x = roccurve$x.sorted[finite_roc],
                                         y = roccurve$m[finite_roc],
@@ -51,19 +52,38 @@ optimize_metric <- function(data, x, class, metric_func = youden,
                                         cv = FALSE,
                                         nknots = nknots, df.offset = args[["df_offset"]],
                                         penalty = args[["penalty"]],
-                                        control.spar = args[["control_spar"]])
+                                        control.spar = args[["control_spar"]],
+                                        tol = 1e-100)
+        }
+        # smooth.spline builds bins of x values that are closer to each other
+        # than tol, so not all original x values may be returned
+        if (length(mod$x) != sum(finite_roc)) {
+            stop("Not all original x values returned by smooth.spline")
         }
         roccurve$m <- NA
         roccurve$m[finite_roc] <- rev(mod$y)
     }
+    if (gam) {
+        roccurve$m_unsmoothed <- roccurve$m
+        finite_x <- is.finite(roccurve$x.sorted)
+        finite_m <- is.finite(roccurve$m)
+        finite_roc <- (finite_x + finite_m) == 2
+        mod <- mgcv::gam(as.formula(paste(paste0(args$formula[2], " ~"), args$formula[3])),
+                         data = roccurve[finite_roc, ],
+                         family = args[["family"]])
+        roccurve$m <- NA
+        roccurve$m[finite_roc] <- mod$fitted.values
+    }
     if (minmax == "max") {
         max_m <- max(roccurve$m, na.rm = TRUE)
-        opt <- which(roccurve$m == max_m)
+        opt <- which((roccurve$m >= (max_m - tol_metric)) &
+                         (roccurve$m <= (max_m + tol_metric)))
         oc <- roccurve[, "x.sorted"][opt]
         m_oc <- max_m
     } else if (minmax == "min") {
         min_m <- min(roccurve$m, na.rm = TRUE)
-        opt <- which(roccurve$m == min_m)
+        opt <- which((roccurve$m >= (min_m - tol_metric)) &
+                         (roccurve$m <= (min_m + tol_metric)))
         oc <- roccurve[, "x.sorted"][opt]
         m_oc <- min_m
     }
@@ -77,14 +97,15 @@ optimize_metric <- function(data, x, class, metric_func = youden,
     }
     if (loess) metric_name <- paste0("loess_", metric_name)
     if (spline) metric_name <- paste0("spline_", metric_name)
+    if (gam) metric_name <- paste0("gam_", metric_name)
     res[, metric_name] <- m_oc
     return(res)
 }
 
-#' Maximize a metric function in binary classification
+#' Optimize a metric function in binary classification
 #'
-#' Given a function for computing a metric in \code{metric_func}, this function
-#' maximizes that metric by selecting an optimal cutpoint.
+#' Given a function for computing a metric in \code{metric_func}, these functions
+#' maximize or minimize that metric by selecting an optimal cutpoint.
 #' The metric function should accept the following inputs:
 #' \itemize{
 #'  \item \code{tp}: vector of number of true positives
@@ -104,62 +125,44 @@ optimize_metric <- function(data, x, class, metric_func = youden,
 #' @inheritParams oc_youden_normal
 #' @param metric_func (function) A function that computes a
 #' metric to be maximized. See description.
-#' @param ... Further arguments that will be passed to \code{metric_func}
+#' @param tol_metric All cutpoints will be returned that lead to a metric
+#' value in the interval [m_max - tol_metric, m_max + tol_metric] where
+#' m_max is the maximum achievable metric value. This can be used to return
+#' multiple decent cutpoints and to avoid floating-point problems.
+#' @param ... Further arguments that will be passed to \code{metric_func}.
 #' @examples
 #' cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
+#' @name maximize_metric
 #' @export
 maximize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL,
-                            direction, ...) {
+                            direction, tol_metric, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "max",
-                    direction = direction, metric_name = metric_name, ...)
+                    direction = direction, metric_name = metric_name,
+                    tol_metric = tol_metric, ...)
 }
 
-
-#' Minimize a metric function in binary classification
-#'
-#' Given a function for computing a metric in \code{metric_func}, this function
-#' minimizes that metric by selecting an optimal cutpoint.
-#' The metric function should accept the following inputs:
-#'
-#' \itemize{
-#'  \item \code{tp}: vector of number of true positives
-#'  \item \code{fp}: vector of number of false positives
-#'  \item \code{tn}: vector of number of true negatives
-#'  \item \code{fn}: vector of number of false negatives
-#' }
-#'
-#' The above inputs are arrived at by using all unique values in \code{x}, Inf, or
-#' -Inf as possible cutpoints for classifying the variable in class.
-#'
-#' @return A tibble with the columns \code{optimal_cutpoint}, the corresponding metric
-#' value and \code{roc_curve}, a nested tibble that includes all possible cutoffs
-#' and the corresponding numbers of true and false positives / negatives and
-#' all corresponding metric values.
-#'
-#' @inheritParams oc_youden_normal
-#' @param metric_func (function) A function that computes a
-#' metric to be minimized. See description.
-#' @param ... Further arguments that will be passed to metric_func
 #' @examples
 #' cutpointr(suicide, dsi, suicide, method = minimize_metric, metric = abs_d_sens_spec)
+#' @rdname maximize_metric
 #' @export
 minimize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL,
-                            direction, ...) {
+                            direction, tol_metric, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "min",
-                    direction = direction, metric_name = metric_name, ...)
+                    direction = direction, metric_name = metric_name,
+                    tol_metric = tol_metric, ...)
 }
 
-#' Maximize a metric function in binary classification after LOESS smoothing
+#' Optimize a metric function in binary classification after LOESS smoothing
 #'
-#' Given a function for computing a metric in \code{metric_func}, this function
-#' smoothes the function of metric value per cutpoint using LOESS. Then it
-#' maximizes the metric by selecting an optimal cutpoint. For further details
+#' Given a function for computing a metric in \code{metric_func}, these functions
+#' smooth the function of metric value per cutpoint using LOESS, then
+#' maximize or minimize the metric by selecting an optimal cutpoint. For further details
 #' on the LOESS smoothing see \code{?fANCOVA::loess.as}.
 #' The \code{metric} function should accept the following inputs:
 #' \itemize{
@@ -187,6 +190,12 @@ minimize_metric <- function(data, x, class, metric_func = youden,
 #'  0, 1 or 2.
 #' @param family if "gaussian" fitting is by least-squares, and if "symmetric"
 #'  a re-descending M estimator is used with Tukey's biweight function.
+#' @param user.span The user-defined parameter which controls the degree of
+#' smoothing
+#' @param tol_metric All cutpoints will be returned that lead to a metric
+#' value in the interval [m_max - tol_metric, m_max + tol_metric] where
+#' m_max is the maximum achievable metric value. This can be used to return
+#' multiple decent cutpoints and to avoid floating-point problems.
 #' @param ... Further arguments that will be passed to metric_func or the
 #' loess smoother.
 #'
@@ -201,85 +210,85 @@ minimize_metric <- function(data, x, class, metric_func = youden,
 #' criterion = "aicc", family = "symmetric", degree = 2, user.span = 0.7,
 #' metric = accuracy)
 #' plot_metric(oc)
+#' @name maximize_loess_metric
 #' @export
 maximize_loess_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
                             criterion = "aicc", degree = 1, family = "symmetric",
-                            ...) {
+                            user.span = NULL, tol_metric, ...) {
+    if (!requireNamespace("fANCOVA", quietly = TRUE)) {
+        stop("fANCOVA package has to be installed to use LOESS smoothing.")
+    }
     metric_name <- as.character(substitute(metric_func))
+    if (is.function(user.span)) {
+        us <- user.span(data = data, x = x)
+    } else {
+        us <- user.span
+    }
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "max",
                     direction = direction, metric_name = metric_name,
                     criterion = criterion, degree = degree, family = family,
-                    loess = TRUE, ...)
+                    user.span = us, loess = TRUE,
+                    tol_metric = tol_metric, ...)
 }
 
-
-#' Minimize a metric function in binary classification after LOESS smoothing
-#'
-#' Given a function for computing a metric in \code{metric_func}, this function
-#' smoothes the function of metric value per cutpoint using LOESS. Then it
-#' minimizes the metric by selecting an optimal cutpoint. For further details
-#' on the LOESS smoothing see ?fANCOVA::loess.as.
-#' The \code{metric} function should accept the following inputs:
-#' \itemize{
-#'  \item \code{tp}: vector of number of true positives
-#'  \item \code{fp}: vector of number of false positives
-#'  \item \code{tn}: vector of number of true negatives
-#'  \item \code{fn}: vector of number of false negatives
-#' }
-#'
-#' The above inputs are arrived at by using all unique values in x, Inf, and
-#' -Inf as possible cutpoints for classifying the variable in class.
-#'
-#' @return A tibble with the columns \code{optimal_cutpoint}, the corresponding metric
-#' value and \code{roc_curve}, a nested tibble that includes all possible cutoffs
-#' and the corresponding numbers of true and false positives / negatives and
-#' all corresponding metric values.
-#'
-#' @inheritParams oc_youden_normal
-#' @param metric_func (function) A function that computes a single number
-#' metric to be maximized. See description.
-#' @param criterion the criterion for automatic smoothing parameter selection:
-#'  "aicc" denotes bias-corrected AIC criterion, "gcv" denotes generalized
-#'  cross-validation.
-#' @param degree the degree of the local polynomials to be used. It can be
-#'  0, 1 or 2.
-#' @param family if "gaussian" fitting is by least-squares, and if "symmetric"
-#'  a re-descending M estimator is used with Tukey's biweight function.
-#' @param ... Further arguments that will be passed to metric_func or the
-#' loess smoother.
-#'
-#' @source Xiao-Feng Wang (2010). fANCOVA: Nonparametric Analysis of Covariance.
-#'  https://CRAN.R-project.org/package=fANCOVA
-#' @source Leeflang, M. M., Moons, K. G., Reitsma, J. B., & Zwinderman, A. H.
-#' (2008). Bias in sensitivity and specificity caused by data-driven selection
-#' of optimal cutoff values: mechanisms, magnitude, and solutions.
-#' Clinical Chemistry, (4), 729–738.
 #' @examples
 #' oc <- cutpointr(suicide, dsi, suicide, gender, method = minimize_loess_metric,
 #' criterion = "aicc", family = "symmetric", degree = 2, user.span = 0.7,
 #' metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
 #' plot_metric(oc)
+#' @rdname maximize_loess_metric
 #' @export
 minimize_loess_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
                             criterion = "aicc", degree = 1, family = "symmetric",
-                            ...) {
+                            user.span = NULL, tol_metric, ...) {
+    if (!requireNamespace("fANCOVA", quietly = TRUE)) {
+        stop("fANCOVA package has to be installed to use LOESS smoothing.")
+    }
     metric_name <- as.character(substitute(metric_func))
+    if (is.function(user.span)) {
+        us <- user.span(data = data, x = x)
+    } else {
+        us <- user.span
+    }
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "min",
                     direction = direction, metric_name = metric_name,
                     criterion = criterion, degree = degree, family = family,
-                    loess = TRUE, ...)
+                    loess = TRUE, user.span = us,
+                    tol_metric = tol_metric, ...)
 }
 
-
-#' Maximize a metric function in binary classification after bootstrapping
+#' Calculate bandwidth for LOESS smoothing of metric functions by rule of thumb
 #'
-#' Given a function for computing a metric in \code{metric_func}, this function
-#' bootstraps the data \code{boot_cut} times and
-#' maximizes the metric by selecting an optimal cutpoint. The returned
+#' This function implements a rule of thumb for selecting the bandwidth when
+#' smoothing a function of metric values per cutpoint value, particularly
+#' in \code{maximize_loess_metric} and \code{minimize_loess_metric}.
+#'
+#' The function used for calculating the bandwidth is 0.1 * xsd / sqrt(xn),
+#' where xsd is the standard deviation of the unique values of the predictor
+#' variable (i.e. all cutpoints) and xn is the number of unique predictor values.
+#'
+#' @param data A data frame
+#' @param x The predictor variable
+#' @examples
+#' user_span_cutpointr(suicide, "dsi")
+user_span_cutpointr <- function(data, x) {
+    finite_x <- is.finite(data[[x]])
+    xsd <- stats::sd(data[[x]][finite_x], na.rm = TRUE)
+    xn <- length(unique(data[[x]][finite_x]))
+
+    print(0.1 * xsd / sqrt(xn))
+    return(0.1 * xsd / sqrt(xn))
+}
+
+#' Optimize a metric function in binary classification after bootstrapping
+#'
+#' Given a function for computing a metric in \code{metric_func}, these functions
+#' bootstrap the data \code{boot_cut} times and
+#' maximize or minimize the metric by selecting an optimal cutpoint. The returned
 #' optimal cutpoint is the result of applying \code{summary_func}, e.g. the mean,
 #' to all optimal cutpoints that were determined in the bootstrap samples.
 #' The \code{metric} function should accept the following inputs:
@@ -294,8 +303,6 @@ minimize_loess_metric <- function(data, x, class, metric_func = youden,
 #' -Inf as possible cutpoints for classifying the variable in class.
 #' The reported metric represents the usual in-sample performance of the
 #' determined cutpoint.
-#'
-#'
 #'
 #' @return A tibble with the column \code{optimal_cutpoint}
 #'
@@ -308,26 +315,32 @@ minimize_loess_metric <- function(data, x, class, metric_func = youden,
 #' optimal cutpoint is calculated.
 #' @param inf_rm (logical) whether to remove infinite cutpoints before
 #' calculating the summary.
+#' @param tol_metric All cutpoints will be passed to \code{summary_func}
+#' that lead to a metric
+#' value in the interval [m_max - tol_metric, m_max + tol_metric] where
+#' m_max is the maximum achievable metric value. This can be used to return
+#' multiple decent cutpoints and to avoid floating-point problems.
 #'
 #' @examples
 #' set.seed(100)
 #' cutpointr(suicide, dsi, suicide, method = maximize_boot_metric,
 #'           metric = accuracy, boot_cut = 30)
+#' @name maximize_boot_metric
 #' @export
 maximize_boot_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
                             summary_func = mean, boot_cut = 50, inf_rm = TRUE,
-                            ...) {
+                            tol_metric, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimal_cutpoints <- purrr::map(1:boot_cut, function(i) {
-        b_ind <- sample(1:nrow(data), size = nrow(data), replace = TRUE)
+        b_ind <- simple_boot(data, class)
         opt_cut <- optimize_metric(data = data[b_ind, ],
                                    x = x, class = class,
                                    metric_func = metric_func,
                                    pos_class = pos_class, neg_class = neg_class,
                                    minmax = "max", direction = direction,
-                                   metric_name = metric_name,
-                                   return_roc = FALSE, ...)
+                                   metric_name = metric_name, return_roc = FALSE,
+                                   tol_metric = tol_metric, ...)
         unlist(opt_cut$optimal_cutpoint)
     })
     optimal_cutpoints <- unlist(optimal_cutpoints)
@@ -335,40 +348,7 @@ maximize_boot_metric <- function(data, x, class, metric_func = youden,
     return(data.frame(optimal_cutpoint = summary_func(optimal_cutpoints)))
 }
 
-
-#' Minimize a metric function in binary classification after bootstrapping
-#'
-#' Given a function for computing a metric in \code{metric_func}, this function
-#' bootstraps the data \code{boot_cut} times and
-#' minimizes the metric by selecting an optimal cutpoint. The returned
-#' optimal cutpoint is the result of applying \code{summary_func}, e.g. the mean,
-#' to all optimal cutpoints that were determined in the bootstrap samples.
-#' The \code{metric} function should accept the following inputs:
-#' \itemize{
-#'  \item \code{tp}: vector of number of true positives
-#'  \item \code{fp}: vector of number of false positives
-#'  \item \code{tn}: vector of number of true negatives
-#'  \item \code{fn}: vector of number of false negatives
-#' }
-#'
-#' The above inputs are arrived at by using all unique values in \code{x}, Inf, and
-#' -Inf as possible cutpoints for classifying the variable in class.
-#' The reported metric represents the usual in-sample performance of the
-#' determined cutpoint.
-#'
-#'
-#' @return A tibble with the column optimal_cutpoint
-#'
-#' @inheritParams oc_youden_normal
-#' @param metric_func (function) A function that computes a single number
-#' metric to be maximized. See description.
-#' @param summary_func (function) After obtaining the bootstrapped optimal
-#' cutpoints this function, e.g. mean or median, is applied to arrive at a single cutpoint.
-#' @param boot_cut (numeric) Number of bootstrap repetitions over which the mean
-#' optimal cutpoint is calculated.
-#' @param inf_rm (logical) whether to remove infinite cutpoints before
-#' calculating the summary.
-#'
+#' @rdname maximize_boot_metric
 #' @examples
 #' set.seed(100)
 #' cutpointr(suicide, dsi, suicide, method = minimize_boot_metric,
@@ -377,17 +357,17 @@ maximize_boot_metric <- function(data, x, class, metric_func = youden,
 minimize_boot_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
                             summary_func = mean, boot_cut = 50, inf_rm = TRUE,
-                            ...) {
+                            tol_metric, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimal_cutpoints <- purrr::map(1:boot_cut, function(i) {
-        b_ind <- sample(1:nrow(data), size = nrow(data), replace = TRUE)
+        b_ind <- simple_boot(data, class)
         opt_cut <- optimize_metric(data = data[b_ind, ],
                                    x = x, class = class,
                                    metric_func = metric_func,
                                    pos_class = pos_class, neg_class = neg_class,
                                    minmax = "min", direction = direction,
-                                   metric_name = metric_name,
-                                   return_roc = FALSE, ...)
+                                   metric_name = metric_name, return_roc = FALSE,
+                                   tol_metric = tol_metric, ...)
         unlist(opt_cut$optimal_cutpoint)
     })
     optimal_cutpoints <- unlist(optimal_cutpoints)
@@ -422,26 +402,29 @@ minimize_boot_metric <- function(data, x, class, metric_func = youden,
 #' @inheritParams oc_youden_normal
 #' @param metric_func (function) A function that computes a
 #' metric to be optimized. See description.
-#' @param w optional vector of weights of the same length as x; defaults to all 1.
-#' @param df the desired equivalent number of degrees of freedom
+#' @param w Optional vector of weights of the same length as x; defaults to all 1.
+#' @param df The desired equivalent number of degrees of freedom
 #' (trace of the smoother matrix). Must be in (1,nx], nx the number of
-#' unique x values, see below.
-#' @param spar smoothing parameter, typically (but not necessarily) in (0,1].
+#' unique x values.
+#' @param spar Smoothing parameter, typically (but not necessarily) in (0,1].
 #' When spar is specified, the coefficient lambda of the integral of the squared
 #' second derivative in the fit (penalized log likelihood) criterion is a
-#' monotone function of spar, see the details below. Alternatively lambda may
-#' be specified instead of the scale free spar=s.
-#' @param nknots integer or function giving the number of knots. The function
+#' monotone function of spar.
+#' @param nknots Integer or function giving the number of knots. The function
 #' should accept data and x (the name of the predictor variable) as inputs.
 #' By default nknots = 0.1 * log(n_dat / n_cut) * n_cut where n_dat is the
 #' number of observations and n_cut the number of unique predictor values.
-#' @param df_offset allows the degrees of freedom to be increased by df_offset
+#' @param df_offset Allows the degrees of freedom to be increased by df_offset
 #' in the GCV criterion.
-#' @param penalty the coefficient of the penalty for degrees of freedom in the
+#' @param penalty The coefficient of the penalty for degrees of freedom in the
 #' GCV criterion.
-#' @param control_spar optional list with named components controlling the root
+#' @param control_spar Optional list with named components controlling the root
 #' finding when the smoothing parameter spar is computed, i.e., NULL. See
 #' help("smooth.spline") for further information.
+#' @param tol_metric All cutpoints will be returned that lead to a metric
+#' value in the interval [m_max - tol_metric, m_max + tol_metric] where
+#' m_max is the maximum achievable metric value. This can be used to return
+#' multiple decent cutpoints and to avoid floating-point problems.
 #' @param ... Further arguments that will be passed to metric_func.
 #'
 #' @examples
@@ -452,45 +435,45 @@ minimize_boot_metric <- function(data, x, class, metric_func = youden,
 #' @name maximize_spline_metric
 maximize_spline_metric <- function(data, x, class, metric_func = youden,
                                    pos_class = NULL, neg_class = NULL, direction,
-                                   w = NULL, df = NULL, spar = NULL,
+                                   w = NULL, df = NULL, spar = 1,
                                    nknots = cutpoint_knots, df_offset = NULL,
                                    penalty = 1, control_spar = list(),
-                                   ...) {
+                                   tol_metric, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "max",
                     direction = direction, metric_name = metric_name,
                     w = w, df = df, spar = spar, nknots = nknots,
                     df_offset = df_offset, penalty = penalty,
-                    control_spar = control_spar, spline = TRUE, ...)
+                    control_spar = control_spar, spline = TRUE,
+                    tol_metric = tol_metric, ...)
 }
 
 #' @rdname maximize_spline_metric
 #' @export
 minimize_spline_metric <- function(data, x, class, metric_func = youden,
                                    pos_class = NULL, neg_class = NULL, direction,
-                                   w = NULL, df = NULL, spar = NULL,
+                                   w = NULL, df = NULL, spar = 1,
                                    nknots = cutpoint_knots,
                                    df_offset = NULL, penalty = 1,
-                                   control_spar = list(), ...) {
+                                   control_spar = list(), tol_metric,  ...) {
     metric_name <- as.character(substitute(metric_func))
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "min",
                     direction = direction, metric_name = metric_name,
                     w = w, df = df, spar = spar, nknots = nknots,
                     df_offset = df_offset, penalty = penalty,
-                    control_spar = control_spar, spline = TRUE, ...)
+                    control_spar = control_spar, spline = TRUE,
+                    tol_metric = tol_metric, ...)
 }
 
 #' Calculate number of knots to use in spline smoothing
 #'
-#' This function implements a rule of thumb for picking a number of knots
+#' This function calculates the number of knots
 #' when using smoothing splines for smoothing a function of metric values per
-#' cutpoint value.
-#'
-#' The number of knots is equal to ceiling(0.1 * log(n) / n_cut) * n_cut) + 1
-#' where n is the number of observations and n_cut is the number of unique
-#' cutpoints found in the data.
+#' cutpoint value. The function for calculating the number of knots is equal
+#' to \code{stats::.nknots_smspl} but uses the number of unique cutpoints
+#' in the data as n.
 #'
 #' @param data A data frame
 #' @param x (character) The name of the predictor variable
@@ -499,5 +482,91 @@ minimize_spline_metric <- function(data, x, class, metric_func = youden,
 #' @export
 cutpoint_knots <- function(data, x) {
     n_cut <- length(unique(data[[x]]))
-    ceiling(0.1 * log(nrow(data) / n_cut) * n_cut) + 1
+    n_knots <- stats::.nknots.smspl(n_cut)
+    return(n_knots)
+}
+
+#' Optimize a metric function in binary classification after smoothing via
+#' generalized additive models
+#'
+#' Given a function for computing a metric in \code{metric_func}, these functions
+#' smooth the function of metric value per cutpoint using generalized additive
+#' models (as implemented in \pkg{mgcv}), then
+#' maximize or minimize the metric by selecting an optimal cutpoint. For further details
+#' on the GAM smoothing see \code{?mgcv::gam}.
+#' The \code{metric} function should accept the following inputs:
+#' \itemize{
+#'  \item \code{tp}: vector of number of true positives
+#'  \item \code{fp}: vector of number of false positives
+#'  \item \code{tn}: vector of number of true negatives
+#'  \item \code{fn}: vector of number of false negatives
+#' }
+#'
+#' The above inputs are arrived at by using all unique values in \code{x}, Inf, and
+#' -Inf as possible cutpoints for classifying the variable in class.
+#'
+#' @return A tibble with the columns \code{optimal_cutpoint}, the corresponding metric
+#' value and \code{roc_curve}, a nested tibble that includes all possible cutoffs
+#' and the corresponding numbers of true and false positives / negatives and
+#' all corresponding metric values.
+#'
+#' @inheritParams oc_youden_normal
+#' @param metric_func (function) A function that computes a
+#' metric to be maximized. See description.
+#' @param family This is a family object specifying the distribution and link to
+#' use in fitting.
+#' @param tol_metric All cutpoints will be returned that lead to a metric
+#' value in the interval [m_max - tol_metric, m_max + tol_metric] where
+#' m_max is the maximum achievable metric value. This can be used to return
+#' multiple decent cutpoints and to avoid floating-point problems.
+#' @param ... Further arguments that will be passed to metric_func or the
+#' GAM smoother.
+#'
+#' @examples
+#' oc <- cutpointr(suicide, dsi, suicide, gender, method = maximize_gam_metric,
+#' metric = accuracy)
+#' plot_metric(oc)
+#' @name maximize_gam_metric
+#' @export
+maximize_gam_metric <- function(data, x, class, metric_func = youden,
+                                pos_class = NULL, neg_class = NULL, direction,
+                                formula = m ~ s(x.sorted),
+                                family = stats::gaussian(), method = "GCV.Cp",
+                                optimizer = c("outer", "newton"),
+                                tol_metric, ...) {
+    if (!requireNamespace("mgcv", quietly = TRUE)) {
+        stop("mgcv package has to be installed to use GAM smoothing.")
+    }
+    formula <- as.character(formula)
+    metric_name <- as.character(substitute(metric_func))
+    optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
+                    pos_class = pos_class, neg_class = neg_class, minmax = "max",
+                    direction = direction, metric_name = metric_name,
+                    formula = formula, family = family, method = method,
+                    optimizer = optimizer, gam = TRUE, tol_metric = tol_metric,
+                    ...)
+}
+
+#' @examples
+#' oc <- cutpointr(suicide, dsi, suicide, gender, method = minimize_gam_metric,
+#' metric = abs_d_sens_spec)
+#' plot_metric(oc)
+#' @rdname maximize_gam_metric
+#' @export
+minimize_gam_metric <- function(data, x, class, metric_func = youden,
+                                pos_class = NULL, neg_class = NULL, direction,
+                                formula = m ~ s(x.sorted),
+                                family = stats::gaussian(), method = "GCV.Cp",
+                                optimizer = c("outer", "newton"),
+                                tol_metric, ...) {
+    if (!requireNamespace("mgcv", quietly = TRUE)) {
+        stop("mgcv package has to be installed to use GAM smoothing.")
+    }
+    metric_name <- as.character(substitute(metric_func))
+    optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
+                    pos_class = pos_class, neg_class = neg_class, minmax = "min",
+                    direction = direction, metric_name = metric_name,
+                    formula = formula, family = family, method = method,
+                    optimizer = optimizer, gam = TRUE, tol_metric = tol_metric,
+                    ...)
 }

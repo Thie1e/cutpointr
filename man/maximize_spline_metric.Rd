@@ -8,12 +8,12 @@
 maximize_spline_metric(data, x, class, metric_func = youden,
   pos_class = NULL, neg_class = NULL, direction, w = NULL, df = NULL,
   spar = NULL, nknots = cutpoint_knots, df_offset = NULL, penalty = 1,
-  control_spar = list(), ...)
+  control_spar = list(), tol_metric, ...)
 
 minimize_spline_metric(data, x, class, metric_func = youden,
   pos_class = NULL, neg_class = NULL, direction, w = NULL, df = NULL,
   spar = NULL, nknots = cutpoint_knots, df_offset = NULL, penalty = 1,
-  control_spar = list(), ...)
+  control_spar = list(), tol_metric, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -34,32 +34,36 @@ metric to be optimized. See description.}
 \item{direction}{(character) Use ">=" or "<=" to select whether an x value
 >= or <= the cutoff predicts the positive class.}
 
-\item{w}{optional vector of weights of the same length as x; defaults to all 1.}
+\item{w}{Optional vector of weights of the same length as x; defaults to all 1.}
 
-\item{df}{the desired equivalent number of degrees of freedom
+\item{df}{The desired equivalent number of degrees of freedom
 (trace of the smoother matrix). Must be in (1,nx], nx the number of
-unique x values, see below.}
+unique x values.}
 
-\item{spar}{smoothing parameter, typically (but not necessarily) in (0,1].
+\item{spar}{Smoothing parameter, typically (but not necessarily) in (0,1].
 When spar is specified, the coefficient lambda of the integral of the squared
 second derivative in the fit (penalized log likelihood) criterion is a
-monotone function of spar, see the details below. Alternatively lambda may
-be specified instead of the scale free spar=s.}
+monotone function of spar.}
 
-\item{nknots}{integer or function giving the number of knots. The function
+\item{nknots}{Integer or function giving the number of knots. The function
 should accept data and x (the name of the predictor variable) as inputs.
 By default nknots = 0.1 * log(n_dat / n_cut) * n_cut where n_dat is the
 number of observations and n_cut the number of unique predictor values.}
 
-\item{df_offset}{allows the degrees of freedom to be increased by df_offset
+\item{df_offset}{Allows the degrees of freedom to be increased by df_offset
 in the GCV criterion.}
 
-\item{penalty}{the coefficient of the penalty for degrees of freedom in the
+\item{penalty}{The coefficient of the penalty for degrees of freedom in the
 GCV criterion.}
 
-\item{control_spar}{optional list with named components controlling the root
+\item{control_spar}{Optional list with named components controlling the root
 finding when the smoothing parameter spar is computed, i.e., NULL. See
 help("smooth.spline") for further information.}
+
+\item{tol_metric}{All cutpoints will be returned that lead to a metric
+value in the interval [m_max - tol_metric, m_max + tol_metric] where
+m_max is the maximum achievable metric value. This can be used to return
+multiple decent cutpoints and to avoid floating-point problems.}
 
 \item{...}{Further arguments that will be passed to metric_func.}
 }

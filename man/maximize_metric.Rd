@@ -2,10 +2,14 @@
 % Please edit documentation in R/optimize_metric.R
 \name{maximize_metric}
 \alias{maximize_metric}
-\title{Maximize a metric function in binary classification}
+\alias{minimize_metric}
+\title{Optimize a metric function in binary classification}
 \usage{
 maximize_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction, ...)
+  neg_class = NULL, direction, tol_metric, ...)
+
+minimize_metric(data, x, class, metric_func = youden, pos_class = NULL,
+  neg_class = NULL, direction, tol_metric, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -26,7 +30,12 @@ metric to be maximized. See description.}
 \item{direction}{(character) Use ">=" or "<=" to select whether an x value
 >= or <= the cutoff predicts the positive class.}
 
-\item{...}{Further arguments that will be passed to \code{metric_func}}
+\item{tol_metric}{All cutpoints will be returned that lead to a metric
+value in the interval [m_max - tol_metric, m_max + tol_metric] where
+m_max is the maximum achievable metric value. This can be used to return
+multiple decent cutpoints and to avoid floating-point problems.}
+
+\item{...}{Further arguments that will be passed to \code{metric_func}.}
 }
 \value{
 A tibble with the columns \code{optimal_cutpoint}, the corresponding metric
@@ -35,8 +44,8 @@ and the corresponding numbers of true and false positives / negatives and
 all corresponding metric values.
 }
 \description{
-Given a function for computing a metric in \code{metric_func}, this function
-maximizes that metric by selecting an optimal cutpoint.
+Given a function for computing a metric in \code{metric_func}, these functions
+maximize or minimize that metric by selecting an optimal cutpoint.
 The metric function should accept the following inputs:
 \itemize{
  \item \code{tp}: vector of number of true positives
@@ -51,4 +60,5 @@ The above inputs are arrived at by using all unique values in \code{x}, Inf, or
 }
 \examples{
 cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
+cutpointr(suicide, dsi, suicide, method = minimize_metric, metric = abs_d_sens_spec)
 }
