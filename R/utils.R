@@ -216,3 +216,46 @@ add_list <- function(x, y, name) {
     }
     return(x)
 }
+
+# rbind list elements that are tibbles with different column types (list or dbl,
+# may be necessary for bootstrap results, if only one bootstrap resulted in
+# multiple optimal cutpoints)
+# Convert non-list columns to list so that bind_rows doesn't complain
+prepare_bind_rows <- function(x) {
+    stopifnot(is.list(x))
+    if (length(x) < 2) {
+        return(x)
+    } else {
+        list_cols <- purrr::map(x, function(x) {
+            which(purrr::map_chr(x, class) == "list")
+        })
+        list_cols <- unique(unlist(list_cols))
+        x <- purrr::map(x, function(x) {
+            dplyr::mutate_at(.tbl = x, .vars = list_cols, .funs = function(x) {
+                if (!is.list(x)) {
+                    purrr::map(x, function(x) x)
+                } else {
+                    x
+                }
+            })
+        })
+        return(x)
+    }
+}
+
+simple_boot <- function(data, dep_var) {
+    draw_again <- TRUE
+    i <- 1
+    while (draw_again) {
+        b_ind <- sample(1:nrow(data), size = nrow(data), replace = TRUE)
+        if (cutpointr:::only_one_unique(unlist(data[b_ind, dep_var]))) {
+            draw_again <- TRUE
+            i <- i + 1
+            if (i >= 100) stop(paste("No sets including both classes drawn in",
+                                     "bootstrap after 100 tries."))
+        } else {
+            draw_again <- FALSE
+        }
+    }
+    return(b_ind)
+}
