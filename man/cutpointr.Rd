@@ -11,14 +11,14 @@ cutpointr(...)
 \method{cutpointr}{default}(data, x, class, subgroup = NULL,
   method = maximize_metric, metric = sum_sens_spec, pos_class = NULL,
   neg_class = NULL, direction = NULL, boot_runs = 0,
-  use_midpoints = FALSE, break_ties = median, na.rm = FALSE,
-  allowParallel = FALSE, silent = FALSE, ...)
+  use_midpoints = FALSE, break_ties = c, na.rm = FALSE,
+  allowParallel = FALSE, silent = FALSE, tol_metric = 1e-06, ...)
 
 \method{cutpointr}{numeric}(x, class, subgroup = NULL,
   method = maximize_metric, metric = sum_sens_spec, pos_class = NULL,
   neg_class = NULL, direction = NULL, boot_runs = 0,
   use_midpoints = FALSE, break_ties = median, na.rm = FALSE,
-  allowParallel = FALSE, silent = FALSE, ...)
+  allowParallel = FALSE, silent = FALSE, tol_metric = 1e-06, ...)
 }
 \arguments{
 \item{...}{Further optional arguments that will be passed to method.
@@ -72,6 +72,12 @@ using foreach. A local cluster, for example, should be started manually
 beforehand.}
 
 \item{silent}{(logical) If TRUE suppresses all messages.}
+
+\item{tol_metric}{All cutpoints will be returned that lead to a metric
+value in the interval [m_max - tol_metric, m_max + tol_metric] where
+m_max is the maximum achievable metric value. This can be used to return
+multiple decent cutpoints and to avoid floating-point problems. Not supported
+by all \code{method} functions, see details.}
 }
 \value{
 A cutpointr object which is also a data.frame and tbl_df.
@@ -201,6 +207,18 @@ list that contains the vector(s) of the optimal cutpoints.
 
 If \code{use_midpoints = TRUE} the mean of the optimal cutpoint and the next
 highest or lowest possible cutpoint is returned, depending on \code{direction}.
+
+The \code{tol_metric} argument can be used to avoid floating-point problems
+that may lead to exclusion of cutpoints that achieve the optimally achievable
+metric value. Additionally, by selecting a large tolerance multiple cutpoints
+can be returned that lead to decent metric values in the vicinity of the
+optimal metric value. \code{tol_metric} is passed to metric and is only
+supported by the maximization and minimization functions, i.e.
+\code{maximize_metric}, \code{minimize_metric}, \code{maximize_loess_metric},
+\code{minimize_loess_metric}, \code{maximize_spline_metric}, and
+\code{minimize_spline_metric}. In \code{maximize_boot_metric} and
+\code{minimize_boot_metric} multiple optimal cutpoints will be passed to the
+\code{summary_func} of these two functions.
 }
 \examples{
 library(cutpointr)

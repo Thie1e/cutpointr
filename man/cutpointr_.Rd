@@ -8,7 +8,7 @@ cutpointr_(data, x, class, subgroup = NULL, method = maximize_metric,
   metric = sum_sens_spec, pos_class = NULL, neg_class = NULL,
   direction = NULL, boot_runs = 0, use_midpoints = FALSE,
   break_ties = median, na.rm = FALSE, allowParallel = FALSE,
-  silent = FALSE, ...)
+  silent = FALSE, tol_metric = 1e-06, ...)
 }
 \arguments{
 \item{data}{A data.frame with the data needed for x, class and subgroup.}
@@ -57,6 +57,12 @@ using foreach. A local cluster, for example, should be started manually
 beforehand.}
 
 \item{silent}{(logical) If TRUE suppresses all messages.}
+
+\item{tol_metric}{All cutpoints will be returned that lead to a metric
+value in the interval [m_max - tol_metric, m_max + tol_metric] where
+m_max is the maximum achievable metric value. This can be used to return
+multiple decent cutpoints and to avoid floating-point problems. Not supported
+by all \code{method} functions, see details.}
 
 \item{...}{Further optional arguments that will be passed to method.
 minimize_metric and maximize_metric pass ... to metric.}
