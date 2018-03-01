@@ -23,21 +23,21 @@ assume_direction_pos_class <- function(x, class, pos_class, neg_class, direction
     if (!is.null(direction) & is.null(pos_class)) {
         if (direction == ">" | direction == ">=") {
             if (stats::median(x[class == uc[1]]) > stats::median(x[class == uc[2]])) {
-                message(paste("Assuming", uc[1], "as the positive class"))
+                message(paste("Assuming the positive class is", uc[1]))
                 message("Assuming the positive class has higher x values")
                 pos_class <- uc[1]
             } else {
-                message(paste("Assuming", uc[2], "as the positive class"))
+                message(paste("Assuming the positive class is", uc[2]))
                 message("Assuming the positive class has higher x values")
                 pos_class <- uc[2]
             }
         } else {
             if (stats::median(x[class == uc[1]]) < stats::median(x[class == uc[2]])) {
-                message(paste("Assuming", uc[1], "as the positive class"))
+                message(paste("Assuming the positive class is", uc[1]))
                 message("Assuming the positive class has lower x values")
                 pos_class <- uc[1]
             } else {
-                message(paste("Assuming", uc[2], "as the positive class"))
+                message(paste("Assuming the positive class is", uc[2]))
                 message("Assuming the positive class has lower x values")
                 pos_class <- uc[2]
             }
