@@ -1,3 +1,20 @@
+# cutpointr 0.7.0
+- Change defaults in spline smoothing: nknots is now calculated by 
+stats::.nknots_smspl and spar = 1 
+- Add `cutpoint_tol` argument to define a tolerance around the optimized metric,
+so that multiple cutpoints in the vicinity of the target metric can be returned
+and to avoid not returning other "optimal" cutpoints due to floating-point
+problems
+- Change default value to `break_ties = c`
+- If multiple optimal cutpoints are found and they are summarized using 
+`break_ties`, the returned main metric is now not the optimal one but the
+one corresponding to the summarized cutpoint (thus may be worse than the 
+optimal one)
+- Add `maximize_gam_metric` and `minimize_gam_metric` for smoothing via
+generalized additive models
+- All plots with `geom_ribbon` now use `size = 0` to plot no lines around the
+(transparent) areas
+
 # cutpointr 0.6.0
 - Return multiple optimal cutpoints
 - Add spline smoothing method
