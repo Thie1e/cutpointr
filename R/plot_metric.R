@@ -25,6 +25,7 @@ plot_metric <- function(x, conf_lvl = 0.95) {
         if ("subgroup" %in% colnames(x)) {
             roc_b_unnested <- x %>%
                 dplyr::select_(.dots = c("boot", "subgroup")) %>%
+                dplyr::mutate(boot = prepare_bind_rows(boot)) %>%
                 tidyr::unnest_(unnest_cols = "boot") %>%
                 dplyr::select_(.dots = c("subgroup", "roc_curve_b")) %>%
                 tidyr::unnest_(unnest_cols = "roc_curve_b")

@@ -32,6 +32,7 @@ plot_cut_boot <- function(x, ...) {
     if(!is.null(suppressWarnings(x$boot))) {
         res_boot_unnested <- x %>%
             dplyr::select_(.dots = dts_boot) %>%
+            dplyr::mutate(boot = prepare_bind_rows(boot)) %>%
             tidyr::unnest_(unnest_cols = "boot")
         cutpoints <- unlist(res_boot_unnested$optimal_cutpoint)
         if (all(na_inf_omit(cutpoints %% 1 == 0)) |
