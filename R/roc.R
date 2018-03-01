@@ -41,7 +41,7 @@ roc <- function(data, x, class, pos_class, neg_class, direction = ">=",
     if (direction == ">=") {
         pred.order <- order(x, decreasing = TRUE)
         x.sorted <- x[pred.order]
-        dups <- get_rev_dups(x.sorted)
+        dups <- rev(duplicated(rev(x.sorted)))
         x.sorted <- x.sorted[!dups]
         class.sorted <- class[pred.order]
         tp <- cumsum(is_equal_cpp(class.sorted, pos_class))
@@ -64,7 +64,7 @@ roc <- function(data, x, class, pos_class, neg_class, direction = ">=",
     } else if (direction == "<=") {
         pred.order <- order(x, decreasing = FALSE)
         x.sorted <- x[pred.order]
-        dups <- get_rev_dups(x.sorted)
+        dups <- rev(duplicated(rev(x.sorted)))
         x.sorted <- x.sorted[!dups]
         class.sorted <- class[pred.order]
         tp <- cumsum(is_equal_cpp(class.sorted, pos_class))
