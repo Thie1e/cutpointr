@@ -113,6 +113,16 @@ test_that("Plotting with bootstrapping is silent", {
     expect_silent(plot_metric_boot(opt_cut))
     expect_silent(plot_x(opt_cut))
     expect_silent(plot_precision_recall(opt_cut))
+
+    set.seed(102)
+    opt_cut <- cutpointr(suicide, dsi, suicide, gender, method = minimize_metric,
+                         metric = abs_d_sens_spec, boot_runs = 50, silent = TRUE)
+    plot_cut_boot(opt_cut)
+    plot_metric(opt_cut, conf_lvl = 0.9)
+    plot_metric_boot(opt_cut)
+    plot_precision_recall(opt_cut)
+    plot_sensitivity_specificity(opt_cut)
+    plot_roc(opt_cut)
 })
 
 test_that("AUC calculation is correct and works with Inf and -Inf", {
@@ -332,7 +342,8 @@ test_that("cutpointr detects wrong number of classes", {
 
 test_that("Bootstrap returns plausible results", {
     set.seed(123)
-    opt_cut <- suppressWarnings(cutpointr(suicide, dsi, suicide, boot_runs = 50))
+    opt_cut <- suppressWarnings(cutpointr(suicide, dsi, suicide,
+                                          boot_runs = 50, break_ties = mean))
     expect_true(mean(opt_cut$boot[[1]]$sum_sens_spec_b) > 1.3 &
                     mean(opt_cut$boot[[1]]$sum_sens_spec_b) < 3)
     expect_true(sd(opt_cut$boot[[1]]$sum_sens_spec_b) > 0.02 &
@@ -344,7 +355,7 @@ test_that("Bootstrap returns plausible results", {
 
     set.seed(123)
     opt_cut <- suppressWarnings(cutpointr_(suicide, "dsi", "suicide",
-                                           boot_runs = 50))
+                                           boot_runs = 50, break_ties = mean))
     expect_true(mean(opt_cut$boot[[1]]$sum_sens_spec_b) > 1.3 &
                     mean(opt_cut$boot[[1]]$sum_sens_spec_b) < 3)
     expect_true(sd(opt_cut$boot[[1]]$sum_sens_spec_b) > 0.02 &
@@ -471,14 +482,14 @@ test_that("Results for p_chisquared are equal to results by OptimalCutpoints", {
     suppressWarnings(
         opt_cut_cp <- cutpointr(tempdat, x, y, method = minimize_metric,
                                 metric = p_chisquared, direction = ">=",
-                                pos_class = 1)
+                                pos_class = 1, tol_metric = 0)
     )
     expect_equal(round(opt_cut_cp$optimal_cutpoint, 4), 0.9335)
 
     suppressWarnings(
         opt_cut_cp <- cutpointr(tempdat, x, y, group, method = minimize_metric,
                                 metric = p_chisquared, direction = ">=",
-                                pos_class = 1)
+                                pos_class = 1, tol_metric = 0)
     )
     expect_equal(round(opt_cut_cp$optimal_cutpoint, 4), c(0.9335, 0.5676))
 })
@@ -653,8 +664,22 @@ test_that("LOESS smoothing does not return warnings or errors", {
 
     expect_silent(
         suppressMessages(
-            cutpointr(tempdat, x, y, method = maximize_loess_metric,
+            cp <- cutpointr(tempdat, x, y, method = maximize_loess_metric,
                             user.span = 1,
+                            metric = accuracy, direction = ">=",
+                            pos_class = 1, boot_runs = 10)
+        )
+    )
+    expect_equal(round(cp$optimal_cutpoint, 3), 0.507)
+    expect_equal(round(cp$loess_accuracy, 3), 0.690)
+
+    set.seed(208)
+    tempdat <- data.frame(x = c(rnorm(100), rnorm(100, mean = 2)) ,
+                          y = c(rep(0, 100), rep(1, 100)),
+                          group = sample(c("a", "b"), size = 200, replace = TRUE))
+    expect_silent(
+        suppressMessages(
+            cp <- cutpointr(tempdat, x, y, method = maximize_loess_metric,
                             metric = accuracy, direction = ">=",
                             pos_class = 1, boot_runs = 10)
         )
@@ -798,10 +823,12 @@ test_that("plot_cutpointr runs", {
 })
 
 test_that("smoothing splines lead to plausible results", {
-    cp <- cutpointr(suicide, dsi, suicide, method = maximize_spline_metric)
+    cp <- cutpointr(suicide, dsi, suicide, method = maximize_spline_metric,
+                    nknots = 6)
     expect_equal(cp$optimal_cutpoint, 2)
 
-    cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric)
+    cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric,
+                    nknots = 5)
     expect_equal(cp$optimal_cutpoint, c(2, 2))
 
     cp <- cutpointr(suicide, dsi, suicide, method = maximize_spline_metric,
@@ -811,6 +838,18 @@ test_that("smoothing splines lead to plausible results", {
     cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric,
                     nknots = 5, spar = 0.3)
     expect_equal(cp$optimal_cutpoint, c(3, 3))
+})
+
+test_that("this led to an error with get_rev_dups Rcpp function", {
+    dat <- rbind(data.frame(x = round(rnorm(5000), 1), y = 0),
+                 data.frame(x = round(rnorm(5000, mean = 0.05), 1), y = 1))
+    expect_silent(cutpointr(dat, x, y, method = maximize_spline_metric,
+                            nknots = 50, silent = TRUE))
+})
+
+
+test_that("cutpoint_knots returns correct results", {
+    expect_equal(cutpoint_knots(suicide, "dsi"), 11)
 })
 
 test_that("cutpointr handles multiple optimal cutpoints correctly", {
@@ -837,4 +876,83 @@ test_that("cutpointr handles multiple optimal cutpoints correctly", {
                      newdata = data.frame(x = c(3,4,5,8), g = c(1,1,2,2)),
                      cutpoint_nr = c(2, 1))
     expect_equal(preds, c(0,1,0,1))
+
+    # 5 "optimal" cutpoints at 1.2. Only one is returned without
+    # using a tolerance argument due to floating point problems
+    dat <-
+        structure(list(x = c(107.163316194991, 105.577309820546, 114.819340158769,
+                             93.8701224510515, 111.161366154904, 110.365480099412, 98.3751686809715,
+                             90.2407330717812, 89.1085480911548, 104.57786957945, 99.2887326627911,
+                             117.791026668514, 105.351379604962, 96.280551248365, 89.7445775150289,
+                             100.175983253947, 109.428883928973, 101.490653529433, 111.142301202307,
+                             102.656619478302, 104.944400912055, 98.6949032719217, 125.050435849087,
+                             109.326217314704, 108.306336404995, 89.0813758511593, 112.597918995493,
+                             95.7637641112029, 97.084784256457, 115.183411710216),
+                       group = structure(c(1L,
+                                           1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L,
+                                           2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L),
+                                         .Label = c("h", "d"), class = "factor")),
+                  .Names = c("x", "group"), row.names = c(NA, -30L), class = "data.frame")
+    cp <- cutpointr(dat, x, group, break_ties = c, tol_metric = 1e-6)
+    expect_equal(length(unlist(cp$optimal_cutpoint)), 5)
+})
+
+test_that("Main metric gets replaced correctly when ties are broken", {
+    dat <- structure(list(x = c(101.805229018197, 107.847340401023, 86.4683542621282,
+                                119.832982062599, 112.384717044928, 112.006173961394, 108.961498842131,
+                                102.536897550745, 105.496003408587, 119.033710510161, 124.445336141903,
+                                111.152957581359, 103.727459196182, 97.3051126961894, 107.721798530394,
+                                107.3951172956, 94.2585671912768, 127.544243110669, 93.2168880188317,
+                                115.311444925151), group = structure(c(1L, 1L, 1L, 1L, 1L, 1L,
+                                                                       1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L), .Label = c("h",
+                                                                                                                                           "d"), class = "factor")), .Names = c("x", "group"), row.names = c(NA,
+                                                                                                                                                                                                             -20L), class = "data.frame")
+    cp <- cutpointr(dat, x, group, break_ties = c)
+    cp2 <- cutpointr(dat, x, group, break_ties = mean)
+    expect_equal(unlist(cp$sum_sens_spec), c(1.2, 1.2))
+    expect_equal(cp2$sum_sens_spec, 1.1)
+
+    # Different metric
+    cp <- cutpointr(dat, x, group, metric = accuracy,
+                    method = maximize_metric, break_ties = c)
+    cp2 <- cutpointr(dat, x, group, metric = accuracy,
+                    method = maximize_metric, break_ties = mean)
+    expect_equal(unlist(cp$accuracy), c(0.6, 0.6))
+    expect_equal(unlist(cp$accuracy), unlist(cp$acc))
+    expect_equal(cp2$accuracy, 0.55)
+    expect_equal(cp2$accuracy, cp2$acc)
+
+    # With subgroup
+    dat <- structure(list(x = c(112.154869479653, 85.0195562661719, 93.9648809281475,
+                                111.629388719907, 93.6448243724487, 117.357328029692, 98.3663682555138,
+                                105.201729160301, 98.7939462917362, 103.013183787135, 106.178862160569,
+                                108.635928791856, 93.964291812696, 99.9357423611922, 106.763495052307,
+                                114.17384726262, 127.593415952213, 95.1459299909085, 124.619049508866,
+                                103.578770674126, 118.606425125718, 117.882345070528, 113.320440921296,
+                                115.780191821353, 99.4794449460106, 115.080791705234, 104.429126735958,
+                                119.686460888845, 106.942508474107, 119.110377570583, 121.929559539621,
+                                121.503911629438, 116.669635368185, 106.99542786452, 106.089271831433,
+                                119.975572786775, 120.126938685093, 98.1659607850261, 110.128131439393,
+                                108.365631379854), group = structure(c(1L, 1L, 1L, 1L, 1L, 1L,
+                                                                       1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L,
+                                                                       2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L,
+                                                                       2L, 2L), .Label = c("h", "d"), class = "factor"), subgroup = c(0L,
+                                                                                                                                      1L, 0L, 1L, 0L, 0L, 1L, 1L, 0L, 0L, 1L, 1L, 1L, 0L, 0L, 0L, 0L,
+                                                                                                                                      0L, 1L, 1L, 1L, 0L, 1L, 1L, 1L, 1L, 0L, 0L, 0L, 1L, 1L, 0L, 1L,
+                                                                                                                                      0L, 0L, 0L, 0L, 0L, 1L, 0L)), .Names = c("x", "group", "subgroup"
+                                                                                                                                      ), row.names = c(NA, -40L), class = "data.frame")
+    cp <- cutpointr(dat, x, group, subgroup, break_ties = c)
+    cp2 <- cutpointr(dat, x, group, subgroup, break_ties = function(x) mean(x) - 10)
+    expect_equal(round(cp$optimal_cutpoint[[2]], 4), c(113.3204, 110.1281))
+    expect_equal(round(cp$sum_sens_spec[[2]], 3), rep(1.667, 2))
+    expect_equal(round(cp2$optimal_cutpoint[[2]], 2), 101.72)
+    expect_equal(round(cp2$sum_sens_spec[[2]], 3), 1.222)
+})
+
+test_that("simple_boot stops if no sets with both classes can be found", {
+    dat <- data.frame(x = rnorm(50), y = 0)
+    expect_error(cutpointr:::simple_boot(data = dat, dep_var = "y"))
+
+    dat <- data.frame(x = rnorm(50), y = factor("a"))
+    expect_error(cutpointr:::simple_boot(data = dat, dep_var = "y"))
 })
