@@ -16,13 +16,11 @@ Clinical Chemistry, (4), 729–738.
 \usage{
 maximize_loess_metric(data, x, class, metric_func = youden,
   pos_class = NULL, neg_class = NULL, direction, criterion = "aicc",
-  degree = 1, family = "symmetric", user.span = user_span_cutpointr,
-  tol_metric, ...)
+  degree = 1, family = "symmetric", user.span = NULL, tol_metric, ...)
 
 minimize_loess_metric(data, x, class, metric_func = youden,
   pos_class = NULL, neg_class = NULL, direction, criterion = "aicc",
-  degree = 1, family = "symmetric", user.span = user_span_cutpointr,
-  tol_metric, ...)
+  degree = 1, family = "symmetric", user.span = NULL, tol_metric, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x

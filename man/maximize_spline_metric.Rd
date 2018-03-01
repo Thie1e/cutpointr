@@ -7,12 +7,12 @@
 \usage{
 maximize_spline_metric(data, x, class, metric_func = youden,
   pos_class = NULL, neg_class = NULL, direction, w = NULL, df = NULL,
-  spar = NULL, nknots = cutpoint_knots, df_offset = NULL, penalty = 1,
+  spar = 1, nknots = cutpoint_knots, df_offset = NULL, penalty = 1,
   control_spar = list(), tol_metric, ...)
 
 minimize_spline_metric(data, x, class, metric_func = youden,
   pos_class = NULL, neg_class = NULL, direction, w = NULL, df = NULL,
-  spar = NULL, nknots = cutpoint_knots, df_offset = NULL, penalty = 1,
+  spar = 1, nknots = cutpoint_knots, df_offset = NULL, penalty = 1,
   control_spar = list(), tol_metric, ...)
 }
 \arguments{

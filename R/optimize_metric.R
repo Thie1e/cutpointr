@@ -68,7 +68,8 @@ optimize_metric <- function(data, x, class, metric_func = youden,
         finite_x <- is.finite(roccurve$x.sorted)
         finite_m <- is.finite(roccurve$m)
         finite_roc <- (finite_x + finite_m) == 2
-        mod <- mgcv::gam(as.formula(paste(paste0(args$formula[2], " ~"), args$formula[3])),
+        mod <- mgcv::gam(stats::as.formula(paste(paste0(args$formula[2], " ~"),
+                                                 args$formula[3])),
                          data = roccurve[finite_roc, ],
                          family = args[["family"]])
         roccurve$m <- NA
@@ -273,8 +274,6 @@ minimize_loess_metric <- function(data, x, class, metric_func = youden,
 #'
 #' @param data A data frame
 #' @param x The predictor variable
-#' @examples
-#' user_span_cutpointr(suicide, "dsi")
 user_span_cutpointr <- function(data, x) {
     finite_x <- is.finite(data[[x]])
     xsd <- stats::sd(data[[x]][finite_x], na.rm = TRUE)
@@ -515,6 +514,14 @@ cutpoint_knots <- function(data, x) {
 #' metric to be maximized. See description.
 #' @param family This is a family object specifying the distribution and link to
 #' use in fitting.
+#' @param formula A GAM formula. See \code{help("gam", package = "mgcv")} for
+#' details.
+#' @param method The smoothing parameter estimation method. "GCV.Cp" to use GCV
+#' for unknown scale parameter. See \code{help("gam", package = "mgcv")} for
+#' details.
+#' @param optimizer An array specifying the numerical optimization method to
+#' use to optimize the smoothing parameter estimation criterion (given by method).
+#' See \code{help("gam", package = "mgcv")} for details.
 #' @param tol_metric All cutpoints will be returned that lead to a metric
 #' value in the interval [m_max - tol_metric, m_max + tol_metric] where
 #' m_max is the maximum achievable metric value. This can be used to return

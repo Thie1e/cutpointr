@@ -12,14 +12,11 @@ cutpoint_knots(data, x)
 \item{x}{(character) The name of the predictor variable}
 }
 \description{
-This function implements a rule of thumb for picking a number of knots
+This function calculates the number of knots
 when using smoothing splines for smoothing a function of metric values per
-cutpoint value.
-}
-\details{
-The number of knots is equal to ceiling(0.1 * log(n) / n_cut) * n_cut) + 1
-where n is the number of observations and n_cut is the number of unique
-cutpoints found in the data.
+cutpoint value. The function for calculating the number of knots is equal
+to \code{stats::.nknots_smspl} but uses the number of unique cutpoints
+in the data as n.
 }
 \examples{
 cutpoint_knots(suicide, "dsi")

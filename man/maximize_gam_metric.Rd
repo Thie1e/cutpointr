@@ -2,11 +2,19 @@
 % Please edit documentation in R/optimize_metric.R
 \name{maximize_gam_metric}
 \alias{maximize_gam_metric}
+\alias{minimize_gam_metric}
 \title{Optimize a metric function in binary classification after smoothing via
 generalized additive models}
 \usage{
 maximize_gam_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction, family = stats::gaussian(), tol_metric, ...)
+  neg_class = NULL, direction, formula = m ~ s(x.sorted),
+  family = stats::gaussian(), method = "GCV.Cp", optimizer = c("outer",
+  "newton"), tol_metric, ...)
+
+minimize_gam_metric(data, x, class, metric_func = youden, pos_class = NULL,
+  neg_class = NULL, direction, formula = m ~ s(x.sorted),
+  family = stats::gaussian(), method = "GCV.Cp", optimizer = c("outer",
+  "newton"), tol_metric, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -27,8 +35,19 @@ metric to be maximized. See description.}
 \item{direction}{(character) Use ">=" or "<=" to select whether an x value
 >= or <= the cutoff predicts the positive class.}
 
+\item{formula}{A GAM formula. See \code{help("gam", package = "mgcv")} for
+details.}
+
 \item{family}{This is a family object specifying the distribution and link to
 use in fitting.}
+
+\item{method}{The smoothing parameter estimation method. "GCV.Cp" to use GCV
+for unknown scale parameter. See \code{help("gam", package = "mgcv")} for
+details.}
+
+\item{optimizer}{An array specifying the numerical optimization method to
+use to optimize the smoothing parameter estimation criterion (given by method).
+See \code{help("gam", package = "mgcv")} for details.}
 
 \item{tol_metric}{All cutpoints will be returned that lead to a metric
 value in the interval [m_max - tol_metric, m_max + tol_metric] where
@@ -65,5 +84,8 @@ The above inputs are arrived at by using all unique values in \code{x}, Inf, and
 \examples{
 oc <- cutpointr(suicide, dsi, suicide, gender, method = maximize_gam_metric,
 metric = accuracy)
+plot_metric(oc)
+oc <- cutpointr(suicide, dsi, suicide, gender, method = minimize_gam_metric,
+metric = abs_d_sens_spec)
 plot_metric(oc)
 }

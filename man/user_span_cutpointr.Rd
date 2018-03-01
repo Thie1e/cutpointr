@@ -21,6 +21,3 @@ The function used for calculating the bandwidth is 0.1 * xsd / sqrt(xn),
 where xsd is the standard deviation of the unique values of the predictor
 variable (i.e. all cutpoints) and xn is the number of unique predictor values.
 }
-\examples{
-user_span_cutpointr(suicide, "dsi")
-}

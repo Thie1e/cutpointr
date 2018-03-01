@@ -824,11 +824,11 @@ test_that("plot_cutpointr runs", {
 
 test_that("smoothing splines lead to plausible results", {
     cp <- cutpointr(suicide, dsi, suicide, method = maximize_spline_metric,
-                    nknots = 6)
+                    nknots = 6, spar = NULL)
     expect_equal(cp$optimal_cutpoint, 2)
 
     cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric,
-                    nknots = 5)
+                    nknots = 5, spar = NULL)
     expect_equal(cp$optimal_cutpoint, c(2, 2))
 
     cp <- cutpointr(suicide, dsi, suicide, method = maximize_spline_metric,
@@ -838,6 +838,9 @@ test_that("smoothing splines lead to plausible results", {
     cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric,
                     nknots = 5, spar = 0.3)
     expect_equal(cp$optimal_cutpoint, c(3, 3))
+
+    # cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric, spar = 0.8)
+    # expect_equal(cp$optimal_cutpoint, c(3, 3))
 })
 
 test_that("this led to an error with get_rev_dups Rcpp function", {
@@ -849,7 +852,7 @@ test_that("this led to an error with get_rev_dups Rcpp function", {
 
 
 test_that("cutpoint_knots returns correct results", {
-    expect_equal(cutpoint_knots(suicide, "dsi"), 11)
+    expect_equal(cutpoint_knots(suicide, "dsi"), 12)
 })
 
 test_that("cutpointr handles multiple optimal cutpoints correctly", {

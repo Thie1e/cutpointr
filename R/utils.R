@@ -248,7 +248,7 @@ simple_boot <- function(data, dep_var) {
     i <- 1
     while (draw_again) {
         b_ind <- sample(1:nrow(data), size = nrow(data), replace = TRUE)
-        if (cutpointr:::only_one_unique(unlist(data[b_ind, dep_var]))) {
+        if (only_one_unique(unlist(data[b_ind, dep_var]))) {
             draw_again <- TRUE
             i <- i + 1
             if (i >= 100) stop(paste("No sets including both classes drawn in",
