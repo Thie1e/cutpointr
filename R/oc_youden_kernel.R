@@ -53,6 +53,15 @@ oc_youden_kernel <- function(data, x, class, pos_class, neg_class,
         pos_k = pos_k
     )$maximum
 
+    # Extremely high or low cutoffs can result in some scenarios
+    if (oc < min(c(x_neg, x_pos))) {
+        warning(paste("Cutpoint", oc, "was restricted to range of independent variable"))
+        oc <- min(c(x_neg, x_pos))
+    } else if (oc > max(c(x_neg, x_pos))) {
+        warning(paste("Cutpoint", oc, "was restricted to range of independent variable"))
+        oc <- max(c(x_neg, x_pos))
+    }
+
     return(data.frame(optimal_cutpoint = oc))
 }
 
