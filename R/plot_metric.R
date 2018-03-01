@@ -68,11 +68,11 @@ plot_metric <- function(x, conf_lvl = 0.95) {
                 ggplot2::ggtitle("Metric values by cutpoint value",
                                  "in-sample results") +
                 ggplot2::ylab(metric_name) + ggplot2::xlab("Cutpoint") +
-                ggplot2::geom_ribbon(alpha = 0.2)
+                ggplot2::geom_ribbon(alpha = 0.2, size = 0)
         } else {
             p <- ggplot2::ggplot(res_unnested, ggplot2::aes_(x = ~ x.sorted,
-                                                                   y = ~ m,
-                                                                   color = ~ subgroup)) +
+                                                             y = ~ m,
+                                                             color = ~ subgroup)) +
                 ggplot2::geom_line() + ggplot2::geom_point() +
                 ggplot2::ggtitle("Metric values by cutpoint value",
                                  "in-sample results") +
@@ -96,7 +96,7 @@ plot_metric <- function(x, conf_lvl = 0.95) {
                 ggplot2::ggtitle("Metric values by cutpoint value",
                                  "in-sample results") +
                 ggplot2::ylab(metric_name) + ggplot2::xlab("Cutpoint") +
-                ggplot2::geom_ribbon(alpha = 0.2)
+                ggplot2::geom_ribbon(alpha = 0.2, size = 0)
         } else {
             p <- ggplot2::ggplot(res_unnested, ggplot2::aes_(x = ~ x.sorted,
                                                              y = ~ m)) +

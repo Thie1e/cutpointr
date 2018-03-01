@@ -139,7 +139,7 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
                                                              fill = "subgroup",
                                                              color = "subgroup")) +
                 ggplot2::geom_line() +
-                ggplot2::geom_ribbon(alpha = 0.2) +
+                ggplot2::geom_ribbon(alpha = 0.2, size = 0) +
                 ggplot2::ggtitle(paste(yvar_name_plotlabel, "by", xvar_name_plotlabel),
                                  "in-sample results") +
                 ggplot2::ylab(yvar_name_plotlabel) +
@@ -164,7 +164,7 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
                                                        ymax = "ymax",
                                                        ymin = "ymin")) +
                 ggplot2::geom_line() +
-                ggplot2::geom_ribbon(alpha = 0.2) +
+                ggplot2::geom_ribbon(alpha = 0.2, size = 0) +
                 ggplot2::ggtitle(paste(yvar_name_plotlabel, "by", xvar_name_plotlabel),
                                  "in-sample results") +
                 ggplot2::ylab(yvar_name_plotlabel) +
