@@ -31,7 +31,7 @@ print.summary_cutpointr <- function(x, ...) {
                                n_neg = ~ x$n_neg[i])
         }) %>%
             as.data.frame %>%
-            print
+            print(row.names = FALSE)
         cat("\n")
         for (j in 1:nrow(x$confusion_matrix[[i]])) {
             cat(paste0("Cutpoint ", x$confusion_matrix[[i]]$cutpoint[j], ":"))
