@@ -30,7 +30,10 @@ check_method_cols <- function(method_result) {
         roc_col <- which(cn == "roc_curve")
         identified_cols <- identified_cols + 1
     }
-    if (identified_cols < n_col) {
+    if (identified_cols == 1 & n_col == 2) {
+        metric_col <- (1:n_col)[-oc_col]
+    } else if (identified_cols < n_col) {
+        stopifnot(exists("roc_col"))
         metric_col <- (1:n_col)[-c(oc_col, roc_col)]
         if (length(metric_col) >= 2) {
             stop(paste("method function returned too many columns.",
