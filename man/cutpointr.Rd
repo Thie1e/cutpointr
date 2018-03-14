@@ -58,7 +58,7 @@ will be used to assess the variability and the out-of-sample performance.}
 \item{use_midpoints}{(logical) If TRUE (default FALSE) the returned optimal
 cutpoint will be the mean of the optimal cutpoint and the next highest
 observation (for direction = ">") or the next lowest observation
-(for direction = "<").}
+(for direction = "<") which avoids biasing the optimal cutpoint.}
 
 \item{break_ties}{If multiple cutpoints are found, they can be summarized using
 this function, e.g. mean or median. To return all cutpoints use c as the function.}
@@ -130,6 +130,10 @@ as input(s):
  \item \code{pos_class}: The positive class
  \item \code{neg_class}: The negative class
  \item \code{direction}: ">=" if the positive class has higher x values, "<=" otherwise
+ \item \code{tol_metric}: (numeric) In the built-in methods a tolerance around
+ the optimal metric value
+ \item \code{use_midpoints}: (logical) In the built-in methods whether to
+ use midpoints instead of exact optimal cutpoints
  \item \code{...} Further arguments
 }
 

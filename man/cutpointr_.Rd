@@ -43,7 +43,7 @@ will be used to assess the variability and the out-of-sample performance.}
 \item{use_midpoints}{(logical) If TRUE (default FALSE) the returned optimal
 cutpoint will be the mean of the optimal cutpoint and the next highest
 observation (for direction = ">") or the next lowest observation
-(for direction = "<").}
+(for direction = "<") which avoids biasing the optimal cutpoint.}
 
 \item{break_ties}{If multiple cutpoints are found, they can be summarized using
 this function, e.g. mean or median. To return all cutpoints use c as the function.}

@@ -46,6 +46,10 @@
 #'  \item \code{pos_class}: The positive class
 #'  \item \code{neg_class}: The negative class
 #'  \item \code{direction}: ">=" if the positive class has higher x values, "<=" otherwise
+#'  \item \code{tol_metric}: (numeric) In the built-in methods a tolerance around
+#'  the optimal metric value
+#'  \item \code{use_midpoints}: (logical) In the built-in methods whether to
+#'  use midpoints instead of exact optimal cutpoints
 #'  \item \code{...} Further arguments
 #' }
 #'
@@ -218,7 +222,7 @@
 #' @param use_midpoints (logical) If TRUE (default FALSE) the returned optimal
 #' cutpoint will be the mean of the optimal cutpoint and the next highest
 #' observation (for direction = ">") or the next lowest observation
-#' (for direction = "<").
+#' (for direction = "<") which avoids biasing the optimal cutpoint.
 #' @param break_ties If multiple cutpoints are found, they can be summarized using
 #' this function, e.g. mean or median. To return all cutpoints use c as the function.
 #' @param na.rm (logical) Set to TRUE (default FALSE) to keep only complete
@@ -511,6 +515,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                     metric_func = metric,
                                     direction = direction, pos_class = pos_class,
                                     neg_class = neg_class, tol_metric = tol_metric,
+                                    use_midpoints = use_midpoints,
                                     ...)
             method_result <- check_method_cols(method_result)
             optcut <- dplyr::bind_cols(optcut, method_result)
@@ -561,12 +566,6 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                     oc = optcut$optimal_cutpoint[[1]],
                                     direction = direction)[, "accuracy"]
             optcut <- add_list(optcut, acc, "acc")
-            if (use_midpoints) {
-                midpoints <- midpoint(oc = unlist(optcut$optimal_cutpoint),
-                                      x = unlist(d[, predictor], use.names = FALSE),
-                                      direction = direction)
-                optcut <- add_list(optcut, midpoints, "optimal_cutpoint")
-            }
             return(optcut)
         })
         # if multiple cutpoints only in some groups, all cols have to be lists
@@ -605,7 +604,8 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
         optcut <- method(data = dat$data[[1]],  x = predictor, class = outcome,
                          metric_func = metric,
                          direction = direction, pos_class = pos_class,
-                         neg_class = neg_class, tol_metric = tol_metric, ...)
+                         neg_class = neg_class, tol_metric = tol_metric,
+                         use_midpoints = use_midpoints, ...)
         optcut <- check_method_cols(optcut)
         if (length(optcut[["optimal_cutpoint"]][[1]]) > 1) {
             message("Multiple optimal cutpoints found")
@@ -655,13 +655,6 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                 oc = unlist(optcut$optimal_cutpoint),
                                 direction = direction)[, "accuracy"]
         optcut <- add_list(optcut, acc, "acc")
-        if (use_midpoints) {
-            midpoints <- midpoint(oc = unlist(optcut$optimal_cutpoint),
-                                  x = unlist(dat$data[[1]][, predictor],
-                                             use.names = FALSE),
-                                  direction = direction)
-            optcut <- add_list(optcut, midpoints, "optimal_cutpoint")
-        }
         optcut$AUC <- auc(tpr = optcut$roc_curve[[1]]$tpr,
                           fpr = optcut$roc_curve[[1]]$fpr)
         optcut$prevalence <- utils::tail(optcut$roc_curve[[1]]$tp, 1) /
@@ -713,24 +706,18 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                     "neg_class", "mn", "use_midpoints",
                     "predictor", "outcome", "tol_metric")) %seq_or_par%
                     {
-                        b_ind <- simple_boot(g, predictor)
+                        b_ind <- simple_boot(g, outcome)
                         optcut_b <- method(data = g[b_ind, ], x = predictor,
                                            metric_func = metric,
                                            class = outcome,
                                            direction = direction,
                                            pos_class = pc,
                                            neg_class = neg_class,
-                                           tol_metric = tol_metric, ...)
+                                           tol_metric = tol_metric,
+                                           use_midpoints = use_midpoints, ...)
                         optcut_b <- check_method_cols(optcut_b)
                         optcut_b <- tibble::as_tibble(optcut_b)
                         optcut_b <- apply_break_ties(optcut_b, break_ties)
-                        if (use_midpoints) {
-                            optcut_b$optimal_cutpoint <- midpoint(
-                                oc = optcut_b$optimal_cutpoint,
-                                x = unlist(g[b_ind, predictor],
-                                           use.names = FALSE),
-                                direction = direction)
-                        }
                         # LOO-Bootstrap
                         if (suppressWarnings(is.null(optcut_b$roc_curve))) {
                             roc_curve_b <- roc(data = g[b_ind, ], x = predictor,
@@ -837,16 +824,16 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                               optcut_b$roc_curve[[1]]$fn[opt_ind_b],
                                               "FN_b")
                         bootstrap <- add_list(bootstrap,
-                                              optcut_b$roc_curve[[1]]$tp[opt_ind_oob],
+                                              roc_curve_oob$tp[opt_ind_oob],
                                               "TP_oob")
                         bootstrap <- add_list(bootstrap,
-                                              optcut_b$roc_curve[[1]]$fp[opt_ind_oob],
+                                              roc_curve_oob$fp[opt_ind_oob],
                                               "FP_oob")
                         bootstrap <- add_list(bootstrap,
-                                              optcut_b$roc_curve[[1]]$tn[opt_ind_oob],
+                                              roc_curve_oob$tn[opt_ind_oob],
                                               "TN_oob")
                         bootstrap <- add_list(bootstrap,
-                                              optcut_b$roc_curve[[1]]$fn[opt_ind_oob],
+                                              roc_curve_oob$fn[opt_ind_oob],
                                               "FN_oob")
                         bootstrap$roc_curve_b =  optcut_b$roc_curve
                         roc_curve_oob <- tidyr::nest_(roc_curve_oob,
@@ -854,9 +841,6 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                         bootstrap <- dplyr::bind_cols(bootstrap, roc_curve_oob)
                         return(bootstrap)
                     }
-                lna <- sum(is.na(boot_g))
-                if (lna) message(paste(lna, "Missing values in bootstrap, e.g.",
-                                       "due to sampling of only one class"))
                 return(boot_g)
             }))
     }
