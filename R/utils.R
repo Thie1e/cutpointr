@@ -243,12 +243,15 @@ prepare_bind_rows <- function(x) {
     }
 }
 
+# Draw a bootstrap sample from a data frame. Draw again, if the sampled or
+# unsampled observations contain only one class.
 simple_boot <- function(data, dep_var) {
     draw_again <- TRUE
     i <- 1
     while (draw_again) {
         b_ind <- sample(1:nrow(data), size = nrow(data), replace = TRUE)
-        if (only_one_unique(unlist(data[b_ind, dep_var]))) {
+        if (only_one_unique(unlist(data[b_ind, dep_var])) |
+            only_one_unique(unlist(data[-b_ind, dep_var]))) {
             draw_again <- TRUE
             i <- i + 1
             if (i >= 100) stop(paste("No sets including both classes drawn in",
