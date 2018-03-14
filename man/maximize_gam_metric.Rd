@@ -8,13 +8,11 @@ generalized additive models}
 \usage{
 maximize_gam_metric(data, x, class, metric_func = youden, pos_class = NULL,
   neg_class = NULL, direction, formula = m ~ s(x.sorted),
-  family = stats::gaussian(), method = "GCV.Cp", optimizer = c("outer",
-  "newton"), tol_metric, ...)
+  optimizer = c("outer", "newton"), tol_metric, use_midpoints, ...)
 
 minimize_gam_metric(data, x, class, metric_func = youden, pos_class = NULL,
   neg_class = NULL, direction, formula = m ~ s(x.sorted),
-  family = stats::gaussian(), method = "GCV.Cp", optimizer = c("outer",
-  "newton"), tol_metric, ...)
+  optimizer = c("outer", "newton"), tol_metric, use_midpoints, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -38,13 +36,6 @@ metric to be maximized. See description.}
 \item{formula}{A GAM formula. See \code{help("gam", package = "mgcv")} for
 details.}
 
-\item{family}{This is a family object specifying the distribution and link to
-use in fitting.}
-
-\item{method}{The smoothing parameter estimation method. "GCV.Cp" to use GCV
-for unknown scale parameter. See \code{help("gam", package = "mgcv")} for
-details.}
-
 \item{optimizer}{An array specifying the numerical optimization method to
 use to optimize the smoothing parameter estimation criterion (given by method).
 See \code{help("gam", package = "mgcv")} for details.}
@@ -53,6 +44,11 @@ See \code{help("gam", package = "mgcv")} for details.}
 value in the interval [m_max - tol_metric, m_max + tol_metric] where
 m_max is the maximum achievable metric value. This can be used to return
 multiple decent cutpoints and to avoid floating-point problems.}
+
+\item{use_midpoints}{(logical) If TRUE (default FALSE) the returned optimal
+cutpoint will be the mean of the optimal cutpoint and the next highest
+observation (for direction = ">") or the next lowest observation
+(for direction = "<") which avoids biasing the optimal cutpoint.}
 
 \item{...}{Further arguments that will be passed to metric_func or the
 GAM smoother.}

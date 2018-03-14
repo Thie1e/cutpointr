@@ -6,10 +6,10 @@
 \title{Optimize a metric function in binary classification}
 \usage{
 maximize_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction, tol_metric, ...)
+  neg_class = NULL, direction, tol_metric, use_midpoints, ...)
 
 minimize_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction, tol_metric, ...)
+  neg_class = NULL, direction, tol_metric, use_midpoints, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -34,6 +34,11 @@ metric to be maximized. See description.}
 value in the interval [m_max - tol_metric, m_max + tol_metric] where
 m_max is the maximum achievable metric value. This can be used to return
 multiple decent cutpoints and to avoid floating-point problems.}
+
+\item{use_midpoints}{(logical) If TRUE (default FALSE) the returned optimal
+cutpoint will be the mean of the optimal cutpoint and the next highest
+observation (for direction = ">") or the next lowest observation
+(for direction = "<") which avoids biasing the optimal cutpoint.}
 
 \item{...}{Further arguments that will be passed to \code{metric_func}.}
 }

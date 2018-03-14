@@ -2,7 +2,7 @@ optimize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, minmax,
                             direction, metric_name = "metric", loess = FALSE,
                             spline = FALSE, gam = FALSE, return_roc = TRUE,
-                            tol_metric, ...) {
+                            tol_metric, use_midpoints, ...) {
     args <- list(...)
     metric_name_call <- as.character(substitute(metric_func))
     if (metric_name_call != "metric_func") metric_name <- metric_name_call
@@ -71,7 +71,7 @@ optimize_metric <- function(data, x, class, metric_func = youden,
         mod <- mgcv::gam(stats::as.formula(paste(paste0(args$formula[2], " ~"),
                                                  args$formula[3])),
                          data = roccurve[finite_roc, ],
-                         family = args[["family"]])
+                         optimizer = args[["optimizer"]])
         roccurve$m <- NA
         roccurve$m[finite_roc] <- mod$fitted.values
     }
@@ -90,8 +90,18 @@ optimize_metric <- function(data, x, class, metric_func = youden,
     }
     if (length(oc) > 1) {
         res <- tibble::tibble(optimal_cutpoint = list(oc))
+        if (use_midpoints) {
+            res$optimal_cutpoint <- list(midpoint(oc = unlist(res$optimal_cutpoint),
+                                                  x = unlist(data[, x], use.names = FALSE),
+                                                  direction = direction))
+        }
     } else {
         res <- tibble::tibble(optimal_cutpoint = oc)
+        if (use_midpoints) {
+            res$optimal_cutpoint <- midpoint(oc = unlist(res$optimal_cutpoint),
+                                             x = unlist(data[, x], use.names = FALSE),
+                                             direction = direction)
+        }
     }
     if (return_roc) {
         res <- dplyr::bind_cols(res, tidyr::nest_(roccurve, key_col = "roc_curve"))
@@ -130,6 +140,10 @@ optimize_metric <- function(data, x, class, metric_func = youden,
 #' value in the interval [m_max - tol_metric, m_max + tol_metric] where
 #' m_max is the maximum achievable metric value. This can be used to return
 #' multiple decent cutpoints and to avoid floating-point problems.
+#' @param use_midpoints (logical) If TRUE (default FALSE) the returned optimal
+#' cutpoint will be the mean of the optimal cutpoint and the next highest
+#' observation (for direction = ">") or the next lowest observation
+#' (for direction = "<") which avoids biasing the optimal cutpoint.
 #' @param ... Further arguments that will be passed to \code{metric_func}.
 #' @examples
 #' cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
@@ -137,12 +151,13 @@ optimize_metric <- function(data, x, class, metric_func = youden,
 #' @export
 maximize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL,
-                            direction, tol_metric, ...) {
+                            direction, tol_metric,
+                            use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "max",
                     direction = direction, metric_name = metric_name,
-                    tol_metric = tol_metric, ...)
+                    tol_metric = tol_metric, use_midpoints = use_midpoints, ...)
 }
 
 #' @examples
@@ -151,12 +166,12 @@ maximize_metric <- function(data, x, class, metric_func = youden,
 #' @export
 minimize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL,
-                            direction, tol_metric, ...) {
+                            direction, tol_metric, use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "min",
                     direction = direction, metric_name = metric_name,
-                    tol_metric = tol_metric, ...)
+                    tol_metric = tol_metric, use_midpoints = use_midpoints, ...)
 }
 
 #' Optimize a metric function in binary classification after LOESS smoothing
@@ -197,6 +212,10 @@ minimize_metric <- function(data, x, class, metric_func = youden,
 #' value in the interval [m_max - tol_metric, m_max + tol_metric] where
 #' m_max is the maximum achievable metric value. This can be used to return
 #' multiple decent cutpoints and to avoid floating-point problems.
+#' @param use_midpoints (logical) If TRUE (default FALSE) the returned optimal
+#' cutpoint will be the mean of the optimal cutpoint and the next highest
+#' observation (for direction = ">") or the next lowest observation
+#' (for direction = "<") which avoids biasing the optimal cutpoint.
 #' @param ... Further arguments that will be passed to metric_func or the
 #' loess smoother.
 #'
@@ -216,7 +235,7 @@ minimize_metric <- function(data, x, class, metric_func = youden,
 maximize_loess_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
                             criterion = "aicc", degree = 1, family = "symmetric",
-                            user.span = NULL, tol_metric, ...) {
+                            user.span = NULL, tol_metric, use_midpoints, ...) {
     if (!requireNamespace("fANCOVA", quietly = TRUE)) {
         stop("fANCOVA package has to be installed to use LOESS smoothing.")
     }
@@ -231,7 +250,7 @@ maximize_loess_metric <- function(data, x, class, metric_func = youden,
                     direction = direction, metric_name = metric_name,
                     criterion = criterion, degree = degree, family = family,
                     user.span = us, loess = TRUE,
-                    tol_metric = tol_metric, ...)
+                    tol_metric = tol_metric, use_midpoints = use_midpoints, ...)
 }
 
 #' @examples
@@ -244,7 +263,7 @@ maximize_loess_metric <- function(data, x, class, metric_func = youden,
 minimize_loess_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
                             criterion = "aicc", degree = 1, family = "symmetric",
-                            user.span = NULL, tol_metric, ...) {
+                            user.span = NULL, tol_metric, use_midpoints, ...) {
     if (!requireNamespace("fANCOVA", quietly = TRUE)) {
         stop("fANCOVA package has to be installed to use LOESS smoothing.")
     }
@@ -259,7 +278,7 @@ minimize_loess_metric <- function(data, x, class, metric_func = youden,
                     direction = direction, metric_name = metric_name,
                     criterion = criterion, degree = degree, family = family,
                     loess = TRUE, user.span = us,
-                    tol_metric = tol_metric, ...)
+                    tol_metric = tol_metric, use_midpoints = use_midpoints, ...)
 }
 
 #' Calculate bandwidth for LOESS smoothing of metric functions by rule of thumb
@@ -319,6 +338,10 @@ user_span_cutpointr <- function(data, x) {
 #' value in the interval [m_max - tol_metric, m_max + tol_metric] where
 #' m_max is the maximum achievable metric value. This can be used to return
 #' multiple decent cutpoints and to avoid floating-point problems.
+#' @param use_midpoints (logical) If TRUE (default FALSE) the returned optimal
+#' cutpoint will be the mean of the optimal cutpoint and the next highest
+#' observation (for direction = ">") or the next lowest observation
+#' (for direction = "<") which avoids biasing the optimal cutpoint.
 #'
 #' @examples
 #' set.seed(100)
@@ -329,7 +352,7 @@ user_span_cutpointr <- function(data, x) {
 maximize_boot_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
                             summary_func = mean, boot_cut = 50, inf_rm = TRUE,
-                            tol_metric, ...) {
+                            tol_metric, use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimal_cutpoints <- purrr::map(1:boot_cut, function(i) {
         b_ind <- simple_boot(data, class)
@@ -339,8 +362,9 @@ maximize_boot_metric <- function(data, x, class, metric_func = youden,
                                    pos_class = pos_class, neg_class = neg_class,
                                    minmax = "max", direction = direction,
                                    metric_name = metric_name, return_roc = FALSE,
-                                   tol_metric = tol_metric, ...)
-        unlist(opt_cut$optimal_cutpoint)
+                                   tol_metric = tol_metric,
+                                   use_midpoints = use_midpoints, ...)
+        return(unlist(opt_cut$optimal_cutpoint))
     })
     optimal_cutpoints <- unlist(optimal_cutpoints)
     if (inf_rm) optimal_cutpoints <- optimal_cutpoints[is.finite(optimal_cutpoints)]
@@ -356,7 +380,7 @@ maximize_boot_metric <- function(data, x, class, metric_func = youden,
 minimize_boot_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
                             summary_func = mean, boot_cut = 50, inf_rm = TRUE,
-                            tol_metric, ...) {
+                            tol_metric, use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimal_cutpoints <- purrr::map(1:boot_cut, function(i) {
         b_ind <- simple_boot(data, class)
@@ -366,8 +390,9 @@ minimize_boot_metric <- function(data, x, class, metric_func = youden,
                                    pos_class = pos_class, neg_class = neg_class,
                                    minmax = "min", direction = direction,
                                    metric_name = metric_name, return_roc = FALSE,
-                                   tol_metric = tol_metric, ...)
-        unlist(opt_cut$optimal_cutpoint)
+                                   tol_metric = tol_metric,
+                                   use_midpoints = use_midpoints, ...)
+        return(unlist(opt_cut$optimal_cutpoint))
     })
     optimal_cutpoints <- unlist(optimal_cutpoints)
     if (inf_rm) optimal_cutpoints <- optimal_cutpoints[is.finite(optimal_cutpoints)]
@@ -424,6 +449,10 @@ minimize_boot_metric <- function(data, x, class, metric_func = youden,
 #' value in the interval [m_max - tol_metric, m_max + tol_metric] where
 #' m_max is the maximum achievable metric value. This can be used to return
 #' multiple decent cutpoints and to avoid floating-point problems.
+#' @param use_midpoints (logical) If TRUE (default FALSE) the returned optimal
+#' cutpoint will be the mean of the optimal cutpoint and the next highest
+#' observation (for direction = ">") or the next lowest observation
+#' (for direction = "<") which avoids biasing the optimal cutpoint.
 #' @param ... Further arguments that will be passed to metric_func.
 #'
 #' @examples
@@ -437,7 +466,7 @@ maximize_spline_metric <- function(data, x, class, metric_func = youden,
                                    w = NULL, df = NULL, spar = 1,
                                    nknots = cutpoint_knots, df_offset = NULL,
                                    penalty = 1, control_spar = list(),
-                                   tol_metric, ...) {
+                                   tol_metric, use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "max",
@@ -445,7 +474,7 @@ maximize_spline_metric <- function(data, x, class, metric_func = youden,
                     w = w, df = df, spar = spar, nknots = nknots,
                     df_offset = df_offset, penalty = penalty,
                     control_spar = control_spar, spline = TRUE,
-                    tol_metric = tol_metric, ...)
+                    tol_metric = tol_metric, use_midpoints = use_midpoints, ...)
 }
 
 #' @rdname maximize_spline_metric
@@ -455,7 +484,8 @@ minimize_spline_metric <- function(data, x, class, metric_func = youden,
                                    w = NULL, df = NULL, spar = 1,
                                    nknots = cutpoint_knots,
                                    df_offset = NULL, penalty = 1,
-                                   control_spar = list(), tol_metric,  ...) {
+                                   control_spar = list(), tol_metric,
+                                   use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "min",
@@ -463,7 +493,7 @@ minimize_spline_metric <- function(data, x, class, metric_func = youden,
                     w = w, df = df, spar = spar, nknots = nknots,
                     df_offset = df_offset, penalty = penalty,
                     control_spar = control_spar, spline = TRUE,
-                    tol_metric = tol_metric, ...)
+                    tol_metric = tol_metric, use_midpoints = use_midpoints, ...)
 }
 
 #' Calculate number of knots to use in spline smoothing
@@ -512,12 +542,7 @@ cutpoint_knots <- function(data, x) {
 #' @inheritParams oc_youden_normal
 #' @param metric_func (function) A function that computes a
 #' metric to be maximized. See description.
-#' @param family This is a family object specifying the distribution and link to
-#' use in fitting.
 #' @param formula A GAM formula. See \code{help("gam", package = "mgcv")} for
-#' details.
-#' @param method The smoothing parameter estimation method. "GCV.Cp" to use GCV
-#' for unknown scale parameter. See \code{help("gam", package = "mgcv")} for
 #' details.
 #' @param optimizer An array specifying the numerical optimization method to
 #' use to optimize the smoothing parameter estimation criterion (given by method).
@@ -526,6 +551,10 @@ cutpoint_knots <- function(data, x) {
 #' value in the interval [m_max - tol_metric, m_max + tol_metric] where
 #' m_max is the maximum achievable metric value. This can be used to return
 #' multiple decent cutpoints and to avoid floating-point problems.
+#' @param use_midpoints (logical) If TRUE (default FALSE) the returned optimal
+#' cutpoint will be the mean of the optimal cutpoint and the next highest
+#' observation (for direction = ">") or the next lowest observation
+#' (for direction = "<") which avoids biasing the optimal cutpoint.
 #' @param ... Further arguments that will be passed to metric_func or the
 #' GAM smoother.
 #'
@@ -538,9 +567,8 @@ cutpoint_knots <- function(data, x) {
 maximize_gam_metric <- function(data, x, class, metric_func = youden,
                                 pos_class = NULL, neg_class = NULL, direction,
                                 formula = m ~ s(x.sorted),
-                                family = stats::gaussian(), method = "GCV.Cp",
                                 optimizer = c("outer", "newton"),
-                                tol_metric, ...) {
+                                tol_metric, use_midpoints, ...) {
     if (!requireNamespace("mgcv", quietly = TRUE)) {
         stop("mgcv package has to be installed to use GAM smoothing.")
     }
@@ -549,9 +577,8 @@ maximize_gam_metric <- function(data, x, class, metric_func = youden,
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "max",
                     direction = direction, metric_name = metric_name,
-                    formula = formula, family = family, method = method,
-                    optimizer = optimizer, gam = TRUE, tol_metric = tol_metric,
-                    ...)
+                    formula = formula, optimizer = optimizer, gam = TRUE,
+                    tol_metric = tol_metric, use_midpoints = use_midpoints, ...)
 }
 
 #' @examples
@@ -563,9 +590,8 @@ maximize_gam_metric <- function(data, x, class, metric_func = youden,
 minimize_gam_metric <- function(data, x, class, metric_func = youden,
                                 pos_class = NULL, neg_class = NULL, direction,
                                 formula = m ~ s(x.sorted),
-                                family = stats::gaussian(), method = "GCV.Cp",
                                 optimizer = c("outer", "newton"),
-                                tol_metric, ...) {
+                                tol_metric, use_midpoints, ...) {
     if (!requireNamespace("mgcv", quietly = TRUE)) {
         stop("mgcv package has to be installed to use GAM smoothing.")
     }
@@ -573,7 +599,6 @@ minimize_gam_metric <- function(data, x, class, metric_func = youden,
     optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
                     pos_class = pos_class, neg_class = neg_class, minmax = "min",
                     direction = direction, metric_name = metric_name,
-                    formula = formula, family = family, method = method,
-                    optimizer = optimizer, gam = TRUE, tol_metric = tol_metric,
-                    ...)
+                    formula = formula, optimizer = optimizer, gam = TRUE,
+                    tol_metric = tol_metric, use_midpoints = use_midpoints, ...)
 }
