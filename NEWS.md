@@ -1,6 +1,17 @@
+# cutpointr 0.7.1
+- Fix a bug in check_method_cols that occurred when a user-supplied method 
+function returned a metric column but no roc_curve
+- Add chapters to the Readme about GAM, kernel and normal methods
+- Fix bug in bootstrapping that allowed resamples with only one class to be 
+sampled
+- `use_midpoints` is now also passed to `method` by `cutpointr` to allow for
+the calculation of midpoints within `maximize_boot_metric` and `minimize_boot_metric`,
+which before happened in `cutpointr`, leading to slightly biased cutpoints
+in certain scenarios
+
 # cutpointr 0.7.0
-- Change defaults in spline smoothing: nknots is now calculated by 
-stats::.nknots_smspl and spar = 1 
+- Change defaults in spline smoothing: `nknots` is now calculated by 
+`stats::.nknots_smspl` and `spar = 1`
 - Add `cutpoint_tol` argument to define a tolerance around the optimized metric,
 so that multiple cutpoints in the vicinity of the target metric can be returned
 and to avoid not returning other "optimal" cutpoints due to floating-point
