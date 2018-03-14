@@ -959,3 +959,76 @@ test_that("simple_boot stops if no sets with both classes can be found", {
     dat <- data.frame(x = rnorm(50), y = factor("a"))
     expect_error(cutpointr:::simple_boot(data = dat, dep_var = "y"))
 })
+
+test_that("cutpointr works with custom method function", {
+    CutOff_Optimised <- function(data, x, class, pos_class,
+                                 neg_class, direction, ...){
+
+        stopifnot(direction == ">=")
+        Obs <- data[[class]] == pos_class
+        Fit <- data[[x]]
+        SumObs <- sum(Obs)
+        LengObs <- length(Obs)
+        tt <- c(0)
+        Cut <- c(0,0,0)
+
+        if(length(unique(Fit))==1){
+            Cut[1] <- unique(Fit)
+            Cut[2] <- 100*sum((Fit>=Cut[1])[Obs==1])/SumObs
+            Cut[3] <- 100*sum((Fit<Cut[1])[Obs==0])/(LengObs-SumObs)
+            Cut <- t(Cut)
+        }
+
+        else{
+            if(min(Fit)<0) Fit[Fit<0] <- 0
+            Quant <- quantile(Fit)
+            i <- Quant[1]
+            a <- 2
+            while(i<=Quant[5]){
+                se <- sum((Fit>=i)[Obs==1])/SumObs
+                sp <- sum((Fit<i)[Obs==0])/(LengObs-SumObs)
+                tt[a] <- se+sp-1
+                if(tt[a]<tt[a-1]) break
+                i <- i+((Quant[5] - Quant[1])/1000)
+                a <- a+1
+            }
+            b <- (i-((Quant[5] - Quant[1])/1000))
+            Cut[1] <- b
+            se <- sum((Fit>=b)[Obs==1])/SumObs
+            sp <- sum((Fit<b)[Obs==0])/(LengObs-SumObs)
+            Cut[2] <- se
+            Cut[3] <- sp
+            Cut <- t(Cut)
+            dimnames(Cut)=list(NULL, c("CutOff", "se", "sp"))
+        }
+        return(data.frame(optimal_cutpoint = b, youden_index = se + sp - 1))
+    }
+
+    cp <- cutpointr(suicide, dsi, suicide, method = CutOff_Optimised)
+    expect_equal(colnames(cp)[4], "youden_index")
+    expect_equal(cp$optimal_cutpoint, 1.991)
+    expect_equal(cp$method, "CutOff_Optimised")
+    expect_silent(plot(cp))
+
+    set.seed(927)
+    cp <- cutpointr(suicide, dsi, suicide, method = CutOff_Optimised,
+                    boot_runs = 10)
+    expect_equal(colnames(cp)[4], "youden_index")
+    expect_equal(cp$optimal_cutpoint, 1.991)
+    expect_equal(cp$method, "CutOff_Optimised")
+    expect_silent(plot(cp))
+
+    cp <- cutpointr(suicide, dsi, suicide, gender, method = CutOff_Optimised)
+    expect_equal(colnames(cp)[5], "youden_index")
+    expect_equal(cp$optimal_cutpoint, c(1.990, 2.992))
+    expect_equal(cp$method, c("CutOff_Optimised", "CutOff_Optimised"))
+    expect_silent(plot(cp))
+
+    set.seed(264)
+    cp <- cutpointr(suicide, dsi, suicide, gender, method = CutOff_Optimised,
+                    boot_runs = 10)
+    expect_equal(colnames(cp)[5], "youden_index")
+    expect_equal(cp$optimal_cutpoint, c(1.990, 2.992))
+    expect_equal(cp$method, c("CutOff_Optimised", "CutOff_Optimised"))
+    expect_silent(plot(cp))
+})
