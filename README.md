@@ -604,7 +604,7 @@ Alternatively, the number of knots can be set manually and also the other smooth
 
 ``` r
 opt_cut <- cutpointr(suicide, dsi, suicide, gender, 
-                     method = minimize_spline_metric,
+                     method = minimize_spline_metric, spar = 0.4,
                      metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
 #> Assuming the positive class is yes
 #> Assuming the positive class has higher x values
