@@ -13,6 +13,7 @@
 #' ## With subgroup
 #' opt_cut_2groups <- cutpointr(suicide, dsi, suicide, gender)
 #' plot_x(opt_cut_2groups)
+#' @family cutpointr plotting functions
 #' @export
 plot_x <- function(x, display_cutpoint = TRUE, ...) {
 

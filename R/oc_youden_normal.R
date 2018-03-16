@@ -21,6 +21,7 @@
 #' oc_youden_normal(suicide, "dsi", "suicide",
 #'   pos_class = "yes", neg_class = "no", direction = ">=")
 #' cutpointr(suicide, dsi, suicide, method = oc_youden_normal)
+#' @family method functions
 #' @export
 oc_youden_normal <- function(data, x, class, pos_class = NULL, neg_class = NULL,
                              direction, ...) {

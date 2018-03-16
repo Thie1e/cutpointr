@@ -12,6 +12,8 @@
 #' opt_cut <- cutpointr(suicide, dsi, suicide)
 #' plot_metric(opt_cut)
 #' @importFrom dplyr %>%
+#' @family cutpointr plotting functions
+#' @family cutpointr plotting functions
 #' @export
 plot_metric <- function(x, conf_lvl = 0.95) {
     stopifnot("cutpointr" %in% class(x))

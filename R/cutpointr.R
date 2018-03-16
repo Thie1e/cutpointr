@@ -244,6 +244,7 @@
 #' @return A cutpointr object which is also a data.frame and tbl_df.
 #' @useDynLib cutpointr
 #' @importFrom Rcpp sourceCpp
+#' @family main cutpointr functions
 #' @export cutpointr
 cutpointr <- function(...) {
     UseMethod("cutpointr")
@@ -394,6 +395,7 @@ cutpointr.numeric <- function(x, class, subgroup = NULL,
 #' plot(opt_cut)
 #' predict(opt_cut, newdata = data.frame(dsi = 0:5))
 #' @importFrom stats median
+#' @family main cutpointr functions
 #' @export
 cutpointr_ <- function(data, x, class, subgroup = NULL,
                       method = maximize_metric, metric = sum_sens_spec,
@@ -878,6 +880,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
 #'
 #' @return A data frame.
 #' @importFrom purrr %>%
+#' @family main cutpointr functions
 #' @export
 multi_cutpointr <- function(data, x = colnames(data)[colnames(data) != class],
                             class, silent = FALSE, ...) {

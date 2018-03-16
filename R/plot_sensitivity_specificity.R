@@ -13,6 +13,7 @@
 #' data(suicide)
 #' opt_cut <- cutpointr(suicide, dsi, suicide)
 #' plot_sensitivity_specificity(opt_cut)
+#' @family cutpointr plotting functions
 #' @export
 #' @importFrom purrr %>%
 plot_sensitivity_specificity <- function(x, display_cutpoint = TRUE, ...) {

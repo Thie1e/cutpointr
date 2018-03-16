@@ -22,3 +22,22 @@ value for every cutpoint along with the optimal cutpoint.
 opt_cut <- cutpointr(suicide, dsi, suicide)
 plot_metric(opt_cut)
 }
+\seealso{
+Other cutpointr plotting functions: \code{\link{plot.cutpointr}},
+  \code{\link{plot_cut_boot}},
+  \code{\link{plot_cutpointr}},
+  \code{\link{plot_metric_boot}},
+  \code{\link{plot_precision_recall}},
+  \code{\link{plot_roc}},
+  \code{\link{plot_sensitivity_specificity}},
+  \code{\link{plot_x}}
+
+Other cutpointr plotting functions: \code{\link{plot.cutpointr}},
+  \code{\link{plot_cut_boot}},
+  \code{\link{plot_cutpointr}},
+  \code{\link{plot_metric_boot}},
+  \code{\link{plot_precision_recall}},
+  \code{\link{plot_roc}},
+  \code{\link{plot_sensitivity_specificity}},
+  \code{\link{plot_x}}
+}

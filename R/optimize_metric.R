@@ -148,6 +148,7 @@ optimize_metric <- function(data, x, class, metric_func = youden,
 #' @examples
 #' cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
 #' @name maximize_metric
+#' @family method functions
 #' @export
 maximize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL,
@@ -231,6 +232,7 @@ minimize_metric <- function(data, x, class, metric_func = youden,
 #' metric = accuracy)
 #' plot_metric(oc)
 #' @name maximize_loess_metric
+#' @family method functions
 #' @export
 maximize_loess_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
@@ -348,6 +350,7 @@ user_span_cutpointr <- function(data, x) {
 #' cutpointr(suicide, dsi, suicide, method = maximize_boot_metric,
 #'           metric = accuracy, boot_cut = 30)
 #' @name maximize_boot_metric
+#' @family method functions
 #' @export
 maximize_boot_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
@@ -460,6 +463,7 @@ minimize_boot_metric <- function(data, x, class, metric_func = youden,
 #' df = 5, metric = accuracy)
 #' plot_metric(oc)
 #' @export
+#' @family method functions
 #' @name maximize_spline_metric
 maximize_spline_metric <- function(data, x, class, metric_func = youden,
                                    pos_class = NULL, neg_class = NULL, direction,
@@ -563,6 +567,7 @@ cutpoint_knots <- function(data, x) {
 #' metric = accuracy)
 #' plot_metric(oc)
 #' @name maximize_gam_metric
+#' @family method functions
 #' @export
 maximize_gam_metric <- function(data, x, class, metric_func = youden,
                                 pos_class = NULL, neg_class = NULL, direction,

@@ -13,6 +13,7 @@
 #' data(suicide)
 #' oc_median(suicide, "dsi")
 #' cutpointr(suicide, dsi, suicide, method = oc_median)
+#' @family method functions
 #' @export
 oc_median <- function(data, x, ...) {
     stopifnot(is.character(x))

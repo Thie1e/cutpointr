@@ -12,6 +12,7 @@
 #' opt_cut <- cutpointr(suicide, dsi, suicide, gender)
 #' plot(opt_cut)
 #' plot(opt_cut, ggplot2::theme_bw())
+#' @family cutpointr plotting functions
 #' @export
 plot.cutpointr <- function(x, ...) {
     args <- list(...)

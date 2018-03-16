@@ -12,6 +12,7 @@
 #'
 #' opt_cut_2groups <- cutpointr(suicide, dsi, suicide, gender)
 #' plot_roc(opt_cut_2groups, display_cutpoint = TRUE)
+#' @family cutpointr plotting functions
 #' @export
 plot_roc <- function(x, display_cutpoint = TRUE, ...) {
 

@@ -1,4 +1,4 @@
-#' Plot metrics
+#' General purpose plotting function for cutpointr or roc_cutpointr objects
 #'
 #' Flexibly plot various metrics against all cutpoints or any other metric.
 #' The function can plot any metric based on a \code{cutpointr} or \code{roc_cutpointr}
@@ -21,13 +21,14 @@
 #' \code{tpr} by \code{fpr} (a ROC curve) cannot be plotted, as the values of the false positive
 #' rate vary per bootstrap sample.
 #'
-#' @param x A cutpointr or roc_cutpointr object.
-#' @param xvar A function, typically cutpoint or a metric function.
+#' @param x A \code{cutpointr} or \code{roc_cutpointr} object.
+#' @param xvar A function, typically \code{cutpoint} or a metric function.
 #' @param yvar A function, typically a metric function.
 #' @param conf_lvl (numeric) If bootstrapping was run and x is a cutpointr object,
 #' a confidence interval at the level of conf_lvl can be plotted. To plot no
 #' confidence interval set conf_lvl = 0.
-#' @param aspect_ratio (numeric) Set to 1, to obtain a quadratic plot.
+#' @param aspect_ratio (numeric) Set to 1 to obtain a quadratic plot, e.g. for
+#' plotting a ROC curve.
 #'
 #' @examples
 #' set.seed(1)
@@ -42,6 +43,7 @@
 #' plot_cutpointr(oc, cutpoint, function(tp, tn, fp, fn, ...) tp / fp) +
 #'   ggplot2::ggtitle("Custom metric") + ggplot2::ylab("value")
 #'
+#' @family cutpointr plotting functions
 #' @export
 plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
                            conf_lvl = 0.95, aspect_ratio = NULL) {

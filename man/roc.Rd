@@ -48,3 +48,8 @@ dat <- iris[1:100, ]
 roc(data = dat, x = "Petal.Width", class = "Species",
 pos_class = "versicolor", neg_class = "setosa", direction = ">=")
 }
+\seealso{
+Other main cutpointr functions: \code{\link{cutpointr_}},
+  \code{\link{cutpointr}}, \code{\link{multi_cutpointr}},
+  \code{\link{predict.cutpointr}}
+}

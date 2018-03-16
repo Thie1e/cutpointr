@@ -283,3 +283,8 @@ opt_cut
 
 
 }
+\seealso{
+Other main cutpointr functions: \code{\link{cutpointr_}},
+  \code{\link{multi_cutpointr}},
+  \code{\link{predict.cutpointr}}, \code{\link{roc}}
+}

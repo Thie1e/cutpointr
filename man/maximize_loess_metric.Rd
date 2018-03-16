@@ -102,3 +102,12 @@ criterion = "aicc", family = "symmetric", degree = 2, user.span = 0.7,
 metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
 plot_metric(oc)
 }
+\seealso{
+Other method functions: \code{\link{maximize_boot_metric}},
+  \code{\link{maximize_gam_metric}},
+  \code{\link{maximize_metric}},
+  \code{\link{maximize_spline_metric}},
+  \code{\link{oc_manual}}, \code{\link{oc_mean}},
+  \code{\link{oc_median}}, \code{\link{oc_youden_kernel}},
+  \code{\link{oc_youden_normal}}
+}

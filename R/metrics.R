@@ -62,6 +62,7 @@ auc <- function(tpr, fpr) {
 #' oc <- cutpointr(suicide, dsi, suicide, gender)
 #' plot_cutpointr(oc, cutpoint, accuracy)
 #'
+#' @family metric functions
 #' @export
 cutpoint <- function(x, ...) {
     x[["x.sorted"]]
@@ -86,6 +87,7 @@ cutpoints <- function(x, ...) {
 #' @examples
 #' accuracy(10, 5, 20, 10)
 #' accuracy(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 accuracy <- function(tp, fp, tn, fn, ...) {
     Accuracy <- cbind((tp + tn) / (tp + fp + tn + fn))
@@ -105,6 +107,7 @@ accuracy <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' youden(10, 5, 20, 10)
 #' youden(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 youden <- function(tp, fp, tn, fn, ...) {
     sesp <- sens_spec(tp, fp, tn, fn)
@@ -123,6 +126,7 @@ youden <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' sensitivity(10, 5, 20, 10)
 #' sensitivity(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 sensitivity <- function(tp, fn, ...) {
     sens <- tp / (tp + fn)
@@ -141,6 +145,7 @@ sensitivity <- function(tp, fn, ...) {
 #' @examples
 #' specificity(10, 5, 20, 10)
 #' specificity(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 specificity <- function(fp, tn, ...) {
     spec <- tn / (tn + fp)
@@ -162,6 +167,7 @@ specificity <- function(fp, tn, ...) {
 #' @examples
 #' sum_sens_spec(10, 5, 20, 10)
 #' sum_sens_spec(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 sum_sens_spec <- function(tp, fp, tn, fn, ...) {
     sesp <- sens_spec(tp, fp, tn, fn)
@@ -183,6 +189,7 @@ sum_sens_spec <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' prod_sens_spec(10, 5, 20, 10)
 #' prod_sens_spec(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 prod_sens_spec <- function(tp, fp, tn, fn, ...) {
     sesp <- sens_spec(tp, fp, tn, fn)
@@ -204,6 +211,7 @@ prod_sens_spec <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' abs_d_sens_spec(10, 5, 20, 10)
 #' abs_d_sens_spec(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 abs_d_sens_spec <- function(tp, fp, tn, fn, ...) {
     sesp <- sens_spec(tp, fp, tn, fn)
@@ -223,6 +231,7 @@ abs_d_sens_spec <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' precision(10, 5, 20, 10)
 #' precision(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 precision <- function(tp, fp, tn, fn, ...) {
     prec <- ppv(tp = tp, fp = fp, tn = tn, fn = fn)
@@ -240,6 +249,7 @@ precision <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' recall(10, 5, 20, 10)
 #' recall(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 recall <- function(tp, fp, tn, fn, ...) {
     rec <- sensitivity(tp = tp, fp = fp, tn = tn, fn = fn)
@@ -257,6 +267,7 @@ recall <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' ppv(10, 5, 20, 10)
 #' ppv(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 ppv <- function(tp, fp, tn, fn, ...) {
     ppv <- tp / (tp + fp)
@@ -276,6 +287,7 @@ ppv <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' npv(10, 5, 20, 10)
 #' npv(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 npv <- function(tp, fp, tn, fn, ...) {
     npv <- tn / (tn + fn)
@@ -297,6 +309,7 @@ npv <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' abs_d_ppv_npv(10, 5, 20, 10)
 #' abs_d_ppv_npv(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 abs_d_ppv_npv <- function(tp, fp, tn, fn, ...) {
     ppv <- tp / (tp + fp)
@@ -320,6 +333,7 @@ abs_d_ppv_npv <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' sum_ppv_npv(10, 5, 20, 10)
 #' sum_ppv_npv(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 sum_ppv_npv <- function(tp, fp, tn, fn, ...) {
     ppv <- tp / (tp + fp)
@@ -343,6 +357,7 @@ sum_ppv_npv <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' prod_ppv_npv(10, 5, 20, 10)
 #' prod_ppv_npv(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 prod_ppv_npv <- function(tp, fp, tn, fn, ...) {
     ppv <- tp / (tp + fp)
@@ -366,6 +381,7 @@ prod_ppv_npv <- function(tp, fp, tn, fn, ...) {
 #' false_omission_rate(10, 5, 20, 10)
 #' false_omission_rate(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 #' @name false_omission_rate
+#' @family metric functions
 #' @export
 false_omission_rate <- function(tp, fp, tn, fn, ...) {
     fomr <- fn / (tn + fn)
@@ -400,6 +416,7 @@ false_discovery_rate <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' tpr(10, 5, 20, 10)
 #' tpr(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 tpr <- function(tp, fn, ...) {
     tprate <- sensitivity(tp = tp, fn = fn)
@@ -441,6 +458,7 @@ fnr <- function(tp, fn, ...) {
 #' @examples
 #' plr(10, 5, 20, 10)
 #' plr(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 plr <- function(tp, fp, tn, fn, ...) {
     plr <- tpr(tp = tp, fp = tp, tn = tn, fn = fn) /
@@ -473,6 +491,7 @@ nlr <- function(tp, fp, tn, fn, ...) {
 #' fp(10, 5, 20, 10)
 #' tn(10, 5, 20, 10)
 #' fn(10, 5, 20, 10)
+#' @family metric functions
 #' @export
 tp <- function(tp, ...) {
     res <- matrix(tp, ncol = 1)
@@ -517,6 +536,7 @@ fn <- function(fn, ...) {
 #' cohens_kappa(10, 5, 20, 10)
 #' cohens_kappa(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 #' @return A numeric matrix with the column name "cohens_kappa".
+#' @family metric functions
 #' @export
 cohens_kappa <- function(tp, fp, tn, fn, ...) {
     mrg_a <- ((tp + fn) * (tp + fp)) / (tp + fn + fp + tn)
@@ -538,6 +558,7 @@ cohens_kappa <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' odds_ratio(10, 5, 20, 10)
 #' odds_ratio(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 odds_ratio <- function(tp, fp, tn, fn, ...) {
     or <- (tp / fp) / (fn / tn)
@@ -556,6 +577,7 @@ odds_ratio <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' risk_ratio(10, 5, 20, 10)
 #' risk_ratio(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 risk_ratio <- function(tp, fp, tn, fn, ...) {
     rr <- (tp / (tp + fn)) / (fp / (fp + tn))
@@ -573,6 +595,7 @@ risk_ratio <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' p_chisquared(10, 5, 20, 10)
 #' p_chisquared(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 p_chisquared <- function(tp, fp, tn, fn, ...) {
     samplesize <- tp + fp + tn + fn
@@ -597,6 +620,7 @@ p_chisquared <- function(tp, fp, tn, fn, ...) {
 #' misclassification_cost(10, 5, 20, 10, cost_fp = 1, cost_fn = 5)
 #' misclassification_cost(c(10, 8), c(5, 7), c(20, 12), c(10, 18),
 #'                        cost_fp = 1, cost_fn = 5)
+#' @family metric functions
 #' @export
 misclassification_cost <- function(tp, fp, tn, fn, cost_fp = 1, cost_fn = 1, ...) {
     misclassification_cost <- cost_fp * fp + cost_fn * fn
@@ -620,6 +644,7 @@ misclassification_cost <- function(tp, fp, tn, fn, cost_fp = 1, cost_fn = 1, ...
 #' total_utility(10, 5, 20, 10, utility_tp = 3, utility_tn = 3, cost_fp = 1, cost_fn = 5)
 #' total_utility(c(10, 8), c(5, 7), c(20, 12), c(10, 18),
 #'               utility_tp = 3, utility_tn = 3, cost_fp = 1, cost_fn = 5)
+#' @family metric functions
 #' @export
 total_utility <- function(tp, fp, tn, fn,
                           utility_tp = 1, utility_tn = 1,
@@ -640,6 +665,7 @@ total_utility <- function(tp, fp, tn, fn,
 #' @examples
 #' F1_score(10, 5, 20, 10)
 #' F1_score(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 F1_score <- function(tp, fp, tn, fn, ...) {
     f <- (2 * tp) / (2 * tp + fp + fn)

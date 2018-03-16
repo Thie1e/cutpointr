@@ -43,3 +43,8 @@ multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
                 subgroup = "gender", pos_class = "yes")
 
 }
+\seealso{
+Other main cutpointr functions: \code{\link{cutpointr_}},
+  \code{\link{cutpointr}}, \code{\link{predict.cutpointr}},
+  \code{\link{roc}}
+}

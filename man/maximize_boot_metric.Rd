@@ -87,3 +87,12 @@ set.seed(100)
 cutpointr(suicide, dsi, suicide, method = minimize_boot_metric,
           metric = abs_d_sens_spec, boot_cut = 30)
 }
+\seealso{
+Other method functions: \code{\link{maximize_gam_metric}},
+  \code{\link{maximize_loess_metric}},
+  \code{\link{maximize_metric}},
+  \code{\link{maximize_spline_metric}},
+  \code{\link{oc_manual}}, \code{\link{oc_mean}},
+  \code{\link{oc_median}}, \code{\link{oc_youden_kernel}},
+  \code{\link{oc_youden_normal}}
+}

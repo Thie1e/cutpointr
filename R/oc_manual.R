@@ -8,6 +8,7 @@
 #' @param cutpoint (numeric) The fixed cutpoint.
 #' @examples
 #' cutpointr(suicide, dsi, suicide, method = oc_manual, cutpoint = 4)
+#' @family method functions
 #' @export
 oc_manual <- function(cutpoint, ...) {
     return(data.frame(optimal_cutpoint = cutpoint))

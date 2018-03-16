@@ -13,6 +13,7 @@
 #' data(suicide)
 #' opt_cut <- cutpointr(suicide, dsi, suicide)
 #' plot_precision_recall(opt_cut)
+#' @family cutpointr plotting functions
 #' @export
 plot_precision_recall <- function(x, display_cutpoint = TRUE, ...) {
 

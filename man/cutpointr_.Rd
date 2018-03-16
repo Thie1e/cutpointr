@@ -83,3 +83,8 @@ summary(opt_cut)
 plot(opt_cut)
 predict(opt_cut, newdata = data.frame(dsi = 0:5))
 }
+\seealso{
+Other main cutpointr functions: \code{\link{cutpointr}},
+  \code{\link{multi_cutpointr}},
+  \code{\link{predict.cutpointr}}, \code{\link{roc}}
+}

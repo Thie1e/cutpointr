@@ -67,3 +67,12 @@ The above inputs are arrived at by using all unique values in \code{x}, Inf, or
 cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
 cutpointr(suicide, dsi, suicide, method = minimize_metric, metric = abs_d_sens_spec)
 }
+\seealso{
+Other method functions: \code{\link{maximize_boot_metric}},
+  \code{\link{maximize_gam_metric}},
+  \code{\link{maximize_loess_metric}},
+  \code{\link{maximize_spline_metric}},
+  \code{\link{oc_manual}}, \code{\link{oc_mean}},
+  \code{\link{oc_median}}, \code{\link{oc_youden_kernel}},
+  \code{\link{oc_youden_normal}}
+}

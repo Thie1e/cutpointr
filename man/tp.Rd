@@ -38,3 +38,19 @@ fp(10, 5, 20, 10)
 tn(10, 5, 20, 10)
 fn(10, 5, 20, 10)
 }
+\seealso{
+Other metric functions: \code{\link{F1_score}},
+  \code{\link{abs_d_ppv_npv}},
+  \code{\link{abs_d_sens_spec}}, \code{\link{accuracy}},
+  \code{\link{cohens_kappa}}, \code{\link{cutpoint}},
+  \code{\link{false_omission_rate}},
+  \code{\link{misclassification_cost}}, \code{\link{npv}},
+  \code{\link{odds_ratio}}, \code{\link{p_chisquared}},
+  \code{\link{plr}}, \code{\link{ppv}},
+  \code{\link{precision}}, \code{\link{prod_ppv_npv}},
+  \code{\link{prod_sens_spec}}, \code{\link{recall}},
+  \code{\link{risk_ratio}}, \code{\link{sensitivity}},
+  \code{\link{specificity}}, \code{\link{sum_ppv_npv}},
+  \code{\link{sum_sens_spec}}, \code{\link{total_utility}},
+  \code{\link{tpr}}, \code{\link{youden}}
+}

@@ -38,3 +38,12 @@ oc_youden_normal(suicide, "dsi", "suicide",
   pos_class = "yes", neg_class = "no", direction = ">=")
 cutpointr(suicide, dsi, suicide, method = oc_youden_normal)
 }
+\seealso{
+Other method functions: \code{\link{maximize_boot_metric}},
+  \code{\link{maximize_gam_metric}},
+  \code{\link{maximize_loess_metric}},
+  \code{\link{maximize_metric}},
+  \code{\link{maximize_spline_metric}},
+  \code{\link{oc_manual}}, \code{\link{oc_mean}},
+  \code{\link{oc_median}}, \code{\link{oc_youden_kernel}}
+}

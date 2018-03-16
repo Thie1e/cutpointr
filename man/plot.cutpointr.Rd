@@ -24,3 +24,13 @@ opt_cut <- cutpointr(suicide, dsi, suicide, gender)
 plot(opt_cut)
 plot(opt_cut, ggplot2::theme_bw())
 }
+\seealso{
+Other cutpointr plotting functions: \code{\link{plot_cut_boot}},
+  \code{\link{plot_cutpointr}},
+  \code{\link{plot_metric_boot}},
+  \code{\link{plot_metric}},
+  \code{\link{plot_precision_recall}},
+  \code{\link{plot_roc}},
+  \code{\link{plot_sensitivity_specificity}},
+  \code{\link{plot_x}}
+}

@@ -27,6 +27,7 @@
 #' roc(data = dat, x = "Petal.Width", class = "Species",
 #' pos_class = "versicolor", neg_class = "setosa", direction = ">=")
 #' @export
+#' @family main cutpointr functions
 #' @source
 #' Forked from the \pkg{ROCR} package
 roc <- function(data, x, class, pos_class, neg_class, direction = ">=",

@@ -9,6 +9,7 @@
 #' set.seed(100)
 #' opt_cut <- cutpointr(suicide, dsi, suicide, boot_runs = 10)
 #' plot_cut_boot(opt_cut)
+#' @family cutpointr plotting functions
 #' @export
 plot_cut_boot <- function(x, ...) {
 

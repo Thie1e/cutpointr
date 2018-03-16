@@ -21,3 +21,13 @@ set.seed(100)
 opt_cut <- cutpointr(suicide, dsi, suicide, boot_runs = 10)
 plot_cut_boot(opt_cut)
 }
+\seealso{
+Other cutpointr plotting functions: \code{\link{plot.cutpointr}},
+  \code{\link{plot_cutpointr}},
+  \code{\link{plot_metric_boot}},
+  \code{\link{plot_metric}},
+  \code{\link{plot_precision_recall}},
+  \code{\link{plot_roc}},
+  \code{\link{plot_sensitivity_specificity}},
+  \code{\link{plot_x}}
+}

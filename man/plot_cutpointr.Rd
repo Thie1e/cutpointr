@@ -2,15 +2,15 @@
 % Please edit documentation in R/plot_cutpointr.R
 \name{plot_cutpointr}
 \alias{plot_cutpointr}
-\title{Plot metrics}
+\title{General purpose plotting function for cutpointr or roc_cutpointr objects}
 \usage{
 plot_cutpointr(x, xvar = cutpoint, yvar = sum_sens_spec, conf_lvl = 0.95,
   aspect_ratio = NULL)
 }
 \arguments{
-\item{x}{A cutpointr or roc_cutpointr object.}
+\item{x}{A \code{cutpointr} or \code{roc_cutpointr} object.}
 
-\item{xvar}{A function, typically cutpoint or a metric function.}
+\item{xvar}{A function, typically \code{cutpoint} or a metric function.}
 
 \item{yvar}{A function, typically a metric function.}
 
@@ -18,7 +18,8 @@ plot_cutpointr(x, xvar = cutpoint, yvar = sum_sens_spec, conf_lvl = 0.95,
 a confidence interval at the level of conf_lvl can be plotted. To plot no
 confidence interval set conf_lvl = 0.}
 
-\item{aspect_ratio}{(numeric) Set to 1, to obtain a quadratic plot.}
+\item{aspect_ratio}{(numeric) Set to 1 to obtain a quadratic plot, e.g. for
+plotting a ROC curve.}
 }
 \description{
 Flexibly plot various metrics against all cutpoints or any other metric.
@@ -56,4 +57,14 @@ plot_cutpointr(oc, fpr, tpr, aspect_ratio = 1)
 plot_cutpointr(oc, cutpoint, function(tp, tn, fp, fn, ...) tp / fp) +
   ggplot2::ggtitle("Custom metric") + ggplot2::ylab("value")
 
+}
+\seealso{
+Other cutpointr plotting functions: \code{\link{plot.cutpointr}},
+  \code{\link{plot_cut_boot}},
+  \code{\link{plot_metric_boot}},
+  \code{\link{plot_metric}},
+  \code{\link{plot_precision_recall}},
+  \code{\link{plot_roc}},
+  \code{\link{plot_sensitivity_specificity}},
+  \code{\link{plot_x}}
 }

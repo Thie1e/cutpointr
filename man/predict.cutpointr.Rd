@@ -29,3 +29,8 @@ oc <- cutpointr(suicide, dsi, suicide)
 ## Return in-sample predictions
 predict(oc, newdata = data.frame(dsi = oc$data[[1]]$dsi))
 }
+\seealso{
+Other main cutpointr functions: \code{\link{cutpointr_}},
+  \code{\link{cutpointr}}, \code{\link{multi_cutpointr}},
+  \code{\link{roc}}
+}

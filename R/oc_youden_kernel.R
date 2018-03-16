@@ -24,6 +24,7 @@
 #'   ## Within cutpointr
 #'   cutpointr(suicide, dsi, suicide, method = oc_youden_kernel)
 #' }
+#' @family method functions
 #' @export
 oc_youden_kernel <- function(data, x, class, pos_class, neg_class,
                              direction, ...) {
