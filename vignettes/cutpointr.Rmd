@@ -30,13 +30,14 @@ of a metric. Additionally,
 **cutpointr** can automatically bootstrap the variability of the optimal 
 cutpoints and return out-of-bag estimates of various performance metrics.
 
-For example, the optimal cutpoint for the included data set is 6 when maximizing accuracy.
+For example, the optimal cutpoint for the included data set is 2 when maximizing the sum of sensitivity and specificity.
 
 ```{r}
 library(cutpointr)
 data(suicide)
 head(suicide)
-cp <- cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
+cp <- cutpointr(suicide, dsi, suicide, 
+                method = maximize_metric, metric = sum_sens_spec)
 cp
 ```
 
@@ -364,7 +365,7 @@ can be set as desired. For details see `?maximize_spline_metric`.
 
 ```{r}
 opt_cut <- cutpointr(suicide, dsi, suicide, gender, 
-                     method = minimize_spline_metric,
+                     method = minimize_spline_metric, spar = 0.4,
                      metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
 plot_metric(opt_cut)
 ```

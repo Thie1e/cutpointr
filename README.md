@@ -33,7 +33,7 @@ cutpointr
 
 **cutpointr** is an R package for tidy calculation of "optimal" cutpoints. It supports several methods for calculating cutpoints and includes several metrics that can be maximized or minimized by selecting a cutpoint. Some of these methods are designed to be more robust than the simple empirical optimization of a metric. Additionally, **cutpointr** can automatically bootstrap the variability of the optimal cutpoints and return out-of-bag estimates of various performance metrics.
 
-For example, the optimal cutpoint for the included data set is 6 when maximizing accuracy.
+For example, the optimal cutpoint for the included data set is 2 when maximizing the sum of sensitivity and specificity.
 
 ``` r
 library(cutpointr)
@@ -46,20 +46,21 @@ head(suicide)
 #> 4  27 female   0      no
 #> 5  28 female   0      no
 #> 6  53   male   2      no
-cp <- cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
+cp <- cutpointr(suicide, dsi, suicide, 
+                method = maximize_metric, metric = sum_sens_spec)
 #> Assuming the positive class is yes
 #> Assuming the positive class has higher x values
 cp
 #> # A tibble: 1 x 15
-#>   direction optimal_cutpoint method          accuracy   acc sensitivity
-#>   <chr>                <dbl> <chr>              <dbl> <dbl>       <dbl>
-#> 1 >=                      6. maximize_metric    0.951 0.951       0.444
-#>   specificity   AUC pos_class neg_class prevalence outcome predictor
-#>         <dbl> <dbl> <fct>     <fct>          <dbl> <chr>   <chr>    
-#> 1       0.988 0.924 yes       no            0.0677 suicide dsi      
-#>   data               roc_curve             
-#>   <list>             <list>                
-#> 1 <tibble [532 × 2]> <data.frame [13 × 10]>
+#>   direction optimal_cutpoint method          sum_sens_spec   acc
+#>   <chr>                <dbl> <chr>                   <dbl> <dbl>
+#> 1 >=                      2. maximize_metric          1.75 0.865
+#>   sensitivity specificity   AUC pos_class neg_class prevalence outcome
+#>         <dbl>       <dbl> <dbl> <fct>     <fct>          <dbl> <chr>  
+#> 1       0.889       0.863 0.924 yes       no            0.0677 suicide
+#>   predictor data               roc_curve             
+#>   <chr>     <list>             <list>                
+#> 1 dsi       <tibble [532 × 2]> <data.frame [13 × 10]>
 ```
 
 ``` r
@@ -69,16 +70,16 @@ summary(cp)
 #> Outcome: suicide 
 #> Direction: >= 
 #> 
-#>  optimal_cutpoint accuracy    acc sensitivity specificity    AUC n_pos
-#>                 6   0.9511 0.9511      0.4444      0.9879 0.9238    36
-#>  n_neg
-#>    496
+#>  optimal_cutpoint sum_sens_spec    acc sensitivity specificity    AUC
+#>                 2        1.7518 0.8647      0.8889      0.8629 0.9238
+#>  n_pos n_neg
+#>     36   496
 #> 
-#> Cutpoint 6:
+#> Cutpoint 2:
 #>           observation
 #> prediction yes  no
-#>        yes  16   6
-#>        no   20 490
+#>        yes  32  68
+#>        no    4 428
 #> 
 #> 
 #> Predictor summary: 
