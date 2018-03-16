@@ -1,3 +1,10 @@
+# cutpointr 0.7.2
+- More tests and modified two tests that led to errors when CRAN checked 
+the package (`spar = NULL` in `maximize_spline_metric`)
+- Add links to the documentation of all method, plotting, main and metric functions 
+to all other functions of the same family
+- Add some checks to predict.cutpointr to prevent improper `cutpoint_nr`
+
 # cutpointr 0.7.1
 - Fix a bug in check_method_cols that occurred when a user-supplied method 
 function returned a metric column but no roc_curve
