@@ -16,12 +16,15 @@
 #' oc <- cutpointr(suicide, dsi, suicide)
 #' ## Return in-sample predictions
 #' predict(oc, newdata = data.frame(dsi = oc$data[[1]]$dsi))
+#' @family main cutpointr functions
 #' @export
 predict.cutpointr <- function(object, newdata, cutpoint_nr = 1, ...) {
     if (!("data.frame" %in% class(newdata))) {
         stop("newdata should be a data.frame")
     }
-    stopifnot(length(cutpoint_nr) == 1 | length(cutpoint_nr) == nrow(object))
+    if (!(length(cutpoint_nr) == 1 | length(cutpoint_nr) == nrow(object))) {
+        stop("Specify one cutpoint_nr or one cutpoint_nr per subgroup.")
+    }
     predictor_name <- object$predictor[1]
     # The predictor may have been altered using NSE
     indep_var <- eval(parse(text = predictor_name), newdata, parent.frame())
@@ -42,7 +45,11 @@ predict.cutpointr <- function(object, newdata, cutpoint_nr = 1, ...) {
             optimal_cuts <- purrr::map2(.x = 1:nrow(object),
                                         .y = cutpoint_nr,
                                         .f = function(i, nr) {
-                object$optimal_cutpoint[[i]][nr]
+                optimal_cut <- object$optimal_cutpoint[[i]][nr]
+                if (is.na(optimal_cut)) {
+                    stop(paste("Cutpoint Nr.", nr, "in subgroup", i, "not found"))
+                }
+                return(optimal_cut)
             })
             optimal_cuts <- unlist(optimal_cuts)
         }
@@ -56,6 +63,9 @@ predict.cutpointr <- function(object, newdata, cutpoint_nr = 1, ...) {
         }
     } else {
         optimal_cut <- object$optimal_cutpoint[[1]][cutpoint_nr]
+        if (is.na(optimal_cut)) {
+            stop(paste("Cutpoint Nr.", cutpoint_nr, "not found"))
+        }
         if (object$direction[1] == ">=") {
             preds <- indep_var >= optimal_cut
             preds <- ifel_pos_neg(preds, pos_class, neg_class)
