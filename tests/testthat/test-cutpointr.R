@@ -693,6 +693,30 @@ test_that("LOESS smoothing does not return warnings or errors", {
                             pos_class = 1, boot_runs = 10)
         )
     )
+
+    set.seed(3429)
+    tempdat <- data.frame(x = c(rnorm(100), rnorm(100, mean = 1)) ,
+                          y = c(rep(0, 100), rep(1, 100)),
+                          group = sample(c("a", "b"), size = 200, replace = TRUE))
+
+    expect_silent(
+        suppressMessages(
+            cp <- cutpointr(tempdat, x, y, method = minimize_loess_metric,
+                            user.span = 1, break_ties = mean,
+                            metric = abs_d_ppv_npv, direction = ">=",
+                            pos_class = 1, boot_runs = 10)
+        )
+    )
+    expect_equal(round(cp$optimal_cutpoint, 3), -0.083)
+    expect_equal(round(cp$loess_abs_d_ppv_npv, 3), 0.156)
+
+    expect_silent(
+        cp <- cutpointr(tempdat, x, y, group, method = minimize_loess_metric,
+                        user.span = 1, break_ties = mean, silent = TRUE,
+                        metric = abs_d_ppv_npv, direction = ">=",
+                        pos_class = 1, boot_runs = 100)
+    )
+    expect_equal(round(cp$optimal_cutpoint, 2), c(-1.29, 1.01))
 })
 
 test_that("cutpointr returns same result with NSE interface and raw data", {
@@ -824,23 +848,81 @@ test_that("plot_cutpointr runs", {
 
 test_that("smoothing splines lead to plausible results", {
     cp <- cutpointr(suicide, dsi, suicide, method = maximize_spline_metric,
-                    nknots = 6, spar = NULL)
-    expect_equal(cp$optimal_cutpoint, 2)
-
-    cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric,
-                    nknots = 5, spar = NULL)
-    expect_equal(cp$optimal_cutpoint, c(2, 2))
-
-    cp <- cutpointr(suicide, dsi, suicide, method = maximize_spline_metric,
                     nknots = 5, spar = 0.3)
     expect_equal(cp$optimal_cutpoint, 3)
+    expect_silent(plot(cp))
+    expect_silent(plot_metric(cp))
+    expect_silent(plot_roc(cp))
+    expect_silent(summary(cp))
 
     cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric,
                     nknots = 5, spar = 0.3)
     expect_equal(cp$optimal_cutpoint, c(3, 3))
+    expect_silent(plot(cp))
+    expect_silent(plot_metric(cp))
+    expect_silent(plot_roc(cp))
+    expect_silent(summary(cp))
 
-    # cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric, spar = 0.8)
-    # expect_equal(cp$optimal_cutpoint, c(3, 3))
+    cp <- cutpointr(suicide, dsi, suicide, method = minimize_spline_metric,
+                    nknots = 5, spar = 0.3, df = 5, metric = abs_d_sens_spec)
+    expect_equal(cp$optimal_cutpoint, 3)
+    expect_silent(plot(cp))
+    expect_silent(plot_metric(cp))
+    expect_silent(plot_roc(cp))
+    expect_silent(summary(cp))
+})
+
+test_that("gam smoothing leads to plausible results", {
+    cp <- cutpointr(suicide, dsi, suicide, method = maximize_gam_metric,
+                    metric = youden)
+    expect_equal(cp$optimal_cutpoint, 2)
+    expect_silent(plot(cp))
+    expect_silent(plot_metric(cp))
+    expect_silent(plot_roc(cp))
+    expect_silent(summary(cp))
+
+    cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_gam_metric,
+                    metric = youden)
+    expect_equal(cp$optimal_cutpoint, c(2, 2))
+    expect_silent(plot(cp))
+    expect_silent(plot_metric(cp))
+    expect_silent(plot_roc(cp))
+    expect_silent(summary(cp))
+
+    cp <- cutpointr(suicide, dsi, suicide, gender, method = minimize_gam_metric,
+                    metric = abs_d_sens_spec)
+    expect_equal(cp$optimal_cutpoint, c(2, 2))
+    expect_silent(plot(cp))
+    expect_silent(plot_metric(cp))
+    expect_silent(plot_roc(cp))
+    expect_silent(summary(cp))
+})
+
+test_that("bootstrapped cutpoints lead to plausible results", {
+    set.seed(914)
+    cp <- cutpointr(suicide, dsi, suicide, method = maximize_boot_metric,
+                    metric = youden, boot_cut = 10)
+    expect_equal(cp$optimal_cutpoint, 1.9)
+    expect_silent(plot(cp))
+    expect_silent(plot_roc(cp))
+    expect_silent(summary(cp))
+
+    set.seed(14)
+    cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_boot_metric,
+                    metric = youden, boot_cut = 10)
+    expect_equal(cp$optimal_cutpoint, c(2.2, 3.2))
+    expect_silent(plot(cp))
+    expect_silent(plot_roc(cp))
+    expect_silent(summary(cp))
+
+    set.seed(15)
+    cp <- cutpointr(suicide, dsi, suicide, gender, method = minimize_boot_metric,
+                    metric = abs_d_sens_spec, boot_cut = 10)
+    expect_equal(cp$optimal_cutpoint, c(2.1, 2.2))
+    expect_silent(plot(cp))
+    expect_error(plot_metric(cp))
+    expect_silent(plot_roc(cp))
+    expect_silent(summary(cp))
 })
 
 test_that("this led to an error with get_rev_dups Rcpp function", {
@@ -1031,4 +1113,34 @@ test_that("cutpointr works with custom method function", {
     expect_equal(cp$optimal_cutpoint, c(1.990, 2.992))
     expect_equal(cp$method, c("CutOff_Optimised", "CutOff_Optimised"))
     expect_silent(plot(cp))
+})
+
+test_that("predict behaves as expected", {
+    cp <- cutpointr(suicide, dsi, suicide, gender)
+    # Cutpoint 2 does not exist
+    expect_error(predict(cp,
+                         newdata = data.frame(dsi = c(2,3,4,5),
+                                              gender = c("female", "female", "female", "male")),
+                         cutpoint_nr = c(1,2)))
+
+    cp <- cutpointr(suicide, dsi, suicide,
+                    method = maximize_spline_metric, spar = 0.6)
+    # Cutpoint 2 does not exist
+    expect_error(predict(cp,
+                         newdata = data.frame(dsi = c(2,3,4,5),
+                                              gender = c("female", "female", "female", "male")),
+                         cutpoint_nr = c(2)))
+    # Subgroup does not exist
+    expect_error(predict(cp,
+                         newdata = data.frame(dsi = c(2,3,4,5),
+                                              gender = c("female", "female", "female", "male")),
+                         cutpoint_nr = c(1, 1)))
+
+    expect_equal(predict(cp, newdata = data.frame(dsi = 1:5)),
+                 factor(c("no", "no", "yes", "yes", "yes")))
+
+    cp <- cutpointr(suicide, dsi, suicide, use_midpoints = TRUE,
+                    method = maximize_spline_metric, spar = 0.6)
+    expect_equal(predict(cp, newdata = data.frame(dsi = 1:5)),
+                 factor(c("no", "no", "yes", "yes", "yes")))
 })
