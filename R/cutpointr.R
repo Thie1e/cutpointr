@@ -526,7 +526,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
             }
             optcut <- apply_break_ties(optcut, break_ties)
             # Depending on method the roc_curve may be missing
-            if (suppressWarnings(is.null(optcut$roc_curve))) {
+            if (!(has_column(optcut, "roc_curve"))) {
                 roc_curve <- roc(data = d, x = predictor, class = outcome,
                                  pos_class = pos_class, neg_class = neg_class,
                                  direction = direction)
@@ -613,7 +613,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
             message("Multiple optimal cutpoints found")
         }
         optcut <- apply_break_ties(optcut, break_ties)
-        if (suppressWarnings(is.null(optcut$roc_curve))) {
+        if (!(has_column(optcut, "roc_curve"))) {
             roc_curve <- roc(data = dat$data[[1]],
                              x = predictor, class = outcome,
                              pos_class = pos_class, neg_class = neg_class,
@@ -721,7 +721,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                         optcut_b <- tibble::as_tibble(optcut_b)
                         optcut_b <- apply_break_ties(optcut_b, break_ties)
                         # LOO-Bootstrap
-                        if (suppressWarnings(is.null(optcut_b$roc_curve))) {
+                        if (!(has_column(optcut_b, "roc_curve"))) {
                             roc_curve_b <- roc(data = g[b_ind, ], x = predictor,
                                                class = outcome,
                                                pos_class = pc, neg_class = neg_class,

@@ -20,7 +20,7 @@ plot_sensitivity_specificity <- function(x, display_cutpoint = TRUE, ...) {
     stopifnot("cutpointr" %in% class(x))
     args <- list(...)
 
-    if (is.null(suppressWarnings(x$subgroup))) {
+    if (!(has_column(x, "subgroup"))) {
         dts_pr <- c("roc_curve", "optimal_cutpoint")
         ltype <- NULL
     } else {
@@ -28,7 +28,7 @@ plot_sensitivity_specificity <- function(x, display_cutpoint = TRUE, ...) {
         ltype <- ~ subgroup
     }
 
-    if (suppressWarnings(is.null(x$subgroup))) {
+    if (!(has_column(x, "subgroup"))) {
         plot_title <- ggplot2::ggtitle("Sensitivity and specificity plot")
     } else {
         plot_title <- ggplot2::ggtitle("Sensitivity and specificity plot",
@@ -57,7 +57,7 @@ plot_sensitivity_specificity <- function(x, display_cutpoint = TRUE, ...) {
         ggplot2::xlab("Cutpoint") +
         ggplot2::ylab("Sensitivity and Specificity")
     if (display_cutpoint) {
-        if (is.null(suppressWarnings(x$subgroup))) {
+        if (!(has_column(x, "subgroup"))) {
             res_cutpoints <- x %>%
                 dplyr::select_(.dots = "optimal_cutpoint")
             if (is.list(res_cutpoints$optimal_cutpoint)) {

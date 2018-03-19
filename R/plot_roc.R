@@ -21,7 +21,7 @@ plot_roc <- function(x, display_cutpoint = TRUE, ...) {
     predictor <- as.name(x$predictor[1])
     outcome <- as.name(x$outcome[1])
 
-    if (is.null(suppressWarnings(x$subgroup))) {
+    if (!(has_column(x, "subgroup"))) {
         dts_roc <- "roc_curve"
         fll <- NULL
         clr <- NULL
@@ -35,7 +35,7 @@ plot_roc <- function(x, display_cutpoint = TRUE, ...) {
         transparency <- 0.6
     }
 
-    if (suppressWarnings(is.null(x$subgroup))) {
+    if (!(has_column(x, "subgroup"))) {
         roc_title <- ggplot2::ggtitle("ROC curve")
     } else {
         roc_title <- ggplot2::ggtitle("ROC curve", "by class")

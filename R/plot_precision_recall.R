@@ -20,7 +20,7 @@ plot_precision_recall <- function(x, display_cutpoint = TRUE, ...) {
     stopifnot("cutpointr" %in% class(x))
     args <- list(...)
 
-    if (is.null(suppressWarnings(x$subgroup))) {
+    if (!(has_column(x, "subgroup"))) {
         dts_pr <- "roc_curve"
         fll <- NULL
         clr <- NULL
@@ -34,7 +34,7 @@ plot_precision_recall <- function(x, display_cutpoint = TRUE, ...) {
         transparency <- 0.6
     }
 
-    if (suppressWarnings(is.null(x$subgroup))) {
+    if (!(has_column(x, "subgroup"))) {
         plot_title <- ggplot2::ggtitle("Precision recall plot")
     } else {
         plot_title <- ggplot2::ggtitle("Precision recall plot", "by class")

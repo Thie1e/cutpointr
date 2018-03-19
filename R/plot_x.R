@@ -21,7 +21,7 @@ plot_x <- function(x, display_cutpoint = TRUE, ...) {
     predictor <- as.name(x$predictor[1])
     outcome <- as.name(x$outcome[1])
 
-    if (is.null(suppressWarnings(x$subgroup))) {
+    if (!(has_column(x, "subgroup"))) {
         dts <- "data"
         dts_cutpoint <- "optimal_cutpoint"
         fll <- NULL
@@ -40,8 +40,7 @@ plot_x <- function(x, display_cutpoint = TRUE, ...) {
     res_unnested <- x %>%
         dplyr::select_(.dots = dts) %>%
         tidyr::unnest_(unnest_cols = "data")
-    if (is.null(suppressWarnings(x$subgroup))) {
-        # res_unnested$optimal_cutpoint <- x$optimal_cutpoint
+    if (!(has_column(x, "subgroup"))) {
         col <- NULL
     } else {
         res_unnested <- dplyr::full_join(res_unnested,

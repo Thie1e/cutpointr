@@ -17,14 +17,14 @@
 #' @export
 plot_metric <- function(x, conf_lvl = 0.95) {
     stopifnot("cutpointr" %in% class(x))
-    if (suppressWarnings(is.null(x$roc_curve[[1]]$m))) {
+    if (!(has_column(x$roc_curve[[1]], "m"))) {
         stop(paste("The cutpointr object does not include a metric column in",
                    "roc_curve - maybe because a method other than",
                    "maximize_metric or minimize_metric was used"))
     }
 
-    if ("boot" %in% colnames(x) & conf_lvl != 0) {
-        if ("subgroup" %in% colnames(x)) {
+    if (has_column(x, "boot") & conf_lvl != 0) {
+        if (has_column(x, "subgroup")) {
             roc_b_unnested <- x %>%
                 dplyr::select_(.dots = c("boot", "subgroup")) %>%
                 dplyr::mutate_(boot = ~ prepare_bind_rows(boot)) %>%

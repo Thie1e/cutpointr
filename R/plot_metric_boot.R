@@ -17,7 +17,7 @@ plot_metric_boot <- function(x, ...) {
 
     args <- list(...)
 
-    if (is.null(suppressWarnings(x$subgroup))) {
+    if (!(has_column(x, "subgroup"))) {
         dts_boot <- "boot"
         dts <- "data"
         fll <- NULL
@@ -31,7 +31,7 @@ plot_metric_boot <- function(x, ...) {
         transparency <- 0.6
     }
 
-    if(!is.null(suppressWarnings(x$boot))) {
+    if(has_column(x, "boot")) {
         res_boot_unnested <- x %>%
             dplyr::select_(.dots = dts_boot) %>%
             dplyr::mutate_(boot = ~ prepare_bind_rows(boot)) %>%

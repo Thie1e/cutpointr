@@ -19,7 +19,7 @@ plot.cutpointr <- function(x, ...) {
 
     dist <- plot_x(x)
     roc <- plot_roc(x)
-    boot_flag <- !is.null(suppressWarnings(x$boot))
+    boot_flag <- has_column(x, "boot")
     if (boot_flag) {
         boot_cut <- plot_cut_boot(x)
         boot_metric <- plot_metric_boot(x)

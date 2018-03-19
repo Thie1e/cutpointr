@@ -80,6 +80,14 @@ check_roc_curve <- function(object) {
     }
 }
 
+has_column <- function(x, colname) {
+    if (colname %in% colnames(x)) {
+        return(TRUE)
+    } else {
+        return(FALSE)
+    }
+}
+
 ifel_pos_neg <- function(logi_vec, pos_class, neg_class) {
     predictions <- rep(neg_class, length(logi_vec))
     predictions[logi_vec] <- pos_class

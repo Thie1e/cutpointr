@@ -4,18 +4,18 @@ print.summary_cutpointr <- function(x, ...) {
     cat(paste("Predictor:", x$cutpointr[[1]]$predictor, "\n"))
     cat(paste("Outcome:", x$cutpointr[[1]]$outcome, "\n"))
     cat(paste("Direction:", x$cutpointr[[1]]$direction, "\n"))
-    if (!is.null(suppressWarnings(x$cutpointr[[1]]$subgroup))) {
+    if (has_column(x$cutpointr[[1]], "subgroup")) {
         cat(c("Subgroups:",
               paste(purrr::map(x$cutpointr, ~ .$subgroup), collapse = ", "),
               "\n"))
     }
-    if (!is.null(suppressWarnings(x$boot))) {
+    if (has_column(x, "boot")) {
         cat(paste("Nr. of bootstraps:", x$boot_runs[1], "\n"))
     }
 
     for (i in 1:nrow(x)) {
         cat("\n")
-        if (!is.null(suppressWarnings(x$cutpointr[[i]]$subgroup))) {
+        if (has_column(x$cutpointr[[i]], "subgroup")) {
             cat(paste("Subgroup:", x$subgroup[i], "\n"))
             cat(paste0(rep("-", getOption("width")), collapse = ""), "\n")
         }
