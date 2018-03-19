@@ -15,6 +15,7 @@
 -   [Additional features](#additional-features)
     -   [Calculating only the ROC curve](#calculating-only-the-roc-curve)
     -   [Midpoints](#midpoints)
+    -   [Finding all cutpoints with acceptable performance](#finding-all-cutpoints-with-acceptable-performance)
     -   [Manual and mean / median cutpoints](#manual-and-mean-median-cutpoints)
     -   [Nonstandard evaluation and transforming variables](#nonstandard-evaluation-and-transforming-variables)
     -   [ROC-curve and optimal cutpoint for multiple variables](#roc-curve-and-optimal-cutpoint-for-multiple-variables)
@@ -291,9 +292,9 @@ summary(opt_cut)
 #> Predictor: dsi 
 #> Outcome: suicide 
 #> Direction: >= 
-#> Subgroups: female, male 
-#> 
-#> Subgroup: female 
+#> Subgroups: female, male
+#> Warning: Unknown or uninitialised column: 'subgroup'.
+#> Subgroup:  
 #> --------------------------------------------------------------------------- 
 #>  optimal_cutpoint sum_sens_spec    acc sensitivity specificity    AUC
 #>                 2        1.8081 0.8852      0.9259      0.8822 0.9446
@@ -315,8 +316,8 @@ summary(opt_cut)
 #>     Min.  5% 1st Qu. Median   Mean 3rd Qu. 95% Max     SD
 #> no     0 0.0       0      0 0.5479       0   4  10 1.3181
 #> yes    0 1.3       4      5 4.7778       6   7   9 2.0444
-#> 
-#> Subgroup: male 
+#> Warning: Unknown or uninitialised column: 'subgroup'.
+#> Subgroup:  
 #> --------------------------------------------------------------------------- 
 #>  optimal_cutpoint sum_sens_spec    acc sensitivity specificity    AUC
 #>                 3        1.6251 0.8429      0.7778      0.8473 0.8617
@@ -400,7 +401,6 @@ summary(opt_cut)
 #> Predictor: dsi 
 #> Outcome: suicide 
 #> Direction: >= 
-#> Nr. of bootstraps: 50 
 #> 
 #>  optimal_cutpoint sum_sens_spec    acc sensitivity specificity    AUC
 #>                 2        1.7518 0.8647      0.8889      0.8629 0.9238
@@ -422,36 +422,6 @@ summary(opt_cut)
 #>     Min.   5% 1st Qu. Median   Mean 3rd Qu.  95% Max     SD
 #> no     0 0.00       0      0 0.6331       0 4.00  10 1.4122
 #> yes    0 0.75       4      5 4.8889       6 9.25  11 2.5498
-#> 
-#> Bootstrap summary: 
-#>           Variable   Min.     5% 1st Qu. Median   Mean 3rd Qu.    95%
-#>   optimal_cutpoint 1.0000 1.4500  2.0000 2.0000 2.1400  2.0000 3.5500
-#>              AUC_b 0.8621 0.8913  0.9168 0.9327 0.9296  0.9466 0.9586
-#>            AUC_oob 0.8311 0.8541  0.8983 0.9142 0.9134  0.9338 0.9644
-#>    sum_sens_spec_b 1.6285 1.6894  1.7478 1.7747 1.7702  1.7995 1.8385
-#>  sum_sens_spec_oob 1.4764 1.5551  1.6510 1.7085 1.7068  1.7631 1.8324
-#>              acc_b 0.7613 0.8164  0.8571 0.8712 0.8679  0.8816 0.9052
-#>            acc_oob 0.7200 0.7976  0.8455 0.8618 0.8546  0.8721 0.8921
-#>      sensitivity_b 0.7949 0.8358  0.8777 0.9077 0.9049  0.9316 0.9683
-#>    sensitivity_oob 0.5833 0.6958  0.8031 0.8571 0.8519  0.9215 1.0000
-#>      specificity_b 0.7520 0.8095  0.8545 0.8691 0.8653  0.8822 0.9091
-#>    specificity_oob 0.7059 0.7866  0.8442 0.8628 0.8549  0.8722 0.8934
-#>            kappa_b 0.2214 0.3289  0.3786 0.4221 0.4238  0.4673 0.5310
-#>          kappa_oob 0.2145 0.2505  0.3198 0.3808 0.3814  0.4430 0.4866
-#>    Max.     SD
-#>  4.0000 0.6064
-#>  0.9705 0.0214
-#>  0.9737 0.0320
-#>  1.8555 0.0471
-#>  1.8876 0.0874
-#>  0.9286 0.0296
-#>  0.9091 0.0325
-#>  0.9762 0.0426
-#>  1.0000 0.0951
-#>  0.9313 0.0322
-#>  0.9389 0.0373
-#>  0.6033 0.0720
-#>  0.5003 0.0748
 plot(opt_cut)
 ```
 
@@ -718,6 +688,29 @@ plot_x(opt_cut)
 A simulation demonstrates more clearly that setting `use_midpoints = TRUE` avoids biasing the cutpoints. To simulate the bias of the metric functions, the predictor values of both classes were drawn from normal distributions with constant standard deviations of 10, a constant mean of the negative class of 100 and higher mean values of the positive class that are selected in such a way that optimal Youden-Index values of 0.2, 0.4, 0.6, and 0.8 result in the population. Samples of 9 different sizes were drawn and the cutpoints that maximize the Youden-Index were estimated. The simulation was repeated 10000 times. As can be seen by the mean error, `use_midpoints = TRUE` eliminates the bias that is introduced by otherwise selecting the value of an observation as the optimal cutpoint. If `direction = ">="`, as in this case, the observation that represents the optimal cutpoint is the highest possible cutpoint that leads to the optimal metric value and thus the biases are positive. The methods `oc_youden_normal` and `oc_youden_kernel` are always unbiased, as they don't select a cutpoint based on the ROC-curve or the function of metric values per cutpoint.
 
 ![](README-unnamed-chunk-30-1.png)
+
+Finding all cutpoints with acceptable performance
+-------------------------------------------------
+
+By default, most packages only return the "best" cutpoint and disregard other cutpoints with quite similar performance, even if the performance differences are miniscule. **cutpointr** makes this process more explicit via the `tol_metric` argument. For example, if all cupoints are of interest that are achieve at least an accuracy within `0.05` of the optimally achievable accuracy, `tol_metric` can be set to `0.05` and also those cutpoints will be returned.
+
+In the case of the `suicide` data and when maximizing the sum of sensitivity and specificity, empirically the cutpoints 2 and 3 lead to quite similar performances. If `tol_metric` is set to `0.05`, both will be returned.
+
+``` r
+opt_cut <- cutpointr(suicide, dsi, suicide, metric = sum_sens_spec, 
+                     tol_metric = 0.05)
+#> Assuming the positive class is yes
+#> Assuming the positive class has higher x values
+#> Multiple optimal cutpoints found
+opt_cut %>% 
+    select(optimal_cutpoint, sum_sens_spec) %>% 
+    unnest
+#> # A tibble: 2 x 2
+#>   optimal_cutpoint sum_sens_spec
+#>              <dbl>         <dbl>
+#> 1               2.          1.75
+#> 2               1.          1.70
+```
 
 Manual and mean / median cutpoints
 ----------------------------------
@@ -991,37 +984,37 @@ opt_cut
 plot_cut_boot(opt_cut)
 ```
 
-![](README-unnamed-chunk-39-1.png)
+![](README-unnamed-chunk-40-1.png)
 
 ``` r
 plot_metric(opt_cut, conf_lvl = 0.9)
 ```
 
-![](README-unnamed-chunk-39-2.png)
+![](README-unnamed-chunk-40-2.png)
 
 ``` r
 plot_metric_boot(opt_cut)
 ```
 
-![](README-unnamed-chunk-39-3.png)
+![](README-unnamed-chunk-40-3.png)
 
 ``` r
 plot_precision_recall(opt_cut)
 ```
 
-![](README-unnamed-chunk-39-4.png)
+![](README-unnamed-chunk-40-4.png)
 
 ``` r
 plot_sensitivity_specificity(opt_cut)
 ```
 
-![](README-unnamed-chunk-39-5.png)
+![](README-unnamed-chunk-40-5.png)
 
 ``` r
 plot_roc(opt_cut)
 ```
 
-![](README-unnamed-chunk-39-6.png)
+![](README-unnamed-chunk-40-6.png)
 
 All plot functions, except for the standard plot method, return `ggplot` objects than can be further modified. For example, changing labels, title, and the theme can be achieved this way:
 
@@ -1030,7 +1023,7 @@ p <- plot_x(opt_cut)
 p + ggtitle("Distribution of dsi") + theme_minimal() + xlab("Depression score")
 ```
 
-![](README-unnamed-chunk-40-1.png)
+![](README-unnamed-chunk-41-1.png)
 
 Flexible plotting function
 --------------------------
@@ -1047,19 +1040,19 @@ oc <- cutpointr(suicide, dsi, suicide, boot_runs = 20,
 plot_cutpointr(oc, xvar = cutpoints, yvar = sum_sens_spec, conf_lvl = 0.9)
 ```
 
-![](README-unnamed-chunk-41-1.png)
+![](README-unnamed-chunk-42-1.png)
 
 ``` r
 plot_cutpointr(oc, xvar = fpr, yvar = tpr, aspect_ratio = 1, conf_lvl = 0)
 ```
 
-![](README-unnamed-chunk-41-2.png)
+![](README-unnamed-chunk-42-2.png)
 
 ``` r
 plot_cutpointr(oc, xvar = cutpoint, yvar = tp, conf_lvl = 0.9) + geom_point()
 ```
 
-![](README-unnamed-chunk-41-3.png)
+![](README-unnamed-chunk-42-3.png)
 
 Manual plotting
 ---------------
@@ -1112,7 +1105,7 @@ opt_cut %>%
     geom_boxplot(alpha = 0.3) + facet_grid(~subgroup)
 ```
 
-![](README-unnamed-chunk-42-1.png)
+![](README-unnamed-chunk-43-1.png)
 
 Benchmarks
 ----------
@@ -1148,7 +1141,7 @@ The benchmarking will be carried out using the **microbenchmark** package and ra
 
 Benchmarks are run for sample sizes of 1000, 1e4, 1e5, 1e6, and 1e7. For low sample sizes **cutpointr** is slower than the other solutions. While this should be of low practical importance, **cutpointr** scales more favorably with increasing sample size. The speed disadvantage in small samples that leads to the lower limit of around 25ms is mainly due to the nesting of the original data and the results that makes the compact output of `cutpointr` possible. For sample sizes &gt; 1e5 **cutpointr** is a little faster than the function based on **ROCR**. Both of these solutions are generally faster than **OptimalCutpoints** and **ThresholdROC** with the exception of small samples. **OptimalCutpoints** and **ThresholdROC** had to be excluded from benchmarks with more than 1e4 observations and **pROC** from benchmarks with more than 1e5 observations due to high memory requirements and/or excessive run times, rendering the use of these packages in larger samples impractical.
 
-![](README-unnamed-chunk-46-1.png)
+![](README-unnamed-chunk-47-1.png)
 
 |      n|   cutpointr|  OptimalCutpoints|        pROC|          ROCR|  ThresholdROC|
 |------:|-----------:|-----------------:|-----------:|-------------:|-------------:|
@@ -1176,7 +1169,7 @@ proc_roc <- function(x, class, levels = c("no", "yes"), algo = 2) {
 }
 ```
 
-![](README-unnamed-chunk-51-1.png)
+![](README-unnamed-chunk-52-1.png)
 
 |      n|    cutpointr|        pROC|         ROCR|
 |------:|------------:|-----------:|------------:|

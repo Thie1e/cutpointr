@@ -648,6 +648,21 @@ ggplot(plotdat_nomidpoints %>% filter(!(method %in% c("spline_20"))),
             "normally distributed data, 10000 repetitions of simulation")
 ```
 
+
+## Finding all cutpoints with acceptable performance
+By default, most packages only return the "best" cutpoint and disregard other cutpoints with quite similar performance, even if the performance differences are miniscule. **cutpointr** makes this process more explicit via the `tol_metric` argument. For example, if all cupoints are of interest that are achieve at least an accuracy within `0.05` of the optimally achievable accuracy, `tol_metric` can be set to `0.05` and also those cutpoints will be returned. 
+
+In the case of the `suicide` data and when maximizing the sum of sensitivity and specificity, empirically the cutpoints 2 and 3 lead to quite similar performances. If `tol_metric` is set to `0.05`, both will be returned.
+
+```{r}
+opt_cut <- cutpointr(suicide, dsi, suicide, metric = sum_sens_spec, 
+                     tol_metric = 0.05)
+opt_cut %>% 
+    select(optimal_cutpoint, sum_sens_spec) %>% 
+    unnest
+```
+
+
 ## Manual and mean / median cutpoints
 
 Using the `oc_manual` function the optimal cutpoint will not be determined 
