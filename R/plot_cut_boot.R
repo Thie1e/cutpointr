@@ -30,7 +30,7 @@ plot_cut_boot <- function(x, ...) {
         transparency <- 0.6
     }
 
-    if (has_column(x, "boot")) {
+    if (has_boot_results(x)) {
         res_boot_unnested <- x %>%
             dplyr::select_(.dots = dts_boot) %>%
             dplyr::mutate_(boot = ~ prepare_bind_rows(boot)) %>%

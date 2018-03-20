@@ -18,7 +18,7 @@ default_cols <- c("m", "subgroup", "direction", "optimal_cutpoint",
                   "method", "acc", "sensitivity", "specificity", "AUC",
                   "pos_class", "neg_class", "prevalence",
                   "outcome", "predictor", "grouping", "data", "roc_curve",
-                  "tn", "fn", "tp", "fp", "tpr", "tnr", "fpr", "fnr")
+                  "boot", "tn", "fn", "tp", "fp", "tpr", "tnr", "fpr", "fnr")
 
 check_method_cols <- function(method_result) {
     cn <- colnames(method_result)
@@ -83,6 +83,18 @@ check_roc_curve <- function(object) {
 has_column <- function(x, colname) {
     if (colname %in% colnames(x)) {
         return(TRUE)
+    } else {
+        return(FALSE)
+    }
+}
+
+has_boot_results <- function(x) {
+    if (has_column(x, "boot")) {
+        if (all(is.na(x[["boot"]]))) {
+            return(FALSE)
+        } else {
+            return(TRUE)
+        }
     } else {
         return(FALSE)
     }

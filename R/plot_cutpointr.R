@@ -92,10 +92,10 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
         x
     })
 
-    if ("boot" %in% colnames(x) & conf_lvl != 0) {
+    if (has_boot_results(x) & conf_lvl != 0) {
         # Add xvar and yvar columns to ROC curves of bootstrap repetitions
         for (i in 1:nrow(x)) {
-            x$boot[[i]]$roc_curve_b <- purrr::map(x$boot[[i]]$roc_curve_b, function(x) {
+            x[["boot"]][[i]]$roc_curve_b <- purrr::map(x[["boot"]][[i]]$roc_curve_b, function(x) {
                 met <- xvar(x = x, tp = x$tp, fp = x$fp, tn = x$tn, fn = x$fn)
                 met <- sanitize_metric(met, m_name = xvar_name, n = nrow(x),
                                                    silent = TRUE)
@@ -108,7 +108,7 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
                 x <- dplyr::bind_cols(x, tibble::as_data_frame(met))
                 x
             })
-            ci <- x$boot[[i]]$roc_curve_b %>%
+            ci <- x[["boot"]][[i]]$roc_curve_b %>%
                 dplyr::bind_rows() %>%
                 dplyr::select_(.dots = c(xvar_name, yvar_name)) %>%
                 dplyr::group_by(!!rlang::sym(xvar_name)) %>%
@@ -133,7 +133,7 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
             return(d)
         }) %>%
             dplyr::bind_rows()
-        if ("boot" %in% colnames(x) & conf_lvl != 0) {
+        if (has_boot_results(x) & conf_lvl != 0) {
             p <- ggplot2::ggplot(rocdat, ggplot2::aes_string(x = xvar_name,
                                                              y = yvar_name,
                                                              ymax = "ymax",
@@ -160,7 +160,7 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
         rocdat <- rocdat[[1]]
         rocdat <- rocdat[is.finite(rocdat[[yvar_name]]), ]
         rocdat <- rocdat[is.finite(rocdat[[xvar_name]]), ]
-        if ("boot" %in% colnames(x) & conf_lvl != 0) {
+        if (has_boot_results(x) & conf_lvl != 0) {
             p <- ggplot2::ggplot(rocdat, ggplot2::aes_string(x = xvar_name,
                                                        y = yvar_name,
                                                        ymax = "ymax",

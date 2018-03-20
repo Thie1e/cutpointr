@@ -696,7 +696,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
         `%seq_or_par%` <- foreach::`%do%`
     }
     if (boot_runs <= 0) {
-        bootstrap <- NULL
+        bootstrap <- rep(NA, times = nrow(optcut))
     } else {
         message("Running bootstrap...")
         boot_runs <- ceiling(boot_runs)
@@ -846,7 +846,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                 return(boot_g)
             }))
     }
-    res <- dplyr::bind_cols(optcut, bootstrap)
+    res <- dplyr::bind_cols(optcut, boot = bootstrap)
     class(res) <- c("cutpointr", class(res))
     return(res)
 }

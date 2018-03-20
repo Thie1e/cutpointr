@@ -9,14 +9,14 @@ print.summary_cutpointr <- function(x, ...) {
               paste(purrr::map(x$cutpointr, ~ .$subgroup), collapse = ", "),
               "\n"))
     }
-    if (has_column(x, "boot")) {
+    if (has_boot_results(x)) {
         cat(paste("Nr. of bootstraps:", x$boot_runs[1], "\n"))
     }
 
     for (i in 1:nrow(x)) {
         cat("\n")
         if (has_column(x$cutpointr[[i]], "subgroup")) {
-            cat(paste("Subgroup:", x$subgroup[i], "\n"))
+            cat(paste("Subgroup:", x$cutpointr[[i]]$subgroup, "\n"))
             cat(paste0(rep("-", getOption("width")), collapse = ""), "\n")
         }
         purrr::map_df(1:length(x$cutpointr[[i]]$optimal_cutpoint[[1]]), function(j) {
@@ -51,10 +51,11 @@ print.summary_cutpointr <- function(x, ...) {
         cat("\n")
         cat(paste("Predictor summary per class:", "\n"))
         print(x$desc_by_class[[i]])
-        if (!is.null(suppressWarnings(x$boot[[i]]))) {
+        # if (!is.null(suppressWarnings(x[["boot"]][[i]]))) {
+        if (has_boot_results(x[i, ])) {
             cat("\n")
             cat(paste("Bootstrap summary:", "\n"))
-            print(x$boot[[i]], row.names = rep("", nrow(x$boot[[i]])))
+            print(x[["boot"]][[i]], row.names = rep("", nrow(x[["boot"]][[i]])))
         }
     }
     return(invisible(x))

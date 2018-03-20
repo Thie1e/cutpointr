@@ -35,15 +35,15 @@ summary.cutpointr <- function(object, ...) {
             cutpoint = unlist(temprow$optimal_cutpoint),
             temprow$roc_curve[[1]][oi, c("tp", "fn", "fp", "tn")]
         )
-        if (has_column(temprow, "boot")) {
-            x_summary[[r]]$boot <- purrr::map(temprow$boot[[1]][, 1:13], function(x) {
+        if (has_boot_results(temprow)) {
+            x_summary[[r]][["boot"]] <- purrr::map(temprow[["boot"]][[1]][, 1:13], function(x) {
                 round(summary_sd(x), 4)
             })
-            x_summary[[r]]$boot <- do.call(rbind, x_summary[[r]]$boot)
-            x_summary[[r]]$boot <- as.data.frame(x_summary[[r]]$boot)
-            x_summary[[r]]$boot <- tibble::rownames_to_column(x_summary[[r]]$boot,
+            x_summary[[r]][["boot"]] <- do.call(rbind, x_summary[[r]][["boot"]])
+            x_summary[[r]][["boot"]] <- as.data.frame(x_summary[[r]][["boot"]])
+            x_summary[[r]][["boot"]] <- tibble::rownames_to_column(x_summary[[r]][["boot"]],
                                                               var = "Variable")
-            x_summary[[r]]$boot_runs <- nrow(temprow$boot[[1]])
+            x_summary[[r]]$boot_runs <- nrow(temprow[["boot"]][[1]])
         }
     }
     x_summary <- purrr::map_df(x_summary, tidy_summary)
@@ -64,9 +64,9 @@ tidy_summary <- function(x) {
         n_obs = x$n_obs, n_pos = x$n_pos, n_neg = x$n_neg,
         confusion_matrix = list(x$confusion_matrix)
     )
-    if (has_column(x, "boot")) {
+    if (has_boot_results(x)) {
         res <- dplyr::bind_cols(res,
-                                tidyr::nest_(x$boot, key_col = "boot"),
+                                tidyr::nest_(x[["boot"]], key_col = "boot"),
                                 boot_runs = x$boot_runs)
     }
     if (has_column(x, "subgroup")) {

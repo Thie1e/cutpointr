@@ -3,7 +3,7 @@ test_that("Cutpointr returns a cutpointr without NAs and a certain Nr of rows", 
     opt_cut <- cutpointr(suicide, dsi, suicide)
     expect_true("cutpointr" %in% class(opt_cut))
     expect_that(nrow(opt_cut), equals(1))
-    expect_that(sum(is.na(opt_cut)), equals(0))
+    expect_that(sum(is.na(opt_cut)), equals(1)) # boot is NA
     expect_silent(plot(opt_cut))
     expect_silent(plot_metric(opt_cut))
     expect_silent(plot_roc(opt_cut))
@@ -18,19 +18,19 @@ test_that("Cutpointr works with different data types", {
                           y = sample(0:1, size = 10, replace = TRUE))
     opt_cut <- cutpointr(tempdat, x, y)
     expect_that(nrow(opt_cut), equals(1))
-    expect_that(sum(is.na(opt_cut)), equals(0))
+    expect_that(sum(is.na(opt_cut)), equals(1))
     expect_silent(plot(opt_cut))
 
     tempdat$y <- factor(tempdat$y)
     opt_cut <- cutpointr(tempdat, x, y)
     expect_that(nrow(opt_cut), equals(1))
-    expect_that(sum(is.na(opt_cut)), equals(0))
+    expect_that(sum(is.na(opt_cut)), equals(1))
     expect_silent(plot(opt_cut))
 
     tempdat$y <- as.character(tempdat$y)
     opt_cut <- cutpointr(tempdat, x, y)
     expect_that(nrow(opt_cut), equals(1))
-    expect_that(sum(is.na(opt_cut)), equals(0))
+    expect_that(sum(is.na(opt_cut)), equals(1))
     expect_silent(plot(opt_cut))
 
     # With subgroup
@@ -40,7 +40,7 @@ test_that("Cutpointr works with different data types", {
                           g = sample(0:2, size = 30, replace = TRUE))
     opt_cut <- cutpointr(tempdat, x, y, g)
     expect_that(nrow(opt_cut), equals(3))
-    expect_that(sum(is.na(opt_cut)), equals(0))
+    expect_that(sum(is.na(opt_cut)), equals(3))
     expect_silent(plot(opt_cut))
     expect_silent(plot_metric(opt_cut))
     expect_silent(plot_roc(opt_cut))
@@ -51,7 +51,7 @@ test_that("Cutpointr works with different data types", {
     tempdat$g <- factor(tempdat$g)
     opt_cut <- cutpointr(tempdat, x, y, g)
     expect_that(nrow(opt_cut), equals(3))
-    expect_that(sum(is.na(opt_cut)), equals(0))
+    expect_that(sum(is.na(opt_cut)), equals(3))
     expect_silent(plot(opt_cut))
     expect_silent(plot_metric(opt_cut))
     expect_silent(plot_roc(opt_cut))
@@ -62,7 +62,7 @@ test_that("Cutpointr works with different data types", {
     tempdat$g <- as.character(tempdat$g)
     opt_cut <- cutpointr(tempdat, x, y, g)
     expect_that(nrow(opt_cut), equals(3))
-    expect_that(sum(is.na(opt_cut)), equals(0))
+    expect_that(sum(is.na(opt_cut)), equals(3))
     expect_silent(plot(opt_cut))
     expect_silent(plot_metric(opt_cut))
     expect_silent(plot_roc(opt_cut))
@@ -117,12 +117,12 @@ test_that("Plotting with bootstrapping is silent", {
     set.seed(102)
     opt_cut <- cutpointr(suicide, dsi, suicide, gender, method = minimize_metric,
                          metric = abs_d_sens_spec, boot_runs = 50, silent = TRUE)
-    plot_cut_boot(opt_cut)
-    plot_metric(opt_cut, conf_lvl = 0.9)
-    plot_metric_boot(opt_cut)
-    plot_precision_recall(opt_cut)
-    plot_sensitivity_specificity(opt_cut)
-    plot_roc(opt_cut)
+    expect_silent(plot_cut_boot(opt_cut))
+    expect_silent(plot_metric(opt_cut, conf_lvl = 0.9))
+    expect_silent(plot_metric_boot(opt_cut))
+    expect_silent(plot_precision_recall(opt_cut))
+    expect_silent(plot_sensitivity_specificity(opt_cut))
+    expect_silent(plot_roc(opt_cut))
 })
 
 test_that("AUC calculation is correct and works with Inf and -Inf", {
@@ -131,6 +131,8 @@ test_that("AUC calculation is correct and works with Inf and -Inf", {
     roc_cutpointr <- cutpointr::roc(tempdat, "x", "y", pos_class = 1, neg_class = 0)
     auc_cutpointr <- cutpointr:::auc(roc_cutpointr$tpr, roc_cutpointr$fpr)
     expect_equal(auc_cutpointr, 1)
+    cp <- cutpointr(tempdat, x, y)
+    expect_equal(cp$AUC, 1)
 
     set.seed(123)
     tempdat <- data.frame(x = runif(100),
@@ -138,6 +140,8 @@ test_that("AUC calculation is correct and works with Inf and -Inf", {
     roc_cutpointr <- cutpointr::roc(tempdat, "x", "y", pos_class = 1, neg_class = 0)
     auc_cutpointr <- cutpointr:::auc(roc_cutpointr$tpr, roc_cutpointr$fpr)
     expect_equal(auc_cutpointr, 0.428)
+    cp <- cutpointr(tempdat, x, y, pos_class = 1, direction = ">=")
+    expect_equal(cp$AUC, 0.428)
 })
 
 test_that("Correct midpoints are found", {
@@ -1144,3 +1148,4 @@ test_that("predict behaves as expected", {
     expect_equal(predict(cp, newdata = data.frame(dsi = 1:5)),
                  factor(c("no", "no", "yes", "yes", "yes")))
 })
+
