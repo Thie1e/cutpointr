@@ -4,6 +4,8 @@ the package (`spar = NULL` in `maximize_spline_metric`)
 - Add links to the documentation of all method, plotting, main and metric functions 
 to all other functions of the same family
 - Add some checks to predict.cutpointr to prevent improper `cutpoint_nr`
+- The `boot` column is now always returned and `NA`, if no bootstrapping was
+run, so that the number of returned columns is constant
 
 # cutpointr 0.7.1
 - Fix a bug in check_method_cols that occurred when a user-supplied method 
