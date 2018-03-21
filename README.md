@@ -1,5 +1,7 @@
 
 -   [cutpointr](#cutpointr)
+    -   [Installation](#installation)
+    -   [Example](#example)
     -   [Features](#features)
 -   [Calculating cutpoints](#calculating-cutpoints)
     -   [Method functions for cutpoint estimation](#method-functions-for-cutpoint-estimation)
@@ -30,9 +32,21 @@
 cutpointr
 =========
 
-[![Travis-CI Build Status](https://travis-ci.org/Thie1e/cutpointr.svg?branch=master)](https://travis-ci.org/Thie1e/cutpointr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr) [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active) [![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr)
+[![Travis-CI Build Status](https://travis-ci.org/Thie1e/cutpointr.svg?branch=master)](https://travis-ci.org/Thie1e/cutpointr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr) [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active) [![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr) [![CRAN\_Release\_Badge](http://www.r-pkg.org/badges/version-ago/cutpointr)](https://CRAN.R-project.org/package=cutpointr)
 
 **cutpointr** is an R package for tidy calculation of "optimal" cutpoints. It supports several methods for calculating cutpoints and includes several metrics that can be maximized or minimized by selecting a cutpoint. Some of these methods are designed to be more robust than the simple empirical optimization of a metric. Additionally, **cutpointr** can automatically bootstrap the variability of the optimal cutpoints and return out-of-bag estimates of various performance metrics.
+
+Installation
+------------
+
+You can install **cutpointr** from CRAN using the menu in RStudio or simply:
+
+``` r
+install.packages("cutpointr")
+```
+
+Example
+-------
 
 For example, the optimal cutpoint for the included data set is 2 when maximizing the sum of sensitivity and specificity.
 
@@ -52,16 +66,16 @@ cp <- cutpointr(suicide, dsi, suicide,
 #> Assuming the positive class is yes
 #> Assuming the positive class has higher x values
 cp
-#> # A tibble: 1 x 15
+#> # A tibble: 1 x 16
 #>   direction optimal_cutpoint method          sum_sens_spec   acc
 #>   <chr>                <dbl> <chr>                   <dbl> <dbl>
 #> 1 >=                      2. maximize_metric          1.75 0.865
 #>   sensitivity specificity   AUC pos_class neg_class prevalence outcome
 #>         <dbl>       <dbl> <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1       0.889       0.863 0.924 yes       no            0.0677 suicide
-#>   predictor data               roc_curve             
-#>   <chr>     <list>             <list>                
-#> 1 dsi       <tibble [532 × 2]> <data.frame [13 × 10]>
+#>   predictor data               roc_curve              boot 
+#>   <chr>     <list>             <list>                 <lgl>
+#> 1 dsi       <tibble [532 × 2]> <data.frame [13 × 10]> NA
 ```
 
 ``` r
@@ -181,16 +195,16 @@ opt_cut <- cutpointr(suicide, dsi, suicide)
 #> Assuming the positive class is yes
 #> Assuming the positive class has higher x values
 opt_cut
-#> # A tibble: 1 x 15
+#> # A tibble: 1 x 16
 #>   direction optimal_cutpoint method          sum_sens_spec   acc
 #>   <chr>                <dbl> <chr>                   <dbl> <dbl>
 #> 1 >=                      2. maximize_metric          1.75 0.865
 #>   sensitivity specificity   AUC pos_class neg_class prevalence outcome
 #>         <dbl>       <dbl> <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1       0.889       0.863 0.924 yes       no            0.0677 suicide
-#>   predictor data               roc_curve             
-#>   <chr>     <list>             <list>                
-#> 1 dsi       <tibble [532 × 2]> <data.frame [13 × 10]>
+#>   predictor data               roc_curve              boot 
+#>   <chr>     <list>             <list>                 <lgl>
+#> 1 dsi       <tibble [532 × 2]> <data.frame [13 × 10]> NA
 ```
 
 Alternatively, instead of supplying a data frame the raw vectors of the predictor and outcome can be given as `x` and `class`:
@@ -199,16 +213,16 @@ Alternatively, instead of supplying a data frame the raw vectors of the predicto
 cutpointr(x = suicide$dsi, class = suicide$suicide)
 #> Assuming the positive class is yes
 #> Assuming the positive class has higher x values
-#> # A tibble: 1 x 15
+#> # A tibble: 1 x 16
 #>   direction optimal_cutpoint method          sum_sens_spec   acc
 #>   <chr>                <dbl> <chr>                   <dbl> <dbl>
 #> 1 >=                      2. maximize_metric          1.75 0.865
 #>   sensitivity specificity   AUC pos_class neg_class prevalence outcome
 #>         <dbl>       <dbl> <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1       0.889       0.863 0.924 yes       no            0.0677 class  
-#>   predictor data               roc_curve             
-#>   <chr>     <list>             <list>                
-#> 1 x         <tibble [532 × 2]> <data.frame [13 × 10]>
+#>   predictor data               roc_curve              boot 
+#>   <chr>     <list>             <list>                 <lgl>
+#> 1 x         <tibble [532 × 2]> <data.frame [13 × 10]> NA
 ```
 
 `cutpointr` makes assumptions about the direction of the dependency between `class` and `x`, if `direction` and / or `pos_class` or `neg_class` are not specified. The same result as above can be achieved by manually defining `direction` and the positive / negative classes which is slightly faster, since the classes and direction don't have to be determined:
@@ -217,16 +231,16 @@ cutpointr(x = suicide$dsi, class = suicide$suicide)
 opt_cut <- cutpointr(suicide, dsi, suicide, direction = ">=", pos_class = "yes",
                      neg_class = "no", method = maximize_metric, metric = youden)
 opt_cut
-#> # A tibble: 1 x 15
+#> # A tibble: 1 x 16
 #>   direction optimal_cutpoint method          youden_index   acc
 #>   <chr>                <dbl> <chr>                  <dbl> <dbl>
 #> 1 >=                      2. maximize_metric        0.752 0.865
 #>   sensitivity specificity   AUC pos_class neg_class prevalence outcome
 #>         <dbl>       <dbl> <dbl> <chr>     <chr>          <dbl> <chr>  
 #> 1       0.889       0.863 0.924 yes       no            0.0677 suicide
-#>   predictor data               roc_curve             
-#>   <chr>     <list>             <list>                
-#> 1 dsi       <tibble [532 × 2]> <data.frame [13 × 10]>
+#>   predictor data               roc_curve              boot 
+#>   <chr>     <list>             <list>                 <lgl>
+#> 1 dsi       <tibble [532 × 2]> <data.frame [13 × 10]> NA
 ```
 
 `opt_cut` is a tidy data frame that returns the input data in a nested tibble. Methods for summarizing and plotting the data and results are included:
@@ -292,9 +306,9 @@ summary(opt_cut)
 #> Predictor: dsi 
 #> Outcome: suicide 
 #> Direction: >= 
-#> Subgroups: female, male
-#> Warning: Unknown or uninitialised column: 'subgroup'.
-#> Subgroup:  
+#> Subgroups: female, male 
+#> 
+#> Subgroup: female 
 #> --------------------------------------------------------------------------- 
 #>  optimal_cutpoint sum_sens_spec    acc sensitivity specificity    AUC
 #>                 2        1.8081 0.8852      0.9259      0.8822 0.9446
@@ -316,8 +330,8 @@ summary(opt_cut)
 #>     Min.  5% 1st Qu. Median   Mean 3rd Qu. 95% Max     SD
 #> no     0 0.0       0      0 0.5479       0   4  10 1.3181
 #> yes    0 1.3       4      5 4.7778       6   7   9 2.0444
-#> Warning: Unknown or uninitialised column: 'subgroup'.
-#> Subgroup:  
+#> 
+#> Subgroup: male 
 #> --------------------------------------------------------------------------- 
 #>  optimal_cutpoint sum_sens_spec    acc sensitivity specificity    AUC
 #>                 3        1.6251 0.8429      0.7778      0.8473 0.8617
@@ -477,7 +491,7 @@ cutpointr(suicide, dsi, suicide, gender,
           method = maximize_boot_metric,
           boot_cut = 30, summary_func = mean,
           metric = accuracy, silent = TRUE)
-#> # A tibble: 2 x 17
+#> # A tibble: 2 x 18
 #>   subgroup direction optimal_cutpoint method               accuracy   acc
 #>   <chr>    <chr>                <dbl> <chr>                   <dbl> <dbl>
 #> 1 female   >=                    5.59 maximize_boot_metric    0.957 0.957
@@ -486,10 +500,10 @@ cutpointr(suicide, dsi, suicide, gender,
 #>         <dbl>       <dbl> <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1       0.444       0.995 0.945 yes       no            0.0689 suicide
 #> 2       0.333       1.00  0.862 yes       no            0.0643 suicide
-#>   predictor grouping data               roc_curve            
-#>   <chr>     <chr>    <list>             <list>               
-#> 1 dsi       gender   <tibble [392 × 2]> <data.frame [11 × 9]>
-#> 2 dsi       gender   <tibble [140 × 2]> <data.frame [11 × 9]>
+#>   predictor grouping data               roc_curve             boot 
+#>   <chr>     <chr>    <list>             <list>                <lgl>
+#> 1 dsi       gender   <tibble [392 × 2]> <data.frame [11 × 9]> NA   
+#> 2 dsi       gender   <tibble [140 × 2]> <data.frame [11 × 9]> NA
 ```
 
 LOESS smoothing for selecting a cutpoint
@@ -602,7 +616,7 @@ if the assumption of normality holds. However, since there exist several methods
 cutpointr(suicide, dsi, suicide, gender, method = oc_youden_normal)
 #> Assuming the positive class is yes
 #> Assuming the positive class has higher x values
-#> # A tibble: 2 x 17
+#> # A tibble: 2 x 18
 #>   subgroup direction optimal_cutpoint method           sum_sens_spec   acc
 #>   <chr>    <chr>                <dbl> <chr>                    <dbl> <dbl>
 #> 1 female   >=                    2.48 oc_youden_normal          1.72 0.895
@@ -611,10 +625,10 @@ cutpointr(suicide, dsi, suicide, gender, method = oc_youden_normal)
 #>         <dbl>       <dbl> <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1       0.815       0.901 0.945 yes       no            0.0689 suicide
 #> 2       0.667       0.878 0.862 yes       no            0.0643 suicide
-#>   predictor grouping data               roc_curve            
-#>   <chr>     <chr>    <list>             <list>               
-#> 1 dsi       gender   <tibble [392 × 2]> <data.frame [11 × 9]>
-#> 2 dsi       gender   <tibble [140 × 2]> <data.frame [11 × 9]>
+#>   predictor grouping data               roc_curve             boot 
+#>   <chr>     <chr>    <list>             <list>                <lgl>
+#> 1 dsi       gender   <tibble [392 × 2]> <data.frame [11 × 9]> NA   
+#> 2 dsi       gender   <tibble [140 × 2]> <data.frame [11 × 9]> NA
 ```
 
 ### Nonparametric kernel method
@@ -631,7 +645,7 @@ but as before we prefer to report all metrics based on applying the cutpoint tha
 cutpointr(suicide, dsi, suicide, gender, method = oc_youden_kernel)
 #> Assuming the positive class is yes
 #> Assuming the positive class has higher x values
-#> # A tibble: 2 x 17
+#> # A tibble: 2 x 18
 #>   subgroup direction optimal_cutpoint method           sum_sens_spec   acc
 #>   <chr>    <chr>                <dbl> <chr>                    <dbl> <dbl>
 #> 1 female   >=                    1.18 oc_youden_kernel          1.81 0.885
@@ -640,10 +654,10 @@ cutpointr(suicide, dsi, suicide, gender, method = oc_youden_kernel)
 #>         <dbl>       <dbl> <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1       0.926       0.882 0.945 yes       no            0.0689 suicide
 #> 2       0.778       0.809 0.862 yes       no            0.0643 suicide
-#>   predictor grouping data               roc_curve            
-#>   <chr>     <chr>    <list>             <list>               
-#> 1 dsi       gender   <tibble [392 × 2]> <data.frame [11 × 9]>
-#> 2 dsi       gender   <tibble [140 × 2]> <data.frame [11 × 9]>
+#>   predictor grouping data               roc_curve             boot 
+#>   <chr>     <chr>    <list>             <list>                <lgl>
+#> 1 dsi       gender   <tibble [392 × 2]> <data.frame [11 × 9]> NA   
+#> 2 dsi       gender   <tibble [140 × 2]> <data.frame [11 × 9]> NA
 ```
 
 Additional features
@@ -930,9 +944,11 @@ For example, this is the `misclassification_cost` metric function:
 
 ``` r
 misclassification_cost
-#> function(tp, fp, tn, fn, cost_fp = 1, cost_fn = 1, ...) {
+#> function (tp, fp, tn, fn, cost_fp = 1, cost_fn = 1, ...) 
+#> {
 #>     misclassification_cost <- cost_fp * fp + cost_fn * fn
-#>     misclassification_cost <- matrix(misclassification_cost, ncol = 1)
+#>     misclassification_cost <- matrix(misclassification_cost, 
+#>         ncol = 1)
 #>     colnames(misclassification_cost) <- "misclassification_cost"
 #>     return(misclassification_cost)
 #> }

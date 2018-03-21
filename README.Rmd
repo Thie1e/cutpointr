@@ -28,6 +28,7 @@ library(purrr)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr) 
+[![CRAN_Release_Badge](http://www.r-pkg.org/badges/version-ago/cutpointr)](https://CRAN.R-project.org/package=cutpointr)
 
 **cutpointr** is an R package for tidy calculation of "optimal" cutpoints. It 
 supports several methods for calculating cutpoints and includes several 
@@ -36,6 +37,16 @@ methods are designed to be more robust than the simple empirical optimization
 of a metric. Additionally,
 **cutpointr** can automatically bootstrap the variability of the optimal 
 cutpoints and return out-of-bag estimates of various performance metrics.
+
+## Installation
+
+You can install **cutpointr** from CRAN using the menu in RStudio or simply:
+
+```{r CRAN, eval = FALSE}
+install.packages("cutpointr")
+```
+
+## Example
 
 For example, the optimal cutpoint for the included data set is 2 when maximizing the sum of sensitivity and specificity.
 
