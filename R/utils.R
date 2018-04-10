@@ -81,7 +81,7 @@ check_roc_curve <- function(object) {
 }
 
 has_column <- function(x, colname) {
-    if (colname %in% colnames(x)) {
+    if (colname %in% colnames(x) | colname %in% names(x)) {
         return(TRUE)
     } else {
         return(FALSE)

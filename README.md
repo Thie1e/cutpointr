@@ -415,6 +415,7 @@ summary(opt_cut)
 #> Predictor: dsi 
 #> Outcome: suicide 
 #> Direction: >= 
+#> Nr. of bootstraps: 50 
 #> 
 #>  optimal_cutpoint sum_sens_spec    acc sensitivity specificity    AUC
 #>                 2        1.7518 0.8647      0.8889      0.8629 0.9238
@@ -436,6 +437,36 @@ summary(opt_cut)
 #>     Min.   5% 1st Qu. Median   Mean 3rd Qu.  95% Max     SD
 #> no     0 0.00       0      0 0.6331       0 4.00  10 1.4122
 #> yes    0 0.75       4      5 4.8889       6 9.25  11 2.5498
+#> 
+#> Bootstrap summary: 
+#>           Variable   Min.     5% 1st Qu. Median   Mean 3rd Qu.    95%
+#>   optimal_cutpoint 1.0000 1.4500  2.0000 2.0000 2.1400  2.0000 3.5500
+#>              AUC_b 0.8621 0.8913  0.9168 0.9327 0.9296  0.9466 0.9586
+#>            AUC_oob 0.8311 0.8541  0.8983 0.9142 0.9134  0.9338 0.9644
+#>    sum_sens_spec_b 1.6285 1.6894  1.7478 1.7747 1.7702  1.7995 1.8385
+#>  sum_sens_spec_oob 1.4764 1.5551  1.6510 1.7085 1.7068  1.7631 1.8324
+#>              acc_b 0.7613 0.8164  0.8571 0.8712 0.8679  0.8816 0.9052
+#>            acc_oob 0.7200 0.7976  0.8455 0.8618 0.8546  0.8721 0.8921
+#>      sensitivity_b 0.7949 0.8358  0.8777 0.9077 0.9049  0.9316 0.9683
+#>    sensitivity_oob 0.5833 0.6958  0.8031 0.8571 0.8519  0.9215 1.0000
+#>      specificity_b 0.7520 0.8095  0.8545 0.8691 0.8653  0.8822 0.9091
+#>    specificity_oob 0.7059 0.7866  0.8442 0.8628 0.8549  0.8722 0.8934
+#>            kappa_b 0.2214 0.3289  0.3786 0.4221 0.4238  0.4673 0.5310
+#>          kappa_oob 0.2145 0.2505  0.3198 0.3808 0.3814  0.4430 0.4866
+#>    Max.     SD
+#>  4.0000 0.6064
+#>  0.9705 0.0214
+#>  0.9737 0.0320
+#>  1.8555 0.0471
+#>  1.8876 0.0874
+#>  0.9286 0.0296
+#>  0.9091 0.0325
+#>  0.9762 0.0426
+#>  1.0000 0.0951
+#>  0.9313 0.0322
+#>  0.9389 0.0373
+#>  0.6033 0.0720
+#>  0.5003 0.0748
 plot(opt_cut)
 ```
 
@@ -944,11 +975,9 @@ For example, this is the `misclassification_cost` metric function:
 
 ``` r
 misclassification_cost
-#> function (tp, fp, tn, fn, cost_fp = 1, cost_fn = 1, ...) 
-#> {
+#> function(tp, fp, tn, fn, cost_fp = 1, cost_fn = 1, ...) {
 #>     misclassification_cost <- cost_fp * fp + cost_fn * fn
-#>     misclassification_cost <- matrix(misclassification_cost, 
-#>         ncol = 1)
+#>     misclassification_cost <- matrix(misclassification_cost, ncol = 1)
 #>     colnames(misclassification_cost) <- "misclassification_cost"
 #>     return(misclassification_cost)
 #> }
@@ -1159,13 +1188,13 @@ Benchmarks are run for sample sizes of 1000, 1e4, 1e5, 1e6, and 1e7. For low sam
 
 ![](README-unnamed-chunk-47-1.png)
 
-|      n|   cutpointr|  OptimalCutpoints|        pROC|          ROCR|  ThresholdROC|
-|------:|-----------:|-----------------:|-----------:|-------------:|-------------:|
-|  1e+03|    25.09471|          47.84453|    8.891217|      3.209919|      59.86058|
-|  1e+04|    29.01353|        5194.47377|   83.237628|     10.158945|    8252.99037|
-|  1e+05|    85.94157|                NA|  939.500229|    109.492256|            NA|
-|  1e+06|   617.25418|                NA|          NA|   1117.249976|            NA|
-|  1e+07|  5906.54936|                NA|          NA|  13565.716659|            NA|
+|      n|    cutpointr|  OptimalCutpoints|         pROC|          ROCR|  ThresholdROC|
+|------:|------------:|-----------------:|------------:|-------------:|-------------:|
+|  1e+03|     8.334464|          56.21193|     9.131493|      3.017892|      78.88322|
+|  1e+04|    13.057035|        5383.76537|    94.403445|     11.284935|    7930.97356|
+|  1e+05|    68.155645|                NA|  1021.098187|    108.988626|            NA|
+|  1e+06|   708.193360|                NA|           NA|   1250.425970|            NA|
+|  1e+07|  5893.323971|                NA|           NA|  13247.381417|            NA|
 
 ### ROC curve only
 

@@ -1,3 +1,7 @@
+# cutpointr 0.7.3
+- Fix display of bootstrap results in summary
+- Update benchmarks in Readme
+
 # cutpointr 0.7.2
 - More tests and modified two tests that led to errors when CRAN checked 
 the package (`spar = NULL` in `maximize_spline_metric`)

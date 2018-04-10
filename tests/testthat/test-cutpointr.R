@@ -1149,3 +1149,16 @@ test_that("predict behaves as expected", {
                  factor(c("no", "no", "yes", "yes", "yes")))
 })
 
+test_that("has_column works with different data types", {
+    tempdat <- data.frame(x = 1:10, y = 1:10)
+    expect_true(has_column(tempdat, "x"))
+    expect_false(has_column(tempdat, "a"))
+
+    tempdat <- as.matrix(tempdat)
+    expect_true(has_column(tempdat, "x"))
+    expect_false(has_column(tempdat, "a"))
+
+    tempdat <- list(x = 1:10, y = 1:10)
+    expect_true(has_column(tempdat, "x"))
+    expect_false(has_column(tempdat, "a"))
+})
