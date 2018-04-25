@@ -9,6 +9,8 @@ Description: Estimate cutpoints that optimize a specified metric in binary class
     and validate performance using bootstrapping. Some methods for more robust cutpoint
     estimation and various plotting functions are included.
 License: GPL-3
+URL: https://github.com/thie1e/cutpointr
+BugReports: https://github.com/thie1e/cutpointr/issues
 Encoding: UTF-8
 LazyData: true
 Depends:
