@@ -112,7 +112,7 @@ accuracy <- function(tp, fp, tn, fn, ...) {
 youden <- function(tp, fp, tn, fn, ...) {
     sesp <- sens_spec(tp, fp, tn, fn)
     youden <- cbind(rowSums(sesp) - 1)
-    colnames(youden) <- "youden_index"
+    colnames(youden) <- "youden"
     return(youden)
 }
 
