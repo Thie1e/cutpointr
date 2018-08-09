@@ -284,7 +284,8 @@ opt_cut
 
 }
 \seealso{
-Other main cutpointr functions: \code{\link{cutpointr_}},
-  \code{\link{multi_cutpointr}},
+Other main cutpointr functions: \code{\link{add_metric}},
+  \code{\link{cutpointr_}}, \code{\link{multi_cutpointr}},
   \code{\link{predict.cutpointr}}, \code{\link{roc}}
 }
+\concept{main cutpointr functions}

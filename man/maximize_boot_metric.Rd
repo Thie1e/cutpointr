@@ -5,13 +5,13 @@
 \alias{minimize_boot_metric}
 \title{Optimize a metric function in binary classification after bootstrapping}
 \usage{
-maximize_boot_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction, summary_func = mean, boot_cut = 50,
-  inf_rm = TRUE, tol_metric, use_midpoints, ...)
+maximize_boot_metric(data, x, class, metric_func = youden,
+  pos_class = NULL, neg_class = NULL, direction, summary_func = mean,
+  boot_cut = 50, inf_rm = TRUE, tol_metric, use_midpoints, ...)
 
-minimize_boot_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction, summary_func = mean, boot_cut = 50,
-  inf_rm = TRUE, tol_metric, use_midpoints, ...)
+minimize_boot_metric(data, x, class, metric_func = youden,
+  pos_class = NULL, neg_class = NULL, direction, summary_func = mean,
+  boot_cut = 50, inf_rm = TRUE, tol_metric, use_midpoints, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -96,3 +96,4 @@ Other method functions: \code{\link{maximize_gam_metric}},
   \code{\link{oc_median}}, \code{\link{oc_youden_kernel}},
   \code{\link{oc_youden_normal}}
 }
+\concept{method functions}

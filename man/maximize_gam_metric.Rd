@@ -6,13 +6,15 @@
 \title{Optimize a metric function in binary classification after smoothing via
 generalized additive models}
 \usage{
-maximize_gam_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction, formula = m ~ s(x.sorted),
-  optimizer = c("outer", "newton"), tol_metric, use_midpoints, ...)
+maximize_gam_metric(data, x, class, metric_func = youden,
+  pos_class = NULL, neg_class = NULL, direction, formula = m ~
+  s(x.sorted), optimizer = c("outer", "newton"), tol_metric,
+  use_midpoints, ...)
 
-minimize_gam_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction, formula = m ~ s(x.sorted),
-  optimizer = c("outer", "newton"), tol_metric, use_midpoints, ...)
+minimize_gam_metric(data, x, class, metric_func = youden,
+  pos_class = NULL, neg_class = NULL, direction, formula = m ~
+  s(x.sorted), optimizer = c("outer", "newton"), tol_metric,
+  use_midpoints, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -94,3 +96,4 @@ Other method functions: \code{\link{maximize_boot_metric}},
   \code{\link{oc_median}}, \code{\link{oc_youden_kernel}},
   \code{\link{oc_youden_normal}}
 }
+\concept{method functions}

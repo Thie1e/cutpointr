@@ -36,3 +36,4 @@ Other cutpointr plotting functions: \code{\link{plot.cutpointr}},
   \code{\link{plot_roc}},
   \code{\link{plot_sensitivity_specificity}}
 }
+\concept{cutpointr plotting functions}

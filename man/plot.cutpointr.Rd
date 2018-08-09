@@ -34,3 +34,4 @@ Other cutpointr plotting functions: \code{\link{plot_cut_boot}},
   \code{\link{plot_sensitivity_specificity}},
   \code{\link{plot_x}}
 }
+\concept{cutpointr plotting functions}

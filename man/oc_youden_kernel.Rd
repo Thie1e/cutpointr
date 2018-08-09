@@ -64,3 +64,4 @@ Other method functions: \code{\link{maximize_boot_metric}},
   \code{\link{oc_manual}}, \code{\link{oc_mean}},
   \code{\link{oc_median}}, \code{\link{oc_youden_normal}}
 }
+\concept{method functions}

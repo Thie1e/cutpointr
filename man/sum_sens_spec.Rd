@@ -45,3 +45,4 @@ Other metric functions: \code{\link{F1_score}},
   \code{\link{total_utility}}, \code{\link{tpr}},
   \code{\link{tp}}, \code{\link{youden}}
 }
+\concept{metric functions}

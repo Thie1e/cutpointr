@@ -35,3 +35,4 @@ Other cutpointr plotting functions: \code{\link{plot.cutpointr}},
   \code{\link{plot_sensitivity_specificity}},
   \code{\link{plot_x}}
 }
+\concept{cutpointr plotting functions}

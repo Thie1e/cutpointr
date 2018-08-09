@@ -28,7 +28,7 @@ Imports:
     stats,
     utils,
     rlang (>= 0.1.2)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Suggests:
     KernSmooth (>= 2.23-15),
     fANCOVA (>= 0.5-1),

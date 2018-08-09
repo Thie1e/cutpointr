@@ -30,7 +30,8 @@ oc <- cutpointr(suicide, dsi, suicide)
 predict(oc, newdata = data.frame(dsi = oc$data[[1]]$dsi))
 }
 \seealso{
-Other main cutpointr functions: \code{\link{cutpointr_}},
-  \code{\link{cutpointr}}, \code{\link{multi_cutpointr}},
-  \code{\link{roc}}
+Other main cutpointr functions: \code{\link{add_metric}},
+  \code{\link{cutpointr_}}, \code{\link{cutpointr}},
+  \code{\link{multi_cutpointr}}, \code{\link{roc}}
 }
+\concept{main cutpointr functions}

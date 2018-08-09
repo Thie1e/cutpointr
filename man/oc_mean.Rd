@@ -39,3 +39,4 @@ Other method functions: \code{\link{maximize_boot_metric}},
   \code{\link{oc_youden_kernel}},
   \code{\link{oc_youden_normal}}
 }
+\concept{method functions}

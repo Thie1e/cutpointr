@@ -54,3 +54,4 @@ Other metric functions: \code{\link{F1_score}},
   \code{\link{sum_sens_spec}}, \code{\link{total_utility}},
   \code{\link{tpr}}, \code{\link{youden}}
 }
+\concept{metric functions}

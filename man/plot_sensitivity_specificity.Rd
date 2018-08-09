@@ -35,3 +35,4 @@ Other cutpointr plotting functions: \code{\link{plot.cutpointr}},
   \code{\link{plot_precision_recall}},
   \code{\link{plot_roc}}, \code{\link{plot_x}}
 }
+\concept{cutpointr plotting functions}

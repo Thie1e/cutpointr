@@ -7,7 +7,8 @@
 Forked from the \pkg{ROCR} package
 }
 \usage{
-roc(data, x, class, pos_class, neg_class, direction = ">=", silent = FALSE)
+roc(data, x, class, pos_class, neg_class, direction = ">=",
+  silent = FALSE)
 }
 \arguments{
 \item{data}{A data.frame or matrix. Will be converted to a data.frame.}
@@ -49,7 +50,9 @@ roc(data = dat, x = "Petal.Width", class = "Species",
 pos_class = "versicolor", neg_class = "setosa", direction = ">=")
 }
 \seealso{
-Other main cutpointr functions: \code{\link{cutpointr_}},
-  \code{\link{cutpointr}}, \code{\link{multi_cutpointr}},
+Other main cutpointr functions: \code{\link{add_metric}},
+  \code{\link{cutpointr_}}, \code{\link{cutpointr}},
+  \code{\link{multi_cutpointr}},
   \code{\link{predict.cutpointr}}
 }
+\concept{main cutpointr functions}

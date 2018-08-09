@@ -6,14 +6,14 @@
 \title{Optimize a metric function in binary classification after spline smoothing}
 \usage{
 maximize_spline_metric(data, x, class, metric_func = youden,
-  pos_class = NULL, neg_class = NULL, direction, w = NULL, df = NULL,
-  spar = 1, nknots = cutpoint_knots, df_offset = NULL, penalty = 1,
-  control_spar = list(), tol_metric, use_midpoints, ...)
+  pos_class = NULL, neg_class = NULL, direction, w = NULL,
+  df = NULL, spar = 1, nknots = cutpoint_knots, df_offset = NULL,
+  penalty = 1, control_spar = list(), tol_metric, use_midpoints, ...)
 
 minimize_spline_metric(data, x, class, metric_func = youden,
-  pos_class = NULL, neg_class = NULL, direction, w = NULL, df = NULL,
-  spar = 1, nknots = cutpoint_knots, df_offset = NULL, penalty = 1,
-  control_spar = list(), tol_metric, use_midpoints, ...)
+  pos_class = NULL, neg_class = NULL, direction, w = NULL,
+  df = NULL, spar = 1, nknots = cutpoint_knots, df_offset = NULL,
+  penalty = 1, control_spar = list(), tol_metric, use_midpoints, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -109,3 +109,4 @@ Other method functions: \code{\link{maximize_boot_metric}},
   \code{\link{oc_youden_kernel}},
   \code{\link{oc_youden_normal}}
 }
+\concept{method functions}
