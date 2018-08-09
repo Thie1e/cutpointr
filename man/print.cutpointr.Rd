@@ -8,7 +8,7 @@ Kirill Müller and Hadley Wickham (2017). tibble: Simple Data Frames.
  https://CRAN.R-project.org/package=tibble
 }
 \usage{
-\method{print}{cutpointr}(x, width = 1000, n = 50, ...)
+\method{print}{cutpointr}(x, width = 1000, n = 50, sigfig = 6, ...)
 }
 \arguments{
 \item{x}{a cutpointr object.}
@@ -16,6 +16,9 @@ Kirill Müller and Hadley Wickham (2017). tibble: Simple Data Frames.
 \item{width}{width of output.}
 
 \item{n}{number of rows to print.}
+
+\item{sigfig}{Number of significant digits to print. Temporarily
+overrides options("pillar.sigfig").}
 
 \item{...}{further arguments.}
 }
