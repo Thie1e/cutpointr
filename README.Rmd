@@ -805,6 +805,19 @@ opt_cut %>%
     unnest
 ```
 
+## Calculating additional metrics
+
+By default, the output of cutpointr includes the optimized metric and several
+other metrics. The `add_metric` function adds further metrics. Suitable metric functions
+are all metric functions that are included in the package or that comply
+with those standards. Here, we're adding the negative predictive value (NPV) and
+the positive predictive value (PPV) at the optimal cutpoint per subgroup:
+
+```{r}
+cutpointr(suicide, dsi, suicide, gender, metric = youden, silent = TRUE) %>% 
+    add_metric(list(ppv, npv)) %>% 
+    select(subgroup, optimal_cutpoint, youden, ppv, npv)
+```
 
 ## User-defined functions
 

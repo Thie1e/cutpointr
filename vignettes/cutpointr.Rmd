@@ -30,6 +30,16 @@ of a metric. Additionally,
 **cutpointr** can automatically bootstrap the variability of the optimal 
 cutpoints and return out-of-bag estimates of various performance metrics.
 
+## Installation
+
+You can install **cutpointr** from CRAN using the menu in RStudio or simply:
+
+```{r CRAN, eval = FALSE}
+install.packages("cutpointr")
+```
+
+## Example
+
 For example, the optimal cutpoint for the included data set is 2 when maximizing the sum of sensitivity and specificity.
 
 ```{r}
@@ -648,7 +658,6 @@ ggplot(plotdat_nomidpoints %>% filter(!(method %in% c("spline_20"))),
             "normally distributed data, 10000 repetitions of simulation")
 ```
 
-
 ## Finding all cutpoints with acceptable performance
 By default, most packages only return the "best" cutpoint and disregard other cutpoints with quite similar performance, even if the performance differences are miniscule. **cutpointr** makes this process more explicit via the `tol_metric` argument. For example, if all cupoints are of interest that are achieve at least an accuracy within `0.05` of the optimally achievable accuracy, `tol_metric` can be set to `0.05` and also those cutpoints will be returned. 
 
@@ -788,6 +797,19 @@ opt_cut %>%
     unnest
 ```
 
+## Calculating additional metrics
+
+By default, the output of cutpointr includes the optimized metric and several
+other metrics. The `add_metric` function adds further metrics. Suitable metric functions
+are all metric functions that are included in the package or that comply
+with those standards. Here, we're adding the negative predictive value (NPV) and
+the positive predictive value (PPV) at the optimal cutpoint per subgroup:
+
+```{r}
+cutpointr(suicide, dsi, suicide, gender, metric = youden, silent = TRUE) %>% 
+    add_metric(list(ppv, npv)) %>% 
+    select(subgroup, optimal_cutpoint, youden, ppv, npv)
+```
 
 ## User-defined functions
 
@@ -1045,7 +1067,7 @@ x_pos <- dat$x[dat$y == 1]
 x_neg <- dat$x[dat$y == 0]
 bench_10000 <- microbenchmark::microbenchmark(
     cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
-              direction = ">=", metric = youden, break_ties = mean),
+              direction = ">=", metric = youden, break_ties = mean, silent = TRUE),
     rocr_sensspec(dat$x, dat$y),
     optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
                       data = dat),
@@ -1114,13 +1136,13 @@ results$solution[grep(pattern = "thres", x = results$solution)] <- "ThresholdROC
 ```{r, echo = FALSE}
 # dput(results)
 
-results <- structure(list(time = c(25.0947145, 3.2099195, 8.8912175, 47.844527, 
-59.8605805, 29.0135295, 10.1589445, 5194.4737685, 83.2376275, 
-8252.99037, 85.9415705, 109.492256, 939.500229, 617.2541755, 
-1117.249976, 5906.549361, 13565.7166595), solution = c("cutpointr", 
-"ROCR", "pROC", "OptimalCutpoints", "ThresholdROC", "cutpointr", 
-"ROCR", "OptimalCutpoints", "pROC", "ThresholdROC", "cutpointr", 
-"ROCR", "pROC", "cutpointr", "ROCR", "cutpointr", "ROCR"), n = c(1000, 
+results <- structure(list(time = c(8.3344635, 3.0178925, 9.1314925, 56.2119325, 
+78.8832165, 13.057035, 11.284935, 5383.765367, 94.4034445, 7930.9735595, 
+68.155645, 108.9886265, 1021.0981875, 708.1933595, 1250.4259705, 
+5893.323971, 13247.3814165), solution = c("cutpointr", "ROCR", 
+"pROC", "OptimalCutpoints", "ThresholdROC", "cutpointr", "ROCR", 
+"OptimalCutpoints", "pROC", "ThresholdROC", "cutpointr", "ROCR", 
+"pROC", "cutpointr", "ROCR", "cutpointr", "ROCR"), n = c(1000, 
 1000, 1000, 1000, 1000, 10000, 10000, 10000, 10000, 10000, 1e+05, 
 1e+05, 1e+05, 1e+06, 1e+06, 1e+07, 1e+07)), .Names = c("time", 
 "solution", "n"), row.names = c(NA, -17L), class = "data.frame")
