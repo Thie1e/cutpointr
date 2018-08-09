@@ -1,3 +1,8 @@
+# cutpointr 0.7.4
+- Add `sigfig` argument to `print.cutpointr` to allow for specifying the number of
+significant digits to be printed
+- Add `add_metric()` function to add further metrics to the output of `cutpointr()`
+
 # cutpointr 0.7.3
 - Fix display of bootstrap results in summary
 - Update benchmarks in Readme

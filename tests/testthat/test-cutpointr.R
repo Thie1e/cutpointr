@@ -158,13 +158,13 @@ test_that("find_metric_name finds metric", {
     tempdat <- data.frame(x = runif(100),
                           y = factor(sample(0:1, size = 100, replace = TRUE)))
     optcut <- cutpointr(tempdat, x, y, method = maximize_metric, metric = youden)
-    expect_equal(cutpointr:::find_metric_name(optcut), "youden_index")
+    expect_equal(cutpointr:::find_metric_name(optcut), "youden")
     set.seed(1234)
     tempdat <- data.frame(x = runif(100),
                           y = factor(sample(0:1, size = 100, replace = TRUE)),
                           g = factor(sample(0:1, size = 100, replace = TRUE)))
     optcut <- cutpointr(tempdat, x, y, g, method = maximize_metric, metric = youden)
-    expect_equal(cutpointr:::find_metric_name(optcut), "youden_index")
+    expect_equal(cutpointr:::find_metric_name(optcut), "youden")
 })
 
 test_that("no duplicate column names are returned", {
@@ -1209,4 +1209,50 @@ test_that("summary is printed correctly", {
     expect_output(print(scp), "Direction: >=")
     expect_output(print(scp), "Nr. of bootstraps: 10")
     expect_output(print(scp), "accuracy_oob 0.8163")
+})
+
+test_that("add_metric adds metrics correctly", {
+    oc <- cutpointr(suicide, dsi, suicide, gender)
+    oc <- add_metric(oc, list(ppv, npv))
+    expect_equal(oc$ppv, c(0.3676471, 0.2592593), tolerance = 1e-5)
+    expect_equal(oc$npv, c(0.9938272, 0.9823009), tolerance = 1e-5)
+    oc <- add_metric(oc, list(ppv)) # fügt ppv1 hinzu
+    expect_equal(round(oc$ppv1, 7), c(0.3676471, 0.2592593))
+
+    oc <- cutpointr(suicide, dsi, suicide)
+    oc <- add_metric(oc, list(F1_score, precision))
+    expect_equal(oc$F1_score, 0.470588, tolerance = 1e-5)
+    expect_equal(oc$precision, 0.32, tolerance = 1e-5)
+
+    oc <- cutpointr(suicide, dsi, suicide, use_midpoints = T)
+    oc <- add_metric(oc, list(abs_d_ppv_npv, abs_d_sens_spec))
+    expect_equal(oc$abs_d_ppv_npv, 0.670741, tolerance = 1e-5)
+    expect_equal(oc$abs_d_sens_spec, 0.0259857, tolerance = 1e-5)
+
+    tempdat <- data.frame(y = c(0,0,0,1,0,1,1,1),
+                          x = 1:8)
+    oc <- cutpointr(tempdat, x, y, break_ties = c)
+    oc <- add_metric(oc, list(recall, youden))
+    expect_equal(oc$recall[[1]], c(0.75, 1))
+    expect_equal(oc$youden[[1]], c(0.75, 0.75))
+
+    tempdat_g <- data.frame(g = c(rep(1, 8), rep(2, 8)),
+                            y = c(tempdat$y, tempdat$y),
+                            x = c(tempdat$x, tempdat$x + 2))
+    oc <- cutpointr(tempdat_g, x = x, class = y, pos_class = 1,
+                    direction = ">=", subgroup = g,
+                    break_ties = c)
+    oc <- add_metric(oc, list(false_omission_rate, prod_sens_spec))
+    expect_equal(oc$false_omission_rate[[1]], c(0.2, 0))
+    expect_equal(oc$prod_sens_spec[[1]], c(0.75, 0.75))
+
+    mymetric <- function(...) return(42)
+    oc <- cutpointr(suicide, dsi, suicide)
+    oc <- add_metric(oc, list(mymetric))
+    expect_equal(oc$added_metric, 42)
+
+    mymetric <- function(...) return(data.frame(mymet = 42))
+    oc <- cutpointr(suicide, dsi, suicide)
+    oc <- add_metric(oc, list(mymetric))
+    expect_equal(oc$mymet, 42)
 })
