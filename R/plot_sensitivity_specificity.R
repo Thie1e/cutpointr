@@ -44,8 +44,7 @@ plot_sensitivity_specificity <- function(x, display_cutpoint = TRUE, ...) {
         tidyr::unnest_(unnest_cols = c("roc_curve"))
     res_unnested <- x %>%
         tidyr::unnest_(unnest_cols = c("roc_curve"))
-    # Drop possible NaN at x.sorted = Inf or -Inf
-    res_unnested <- stats::na.omit(res_unnested)
+    res_unnested <- res_unnested[is.finite(res_unnested$x.sorted), ]
     res_unnested <- tidyr::gather_(res_unnested, key_col = "metric",
                                     value_col = "value",
                                     gather_cols = c("Sensitivity", "Specificity"))

@@ -2,6 +2,7 @@
 - Add `sigfig` argument to `print.cutpointr` to allow for specifying the number of
 significant digits to be printed
 - Add `add_metric()` function to add further metrics to the output of `cutpointr()`
+- Fix `plot_sensitivity_specificity()` if `boot_runs = 0`
 
 # cutpointr 0.7.3
 - Fix display of bootstrap results in summary

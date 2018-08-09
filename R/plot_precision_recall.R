@@ -57,8 +57,7 @@ plot_precision_recall <- function(x, display_cutpoint = TRUE, ...) {
     res_unnested <- x %>%
         dplyr::select_(.dots = dts_pr) %>%
         tidyr::unnest_(unnest_cols = "roc_curve")
-    # Drop possible NaN at x.sorted = Inf or -Inf
-    res_unnested <- stats::na.omit(res_unnested)
+    res_unnested <- res_unnested[is.finite(res_unnested$x.sorted), ]
     pr <- ggplot2::ggplot(res_unnested,
                           ggplot2::aes_(x = ~ Recall, y = ~ Precision, color = clr_pr)) +
         ggplot2::geom_line() +
