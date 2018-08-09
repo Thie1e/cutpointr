@@ -30,9 +30,9 @@ add_metric <- function(object, metric) {
                             object$roc_curve,
                             object$direction),
                        function(optimal_cutpoint, roc_curve, direction) {
-                           opt_ind <- cutpointr:::get_opt_ind(roc_curve = roc_curve,
-                                                              oc = optimal_cutpoint,
-                                                              direction = direction)
+                           opt_ind <- get_opt_ind(roc_curve = roc_curve,
+                                                  oc = optimal_cutpoint,
+                                                  direction = direction)
                            met <- metric_func(tp = roc_curve$tp[opt_ind],
                                               fp = roc_curve$fp[opt_ind],
                                               tn = roc_curve$tn[opt_ind],
