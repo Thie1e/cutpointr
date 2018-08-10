@@ -2,6 +2,8 @@
 - Add `sigfig` argument to `print.cutpointr` to allow for specifying the number of
 significant digits to be printed
 - Add `add_metric()` function to add further metrics to the output of `cutpointr()`
+- Add `roc01` metric function to calculate the distance of points on the ROC
+curve to the point (0,1) on ROC space
 - Fix `plot_sensitivity_specificity()` if `boot_runs = 0`
 
 # cutpointr 0.7.3

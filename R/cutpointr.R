@@ -72,6 +72,7 @@
 #'  \item \code{cohens_kappa}: Cohen's Kappa
 #'  \item \code{abs_d_sens_spec}: The absolute difference between
 #'  sensitivity and specificity
+#'  \item \code{roc01}: Distance to the point (0,1) on ROC space
 #'  \item \code{abs_d_ppv_npv}: The absolute difference between positive predictive
 #'  value (PPV) and negative predictive value (NPV)
 #'  \item \code{p_chisquared}: The p-value of a chi-squared test on the confusion

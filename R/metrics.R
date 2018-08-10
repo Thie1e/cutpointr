@@ -221,6 +221,34 @@ abs_d_sens_spec <- function(tp, fp, tn, fn, ...) {
     return(abs_d_sesp)
 }
 
+#' Calculate the distance between points on the ROC curve and (0,1)
+#'
+#' Calculate the distance on the ROC space between points on the ROC curve
+#' and the point of perfect discrimination
+#' from true positives, false positives, true negatives and false negatives.
+#' The inputs must be vectors of equal length. To be used with
+#' \code{method = minimize_metric}. \cr
+#' \cr
+#' sensitivity = tp / (tp + fn) \cr
+#' specificity = tn / (tn + fp) \cr
+#' roc01 = sqrt((1 - sensitivity)^2 + (1 - specificity)^2) \cr
+#' @inheritParams accuracy
+#' @examples
+#' roc01(10, 5, 20, 10)
+#' roc01(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' oc <- cutpointr(suicide, dsi, suicide,
+#'   method = minimize_metric, metric = roc01)
+#' plot_roc(oc)
+#' @family metric functions
+#' @export
+roc01 <- function(tp, fp, tn, fn, ...) {
+    sesp <- sens_spec(tp, fp, tn, fn)
+    distance <- sqrt((1 - sesp[, 1])^2 + (1 - sesp[, 2])^2)
+    distance <- matrix(distance, ncol = 1)
+    colnames(distance) <- "roc01"
+    return(distance)
+}
+
 #' Calculate precision
 #'
 #' Calculate precision (equal to the positive predictive value)

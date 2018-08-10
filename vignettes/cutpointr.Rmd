@@ -108,6 +108,7 @@ are:
 - `abs_d_sens_spec`: The absolute difference of sensitivity and specificity
 - `abs_d_ppv_npv`: The absolute difference between positive predictive
 value (PPV) and negative predictive value (NPV)
+- `roc01`: Distance to the point (0,1) on ROC space
 - `cohens_kappa`: Cohen's Kappa
 - `sum_sens_spec`: sensitivity + specificity
 - `sum_ppv_npv`: The sum of positive predictive value (PPV) and negative

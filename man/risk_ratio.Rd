@@ -38,9 +38,9 @@ Other metric functions: \code{\link{F1_score}},
   \code{\link{plr}}, \code{\link{ppv}},
   \code{\link{precision}}, \code{\link{prod_ppv_npv}},
   \code{\link{prod_sens_spec}}, \code{\link{recall}},
-  \code{\link{sensitivity}}, \code{\link{specificity}},
-  \code{\link{sum_ppv_npv}}, \code{\link{sum_sens_spec}},
-  \code{\link{total_utility}}, \code{\link{tpr}},
-  \code{\link{tp}}, \code{\link{youden}}
+  \code{\link{roc01}}, \code{\link{sensitivity}},
+  \code{\link{specificity}}, \code{\link{sum_ppv_npv}},
+  \code{\link{sum_sens_spec}}, \code{\link{total_utility}},
+  \code{\link{tpr}}, \code{\link{tp}}, \code{\link{youden}}
 }
 \concept{metric functions}
