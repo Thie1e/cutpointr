@@ -268,20 +268,52 @@ prepare_bind_rows <- function(x) {
 
 # Draw a bootstrap sample from a data frame. Draw again, if the sampled or
 # unsampled observations contain only one class.
-simple_boot <- function(data, dep_var) {
-    draw_again <- TRUE
-    i <- 1
-    while (draw_again) {
-        b_ind <- sample(1:nrow(data), size = nrow(data), replace = TRUE)
-        if (only_one_unique(unlist(data[b_ind, dep_var])) |
-            only_one_unique(unlist(data[-b_ind, dep_var]))) {
-            draw_again <- TRUE
-            i <- i + 1
-            if (i >= 100) stop(paste("No sets including both classes drawn in",
-                                     "bootstrap after 100 tries."))
-        } else {
-            draw_again <- FALSE
+# simple_boot <- function(data, dep_var) {
+#     draw_again <- TRUE
+#     i <- 1
+#     while (draw_again) {
+#         b_ind <- sample(1:nrow(data), size = nrow(data), replace = TRUE)
+#         if (only_one_unique(unlist(data[b_ind, dep_var])) |
+#             only_one_unique(unlist(data[-b_ind, dep_var]))) {
+#             draw_again <- TRUE
+#             i <- i + 1
+#             if (i >= 100) stop(paste("No sets including both classes drawn in",
+#                                      "bootstrap after 100 tries."))
+#         } else {
+#             draw_again <- FALSE
+#         }
+#     }
+#     return(b_ind)
+# }
+
+# Return indices for observations based on nonparametric bootstrap per class.
+# If not per_class, draw a bootstrap sample and draw again, if the sampled or
+# observations contain only one class. Preliminary tests suggested that
+# per_class = FALSE leads to better confidence intervals.
+simple_boot <- function(ind_pos = NULL, ind_neg = NULL,
+                        data = NULL, dep_var = NULL,
+                        per_class = FALSE) {
+    if (per_class) {
+        b_ind_pos <- sample(ind_pos, size = length(ind_pos), replace = TRUE)
+        b_ind_neg <- sample(ind_neg, size = length(ind_neg), replace = TRUE)
+        return(c(b_ind_pos, b_ind_neg))
+    } else {
+        draw_again <- TRUE
+        i <- 1
+        while (draw_again) {
+            b_ind <- sample(1:nrow(data), size = nrow(data), replace = TRUE)
+            if (only_one_unique(unlist(data[b_ind, dep_var])) |
+                only_one_unique(unlist(data[-b_ind, dep_var]))) {
+                draw_again <- TRUE
+                i <- i + 1
+                if (i >= 100) stop(paste("No sets including both classes drawn in",
+                                         "bootstrap after 100 tries."))
+            } else {
+                draw_again <- FALSE
+            }
         }
+        return(b_ind)
     }
-    return(b_ind)
 }
+
+
