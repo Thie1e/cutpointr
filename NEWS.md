@@ -1,3 +1,12 @@
+# cutpointr 0.7.5
+- Add constrainable metrics, e.g. sens_constrain to calculate sensitivity given
+a minimum value for specificity
+- Fix a bug where dot-arguments were not passed to the metric function in
+cutpointr_internal
+- Add a check to ensure that the metric function does not return only missing
+values
+- Replace (fix) ">" by ">=" in the documentation of `cutpointr()`.
+
 # cutpointr 0.7.4
 - Add `sigfig` argument to `print.cutpointr` to allow for specifying the number of
 significant digits to be printed
