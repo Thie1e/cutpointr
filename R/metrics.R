@@ -155,6 +155,75 @@ specificity <- function(fp, tn, ...) {
 }
 
 
+#' Metrics that are constrained by another metric
+#'
+#' For example, calculate sensitivity where
+#' a lower bound (minimal desired value) for specificty can be defined. All returned
+#' metric values for cutpoints that lead to values of the constraining metric
+#' below the specified minimum will be zero.
+#' The inputs must be vectors of equal length.
+#' @examples
+#' ## Maximum sensitivity when specificity is at least 95%
+#' cp <- cutpointr(suicide, dsi, suicide,
+#'   metric = sens_constrain, constrain_metric = ppv, min_constrain = 0.75)
+#' plot_metric(cp)
+#' @inheritParams accuracy
+#' @family metric functions
+#' @param constrain_metric Metric for constraint.
+#' @param min_constrain Minimum desired value of constrain_metric.
+#' @param main_metric Metric to be optimized.
+#' @param suffix Character string to be added to the name of main_metric.
+#' @name sens_constrain
+#' @export
+sens_constrain <- function(tp, fp, tn, fn, constrain_metric = specificity,
+                           min_constrain = 0.5, ...) {
+    metric_constrain <- sensitivity(tp = tp, fn = fn)
+    constraint <- constrain_metric(tp = tp, fp = fp, tn = tn, fn = fn)
+    constraint <- as.numeric(unlist(constraint))
+    metric_constrain[constraint < min_constrain, ] <- 0
+    colnames(metric_constrain) <- "sens_constrain"
+    return(metric_constrain)
+}
+#' @rdname sens_constrain
+#' @export
+spec_constrain <- function(tp, fp, tn, fn, constrain_metric = sensitivity,
+                           min_constrain = 0.5, ...) {
+    metric_constrain <- specificity(fp = fp, tn = tn)
+    constraint <- constrain_metric(tp = tp, fp = fp, tn = tn, fn = fn)
+    constraint <- as.numeric(unlist(constraint))
+    metric_constrain[constraint < min_constrain, ] <- 0
+    colnames(metric_constrain) <- "spec_constrain"
+    return(metric_constrain)
+}
+#' @rdname sens_constrain
+#' @export
+acc_constrain <- function(tp, fp, tn, fn, constrain_metric = sensitivity,
+                           min_constrain = 0.5, ...) {
+    metric_constrain <- accuracy(tp = tp, tn = tn, fp = fp, fn = fn)
+    constraint <- constrain_metric(tp = tp, fp = fp, tn = tn, fn = fn)
+    constraint <- as.numeric(unlist(constraint))
+    metric_constrain[constraint < min_constrain, ] <- 0
+    colnames(metric_constrain) <- "acc_constrain"
+    return(metric_constrain)
+}
+#' @rdname sens_constrain
+#' @export
+metric_constrain <- function(tp, fp, tn, fn,
+                             main_metric = sensitivity,
+                             constrain_metric = specificity,
+                             min_constrain = 0.5, suffix = "_constrain", ...) {
+    metric_constrain <- main_metric(tp = tp, fp = fp, tn = tn, fn = fn)
+    metric_constrain <- sanitize_metric(m = metric_constrain,
+                                        n = nrow(metric_constrain),
+                                        m_name = "metric_constrain")
+    constraint <- constrain_metric(tp = tp, fp = fp, tn = tn, fn = fn)
+    constraint <- as.numeric(unlist(constraint))
+    metric_constrain[constraint < min_constrain, ] <- 0
+    colnames(metric_constrain) <- paste0(colnames(metric_constrain), suffix)
+    return(metric_constrain)
+}
+
+
 #' Calculate the sum of sensitivity and specificity
 #'
 #' Calculate the sum of sensitivity and specificity from

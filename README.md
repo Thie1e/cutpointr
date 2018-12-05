@@ -159,6 +159,7 @@ The included metrics to be used with the minimization and maximization methods a
 -   `accuracy`: Fraction correctly classified
 -   `abs_d_sens_spec`: The absolute difference of sensitivity and specificity
 -   `abs_d_ppv_npv`: The absolute difference between positive predictive value (PPV) and negative predictive value (NPV)
+-   `roc01`: Distance to the point (0,1) on ROC space
 -   `cohens_kappa`: Cohen's Kappa
 -   `sum_sens_spec`: sensitivity + specificity
 -   `sum_ppv_npv`: The sum of positive predictive value (PPV) and negative predictive value (NPV)
@@ -171,6 +172,9 @@ The included metrics to be used with the minimization and maximization methods a
 -   `cost_misclassification`: The sum of the misclassification cost of false positives and false negatives. Additional arguments: cost\_fp, cost\_fn
 -   `total_utility`: The total utility of true / false positives / negatives. Additional arguments: utility\_tp, utility\_tn, cost\_fp, cost\_fn
 -   `F1_score`: The F1-score (2 \* TP) / (2 \* TP + FP + FN)
+-   `sens_constrain`: Maximize sensitivity given a minimal value of specificity
+-   `spec_constrain`: Maximize specificity given a minimal value of sensitivity
+-   `metric_constrain`: Maximize a selected metric given a minimal value of another selected metric
 
 Furthermore, the following functions are included which can be used as metric functions but are more useful for plotting purposes, for example in plot\_cutpointr, or for defining new metric functions: `tp`, `fp`, `tn`, `fn`, `tpr`, `fpr`, `tnr`, `fnr`, `false_omission_rate`, `false_discovery_rate`, `ppv`, `npv`, `precision`, `recall`, `sensitivity`, and `specificity`.
 
@@ -1014,15 +1018,8 @@ Plotting
 
 ``` r
 set.seed(102)
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, 
-                     boot_runs = 50, silent = F, tol_metric = 0.05, metric = accuracy)
-#> Assuming the positive class is yes
-#> Assuming the positive class has higher x values
-#> Multiple optimal cutpoints found
-#> Multiple optimal cutpoints found
-#> Running bootstrap...
 opt_cut <- cutpointr(suicide, dsi, suicide, gender, method = minimize_metric,
-                     metric = abs_d_sens_spec, boot_runs = 50, silent = TRUE)
+                     metric = abs_d_sens_spec, boot_runs = 200, silent = TRUE)
 opt_cut
 #> # A tibble: 2 x 18
 #>   subgroup direction optimal_cutpoint method          abs_d_sens_spec
@@ -1037,10 +1034,10 @@ opt_cut
 #>   <chr>   <chr>     <chr>    <list>             <list>                
 #> 1 suicide dsi       gender   <tibble [392 × 2]> <data.frame [11 × 10]>
 #> 2 suicide dsi       gender   <tibble [140 × 2]> <data.frame [11 × 10]>
-#>   boot              
-#>   <list>            
-#> 1 <tibble [50 × 23]>
-#> 2 <tibble [50 × 23]>
+#>   boot               
+#>   <list>             
+#> 1 <tibble [200 × 23]>
+#> 2 <tibble [200 × 23]>
 plot_cut_boot(opt_cut)
 ```
 

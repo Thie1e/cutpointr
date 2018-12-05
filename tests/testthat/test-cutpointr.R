@@ -583,6 +583,53 @@ test_that("Results for accuracy are equal to results by OptimalCutpoints", {
     expect_equal(round(opt_cut_cp$optimal_cutpoint, 4), c(0.9771, 0.0744))
 })
 
+test_that("Results for roc01 are equal to results by OptimalCutpoints", {
+    set.seed(1957)
+    tempdat <- data.frame(x = c(rnorm(100), rnorm(100, mean = 1)) ,
+                          y = c(rep(0, 100), rep(1, 100)),
+                          group = sample(c("a", "b"), size = 200, replace = TRUE))
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, method = minimize_metric,
+                            metric = roc01, direction = ">=",
+                            pos_class = 1)
+    expect_equal(round(opt_cut_cp$optimal_cutpoint, 4), 0.3255)
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, group, method = minimize_metric,
+                            metric = roc01, direction = ">=",
+                            pos_class = 1)
+    expect_equal(round(opt_cut_cp$optimal_cutpoint, 4), c(0.5312, 0.3307))
+})
+
+test_that("Results for constrained metrics are equal to results by OptimalCutpoints", {
+    set.seed(38129)
+    tempdat <- data.frame(x = c(rnorm(100), rnorm(100, mean = 1)) ,
+                          y = c(rep(0, 100), rep(1, 100)),
+                          group = sample(c("a", "b"), size = 200, replace = TRUE))
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, metric = sens_constrain,
+                            min_constrain = 0.85, constrain_metric = specificity)
+    expect_equal(round(opt_cut_cp$optimal_cutpoint, 4), 1.3018)
+    expect_equal(round(opt_cut_cp$sens_constrain, 4), 0.44)
+    expect_equal(round(opt_cut_cp$specificity, 4), 0.8500)
+    expect_equal(opt_cut_cp$sensitivity, opt_cut_cp$sens_constrain)
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, metric = spec_constrain,
+                            min_constrain = 0.85, constrain_metric = sensitivity)
+    expect_equal(round(opt_cut_cp$optimal_cutpoint, 4), 0.2775)
+    expect_equal(round(opt_cut_cp$spec_constrain, 4), 0.54)
+    expect_equal(round(opt_cut_cp$sensitivity, 4), 0.8500)
+    expect_equal(opt_cut_cp$specificity, opt_cut_cp$spec_constrain)
+
+    opt_cut_cp <- cutpointr(tempdat, x, y, metric = metric_constrain,
+                            min_constrain = 0.85,
+                            constrain_metric = npv, main_metric = ppv) %>%
+        add_metric(list(npv, ppv))
+    expect_equal(round(opt_cut_cp$optimal_cutpoint, 4), 0.1435)
+    expect_equal(round(opt_cut_cp$ppv_constrain, 4), 0.6500)
+    expect_equal(round(opt_cut_cp$npv, 4), 0.8500)
+    expect_equal(opt_cut_cp$ppv_constrain, opt_cut_cp$ppv)
+})
+
 test_that("Results for F1_score are equal to results by ROCR", {
     set.seed(38429)
     tempdat <- data.frame(x = c(rnorm(100), rnorm(100, mean = 1)) ,

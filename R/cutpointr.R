@@ -91,6 +91,12 @@
 #'  Additional arguments to cutpointr: \code{utility_tp}, \code{utility_tn},
 #'  \code{cost_fp}, \code{cost_fn}
 #'  \item \code{F1_score}: The F1-score (2 * TP) / (2 * TP + FP + FN)
+#'  \item \code{sens_constrain}: Maximize sensitivity given a minimal value of
+#'  specificity
+#'  \item \code{spec_constrain}: Maximize specificity given a minimal value of
+#'  sensitivity
+#'  \item \code{metric_constrain}: Maximize a selected metric given a minimal
+#'  value of another selected metric
 #' }
 #'
 #' Furthermore, the following functions are included which can be used as metric

@@ -126,6 +126,10 @@ false positives and false negatives. Additional arguments: cost_fp, cost_fn
 - `total_utility`: The total utility of true / false positives / negatives.
 Additional arguments: utility_tp, utility_tn, cost_fp, cost_fn
 - `F1_score`: The F1-score (2 * TP) / (2 * TP + FP + FN)
+- `sens_constrain`: Maximize sensitivity given a minimal value of specificity
+- `spec_constrain`: Maximize specificity given a minimal value of sensitivity
+- `metric_constrain`: Maximize a selected metric given a minimal value of 
+another selected metric
 
 Furthermore, the following functions are included which can be used as metric
 functions but are more useful for plotting purposes, for example in 
