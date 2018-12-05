@@ -545,7 +545,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                 m <- metric(tp = optcut$roc_curve[[1]]$tp[opt_ind],
                             fp = optcut$roc_curve[[1]]$fp[opt_ind],
                             tn = optcut$roc_curve[[1]]$tn[opt_ind],
-                            fn = optcut$roc_curve[[1]]$fn[opt_ind])
+                            fn = optcut$roc_curve[[1]]$fn[opt_ind], ...)
                 m <- check_metric_name(m)
                 colnames(m) <- make.names(colnames(m))
                 optcut <- dplyr::bind_cols(optcut, tibble::as_tibble(m))
@@ -558,7 +558,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
             m <- metric(tp = optcut$roc_curve[[1]]$tp[opt_ind],
                         fp = optcut$roc_curve[[1]]$fp[opt_ind],
                         tn = optcut$roc_curve[[1]]$tn[opt_ind],
-                        fn = optcut$roc_curve[[1]]$fn[opt_ind])
+                        fn = optcut$roc_curve[[1]]$fn[opt_ind], ...)
             optcut <- add_list(optcut, as.numeric(m), optcut$metric_name)
             sesp <- sesp_from_oc(optcut$roc_curve[[1]],
                                  oc = optcut$optimal_cutpoint,
@@ -647,7 +647,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
         m <- metric(tp = optcut$roc_curve[[1]]$tp[opt_ind],
                     fp = optcut$roc_curve[[1]]$fp[opt_ind],
                     tn = optcut$roc_curve[[1]]$tn[opt_ind],
-                    fn = optcut$roc_curve[[1]]$fn[opt_ind])
+                    fn = optcut$roc_curve[[1]]$fn[opt_ind], ...)
         optcut <- add_list(optcut, as.numeric(m), optcut$metric_name)
         sesp <- sesp_from_oc(optcut$roc_curve[[1]],
                              oc = optcut$optimal_cutpoint,
@@ -704,12 +704,14 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
         bootstrap <- dat %>%
             dplyr::transmute_(boot = ~ purrr::map2(dat$data, dat$pos_class,
                                                     function(g, pc) {
+                # ind_pos <- which(unlist(g[, outcome]) == pc)
+                # ind_neg <- which(unlist(g[, outcome]) == neg_class)
                 boot_g <- foreach::foreach(rep = 1:boot_runs, .combine = rbind,
                     .export = c("method", "direction", "metric", "break_ties",
                     "neg_class", "mn", "use_midpoints",
                     "predictor", "outcome", "tol_metric")) %seq_or_par%
                     {
-                        b_ind <- simple_boot(g, outcome)
+                        b_ind <- simple_boot(data = g, dep_var = outcome)
                         optcut_b <- method(data = g[b_ind, ], x = predictor,
                                            metric_func = metric,
                                            class = outcome,
