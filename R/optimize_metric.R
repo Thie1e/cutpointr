@@ -76,13 +76,19 @@ optimize_metric <- function(data, x, class, metric_func = youden,
         roccurve$m[finite_roc] <- mod$fitted.values
     }
     if (minmax == "max") {
-        max_m <- max(roccurve$m, na.rm = TRUE)
+        m_vals <- stats::na.omit(roccurve$m)
+        if (length(m_vals) == 0) stop("All metric values are missing.")
+        # max_m <- max(roccurve$m, na.rm = TRUE)
+        max_m <- max(m_vals)
         opt <- which((roccurve$m >= (max_m - tol_metric)) &
                          (roccurve$m <= (max_m + tol_metric)))
         oc <- roccurve[, "x.sorted"][opt]
         m_oc <- max_m
     } else if (minmax == "min") {
-        min_m <- min(roccurve$m, na.rm = TRUE)
+        m_vals <- stats::na.omit(roccurve$m)
+        if (length(m_vals) == 0) stop("All metric values are missing.")
+        # min_m <- min(roccurve$m, na.rm = TRUE)
+        min_m <- min(m_vals)
         opt <- which((roccurve$m >= (min_m - tol_metric)) &
                          (roccurve$m <= (min_m + tol_metric)))
         oc <- roccurve[, "x.sorted"][opt]
@@ -357,8 +363,10 @@ maximize_boot_metric <- function(data, x, class, metric_func = youden,
                             summary_func = mean, boot_cut = 50, inf_rm = TRUE,
                             tol_metric, use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
+    # ind_pos <- which(unlist(data[, class]) == pos_class)
+    # ind_neg <- which(unlist(data[, class]) == neg_class)
     optimal_cutpoints <- purrr::map(1:boot_cut, function(i) {
-        b_ind <- simple_boot(data, class)
+        b_ind <- simple_boot(data = data, dep_var = class)
         opt_cut <- optimize_metric(data = data[b_ind, ],
                                    x = x, class = class,
                                    metric_func = metric_func,
@@ -385,8 +393,10 @@ minimize_boot_metric <- function(data, x, class, metric_func = youden,
                             summary_func = mean, boot_cut = 50, inf_rm = TRUE,
                             tol_metric, use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
+    # ind_pos <- which(unlist(data[, class]) == pos_class)
+    # ind_neg <- which(unlist(data[, class]) == neg_class)
     optimal_cutpoints <- purrr::map(1:boot_cut, function(i) {
-        b_ind <- simple_boot(data, class)
+        b_ind <- simple_boot(data = data, dep_var = class)
         opt_cut <- optimize_metric(data = data[b_ind, ],
                                    x = x, class = class,
                                    metric_func = metric_func,
