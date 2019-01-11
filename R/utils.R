@@ -60,6 +60,17 @@ check_metric_name <- function(met) {
     }
 }
 
+check_method_name <- function(mod_name) {
+    if (length(mod_name) > 1) {
+        if (mod_name[1] %in% c("::", ":::") & length(mod_name) == 3) {
+            mod_name <- mod_name[3]
+        } else {
+            stop("Could not parse method name")
+        }
+    }
+    return(mod_name)
+}
+
 check_colnames <- function(cutpointr_object) {
     if ("subgroup" %in% colnames(cutpointr_object)) col_nr <- 4 else col_nr <- 3
     metric_name <- colnames(cutpointr_object)[col_nr]

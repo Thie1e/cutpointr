@@ -1,3 +1,6 @@
+# cutpointr 0.7.6
+- Fix fetching of method name if method was called using `::` or `:::`
+
 # cutpointr 0.7.5
 - Add constrainable metrics, e.g. sens_constrain to calculate sensitivity given
 a minimum value for specificity

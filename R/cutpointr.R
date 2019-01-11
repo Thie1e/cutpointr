@@ -303,16 +303,12 @@ cutpointr.default <- function(data, x, class, subgroup = NULL,
         mod_name <- as.character(substitute(method))
     }
     if (is.null(mod_name)) stop("Could not get the method function")
+    mod_name <- check_method_name(mod_name)
 
     # Get metric function
     if (length(metric) > 1 | !(class(metric) == "function")) {
         stop("metric should be a function")
     }
-    cl <- match.call()
-    metric_name <- cl$metric
-    # if default was not changed:
-    metric_name <- as.character(substitute(metric))
-    if (is.null(metric_name)) stop("Could not get the metric function")
     if (silent) {
         suppressMessages(
             cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
@@ -352,16 +348,12 @@ cutpointr.numeric <- function(x, class, subgroup = NULL,
         mod_name <- as.character(substitute(method))
     }
     if (is.null(mod_name)) stop("Could not get the method function")
+    mod_name <- check_method_name(mod_name)
 
     # Get metric function
     if (length(metric) > 1 | !(class(metric) == "function")) {
         stop("metric should be a function")
     }
-    cl <- match.call()
-    metric_name <- cl$metric
-    # if default was not changed:
-    metric_name <- as.character(substitute(metric))
-    if (is.null(metric_name)) stop("Could not get the metric function")
     if (silent) {
         suppressMessages(
             cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
@@ -430,21 +422,15 @@ cutpointr_ <- function(data, x, class, subgroup = NULL,
     } else {
         cl <- match.call()
         mod_name <- cl$method
-        # if default was not changed:
         mod_name <- as.character(substitute(method))
     }
     if (is.null(mod_name)) stop("Could not get the method function")
+    mod_name <- check_method_name(mod_name)
 
     # Get metric function
     if (length(metric) > 1 | !(class(metric) == "function")) {
         stop("metric should be a function")
     }
-    cl <- match.call()
-    metric_name <- cl$metric
-    # if default was not changed:
-    metric_name <- as.character(substitute(metric))
-    if (is.null(metric_name)) stop("Could not get the metric function")
-
     if (silent) {
         suppressMessages(
             cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,

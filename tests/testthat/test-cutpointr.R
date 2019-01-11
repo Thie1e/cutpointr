@@ -1303,3 +1303,15 @@ test_that("add_metric adds metrics correctly", {
     oc <- add_metric(oc, list(mymetric))
     expect_equal(oc$mymet, 42)
 })
+
+test_that("cutpointr works if method / metric are called with ::", {
+    expect_silent(cutpointr(suicide, dsi, suicide,
+                            method = cutpointr::maximize_boot_metric,
+                            metric = cutpointr::accuracy, silent = TRUE))
+    expect_silent(cutpointr_(suicide, "dsi", "suicide",
+                            method = cutpointr::maximize_boot_metric,
+                            metric = cutpointr::accuracy, silent = TRUE))
+    expect_silent(cutpointr(suicide$dsi, suicide$suicide,
+                            method = cutpointr::maximize_boot_metric,
+                            metric = cutpointr::cohens_kappa, silent = TRUE))
+})
