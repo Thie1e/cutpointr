@@ -7,7 +7,7 @@
 \format{A data frame with 53 rows and 2 variables:
 \describe{
   \item{acid_phosphatase}{(numeric) Blood serum level of acid phosphatase}
-  \item{nodal_inolvement}{(logical) Whether neighboring lymph nodes were involved}
+  \item{nodal_involvement}{(logical) Whether neighboring lymph nodes were involved}
 }}
 \source{
 Le CT (2006). A solution for the most basic optimization problem associated with an ROC curve. Statistical methods in medical research 15: 571–584
