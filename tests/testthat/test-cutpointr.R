@@ -1223,7 +1223,7 @@ test_that("summary is printed correctly", {
     expect_output(print(scp), "Outcome: suicide")
     expect_output(print(scp), "Direction: >=")
     expect_output(print(scp), "Nr. of bootstraps: 10")
-    expect_output(print(scp), "accuracy_oob 0.8342")
+    expect_output(print(scp), "accuracy_oob [0-9]*")
 
     set.seed(83)
     cp <- cutpointr(suicide, dsi, suicide, gender, method = oc_youden_normal,
@@ -1239,7 +1239,7 @@ test_that("summary is printed correctly", {
     expect_output(print(scp), "Outcome: suicide")
     expect_output(print(scp), "Direction: >=")
     expect_output(print(scp), "Nr. of bootstraps: 10")
-    expect_output(print(scp), "accuracy_oob 0.8201")
+    expect_output(print(scp), "accuracy_oob [0-9]*")
 
     set.seed(8213)
     cp <- cutpointr(suicide$dsi, suicide$suicide, suicide$gender,
@@ -1255,7 +1255,7 @@ test_that("summary is printed correctly", {
     expect_output(print(scp), "Subgroup: male")
     expect_output(print(scp), "Direction: >=")
     expect_output(print(scp), "Nr. of bootstraps: 10")
-    expect_output(print(scp), "accuracy_oob 0.8163")
+    expect_output(print(scp), "accuracy_oob [0-9]*")
 })
 
 test_that("add_metric adds metrics correctly", {
