@@ -55,7 +55,7 @@ print.summary_cutpointr <- function(x, ...) {
         if (has_boot_results(x[i, ])) {
             cat("\n")
             cat(paste("Bootstrap summary:", "\n"))
-            print(x[["boot"]][[i]], row.names = rep("", nrow(x[["boot"]][[i]])))
+            print.data.frame(x[["boot"]][[i]], row.names = rep("", nrow(x[["boot"]][[i]])))
         }
     }
     return(invisible(x))
