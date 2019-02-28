@@ -7,16 +7,16 @@
 plot_roc(x, display_cutpoint = TRUE, ...)
 }
 \arguments{
-\item{x}{A cutpointr object.}
+\item{x}{A cutpointr or roc_cutpointr object.}
 
 \item{display_cutpoint}{(logical) Whether or not to display the optimal
-cutpoint as a dot on the ROC curve.}
+cutpoint as a dot on the ROC curve for cutpointr objects.}
 
 \item{...}{Additional arguments (unused).}
 }
 \description{
 Given a \code{cutpointr} object this function plots the ROC curve(s)
-per subgroup, if given.
+per subgroup, if given. Also plots a ROC curve from the output of \code{roc()}.
 }
 \examples{
 opt_cut <- cutpointr(suicide, dsi, suicide)

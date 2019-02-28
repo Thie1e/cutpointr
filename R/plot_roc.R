@@ -1,10 +1,10 @@
 #' Plot ROC curve from a cutpointr object
 #'
 #' Given a \code{cutpointr} object this function plots the ROC curve(s)
-#' per subgroup, if given.
-#' @param x A cutpointr object.
+#' per subgroup, if given. Also plots a ROC curve from the output of \code{roc()}.
+#' @param x A cutpointr or roc_cutpointr object.
 #' @param display_cutpoint (logical) Whether or not to display the optimal
-#' cutpoint as a dot on the ROC curve.
+#' cutpoint as a dot on the ROC curve for cutpointr objects.
 #' @param ... Additional arguments (unused).
 #' @examples
 #' opt_cut <- cutpointr(suicide, dsi, suicide)
@@ -15,9 +15,18 @@
 #' @family cutpointr plotting functions
 #' @export
 plot_roc <- function(x, display_cutpoint = TRUE, ...) {
-
-    stopifnot("cutpointr" %in% class(x))
     args <- list(...)
+    if ("cutpointr" %in% class(x)) {
+        plot_roc_cp(x = x, display_cutpoint = display_cutpoint, args)
+    } else if ("roc_cutpointr" %in% class(x)) {
+        plot_roc_rcp(x = x, args)
+    } else {
+        stop(paste("Can not plot ROC curve form object of type",
+                   paste(class(x), collapse = ", ")))
+    }
+}
+
+plot_roc_cp <- function(x, display_cutpoint, ...) {
     predictor <- as.name(x$predictor[1])
     outcome <- as.name(x$outcome[1])
 
@@ -63,5 +72,16 @@ plot_roc <- function(x, display_cutpoint = TRUE, ...) {
     if (display_cutpoint) {
         roc <- roc + ggplot2::geom_point(data = optcut_coords, color = "black")
     }
+    return(roc)
+}
+
+plot_roc_rcp <- function(x, ...) {
+    roc_title <- ggplot2::ggtitle("ROC curve")
+    roc <- ggplot2::ggplot(x, ggplot2::aes_(x = ~ 1 - tnr, y = ~ tpr)) +
+        ggplot2::geom_step() +
+        roc_title +
+        ggplot2::xlab("1 - Specificity") +
+        ggplot2::ylab("Sensitivity") +
+        ggplot2::theme(aspect.ratio = 1)
     return(roc)
 }
