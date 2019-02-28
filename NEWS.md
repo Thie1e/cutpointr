@@ -1,8 +1,10 @@
 # cutpointr 0.7.6
+- Printing results of roc() is now possible with plot_roc()
 - Let roc() return a tibble instead of a data.frame
 - Add prostate_nodal data set of nodal involvement and acid phosphatase levels
 in 53 prostate cancer patients
 - Fix fetching of method name if method was called using `::` or `:::`
+- Make test of summary printing more tolerant after problems with tidyr 0.8.3
 
 # cutpointr 0.7.5
 - Add constrainable metrics, e.g. sens_constrain to calculate sensitivity given
