@@ -90,7 +90,8 @@ roc <- function(data, x, class, pos_class, neg_class, direction = ">=",
     tnr <- tn / n_neg
     fpr <- 1 - tnr
     fnr <- 1 - tpr
-    res <- data.frame(x.sorted, tp, fp, tn, fn, tpr, tnr, fpr, fnr)
+    # res <- data.frame(x.sorted, tp, fp, tn, fn, tpr, tnr, fpr, fnr)
+    res <- tibble::tibble(x.sorted, tp, fp, tn, fn, tpr, tnr, fpr, fnr)
     class(res) <- c(class(res), "roc_cutpointr")
     if (!silent) {
         if (is.nan(res$tpr[1])) warning("ROC curve contains no positives")

@@ -1,4 +1,7 @@
 # cutpointr 0.7.6
+- Let roc() return a tibble instead of a data.frame
+- Add prostate_nodal data set of nodal involvement and acid phosphatase levels
+in 53 prostate cancer patients
 - Fix fetching of method name if method was called using `::` or `:::`
 
 # cutpointr 0.7.5

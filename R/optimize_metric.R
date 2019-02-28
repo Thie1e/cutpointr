@@ -8,8 +8,8 @@ optimize_metric <- function(data, x, class, metric_func = youden,
     if (metric_name_call != "metric_func") metric_name <- metric_name_call
     roccurve <- roc(data = data, x = x, class = class, pos_class = pos_class,
                     neg_class = neg_class, direction = direction)
-    m <- metric_func(tp = roccurve[, "tp"], fp = roccurve[, "fp"],
-                     tn = roccurve[, "tn"], fn = roccurve[, "fn"], ...)
+    m <- metric_func(tp = roccurve[["tp"]], fp = roccurve[["fp"]],
+                     tn = roccurve[["tn"]], fn = roccurve[["fn"]], ...)
     m <- sanitize_metric(m, m_name = metric_name, n = nrow(roccurve))
     roccurve$m <- as.numeric(m)
     if (!is.null(colnames(m))) metric_name <- colnames(m)
@@ -82,7 +82,7 @@ optimize_metric <- function(data, x, class, metric_func = youden,
         max_m <- max(m_vals)
         opt <- which((roccurve$m >= (max_m - tol_metric)) &
                          (roccurve$m <= (max_m + tol_metric)))
-        oc <- roccurve[, "x.sorted"][opt]
+        oc <- roccurve[["x.sorted"]][opt]
         m_oc <- max_m
     } else if (minmax == "min") {
         m_vals <- stats::na.omit(roccurve$m)
@@ -91,7 +91,7 @@ optimize_metric <- function(data, x, class, metric_func = youden,
         min_m <- min(m_vals)
         opt <- which((roccurve$m >= (min_m - tol_metric)) &
                          (roccurve$m <= (min_m + tol_metric)))
-        oc <- roccurve[, "x.sorted"][opt]
+        oc <- roccurve[["x.sorted"]][opt]
         m_oc <- min_m
     }
     if (length(oc) > 1) {
