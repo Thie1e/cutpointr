@@ -2,17 +2,17 @@
 % Please edit documentation in R/add_metric.R
 \name{add_metric}
 \alias{add_metric}
-\title{Add metrics to a cutpointr object}
+\title{Add metrics to a cutpointr or roc_cutpointr object}
 \usage{
 add_metric(object, metric)
 }
 \arguments{
-\item{object}{A cutpointr object.}
+\item{object}{A cutpointr or roc_cutpointr object.}
 
 \item{metric}{(list) A list of metric functions to be added.}
 }
 \value{
-A cutpointr object (a data.frame) with one or more added columns.
+A cutpointr or roc_cutpointr object (a data.frame) with one or more added columns.
 }
 \description{
 By default, the output of cutpointr includes the optimized metric and several

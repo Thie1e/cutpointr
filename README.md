@@ -22,7 +22,7 @@
     -   [Nonstandard evaluation and transforming variables](#nonstandard-evaluation-and-transforming-variables)
     -   [ROC-curve and optimal cutpoint for multiple variables](#roc-curve-and-optimal-cutpoint-for-multiple-variables)
     -   [Accessing `data`, `roc_curve`, and `boot`](#accessing-data-roc_curve-and-boot)
-    -   [Calculating additional metrics](#calculating-additional-metrics)
+    -   [Adding metrics to the result of cutpointr or roc](#adding-metrics-to-the-result-of-cutpointr-or-roc)
     -   [User-defined functions](#user-defined-functions)
 -   [Plotting](#plotting)
     -   [Flexible plotting function](#flexible-plotting-function)
@@ -74,9 +74,9 @@ cp
 #>   sensitivity specificity      AUC pos_class neg_class prevalence outcome
 #>         <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1    0.888889    0.862903 0.923779 yes       no         0.0676692 suicide
-#>   predictor data               roc_curve              boot 
-#>   <chr>     <list>             <list>                 <lgl>
-#> 1 dsi       <tibble [532 × 2]> <data.frame [13 × 10]> NA
+#>   predictor data               roc_curve          boot 
+#>   <chr>     <list>             <list>             <lgl>
+#> 1 dsi       <tibble [532 × 2]> <tibble [13 × 10]> NA
 ```
 
 ``` r
@@ -207,9 +207,9 @@ opt_cut
 #>   sensitivity specificity      AUC pos_class neg_class prevalence outcome
 #>         <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1    0.888889    0.862903 0.923779 yes       no         0.0676692 suicide
-#>   predictor data               roc_curve              boot 
-#>   <chr>     <list>             <list>                 <lgl>
-#> 1 dsi       <tibble [532 × 2]> <data.frame [13 × 10]> NA
+#>   predictor data               roc_curve          boot 
+#>   <chr>     <list>             <list>             <lgl>
+#> 1 dsi       <tibble [532 × 2]> <tibble [13 × 10]> NA
 ```
 
 Alternatively, instead of supplying a data frame the raw vectors of the predictor and outcome can be given as `x` and `class`:
@@ -225,9 +225,9 @@ cutpointr(x = suicide$dsi, class = suicide$suicide)
 #>   sensitivity specificity      AUC pos_class neg_class prevalence outcome
 #>         <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1    0.888889    0.862903 0.923779 yes       no         0.0676692 class  
-#>   predictor data               roc_curve              boot 
-#>   <chr>     <list>             <list>                 <lgl>
-#> 1 x         <tibble [532 × 2]> <data.frame [13 × 10]> NA
+#>   predictor data               roc_curve          boot 
+#>   <chr>     <list>             <list>             <lgl>
+#> 1 x         <tibble [532 × 2]> <tibble [13 × 10]> NA
 ```
 
 `cutpointr` makes assumptions about the direction of the dependency between `class` and `x`, if `direction` and / or `pos_class` or `neg_class` are not specified. The same result as above can be achieved by manually defining `direction` and the positive / negative classes which is slightly faster, since the classes and direction don't have to be determined:
@@ -243,9 +243,9 @@ opt_cut
 #>   specificity      AUC pos_class neg_class prevalence outcome predictor
 #>         <dbl>    <dbl> <chr>     <chr>          <dbl> <chr>   <chr>    
 #> 1    0.862903 0.923779 yes       no         0.0676692 suicide dsi      
-#>   data               roc_curve              boot 
-#>   <list>             <list>                 <lgl>
-#> 1 <tibble [532 × 2]> <data.frame [13 × 10]> NA
+#>   data               roc_curve          boot 
+#>   <list>             <list>             <lgl>
+#> 1 <tibble [532 × 2]> <tibble [13 × 10]> NA
 ```
 
 `opt_cut` is a tidy data frame that returns the input data in a nested tibble. Methods for summarizing and plotting the data and results are included:
@@ -380,9 +380,9 @@ opt_cut
 #>   sensitivity specificity      AUC pos_class neg_class prevalence outcome
 #>         <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1    0.888889    0.862903 0.923779 yes       no         0.0676692 suicide
-#>   predictor data               roc_curve              boot              
-#>   <chr>     <list>             <list>                 <list>            
-#> 1 dsi       <tibble [532 × 2]> <data.frame [13 × 10]> <tibble [50 × 23]>
+#>   predictor data               roc_curve          boot              
+#>   <chr>     <list>             <list>             <list>            
+#> 1 dsi       <tibble [532 × 2]> <tibble [13 × 10]> <tibble [50 × 23]>
 ```
 
 The returned object has the additional column `boot` which is a nested tibble that includes the cutpoints per bootstrap sample along with the metric calculated using the function in `metric` and various default metrics. The metrics are suffixed by `_b` to indicate in-bag results or `_oob` to indicate out-of-bag results:
@@ -403,7 +403,7 @@ opt_cut$boot
 #>  8                2 0.862   0.925            1.63             1.76 0.831
 #>  9                3 0.970   0.846            1.82             1.48 0.882
 #> 10                1 0.912   0.920            1.71             1.67 0.782
-#> # ... with 40 more rows, and 17 more variables: acc_oob <dbl>,
+#> # … with 40 more rows, and 17 more variables: acc_oob <dbl>,
 #> #   sensitivity_b <dbl>, sensitivity_oob <dbl>, specificity_b <dbl>,
 #> #   specificity_oob <dbl>, kappa_b <dbl>, kappa_oob <dbl>, TP_b <dbl>,
 #> #   FP_b <dbl>, TN_b <int>, FN_b <int>, TP_oob <dbl>, FP_oob <dbl>,
@@ -501,10 +501,10 @@ if (suppressPackageStartupMessages(require(doParallel) & require(doRNG))) {
 #>      <dbl>       <dbl>       <dbl>    <dbl> <chr>     <fct>          <dbl>
 #> 1 0.885204    0.925926    0.882192 0.944647 yes       no         0.0688776
 #> 2 0.842857    0.777778    0.847328 0.861747 yes       no         0.0642857
-#>   outcome predictor grouping data               roc_curve             
-#>   <chr>   <chr>     <chr>    <list>             <list>                
-#> 1 suicide dsi       gender   <tibble [392 × 2]> <data.frame [11 × 10]>
-#> 2 suicide dsi       gender   <tibble [140 × 2]> <data.frame [11 × 10]>
+#>   outcome predictor grouping data               roc_curve         
+#>   <chr>   <chr>     <chr>    <list>             <list>            
+#> 1 suicide dsi       gender   <tibble [392 × 2]> <tibble [11 × 10]>
+#> 2 suicide dsi       gender   <tibble [140 × 2]> <tibble [11 × 10]>
 #>   boot              
 #>   <list>            
 #> 1 <tibble [30 × 23]>
@@ -534,10 +534,10 @@ cutpointr(suicide, dsi, suicide, gender,
 #>      <dbl>       <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl>
 #> 1 0.956633    0.444444    0.994521 0.944647 yes       no         0.0688776
 #> 2 0.957143    0.333333    1        0.861747 yes       no         0.0642857
-#>   outcome predictor grouping data               roc_curve             boot 
-#>   <chr>   <chr>     <chr>    <list>             <list>                <lgl>
-#> 1 suicide dsi       gender   <tibble [392 × 2]> <data.frame [11 × 9]> NA   
-#> 2 suicide dsi       gender   <tibble [140 × 2]> <data.frame [11 × 9]> NA
+#>   outcome predictor grouping data               roc_curve         boot 
+#>   <chr>   <chr>     <chr>    <list>             <list>            <lgl>
+#> 1 suicide dsi       gender   <tibble [392 × 2]> <tibble [11 × 9]> NA   
+#> 2 suicide dsi       gender   <tibble [140 × 2]> <tibble [11 × 9]> NA
 ```
 
 LOESS smoothing for selecting a cutpoint
@@ -659,17 +659,17 @@ cutpointr(suicide, dsi, suicide, gender, method = oc_youden_normal)
 #>      <dbl>       <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl>
 #> 1 0.895408    0.814815    0.901370 0.944647 yes       no         0.0688776
 #> 2 0.864286    0.666667    0.877863 0.861747 yes       no         0.0642857
-#>   outcome predictor grouping data               roc_curve             boot 
-#>   <chr>   <chr>     <chr>    <list>             <list>                <lgl>
-#> 1 suicide dsi       gender   <tibble [392 × 2]> <data.frame [11 × 9]> NA   
-#> 2 suicide dsi       gender   <tibble [140 × 2]> <data.frame [11 × 9]> NA
+#>   outcome predictor grouping data               roc_curve         boot 
+#>   <chr>   <chr>     <chr>    <list>             <list>            <lgl>
+#> 1 suicide dsi       gender   <tibble [392 × 2]> <tibble [11 × 9]> NA   
+#> 2 suicide dsi       gender   <tibble [140 × 2]> <tibble [11 × 9]> NA
 ```
 
 ### Nonparametric kernel method
 
-A nonparametric alternative is the "kernel method" \[@fluss\_estimation\_2005\]. Here, the empirical distribution functions are smoothed using the Gaussian kernel functions $\\hat{F}\_N(t) = \\frac{1}{n} \\sum^n\_{i=1} \\Phi(\\frac{t - y\_i}{h\_y})$ and $\\hat{G}\_P(t) = \\frac{1}{m} \\sum^m\_{i=1} \\Phi(\\frac{t - x\_i}{h\_x})$ for the negative and positive classes respectively. Following Silverman's plug-in "rule of thumb" the bandwidths are selected as *h*<sub>*y*</sub> = 0.9 \* *m**i**n*{*s*<sub>*y*</sub>, *i**q**r*<sub>*y*</sub>/1.34}\**n*<sup>−0.2</sup> and *h*<sub>*x*</sub> = 0.9 \* *m**i**n*{*s*<sub>*x*</sub>, *i**q**r*<sub>*x*</sub>/1.34}\**m*<sup>−0.2</sup> where *s* is the sample standard deviation and *i**q**r* is the inter quartile range. It has been demontrated that AUC estimation is rather insensitive to the choice of the bandwith procedure \[@faraggi\_estimation\_2002\] and thus the plug-in bandwith estimator has also been recommended for cutpoint estimation. Indeed, as our preliminary simulations have shown, the choices of the bandwidth and the kernel function do not seem to exhibit a considerable influence on the variability (or bias) of the estimated cutpoints. Thus, the `oc_youden_kernel` function in **cutpointr** uses a Guassian kernel and the direct plug-in method for selecting the bandwidths. The kernel smoothing is done via the `bkde` function from the **KernSmooth** package \[@wand\_kernsmooth:\_2013\].
+A nonparametric alternative is the "kernel method" \[@fluss\_estimation\_2005\]. Here, the empirical distribution functions are smoothed using the Gaussian kernel functions $\\hat{F}\_N(t) = \\frac{1}{n} \\sum^n\_{i=1} \\Phi(\\frac{t - y\_i}{h\_y})$ and $\\hat{G}\_P(t) = \\frac{1}{m} \\sum^m\_{i=1} \\Phi(\\frac{t - x\_i}{h\_x})$ for the negative and positive classes respectively. Following Silverman's plug-in "rule of thumb" the bandwidths are selected as *h*<sub>*y*</sub> = 0.9 \* *m**i**n*{*s*<sub>*y*</sub>, *i**q**r*<sub>*y*</sub>/1.34}\**n*<sup>−0.2</sup> and *h*<sub>*x*</sub> = 0.9 \* *m**i**n*{*s*<sub>*x*</sub>, *i**q**r*<sub>*x*</sub>/1.34}\**m*<sup>−0.2</sup> where *s* is the sample standard deviation and *i**q**r* is the inter quartile range. It has been demontrated that AUC estimation is rather insensitive to the choice of the bandwidth procedure \[@faraggi\_estimation\_2002\] and thus the plug-in bandwith estimator has also been recommended for cutpoint estimation. Indeed, as our preliminary simulations have shown, the choices of the bandwidth and the kernel function do not seem to exhibit a considerable influence on the variability (or bias) of the estimated cutpoints. Thus, the `oc_youden_kernel` function in **cutpointr** uses a Guassian kernel and the direct plug-in method for selecting the bandwidths. The kernel smoothing is done via the `bkde` function from the **KernSmooth** package \[@wand\_kernsmooth:\_2013\].
 
-Again, there is a way to calcualte the Youden-Index from the results of this method \[@fluss\_estimation\_2005\] which is
+Again, there is a way to calculate the Youden-Index from the results of this method \[@fluss\_estimation\_2005\] which is
 
 $$\\hat{J} = max\_c \\{\\hat{F}\_N(c) - \\hat{G}\_N(c) \\}$$
 
@@ -688,10 +688,10 @@ cutpointr(suicide, dsi, suicide, gender, method = oc_youden_kernel)
 #>      <dbl>       <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl>
 #> 1 0.885204    0.925926    0.882192 0.944647 yes       no         0.0688776
 #> 2 0.807143    0.777778    0.809160 0.861747 yes       no         0.0642857
-#>   outcome predictor grouping data               roc_curve             boot 
-#>   <chr>   <chr>     <chr>    <list>             <list>                <lgl>
-#> 1 suicide dsi       gender   <tibble [392 × 2]> <data.frame [11 × 9]> NA   
-#> 2 suicide dsi       gender   <tibble [140 × 2]> <data.frame [11 × 9]> NA
+#>   outcome predictor grouping data               roc_curve         boot 
+#>   <chr>   <chr>     <chr>    <list>             <list>            <lgl>
+#> 1 suicide dsi       gender   <tibble [392 × 2]> <tibble [11 × 9]> NA   
+#> 2 suicide dsi       gender   <tibble [140 × 2]> <tibble [11 × 9]> NA
 ```
 
 Additional features
@@ -735,12 +735,15 @@ plot_x(opt_cut)
 
 A simulation demonstrates more clearly that setting `use_midpoints = TRUE` avoids biasing the cutpoints. To simulate the bias of the metric functions, the predictor values of both classes were drawn from normal distributions with constant standard deviations of 10, a constant mean of the negative class of 100 and higher mean values of the positive class that are selected in such a way that optimal Youden-Index values of 0.2, 0.4, 0.6, and 0.8 result in the population. Samples of 9 different sizes were drawn and the cutpoints that maximize the Youden-Index were estimated. The simulation was repeated 10000 times. As can be seen by the mean error, `use_midpoints = TRUE` eliminates the bias that is introduced by otherwise selecting the value of an observation as the optimal cutpoint. If `direction = ">="`, as in this case, the observation that represents the optimal cutpoint is the highest possible cutpoint that leads to the optimal metric value and thus the biases are positive. The methods `oc_youden_normal` and `oc_youden_kernel` are always unbiased, as they don't select a cutpoint based on the ROC-curve or the function of metric values per cutpoint.
 
+    #> Warning: Detecting old grouped_df format, replacing `vars` attribute by
+    #> `groups`
+
 ![](README-unnamed-chunk-30-1.png)
 
 Finding all cutpoints with acceptable performance
 -------------------------------------------------
 
-By default, most packages only return the "best" cutpoint and disregard other cutpoints with quite similar performance, even if the performance differences are miniscule. **cutpointr** makes this process more explicit via the `tol_metric` argument. For example, if all cupoints are of interest that are achieve at least an accuracy within `0.05` of the optimally achievable accuracy, `tol_metric` can be set to `0.05` and also those cutpoints will be returned.
+By default, most packages only return the "best" cutpoint and disregard other cutpoints with quite similar performance, even if the performance differences are minuscule. **cutpointr** makes this process more explicit via the `tol_metric` argument. For example, if all cutpoints are of interest that achieve at least an accuracy within `0.05` of the optimally achievable accuracy, `tol_metric` can be set to `0.05` and also those cutpoints will be returned.
 
 In the case of the `suicide` data and when maximizing the sum of sensitivity and specificity, empirically the cutpoints 2 and 3 lead to quite similar performances. If `tol_metric` is set to `0.05`, both will be returned.
 
@@ -807,10 +810,10 @@ opt_cut
 #>   <chr>                <chr>        <chr>       <list>            
 #> 1 "suicide == \"yes\"" log(dsi + 1) dsi%%2 == 0 <tibble [86 × 2]> 
 #> 2 "suicide == \"yes\"" log(dsi + 1) dsi%%2 == 0 <tibble [446 × 2]>
-#>   roc_curve             boot              
-#>   <list>                <list>            
-#> 1 <data.frame [7 × 10]> <tibble [30 × 23]>
-#> 2 <data.frame [7 × 10]> <tibble [30 × 23]>
+#>   roc_curve         boot              
+#>   <list>            <list>            
+#> 1 <tibble [7 × 10]> <tibble [30 × 23]>
+#> 2 <tibble [7 × 10]> <tibble [30 × 23]>
 predict(opt_cut, newdata = data.frame(dsi = 0:5))
 #> [1] FALSE FALSE  TRUE FALSE  TRUE  TRUE
 ```
@@ -840,12 +843,12 @@ purrr::map_df(colnames(dat)[1:4], function(coln) {
 #> Assuming the positive class has lower x values
 #> Assuming the positive class has lower x values
 #> # A tibble: 4 x 4
-#>   variable     direction optimal_cutpoint   AUC
-#>   <chr>        <chr>                <dbl> <dbl>
-#> 1 Sepal.Length <=                    5.65 0.985
-#> 2 Sepal.Width  >=                    3.35 0.834
-#> 3 Petal.Length <=                    3.2  1    
-#> 4 Petal.Width  <=                    1    1
+#>   variable     direction optimal_cutpoint      AUC
+#>   <chr>        <chr>                <dbl>    <dbl>
+#> 1 Sepal.Length <=                  5.65   0.9846  
+#> 2 Sepal.Width  >=                  3.3500 0.834400
+#> 3 Petal.Length <=                  3.2    1       
+#> 4 Petal.Width  <=                  1      1
 ```
 
 To make this task more convenient, the built-in `multi_cutpointr` function can be used to achieve the same result.
@@ -929,8 +932,8 @@ opt_cut %>%
 #> 2 male         1     3     8
 ```
 
-Calculating additional metrics
-------------------------------
+Adding metrics to the result of cutpointr or roc
+------------------------------------------------
 
 By default, the output of cutpointr includes the optimized metric and several other metrics. The `add_metric` function adds further metrics. Suitable metric functions are all metric functions that are included in the package or that comply with those standards. Here, we're adding the negative predictive value (NPV) and the positive predictive value (PPV) at the optimal cutpoint per subgroup:
 
@@ -943,6 +946,31 @@ cutpointr(suicide, dsi, suicide, gender, metric = youden, silent = TRUE) %>%
 #>   <chr>               <dbl>    <dbl>    <dbl>    <dbl>
 #> 1 female                  2 0.808118 0.367647 0.993827
 #> 2 male                    3 0.625106 0.259259 0.982301
+```
+
+In the same fashion, additional metric columns can be added to a `roc_cutpointr` object:
+
+``` r
+roc(data = suicide, x = "dsi", class = "suicide", pos_class = "yes",
+    neg_class = "no", direction = ">=") %>% 
+    add_metric(list(cohens_kappa, F1_score)) %>% 
+    select(x.sorted, tp, fp, tn, fn, cohens_kappa, F1_score)
+#> # A tibble: 13 x 7
+#>    x.sorted    tp    fp    tn    fn cohens_kappa F1_score
+#>       <dbl> <dbl> <dbl> <int> <int>        <dbl>    <dbl>
+#>  1      Inf     0     0   496    36       0        0     
+#>  2       11     1     0   496    35       0.0506   0.0541
+#>  3       10     2     1   495    34       0.0931   0.103 
+#>  4        9     3     1   495    33       0.138    0.15  
+#>  5        8     4     1   495    32       0.182    0.195 
+#>  6        7     7     1   495    29       0.301    0.318 
+#>  7        6    16     6   490    20       0.527    0.552 
+#>  8        5    20    16   480    16       0.523    0.556 
+#>  9        4    28    44   452     8       0.471    0.519 
+#> 10        3    29    56   440     7       0.425    0.479 
+#> 11        2    32    68   428     4       0.412    0.471 
+#> 12        1    34   120   376     2       0.279    0.358 
+#> 13        0    36   496     0     0       0        0.127
 ```
 
 User-defined functions
@@ -963,7 +991,7 @@ User-defined functions can be supplied to `method`, which is the function that i
 -   `use_midpoints`: (logical) In the built-in methods, if TRUE (default FALSE) the returned optimal cutpoint will be the mean of the optimal cutpoint and the next highest observation (for direction = "&gt;") or the next lowest observation (for direction = "&lt;") which avoids biasing the optimal cutpoint.
 -   `...`: Further arguments that are passed to `metric` or that can be captured inside of `method`
 
-The function should return a data frame or tibble with one row, the column `optimal_cutpoint`, and an optional column with an arbitraty name with the metric value at the optimal cutpoint.
+The function should return a data frame or tibble with one row, the column `optimal_cutpoint`, and an optional column with an arbitrary name with the metric value at the optimal cutpoint.
 
 For example, a function for choosing the cutpoint as the mean of the independent variable could look like this:
 
@@ -1000,6 +1028,7 @@ misclassification_cost
 #>     colnames(misclassification_cost) <- "misclassification_cost"
 #>     return(misclassification_cost)
 #> }
+#> <bytecode: 0x781bed0>
 #> <environment: namespace:cutpointr>
 ```
 
@@ -1030,10 +1059,10 @@ opt_cut
 #>      <dbl>       <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl>
 #> 1 0.885204    0.925926    0.882192 0.944647 yes       no         0.0688776
 #> 2 0.807143    0.777778    0.809160 0.861747 yes       no         0.0642857
-#>   outcome predictor grouping data               roc_curve             
-#>   <chr>   <chr>     <chr>    <list>             <list>                
-#> 1 suicide dsi       gender   <tibble [392 × 2]> <data.frame [11 × 10]>
-#> 2 suicide dsi       gender   <tibble [140 × 2]> <data.frame [11 × 10]>
+#>   outcome predictor grouping data               roc_curve         
+#>   <chr>   <chr>     <chr>    <list>             <list>            
+#> 1 suicide dsi       gender   <tibble [392 × 2]> <tibble [11 × 10]>
+#> 2 suicide dsi       gender   <tibble [140 × 2]> <tibble [11 × 10]>
 #>   boot               
 #>   <list>             
 #> 1 <tibble [200 × 23]>
@@ -1041,37 +1070,37 @@ opt_cut
 plot_cut_boot(opt_cut)
 ```
 
-![](README-unnamed-chunk-41-1.png)
+![](README-unnamed-chunk-42-1.png)
 
 ``` r
 plot_metric(opt_cut, conf_lvl = 0.9)
 ```
 
-![](README-unnamed-chunk-41-2.png)
+![](README-unnamed-chunk-42-2.png)
 
 ``` r
 plot_metric_boot(opt_cut)
 ```
 
-![](README-unnamed-chunk-41-3.png)
+![](README-unnamed-chunk-42-3.png)
 
 ``` r
 plot_precision_recall(opt_cut)
 ```
 
-![](README-unnamed-chunk-41-4.png)
+![](README-unnamed-chunk-42-4.png)
 
 ``` r
 plot_sensitivity_specificity(opt_cut)
 ```
 
-![](README-unnamed-chunk-41-5.png)
+![](README-unnamed-chunk-42-5.png)
 
 ``` r
 plot_roc(opt_cut)
 ```
 
-![](README-unnamed-chunk-41-6.png)
+![](README-unnamed-chunk-42-6.png)
 
 All plot functions, except for the standard plot method, return `ggplot` objects than can be further modified. For example, changing labels, title, and the theme can be achieved this way:
 
@@ -1080,7 +1109,7 @@ p <- plot_x(opt_cut)
 p + ggtitle("Distribution of dsi") + theme_minimal() + xlab("Depression score")
 ```
 
-![](README-unnamed-chunk-42-1.png)
+![](README-unnamed-chunk-43-1.png)
 
 Flexible plotting function
 --------------------------
@@ -1097,24 +1126,24 @@ oc <- cutpointr(suicide, dsi, suicide, boot_runs = 20,
 plot_cutpointr(oc, xvar = cutpoints, yvar = sum_sens_spec, conf_lvl = 0.9)
 ```
 
-![](README-unnamed-chunk-43-1.png)
+![](README-unnamed-chunk-44-1.png)
 
 ``` r
 plot_cutpointr(oc, xvar = fpr, yvar = tpr, aspect_ratio = 1, conf_lvl = 0)
 ```
 
-![](README-unnamed-chunk-43-2.png)
+![](README-unnamed-chunk-44-2.png)
 
 ``` r
 plot_cutpointr(oc, xvar = cutpoint, yvar = tp, conf_lvl = 0.9) + geom_point()
 ```
 
-![](README-unnamed-chunk-43-3.png)
+![](README-unnamed-chunk-44-3.png)
 
 Manual plotting
 ---------------
 
-Since `cutpointr` returns a `data.frame` with the original data, bootstrap results, and the ROC curve in nested tibbles, these data can coveniently be extracted and plotted manually. This offers additional ways of tweaking these plots as well as the possibility to plot results that are not included in `plot` or one of the other plotting functions. The relevant nested tibbles are in the columns `data`, `roc_curve` and `boot`. The following is an example of accessing and plotting the grouped data.
+Since `cutpointr` returns a `data.frame` with the original data, bootstrap results, and the ROC curve in nested tibbles, these data can be conveniently extracted and plotted manually. This offers additional ways of tweaking these plots as well as the possibility to plot results that are not included in `plot` or one of the other plotting functions. The relevant nested tibbles are in the columns `data`, `roc_curve` and `boot`. The following is an example of accessing and plotting the grouped data.
 
 ``` r
 set.seed(123) # Some missing values expected
@@ -1137,7 +1166,7 @@ head(opt_cut$data)
 #>  8     1 no     
 #>  9     0 no     
 #> 10     0 no     
-#> # ... with 382 more rows
+#> # … with 382 more rows
 #> 
 #> [[2]]
 #> # A tibble: 140 x 2
@@ -1153,7 +1182,7 @@ head(opt_cut$data)
 #>  8     0 no     
 #>  9     0 no     
 #> 10     0 no     
-#> # ... with 130 more rows
+#> # … with 130 more rows
 
 opt_cut %>% 
     select(data, subgroup) %>% 
@@ -1162,7 +1191,7 @@ opt_cut %>%
     geom_boxplot(alpha = 0.3) + facet_grid(~subgroup)
 ```
 
-![](README-unnamed-chunk-44-1.png)
+![](README-unnamed-chunk-45-1.png)
 
 Benchmarks
 ----------
@@ -1198,7 +1227,7 @@ The benchmarking will be carried out using the **microbenchmark** package and ra
 
 Benchmarks are run for sample sizes of 1000, 1e4, 1e5, 1e6, and 1e7. For low sample sizes **cutpointr** is slower than the other solutions. While this should be of low practical importance, **cutpointr** scales more favorably with increasing sample size. The speed disadvantage in small samples that leads to the lower limit of around 25ms is mainly due to the nesting of the original data and the results that makes the compact output of `cutpointr` possible. For sample sizes &gt; 1e5 **cutpointr** is a little faster than the function based on **ROCR**. Both of these solutions are generally faster than **OptimalCutpoints** and **ThresholdROC** with the exception of small samples. **OptimalCutpoints** and **ThresholdROC** had to be excluded from benchmarks with more than 1e4 observations and **pROC** from benchmarks with more than 1e5 observations due to high memory requirements and/or excessive run times, rendering the use of these packages in larger samples impractical.
 
-![](README-unnamed-chunk-48-1.png)
+![](README-unnamed-chunk-49-1.png)
 
 |      n|    cutpointr|  OptimalCutpoints|         pROC|          ROCR|  ThresholdROC|
 |------:|------------:|-----------------:|------------:|-------------:|-------------:|
@@ -1226,7 +1255,7 @@ proc_roc <- function(x, class, levels = c("no", "yes"), algo = 2) {
 }
 ```
 
-![](README-unnamed-chunk-53-1.png)
+![](README-unnamed-chunk-54-1.png)
 
 |      n|    cutpointr|        pROC|         ROCR|
 |------:|------------:|-----------:|------------:|

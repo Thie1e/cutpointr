@@ -1276,6 +1276,14 @@ test_that("add_metric adds metrics correctly", {
     expect_equal(oc$abs_d_ppv_npv, 0.670741, tolerance = 1e-5)
     expect_equal(oc$abs_d_sens_spec, 0.0259857, tolerance = 1e-5)
 
+    rcp <- roc(data = suicide, x = "dsi", class = "suicide",
+               pos_class = "yes", neg_class = "no", direction = ">=") %>%
+        add_metric(list(cohens_kappa, F1_score))
+    expect_equal(rcp$cohens_kappa, c(0.00000000, 0.05058128, 0.09312293, 0.13833841,
+                                     0.18161477, 0.30098108, 0.52746652, 0.52329749,
+                                     0.47076829, 0.42463778, 0.41208251, 0.27878034,
+                                     0.00000000), tolerance = 1e-5)
+
     tempdat <- data.frame(y = c(0,0,0,1,0,1,1,1),
                           x = 1:8)
     oc <- cutpointr(tempdat, x, y, break_ties = c)

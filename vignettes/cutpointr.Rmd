@@ -403,9 +403,9 @@ cutpointr(suicide, dsi, suicide, gender, method = oc_youden_normal)
 
 ### Nonparametric kernel method
 
-A nonparametric alternative is the "kernel method" [@fluss_estimation_2005]. Here, the empirical distribution functions are smoothed using the Gaussian kernel functions $\hat{F}_N(t) = \frac{1}{n} \sum^n_{i=1} \Phi(\frac{t - y_i}{h_y})$ and $\hat{G}_P(t) = \frac{1}{m} \sum^m_{i=1} \Phi(\frac{t - x_i}{h_x})$ for the negative and positive classes respectively. Following Silverman's plug-in "rule of thumb" the bandwidths are selected as $h_y = 0.9 * min\{s_y, iqr_y/1.34\} * n^{-0.2}$ and $h_x = 0.9 * min\{s_x, iqr_x/1.34\} * m^{-0.2}$ where $s$ is the sample standard deviation and $iqr$ is the inter quartile range. It has been demontrated that AUC estimation is rather insensitive to the choice of the bandwith procedure [@faraggi_estimation_2002] and thus the plug-in bandwith estimator has also been recommended for cutpoint estimation. Indeed, as our preliminary simulations have shown, the choices of the bandwidth and the kernel function do not seem to exhibit a considerable influence on the variability (or bias) of the estimated cutpoints. Thus, the `oc_youden_kernel` function in **cutpointr** uses a Guassian kernel and the direct plug-in method for selecting the bandwidths. The kernel smoothing is done via the `bkde` function from the **KernSmooth** package [@wand_kernsmooth:_2013]. 
+A nonparametric alternative is the "kernel method" [@fluss_estimation_2005]. Here, the empirical distribution functions are smoothed using the Gaussian kernel functions $\hat{F}_N(t) = \frac{1}{n} \sum^n_{i=1} \Phi(\frac{t - y_i}{h_y})$ and $\hat{G}_P(t) = \frac{1}{m} \sum^m_{i=1} \Phi(\frac{t - x_i}{h_x})$ for the negative and positive classes respectively. Following Silverman's plug-in "rule of thumb" the bandwidths are selected as $h_y = 0.9 * min\{s_y, iqr_y/1.34\} * n^{-0.2}$ and $h_x = 0.9 * min\{s_x, iqr_x/1.34\} * m^{-0.2}$ where $s$ is the sample standard deviation and $iqr$ is the inter quartile range. It has been demontrated that AUC estimation is rather insensitive to the choice of the bandwidth procedure [@faraggi_estimation_2002] and thus the plug-in bandwith estimator has also been recommended for cutpoint estimation. Indeed, as our preliminary simulations have shown, the choices of the bandwidth and the kernel function do not seem to exhibit a considerable influence on the variability (or bias) of the estimated cutpoints. Thus, the `oc_youden_kernel` function in **cutpointr** uses a Guassian kernel and the direct plug-in method for selecting the bandwidths. The kernel smoothing is done via the `bkde` function from the **KernSmooth** package [@wand_kernsmooth:_2013]. 
 
-Again, there is a way to calcualte the Youden-Index from the results of this method [@fluss_estimation_2005] which is
+Again, there is a way to calculate the Youden-Index from the results of this method [@fluss_estimation_2005] which is
 
 $$\hat{J} = max_c \{\hat{F}_N(c) - \hat{G}_N(c) \}$$
 
@@ -432,6 +432,9 @@ roc_curve <- roc(data = suicide, x = "dsi", class = "suicide",
     pos_class = "yes", neg_class = "no")
 plot_cutpointr(roc_curve, fpr, tpr, aspect_ratio = 1)
 ```
+
+Additional metrics, e.g. Cohen's Kappa, PPV, NPV and so on, can be added to the
+ROC curve via `add_metric`. 
 
 ## Midpoints
 
@@ -664,7 +667,7 @@ ggplot(plotdat_nomidpoints %>% filter(!(method %in% c("spline_20"))),
 ```
 
 ## Finding all cutpoints with acceptable performance
-By default, most packages only return the "best" cutpoint and disregard other cutpoints with quite similar performance, even if the performance differences are miniscule. **cutpointr** makes this process more explicit via the `tol_metric` argument. For example, if all cupoints are of interest that are achieve at least an accuracy within `0.05` of the optimally achievable accuracy, `tol_metric` can be set to `0.05` and also those cutpoints will be returned. 
+By default, most packages only return the "best" cutpoint and disregard other cutpoints with quite similar performance, even if the performance differences are minuscule. **cutpointr** makes this process more explicit via the `tol_metric` argument. For example, if all cutpoints are of interest that achieve at least an accuracy within `0.05` of the optimally achievable accuracy, `tol_metric` can be set to `0.05` and also those cutpoints will be returned. 
 
 In the case of the `suicide` data and when maximizing the sum of sensitivity and specificity, empirically the cutpoints 2 and 3 lead to quite similar performances. If `tol_metric` is set to `0.05`, both will be returned.
 
@@ -802,7 +805,7 @@ opt_cut %>%
     unnest
 ```
 
-## Calculating additional metrics
+## Adding metrics to the result of cutpointr or roc
 
 By default, the output of cutpointr includes the optimized metric and several
 other metrics. The `add_metric` function adds further metrics. Suitable metric functions
@@ -815,6 +818,17 @@ cutpointr(suicide, dsi, suicide, gender, metric = youden, silent = TRUE) %>%
     add_metric(list(ppv, npv)) %>% 
     select(subgroup, optimal_cutpoint, youden, ppv, npv)
 ```
+
+In the same fashion, additional metric columns can be added to a `roc_cutpointr`
+object:
+
+```{r}
+roc(data = suicide, x = "dsi", class = "suicide", pos_class = "yes",
+    neg_class = "no", direction = ">=") %>% 
+    add_metric(list(cohens_kappa, F1_score)) %>% 
+    select(x.sorted, tp, fp, tn, fn, cohens_kappa, F1_score)
+```
+
 
 ## User-defined functions
 
@@ -845,7 +859,7 @@ observation (for direction = ">") or the next lowest observation
 inside of `method`
 
 The function should return a data frame or tibble with
-one row, the column `optimal_cutpoint`, and an optional column with an arbitraty name
+one row, the column `optimal_cutpoint`, and an optional column with an arbitrary name
 with the metric value at the optimal cutpoint.
 
 For example, a function for choosing the cutpoint as the mean of the independent
@@ -912,10 +926,8 @@ To display no confidence interval set `conf_lvl = 0`.
 
 ```{r, fig.width=4, fig.height=3}
 set.seed(102)
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, 
-                     boot_runs = 50, silent = F, tol_metric = 0.05, metric = accuracy)
 opt_cut <- cutpointr(suicide, dsi, suicide, gender, method = minimize_metric,
-                     metric = abs_d_sens_spec, boot_runs = 50, silent = TRUE)
+                     metric = abs_d_sens_spec, boot_runs = 200, silent = TRUE)
 opt_cut
 plot_cut_boot(opt_cut)
 plot_metric(opt_cut, conf_lvl = 0.9)
@@ -966,7 +978,7 @@ plot_cutpointr(oc, xvar = cutpoint, yvar = tp, conf_lvl = 0.9) + geom_point()
 ## Manual plotting
 
 Since `cutpointr` returns a `data.frame` with the original data, bootstrap
-results, and the ROC curve in nested tibbles, these data can coveniently be 
+results, and the ROC curve in nested tibbles, these data can be conveniently 
 extracted and plotted manually. This offers additional ways of tweaking these plots as well
 as the possibility to plot results that are not included in `plot` or one of the
 other plotting functions. The relevant
