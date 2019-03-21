@@ -15,6 +15,9 @@
 #' @family cutpointr plotting functions
 #' @export
 plot.cutpointr <- function(x, ...) {
+    if ("multi_cutpointr" %in% class(x)) {
+        stop("Plotting multi_cutpointr objects is not supported.")
+    }
     args <- list(...)
 
     dist <- plot_x(x)

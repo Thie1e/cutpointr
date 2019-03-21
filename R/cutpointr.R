@@ -154,7 +154,7 @@
 #' data(suicide)
 #' opt_cut <- cutpointr(suicide, dsi, suicide)
 #' opt_cut
-#' summary(opt_cut)
+#' s_opt_cut <- summary(opt_cut)
 #' plot(opt_cut)
 #'
 #' \dontrun{
@@ -172,6 +172,8 @@
 #' ## Optimal cutpoint for dsi, as before, but for the separate subgroups
 #' opt_cut <- cutpointr(suicide, dsi, suicide, gender)
 #' opt_cut
+#' (s_opt_cut <- summary(opt_cut))
+#' tibble:::print.tbl(s_opt_cut)
 #'
 #' ## Bootstrapping also works on individual subgroups
 #' ## low boot_runs for illustrative purposes
@@ -870,8 +872,14 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
 #' multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
 #'                 pos_class = "yes")
 #'
-#' multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
-#'                 subgroup = "gender", pos_class = "yes")
+#' mcp <- multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
+#'                        subgroup = "gender", pos_class = "yes")
+#' mcp
+#'
+#' (scp <- summary(mcp))
+#' \dontrun{
+#' tibble:::print.tbl(scp)
+#' }
 #'
 #' @return A data frame.
 #' @importFrom purrr %>%
@@ -888,10 +896,8 @@ multi_cutpointr <- function(data, x = colnames(data)[colnames(data) != class],
     }
     res <- purrr::map_df(x, function(coln) {
         if (!silent) message(paste0(coln, ":"))
-        cutpointr_(data, coln, class, silent = silent, ...) %>%
-            dplyr::mutate(variable = coln)
+        cutpointr_(data, coln, class, silent = silent, ...)
     })
-    res <- res[, c("variable", colnames(res)[colnames(res) != "variable"])]
     class(res) <- c("multi_cutpointr", class(res))
     return(res)
 }

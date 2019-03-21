@@ -6,6 +6,11 @@
 in 53 prostate cancer patients
 - Fix fetching of method name if method was called using `::` or `:::`
 - Make test of summary printing more tolerant after problems with `tidyr` 0.8.3
+- Issue an error if plot is used on a `multi_cutpointr` object
+- Add a summary method for `multi_cutpointr`, a corresponding 
+`summary_multi_cutpointr` class and a printing method for that class
+- The column `variable` is not returned anymore by `multi_cutpointr`, because
+it is identical to `predictor`
 
 # cutpointr 0.7.5
 - Add constrainable metrics, e.g. sens_constrain to calculate sensitivity given

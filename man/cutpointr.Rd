@@ -238,7 +238,7 @@ library(cutpointr)
 data(suicide)
 opt_cut <- cutpointr(suicide, dsi, suicide)
 opt_cut
-summary(opt_cut)
+s_opt_cut <- summary(opt_cut)
 plot(opt_cut)
 
 \dontrun{
@@ -256,6 +256,8 @@ cutpointr(suicide, dsi, suicide, direction = ">=", pos_class = "yes",
 ## Optimal cutpoint for dsi, as before, but for the separate subgroups
 opt_cut <- cutpointr(suicide, dsi, suicide, gender)
 opt_cut
+(s_opt_cut <- summary(opt_cut))
+tibble:::print.tbl(s_opt_cut)
 
 ## Bootstrapping also works on individual subgroups
 ## low boot_runs for illustrative purposes

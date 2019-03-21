@@ -710,6 +710,8 @@ plot_cutpointr(roc_curve, fpr, tpr, aspect_ratio = 1)
 
 ![](README-unnamed-chunk-26-1.png)
 
+Additional metrics, e.g. Cohen's Kappa, PPV, NPV and so on, can be added to the ROC curve via `add_metric`.
+
 Midpoints
 ---------
 
@@ -851,19 +853,42 @@ purrr::map_df(colnames(dat)[1:4], function(coln) {
 #> 4 Petal.Width  <=                  1      1
 ```
 
-To make this task more convenient, the built-in `multi_cutpointr` function can be used to achieve the same result.
+To make this task more convenient, the built-in `multi_cutpointr` function can be used to achieve the same result. It maps multiple predictor columns to `cutpointr_`, by default all columns except for the class column.
 
 ``` r
-multi_cutpointr(dat, class = "Species", pos_class = "setosa", 
-                use_midpoints = TRUE, silent = TRUE) %>% 
-    dplyr::select(variable, direction, optimal_cutpoint, AUC)
-#> # A tibble: 4 x 4
-#>   variable     direction optimal_cutpoint      AUC
-#>   <chr>        <chr>                <dbl>    <dbl>
-#> 1 Sepal.Length <=                  5.65   0.9846  
-#> 2 Sepal.Width  >=                  3.3500 0.834400
-#> 3 Petal.Length <=                  3.2    1       
-#> 4 Petal.Width  <=                  1      1
+mcp <- multi_cutpointr(dat, class = "Species", pos_class = "setosa", 
+                use_midpoints = TRUE, silent = TRUE) 
+mcp
+#> # A tibble: 4 x 16
+#>   direction optimal_cutpoint method          sum_sens_spec   acc
+#>   <chr>                <dbl> <chr>                   <dbl> <dbl>
+#> 1 <=                  5.65   maximize_metric          1.9   0.95
+#> 2 >=                  3.3500 maximize_metric          1.52  0.76
+#> 3 <=                  3.2    maximize_metric          2     1   
+#> 4 <=                  1      maximize_metric          2     1   
+#>   sensitivity specificity      AUC pos_class neg_class prevalence outcome
+#>         <dbl>       <dbl>    <dbl> <chr>     <fct>          <dbl> <chr>  
+#> 1        0.94        0.96 0.9846   setosa    virginica        0.5 Species
+#> 2        0.62        0.9  0.834400 setosa    virginica        0.5 Species
+#> 3        1           1    1        setosa    virginica        0.5 Species
+#> 4        1           1    1        setosa    virginica        0.5 Species
+#>   predictor    data               roc_curve          boot 
+#>   <chr>        <list>             <list>             <lgl>
+#> 1 Sepal.Length <tibble [100 × 2]> <tibble [34 × 10]> NA   
+#> 2 Sepal.Width  <tibble [100 × 2]> <tibble [22 × 10]> NA   
+#> 3 Petal.Length <tibble [100 × 2]> <tibble [30 × 10]> NA   
+#> 4 Petal.Width  <tibble [100 × 2]> <tibble [19 × 10]> NA
+
+# Also the summary_multi_cutpointr object is a data frame
+tibble:::print.tbl(summary(mcp))
+#> # A tibble: 4 x 8
+#>   predictor cutpointr desc  desc_by_class n_obs n_pos n_neg
+#>   <chr>     <list>    <lis> <list>        <int> <int> <int>
+#> 1 Sepal.Le… <tibble … <dat… <data.frame …   100    50    50
+#> 2 Sepal.Wi… <tibble … <dat… <data.frame …   100    50    50
+#> 3 Petal.Le… <tibble … <dat… <data.frame …   100    50    50
+#> 4 Petal.Wi… <tibble … <dat… <data.frame …   100    50    50
+#> # … with 1 more variable: confusion_matrix <list>
 ```
 
 Accessing `data`, `roc_curve`, and `boot`
@@ -1028,7 +1053,7 @@ misclassification_cost
 #>     colnames(misclassification_cost) <- "misclassification_cost"
 #>     return(misclassification_cost)
 #> }
-#> <bytecode: 0x781bed0>
+#> <bytecode: 0x6c3f518>
 #> <environment: namespace:cutpointr>
 ```
 

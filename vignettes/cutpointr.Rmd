@@ -750,12 +750,16 @@ purrr::map_df(colnames(dat)[1:4], function(coln) {
 ```
 
 To make this task more convenient, the built-in `multi_cutpointr` function can be
-used to achieve the same result.
+used to achieve the same result. It maps multiple predictor columns to 
+`cutpointr_`, by default all columns except for the class column.
 
 ```{r}
-multi_cutpointr(dat, class = "Species", pos_class = "setosa", 
-                use_midpoints = TRUE, silent = TRUE) %>% 
-    dplyr::select(variable, direction, optimal_cutpoint, AUC)
+mcp <- multi_cutpointr(dat, class = "Species", pos_class = "setosa", 
+                use_midpoints = TRUE, silent = TRUE) 
+mcp
+
+# Also the summary_multi_cutpointr object is a data frame
+tibble:::print.tbl(summary(mcp))
 ```
 
 

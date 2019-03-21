@@ -39,8 +39,14 @@ library(cutpointr)
 multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
                 pos_class = "yes")
 
-multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
-                subgroup = "gender", pos_class = "yes")
+mcp <- multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
+                       subgroup = "gender", pos_class = "yes")
+mcp
+
+(scp <- summary(mcp))
+\dontrun{
+tibble:::print.tbl(scp)
+}
 
 }
 \seealso{
