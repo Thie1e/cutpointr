@@ -11,6 +11,7 @@ in 53 prostate cancer patients
 `summary_multi_cutpointr` class and a printing method for that class
 - The column `variable` is not returned anymore by `multi_cutpointr`, because
 it is identical to `predictor`
+- Run `multi_cutpointr` only on all numeric columns, if `x = NULL`
 
 # cutpointr 0.7.5
 - Add constrainable metrics, e.g. sens_constrain to calculate sensitivity given
