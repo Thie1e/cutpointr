@@ -789,7 +789,15 @@ test_that("multi_cutpointr runs without errors", {
                           pos_class = "yes")
     expect_equal(mc$optimal_cutpoint, c(55, 2))
 
+    mc <- multi_cutpointr(suicide, class = "suicide",
+                          pos_class = "yes")
+    expect_equal(mc$optimal_cutpoint, c(55, 2))
+
     mc <- multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
+                          subgroup = "gender", pos_class = "yes")
+    expect_equal(mc$optimal_cutpoint, c(55, 21, 2, 3))
+
+    mc <- multi_cutpointr(suicide, class = "suicide",
                           subgroup = "gender", pos_class = "yes")
     expect_equal(mc$optimal_cutpoint, c(55, 21, 2, 3))
 })
@@ -1340,4 +1348,27 @@ test_that("Summary(multi_cutpointr) is silent", {
                             pos_class = "yes", silent = TRUE)
         )
     )
+})
+
+test_that("multi_cutpointr fetches numeric columns correctly", {
+    tempdat <- iris[1:99, ]
+    tempdat$char <- "XYZ"
+    set.seed(734)
+    tempdat$g <- sample(0:1, size = 99, replace = TRUE)
+
+    expect_silent(
+       mcp <- multi_cutpointr(tempdat, class = "Species", silent = TRUE)
+    )
+    expect_equal(nrow(mcp), 5)
+
+    expect_silent(
+       mcp <- multi_cutpointr(tempdat, class = "Species", subgroup = "g", silent = TRUE)
+    )
+    expect_equal(nrow(mcp), 8)
+
+    expect_silent(
+       mcp <- multi_cutpointr(tempdat, class = "Species", subgroup = "g",
+                              silent = TRUE, boot_runs = 10)
+    )
+    expect_equal(nrow(mcp), 8)
 })

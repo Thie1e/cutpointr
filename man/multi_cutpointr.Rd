@@ -4,27 +4,28 @@
 \alias{multi_cutpointr}
 \title{Calculate optimal cutpoints and further statistics for multiple predictors}
 \usage{
-multi_cutpointr(data, x = colnames(data)[colnames(data) != class], class,
-  silent = FALSE, ...)
+multi_cutpointr(data, x = NULL, class, silent = FALSE, ...)
 }
 \arguments{
 \item{data}{A data frame.}
 
-\item{x}{Character vector of predictor variables.}
+\item{x}{Character vector of predictor variables. If NULL all numeric columns.}
 
 \item{class}{The name of the outcome / independent variable.}
 
 \item{silent}{Whether to suppress messages.}
 
-\item{...}{Further arguments to be passed to cutpointr.}
+\item{...}{Further arguments to be passed to cutpointr_ (Use a quoted variable
+name for subgroup).}
 }
 \value{
 A data frame.
 }
 \description{
-Runs \code{cutpointr_} over multiple predictor variables. By default, \code{cutpointr_}
-will be run using all columns in the data set as predictors except for the
-variable in \code{class}.
+Runs \code{cutpointr_} over multiple predictor variables. If
+\code{x = NULL}, \code{cutpointr_}
+will be run using all numeric columns in the data set as predictors except for the
+variable in \code{class} and, if given, \code{subgroup}.
 }
 \details{
 The automatic determination of positive / negative classes and \code{direction}

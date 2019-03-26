@@ -127,6 +127,12 @@ get_fnth <- function(x, n = 1) {
     stop("no conditions apply in get_fnth")
 }
 
+get_numeric_cols <- function(x, class_col) {
+    cols <- colnames(x)[unlist(lapply(x, is.numeric))]
+    cols <- cols[cols != class_col]
+    cols
+}
+
 midpoint <- function(oc, x, direction) {
     sapply(oc, function(oc) {
         x <- c(oc, x)

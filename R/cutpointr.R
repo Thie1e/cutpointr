@@ -851,9 +851,10 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
 
 #' Calculate optimal cutpoints and further statistics for multiple predictors
 #'
-#' Runs \code{cutpointr_} over multiple predictor variables. By default, \code{cutpointr_}
-#' will be run using all columns in the data set as predictors except for the
-#' variable in \code{class}.
+#' Runs \code{cutpointr_} over multiple predictor variables. If
+#' \code{x = NULL}, \code{cutpointr_}
+#' will be run using all numeric columns in the data set as predictors except for the
+#' variable in \code{class} and, if given, \code{subgroup}.
 #'
 #' The automatic determination of positive / negative classes and \code{direction}
 #' will be carried out separately for every predictor variable. That way, if
@@ -862,10 +863,11 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
 #' \code{direction} is equal within every subgroup.
 #'
 #' @param data A data frame.
-#' @param x Character vector of predictor variables.
+#' @param x Character vector of predictor variables. If NULL all numeric columns.
 #' @param class The name of the outcome / independent variable.
 #' @param silent Whether to suppress messages.
-#' @param ... Further arguments to be passed to cutpointr.
+#' @param ... Further arguments to be passed to cutpointr_ (Use a quoted variable
+#' name for subgroup).
 #' @examples
 #' library(cutpointr)
 #'
@@ -885,8 +887,8 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
 #' @importFrom purrr %>%
 #' @family main cutpointr functions
 #' @export
-multi_cutpointr <- function(data, x = colnames(data)[colnames(data) != class],
-                            class, silent = FALSE, ...) {
+multi_cutpointr <- function(data, x = NULL, class, silent = FALSE, ...) {
+    if (is.null(x)) x = get_numeric_cols(data, class)
     if(!(is.character(class) & length(class == 1))) {
         stop("class should be the name of the outcome variable (character)")
     }
