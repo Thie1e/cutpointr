@@ -1074,7 +1074,8 @@ bench_1000 <- microbenchmark::microbenchmark(
     optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
                       data = dat),
     thres2(k1 = x_neg, k2 = x_pos, rho = 0.5, 
-           method = "empirical", ci = FALSE)
+           method = "empirical", ci = FALSE),
+    unit = "ms"
 )
 
 n <- 10000
@@ -1091,7 +1092,7 @@ bench_10000 <- microbenchmark::microbenchmark(
     proc_sensspec(dat$x, dat$y),
     thres2(k1 = x_neg, k2 = x_pos, rho = 0.5, 
            method = "empirical", ci = FALSE),
-    times = 20
+    times = 20, unit = "ms"
 )
 
 n <- 1e5
@@ -1102,7 +1103,7 @@ bench_1e5 <- microbenchmark::microbenchmark(
               direction = ">=", metric = youden, break_ties = mean),
     rocr_sensspec(dat$x, dat$y),
     proc_sensspec(dat$x, dat$y),
-    times = 20
+    times = 20, unit = "ms"
 )
 
 n <- 1e6
@@ -1113,7 +1114,7 @@ bench_1e6 <- microbenchmark::microbenchmark(
               direction = ">=", metric = youden, break_ties = mean),
     rocr_sensspec(dat$x, dat$y),
     proc_sensspec(dat$x, dat$y),
-    times = 10
+    times = 10, unit = "ms"
 )
 
 n <- 1e7
