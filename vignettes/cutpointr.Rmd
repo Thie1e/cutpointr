@@ -1156,10 +1156,10 @@ results$solution[grep(pattern = "thres", x = results$solution)] <- "ThresholdROC
 ```{r, echo = FALSE}
 # dput(results)
 
-results <- structure(list(time = c(5.0717805, 2.227232, 2.478604, 38.656906, 
-31.8520455, 7.280105, 6.093091, 2677.2731605, 7.075222, 2087.1539065, 
-26.0781765, 44.6324315, 51.426554, 329.5211065, 652.6167625, 
-698.9574225, 3961.584149, 8078.7656205, 9708.3426245), solution = c("cutpointr", 
+results <- structure(list(time = c(5.283772, 2.2762845, 0.989628, 30.4539025, 
+21.848531, 7.1921095, 5.885572, 2591.7438885, 4.2644385, 2084.976477, 
+26.3649, 44.530807, 39.4310555, 254.031469, 561.9668135, 560.7535275, 
+3934.5322705, 8149.810798, 7992.5306045), solution = c("cutpointr", 
 "ROCR", "pROC", "OptimalCutpoints", "ThresholdROC", "cutpointr", 
 "ROCR", "OptimalCutpoints", "pROC", "ThresholdROC", "cutpointr", 
 "ROCR", "pROC", "cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", 
