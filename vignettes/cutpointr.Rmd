@@ -1031,13 +1031,9 @@ rocr_sensspec <- function(x, class) {
 }
 
 # pROC package
-proc_sensspec <- function(x, class, 
-                          levels = c("no", "yes"), algo = 2) {
-    r <- pROC::roc(class, x, algorithm = algo)
-    sens <- r$sensitivities
-    spec <- r$specificities
-    cut <- r$thresholds
-    cut[which.max(sens + spec)]
+proc_sensspec <- function(x, class) {
+    r <- pROC::roc(class, x, algorithm = 2, levels = c(0, 1), direction = "<")
+    coords(r, "best", ret="threshold")[1]
 }
 ```
 
@@ -1074,7 +1070,7 @@ bench_1000 <- microbenchmark::microbenchmark(
     cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
               direction = ">=", metric = youden, break_ties = mean),
     rocr_sensspec(dat$x, dat$y),
-    proc_sensspec(dat$x, dat$y, algo = 2),
+    proc_sensspec(dat$x, dat$y),
     optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
                       data = dat),
     thres2(k1 = x_neg, k2 = x_pos, rho = 0.5, 
@@ -1092,7 +1088,7 @@ bench_10000 <- microbenchmark::microbenchmark(
     rocr_sensspec(dat$x, dat$y),
     optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
                       data = dat),
-    proc_sensspec(dat$x, dat$y, algo = 2),
+    proc_sensspec(dat$x, dat$y),
     thres2(k1 = x_neg, k2 = x_pos, rho = 0.5, 
            method = "empirical", ci = FALSE),
     times = 20
@@ -1105,7 +1101,7 @@ bench_1e5 <- microbenchmark::microbenchmark(
     cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
               direction = ">=", metric = youden, break_ties = mean),
     rocr_sensspec(dat$x, dat$y),
-    proc_sensspec(dat$x, dat$y, algo = 2),
+    proc_sensspec(dat$x, dat$y),
     times = 20
 )
 
@@ -1196,8 +1192,8 @@ rocr_roc <- function(x, class) {
 }
 
 # pROC package
-proc_roc <- function(x, class, levels = c("no", "yes"), algo = 2) {
-    r <- pROC::roc(class, x, algorithm = algo)
+proc_roc <- function(x, class) {
+    r <- pROC::roc(class, x, algorithm = 2, levels = c(0, 1), direction = "<")
     return(NULL)
 }
 ```
@@ -1212,7 +1208,7 @@ bench_1000 <- microbenchmark::microbenchmark(unit = "ms",
     cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
               direction = ">="),
     rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y, algo = 2)
+    proc_roc(dat$x, dat$y)
 )
 
 n <- 10000
@@ -1222,7 +1218,7 @@ bench_10000 <- microbenchmark::microbenchmark(unit = "ms",
     cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
               direction = ">="),
     rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y, algo = 2),
+    proc_roc(dat$x, dat$y),
     times = 50
 )
 
@@ -1233,7 +1229,7 @@ bench_1e5 <- microbenchmark::microbenchmark(unit = "ms",
     cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
               direction = ">="),
     rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y, algo = 2),
+    proc_roc(dat$x, dat$y),
     times = 20
 )
 
