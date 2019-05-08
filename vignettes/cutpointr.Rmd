@@ -1156,10 +1156,10 @@ results$solution[grep(pattern = "thres", x = results$solution)] <- "ThresholdROC
 ```{r, echo = FALSE}
 # dput(results)
 
-results <- structure(list(time = c(5.283772, 2.2762845, 0.989628, 30.4539025, 
-21.848531, 7.1921095, 5.885572, 2591.7438885, 4.2644385, 2084.976477, 
-26.3649, 44.530807, 39.4310555, 254.031469, 561.9668135, 560.7535275, 
-3934.5322705, 8149.810798, 7992.5306045), solution = c("cutpointr", 
+results <- structure(list(time = c(4.4290145, 2.076954, 0.969923, 41.3452605, 
+37.6318835, 6.672219, 6.408562, 3546.0633985, 4.8078475, 3415.179475, 
+28.4640365, 55.908961, 48.733272, 307.2758195, 748.0846365, 737.162376, 
+5618.6891055, 11050.6742895, 11127.924753), solution = c("cutpointr", 
 "ROCR", "pROC", "OptimalCutpoints", "ThresholdROC", "cutpointr", 
 "ROCR", "OptimalCutpoints", "pROC", "ThresholdROC", "cutpointr", 
 "ROCR", "pROC", "cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", 
@@ -1285,9 +1285,9 @@ results$solution[grep(pattern = "proc", x = results$solution)] <- "pROC"
 ```{r, echo = FALSE}
 # dput(results)
 
-results <- structure(list(time = c(0.904112, 0.749559, 0.7914725, 2.0691145, 
-2.562274, 3.9866495, 13.046553, 20.9325915, 38.805097, 172.617514, 
-334.923011, 626.799141, 2517.3757965, 3603.212836, 8148.1264445
+results <- structure(list(time = c(0.8369425, 2.009407, 0.8077945, 1.965323, 
+6.2294905, 4.5425065, 12.986888, 54.6753075, 45.2200015, 179.604702, 
+745.745925, 679.536119, 2738.7512405, 10340.7540995, 10021.4714795
 ), solution = c("cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", 
 "pROC", "cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", "pROC", 
 "cutpointr", "ROCR", "pROC"), n = c(1000, 1000, 1000, 10000, 
