@@ -1050,10 +1050,10 @@ more favorably with increasing sample size. The speed disadvantage in small
 samples that leads to the lower limit of around 25ms is mainly due to the nesting
 of the original data and the results that makes the compact output of `cutpointr`
 possible. For sample sizes > 1e5 **cutpointr**
-is a little faster than the function based on **ROCR**. Both of these 
+is a little faster than the function based on **ROCR** and **pROC**. Both of these
 solutions are generally faster than **OptimalCutpoints** and **ThresholdROC** with the exception of
 small samples. **OptimalCutpoints** and **ThresholdROC** had to be excluded from benchmarks with 
-more than 1e4 observations and **pROC** from benchmarks with more than 1e5
+more than 1e4 observations
 observations due to high memory requirements and/or excessive run times, rendering
 the use of these packages in larger samples impractical.
 
