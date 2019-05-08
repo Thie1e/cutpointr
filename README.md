@@ -1218,12 +1218,21 @@ opt_cut %>%
 
 ![](README-unnamed-chunk-45-1.png)
 
-Benchmarks
-----------
+## Benchmarks
 
-To offer a comparison to established solutions, **cutpointr** will be benchmarked against `optimal.cutpoints` from the **OptimalCutpoints** package and custom functions based on the **ROCR** and **pROC** packages. By generating data of different sizes the benchmarks will offer a comparison of the scalability of the different solutions. When selecting cutpoints, the `optimal.cutpoints` and `cutpointr` functions are more convenient and offer additional features in comparison to the functions based on **ROCR** and **pROC** but the latter ones are still useful for benchmarking purposes.
+To offer a comparison to established solutions, **cutpointr** will be
+benchmarked against `optimal.cutpoints` from the **OptimalCutpoints**
+package and custom functions based on the **ROCR** and **pROC**
+packages. By generating data of different sizes the benchmarks will
+offer a comparison of the scalability of the different solutions. When
+selecting cutpoints, the `optimal.cutpoints` and `cutpointr` functions
+are more convenient and offer additional features in comparison to the
+functions based on **ROCR** and **pROC** but the latter ones are still
+useful for benchmarking purposes.
 
-Using `prediction` and `performance` from the **ROCR** package and `roc` from the **pROC** package, we can write functions for computing the cutpoint that maximizes the sum of sensitivity and specificity:
+Using `prediction` and `performance` from the **ROCR** package and `roc`
+from the **pROC** package, we can write functions for computing the
+cutpoint that maximizes the sum of sensitivity and specificity:
 
 ``` r
 # Return cutpoint that maximizes the sum of sensitivity and specificiy
@@ -1238,54 +1247,73 @@ rocr_sensspec <- function(x, class) {
 }
 
 # pROC package
-proc_sensspec <- function(x, class, 
-                          levels = c("no", "yes"), algo = 2) {
-    r <- pROC::roc(class, x, algorithm = algo)
-    sens <- r$sensitivities
-    spec <- r$specificities
-    cut <- r$thresholds
-    cut[which.max(sens + spec)]
+proc_sensspec <- function(x, class) {
+    r <- pROC::roc(class, x, algorithm = 2, levels = c(0, 1), direction = "<")
+    pROC::coords(r, "best", ret="threshold")[1]
 }
 ```
 
-The benchmarking will be carried out using the **microbenchmark** package and randomly generated data. The values of the `x` predictor variable are drawn from a normal distribution which leads to a lot more unique values than were encountered before in the `suicide` data. Accordingly, the search for an optimal cutpoint is much more demanding, if all possible cutpoints are evaluated.
+The benchmarking will be carried out using the **microbenchmark**
+package and randomly generated data. The values of the `x` predictor
+variable are drawn from a normal distribution which leads to a lot more
+unique values than were encountered before in the `suicide` data.
+Accordingly, the search for an optimal cutpoint is much more demanding,
+if all possible cutpoints are evaluated.
 
-Benchmarks are run for sample sizes of 1000, 1e4, 1e5, 1e6, and 1e7. For low sample sizes **cutpointr** is slower than the other solutions. While this should be of low practical importance, **cutpointr** scales more favorably with increasing sample size. The speed disadvantage in small samples that leads to the lower limit of around 25ms is mainly due to the nesting of the original data and the results that makes the compact output of `cutpointr` possible. For sample sizes &gt; 1e5 **cutpointr** is a little faster than the function based on **ROCR**. Both of these solutions are generally faster than **OptimalCutpoints** and **ThresholdROC** with the exception of small samples. **OptimalCutpoints** and **ThresholdROC** had to be excluded from benchmarks with more than 1e4 observations and **pROC** from benchmarks with more than 1e5 observations due to high memory requirements and/or excessive run times, rendering the use of these packages in larger samples impractical.
+Benchmarks are run for sample sizes of 1000, 1e4, 1e5, 1e6, and 1e7. For
+low sample sizes **cutpointr** is slower than the other solutions. While
+this should be of low practical importance, **cutpointr** scales more
+favorably with increasing sample size. The speed disadvantage in small
+samples that leads to the lower limit of around 25ms is mainly due to
+the nesting of the original data and the results that makes the compact
+output of `cutpointr` possible. For sample sizes \> 1e5 **cutpointr** is
+a little faster than the function based on **ROCR**. Both of these
+solutions are generally faster than **OptimalCutpoints** and
+**ThresholdROC** with the exception of small samples.
+**OptimalCutpoints** and **ThresholdROC** had to be excluded from
+benchmarks with more than 1e4 observations and **pROC** from benchmarks
+with more than 1e5 observations due to high memory requirements and/or
+excessive run times, rendering the use of these packages in larger
+samples
+impractical.
 
-![](README-unnamed-chunk-49-1.png)
+![](README-unnamed-chunk-49-1.png)<!-- -->
 
-|      n|    cutpointr|  OptimalCutpoints|         pROC|          ROCR|  ThresholdROC|
-|------:|------------:|-----------------:|------------:|-------------:|-------------:|
-|  1e+03|     8.334464|          56.21193|     9.131493|      3.017892|      78.88322|
-|  1e+04|    13.057035|        5383.76537|    94.403445|     11.284935|    7930.97356|
-|  1e+05|    68.155645|                NA|  1021.098187|    108.988626|            NA|
-|  1e+06|   708.193360|                NA|           NA|   1250.425970|            NA|
-|  1e+07|  5893.323971|                NA|           NA|  13247.381417|            NA|
+|     n |   cutpointr | OptimalCutpoints |         pROC |         ROCR | ThresholdROC |
+| ----: | ----------: | ---------------: | -----------: | -----------: | -----------: |
+| 1e+03 |    4.429015 |         41.34526 |     0.969923 |     2.076954 |     37.63188 |
+| 1e+04 |    6.672219 |       3546.06340 |     4.807848 |     6.408562 |   3415.17947 |
+| 1e+05 |   28.464036 |               NA |    48.733272 |    55.908961 |           NA |
+| 1e+06 |  307.275820 |               NA |   737.162376 |   748.084636 |           NA |
+| 1e+07 | 5618.689105 |               NA | 11127.924753 | 11050.674290 |           NA |
 
 ### ROC curve only
 
-As we can see, the ROC curve calculation that is implemented in **cutpointr** is considerably faster in samples &gt; 1000 than the ones offered by **ROCR** and **pROC**.
+As we can see, the ROC curve calculation that is implemented in
+**cutpointr** is considerably faster in samples \> 1000 than the ones
+offered by **ROCR** and **pROC**.
 
 ``` r
 # ROCR package
 rocr_roc <- function(x, class) {
     pred <- ROCR::prediction(x, class)
+    perf <- ROCR::performance(pred, "sens", "spec")
     return(NULL)
 }
 
 # pROC package
-proc_roc <- function(x, class, levels = c("no", "yes"), algo = 2) {
-    r <- pROC::roc(class, x, algorithm = algo)
+proc_roc <- function(x, class) {
+    r <- pROC::roc(class, x, algorithm = 2, levels = c(0, 1), direction = "<")
     return(NULL)
 }
 ```
 
 ![](README-unnamed-chunk-54-1.png)
 
-|      n|    cutpointr|        pROC|         ROCR|
-|------:|------------:|-----------:|------------:|
-|  1e+03|     1.302793|    8.905319|     1.223025|
-|  1e+04|     2.889493|   81.582236|     5.190217|
-|  1e+05|    28.598465|  968.227087|    59.418236|
-|  1e+06|   265.087399|          NA|   559.158593|
-|  1e+07|  3218.965990|          NA|  6227.157674|
+|     n |    cutpointr |         pROC |         ROCR |
+| ----: | -----------: | -----------: | -----------: |
+| 1e+03 |    0.8369425 | 8.077945e-01 |     2.009407 |
+| 1e+04 |    1.9653230 | 4.542507e+00 |     6.229490 |
+| 1e+05 |   12.9868880 | 4.522000e+01 |    54.675308 |
+| 1e+06 |  179.6047020 | 6.795361e+02 |   745.745925 |
+| 1e+07 | 2738.7512405 | 1.002147e+04 | 10340.754099 |
