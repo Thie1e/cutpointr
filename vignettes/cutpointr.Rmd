@@ -1191,6 +1191,7 @@ considerably faster in samples > 1000 than the ones offered by **ROCR** and **pR
 # ROCR package
 rocr_roc <- function(x, class) {
     pred <- ROCR::prediction(x, class)
+    perf <- ROCR::performance(pred, "sens", "spec")
     return(NULL)
 }
 
