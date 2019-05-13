@@ -1031,13 +1031,9 @@ rocr_sensspec <- function(x, class) {
 }
 
 # pROC package
-proc_sensspec <- function(x, class, 
-                          levels = c("no", "yes"), algo = 2) {
-    r <- pROC::roc(class, x, algorithm = algo)
-    sens <- r$sensitivities
-    spec <- r$specificities
-    cut <- r$thresholds
-    cut[which.max(sens + spec)]
+proc_sensspec <- function(x, class) {
+    r <- pROC::roc(class, x, algorithm = 2, levels = c(0, 1), direction = "<")
+    pROC::coords(r, "best", ret="threshold")[1]
 }
 ```
 
@@ -1054,10 +1050,10 @@ more favorably with increasing sample size. The speed disadvantage in small
 samples that leads to the lower limit of around 25ms is mainly due to the nesting
 of the original data and the results that makes the compact output of `cutpointr`
 possible. For sample sizes > 1e5 **cutpointr**
-is a little faster than the function based on **ROCR**. Both of these 
+is a little faster than the function based on **ROCR** and **pROC**. Both of these
 solutions are generally faster than **OptimalCutpoints** and **ThresholdROC** with the exception of
 small samples. **OptimalCutpoints** and **ThresholdROC** had to be excluded from benchmarks with 
-more than 1e4 observations and **pROC** from benchmarks with more than 1e5
+more than 1e4 observations
 observations due to high memory requirements and/or excessive run times, rendering
 the use of these packages in larger samples impractical.
 
@@ -1074,11 +1070,12 @@ bench_1000 <- microbenchmark::microbenchmark(
     cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
               direction = ">=", metric = youden, break_ties = mean),
     rocr_sensspec(dat$x, dat$y),
-    proc_sensspec(dat$x, dat$y, algo = 2),
+    proc_sensspec(dat$x, dat$y),
     optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
                       data = dat),
     thres2(k1 = x_neg, k2 = x_pos, rho = 0.5, 
-           method = "empirical", ci = FALSE)
+           method = "empirical", ci = FALSE),
+    unit = "ms"
 )
 
 n <- 10000
@@ -1092,10 +1089,10 @@ bench_10000 <- microbenchmark::microbenchmark(
     rocr_sensspec(dat$x, dat$y),
     optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
                       data = dat),
-    proc_sensspec(dat$x, dat$y, algo = 2),
+    proc_sensspec(dat$x, dat$y),
     thres2(k1 = x_neg, k2 = x_pos, rho = 0.5, 
            method = "empirical", ci = FALSE),
-    times = 20
+    times = 20, unit = "ms"
 )
 
 n <- 1e5
@@ -1105,8 +1102,8 @@ bench_1e5 <- microbenchmark::microbenchmark(
     cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
               direction = ">=", metric = youden, break_ties = mean),
     rocr_sensspec(dat$x, dat$y),
-    proc_sensspec(dat$x, dat$y, algo = 2),
-    times = 20
+    proc_sensspec(dat$x, dat$y),
+    times = 20, unit = "ms"
 )
 
 n <- 1e6
@@ -1116,7 +1113,8 @@ bench_1e6 <- microbenchmark::microbenchmark(
     cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
               direction = ">=", metric = youden, break_ties = mean),
     rocr_sensspec(dat$x, dat$y),
-    times = 10
+    proc_sensspec(dat$x, dat$y),
+    times = 10, unit = "ms"
 )
 
 n <- 1e7
@@ -1126,6 +1124,7 @@ bench_1e7 <- microbenchmark::microbenchmark(
     cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
               direction = ">=", metric = youden, break_ties = mean),
     rocr_sensspec(dat$x, dat$y),
+    proc_sensspec(dat$x, dat$y),
     times = 10, unit = "ms"
 )
 
@@ -1157,16 +1156,16 @@ results$solution[grep(pattern = "thres", x = results$solution)] <- "ThresholdROC
 ```{r, echo = FALSE}
 # dput(results)
 
-results <- structure(list(time = c(8.3344635, 3.0178925, 9.1314925, 56.2119325, 
-78.8832165, 13.057035, 11.284935, 5383.765367, 94.4034445, 7930.9735595, 
-68.155645, 108.9886265, 1021.0981875, 708.1933595, 1250.4259705, 
-5893.323971, 13247.3814165), solution = c("cutpointr", "ROCR", 
-"pROC", "OptimalCutpoints", "ThresholdROC", "cutpointr", "ROCR", 
-"OptimalCutpoints", "pROC", "ThresholdROC", "cutpointr", "ROCR", 
-"pROC", "cutpointr", "ROCR", "cutpointr", "ROCR"), n = c(1000, 
-1000, 1000, 1000, 1000, 10000, 10000, 10000, 10000, 10000, 1e+05, 
-1e+05, 1e+05, 1e+06, 1e+06, 1e+07, 1e+07)), .Names = c("time", 
-"solution", "n"), row.names = c(NA, -17L), class = "data.frame")
+results <- structure(list(time = c(4.4290145, 2.076954, 0.969923, 41.3452605, 
+37.6318835, 6.672219, 6.408562, 3546.0633985, 4.8078475, 3415.179475, 
+28.4640365, 55.908961, 48.733272, 307.2758195, 748.0846365, 737.162376, 
+5618.6891055, 11050.6742895, 11127.924753), solution = c("cutpointr", 
+"ROCR", "pROC", "OptimalCutpoints", "ThresholdROC", "cutpointr", 
+"ROCR", "OptimalCutpoints", "pROC", "ThresholdROC", "cutpointr", 
+"ROCR", "pROC", "cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", 
+"pROC"), n = c(1000, 1000, 1000, 1000, 1000, 10000, 10000, 10000, 
+10000, 10000, 1e+05, 1e+05, 1e+05, 1e+06, 1e+06, 1e+06, 1e+07, 
+1e+07, 1e+07)), row.names = c(NA, -19L), class = "data.frame")
 ```
 
 ```{r, echo = FALSE}
@@ -1192,12 +1191,13 @@ considerably faster in samples > 1000 than the ones offered by **ROCR** and **pR
 # ROCR package
 rocr_roc <- function(x, class) {
     pred <- ROCR::prediction(x, class)
+    perf <- ROCR::performance(pred, "sens", "spec")
     return(NULL)
 }
 
 # pROC package
-proc_roc <- function(x, class, levels = c("no", "yes"), algo = 2) {
-    r <- pROC::roc(class, x, algorithm = algo)
+proc_roc <- function(x, class) {
+    r <- pROC::roc(class, x, algorithm = 2, levels = c(0, 1), direction = "<")
     return(NULL)
 }
 ```
@@ -1212,7 +1212,7 @@ bench_1000 <- microbenchmark::microbenchmark(unit = "ms",
     cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
               direction = ">="),
     rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y, algo = 2)
+    proc_roc(dat$x, dat$y)
 )
 
 n <- 10000
@@ -1222,7 +1222,7 @@ bench_10000 <- microbenchmark::microbenchmark(unit = "ms",
     cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
               direction = ">="),
     rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y, algo = 2),
+    proc_roc(dat$x, dat$y),
     times = 50
 )
 
@@ -1233,7 +1233,7 @@ bench_1e5 <- microbenchmark::microbenchmark(unit = "ms",
     cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
               direction = ">="),
     rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y, algo = 2),
+    proc_roc(dat$x, dat$y),
     times = 20
 )
 
@@ -1244,6 +1244,7 @@ bench_1e6 <- microbenchmark::microbenchmark(unit = "ms",
     cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
               direction = ">="),
     rocr_roc(dat$x, dat$y),
+    proc_roc(dat$x, dat$y),
     times = 15
 )
 
@@ -1254,6 +1255,7 @@ bench_1e7 <- microbenchmark::microbenchmark(
     cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
               direction = ">="),
     rocr_roc(dat$x, dat$y),
+    proc_roc(dat$x, dat$y),
     times = 10, unit = "ms"
 )
 
@@ -1283,14 +1285,15 @@ results$solution[grep(pattern = "proc", x = results$solution)] <- "pROC"
 ```{r, echo = FALSE}
 # dput(results)
 
-results <- structure(list(time = c(1.3027925, 1.223025, 8.9053195, 2.8894935, 
-5.1902165, 81.582236, 28.598465, 59.418236, 968.2270865, 265.087399, 
-559.158593, 3218.96599, 6227.157674), solution = c("cutpointr", 
-"ROCR", "pROC", "cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", 
-"pROC", "cutpointr", "ROCR", "cutpointr", "ROCR"), n = c(1000, 
-1000, 1000, 10000, 10000, 10000, 1e+05, 1e+05, 1e+05, 1e+06, 
-1e+06, 1e+07, 1e+07)), .Names = c("time", "solution", "n"), row.names = c(NA, 
--13L), class = "data.frame")
+results <- structure(list(time = c(0.8369425, 2.009407, 0.8077945, 1.965323, 
+6.2294905, 4.5425065, 12.986888, 54.6753075, 45.2200015, 179.604702, 
+745.745925, 679.536119, 2738.7512405, 10340.7540995, 10021.4714795
+), solution = c("cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", 
+"pROC", "cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", "pROC", 
+"cutpointr", "ROCR", "pROC"), n = c(1000, 1000, 1000, 10000, 
+10000, 10000, 1e+05, 1e+05, 1e+05, 1e+06, 1e+06, 1e+06, 1e+07, 
+1e+07, 1e+07)), row.names = c(NA, -15L), class = "data.frame")
+
 ```
 
 ```{r, echo = FALSE}
