@@ -86,8 +86,9 @@ A cutpointr object which is also a data.frame and tbl_df.
 Using predictions (or e.g. biological marker values) and binary class labels, this function
 will determine "optimal" cutpoints using various selectable methods. The
 methods for cutpoint determination can be evaluated using bootstrapping. An
-estimate of the cutpoint variability and the out-of-sample performance will then
-be returned.
+estimate of the cutpoint variability and the out-of-sample performance can then
+be returned with \code{summary} or \code{plot}. For an introduction to the
+package please see \code{vignette("cutpointr", package = "cutpointr")}
 }
 \details{
 If \code{direction} and/or \code{pos_class} and \code{neg_class} are not given, the function will
