@@ -1041,7 +1041,7 @@ rocr_sensspec <- function(x, class) {
 # pROC package
 proc_sensspec <- function(x, class) {
     r <- pROC::roc(class, x, algorithm = 2, levels = c(0, 1), direction = "<")
-    pROC::coords(r, "best", ret="threshold")[1]
+    pROC::coords(r, "best", ret="threshold", transpose = FALSE)[1]
 }
 ```
 
