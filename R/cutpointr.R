@@ -229,6 +229,9 @@
 #' is supposed to be larger or smaller for the positive class.
 #' @param boot_runs (numerical) If positive, this number of bootstrap samples
 #' will be used to assess the variability and the out-of-sample performance.
+#' @param boot_stratify (logical) If the bootstrap is stratified, bootstrap
+#' samples are drawn in both classes and then combined, keeping the number
+#' of positives and negatives constant in every resample.
 #' @param use_midpoints (logical) If TRUE (default FALSE) the returned optimal
 #' cutpoint will be the mean of the optimal cutpoint and the next highest
 #' observation (for direction = ">=") or the next lowest observation
@@ -266,8 +269,8 @@ cutpointr <- function(...) {
 cutpointr.default <- function(data, x, class, subgroup = NULL,
                       method = maximize_metric, metric = sum_sens_spec,
                       pos_class = NULL, neg_class = NULL, direction = NULL,
-                      boot_runs = 0, use_midpoints = FALSE,
-                      break_ties = c, na.rm = FALSE,
+                      boot_runs = 0, boot_stratify = FALSE,
+                      use_midpoints = FALSE, break_ties = c, na.rm = FALSE,
                       allowParallel = FALSE, silent = FALSE,
                       tol_metric = 1e-6, ...) {
 
@@ -315,15 +318,15 @@ cutpointr.default <- function(data, x, class, subgroup = NULL,
     if (silent) {
         suppressMessages(
             cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
-                               direction, boot_runs, use_midpoints, break_ties, na.rm,
-                               allowParallel, predictor, outcome, mod_name, subgroup_var,
-                               tol_metric, ...)
+                               direction, boot_runs, boot_stratify, use_midpoints,
+                               break_ties, na.rm, allowParallel, predictor, outcome,
+                               mod_name, subgroup_var, tol_metric, ...)
         )
     } else {
         cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
-                           direction, boot_runs, use_midpoints, break_ties, na.rm,
-                           allowParallel, predictor, outcome, mod_name, subgroup_var,
-                           tol_metric, ...)
+                           direction, boot_runs, boot_stratify, use_midpoints,
+                           break_ties, na.rm, allowParallel, predictor, outcome,
+                           mod_name, subgroup_var, tol_metric, ...)
     }
 }
 
@@ -333,7 +336,7 @@ cutpointr.default <- function(data, x, class, subgroup = NULL,
 cutpointr.numeric <- function(x, class, subgroup = NULL,
                       method = maximize_metric, metric = sum_sens_spec,
                       pos_class = NULL, neg_class = NULL, direction = NULL,
-                      boot_runs = 0, use_midpoints = FALSE,
+                      boot_runs = 0, boot_stratify = FALSE, use_midpoints = FALSE,
                       break_ties = median, na.rm = FALSE,
                       allowParallel = FALSE, silent = FALSE,
                       tol_metric = 1e-6, ...) {
@@ -360,15 +363,15 @@ cutpointr.numeric <- function(x, class, subgroup = NULL,
     if (silent) {
         suppressMessages(
             cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
-                               direction, boot_runs, use_midpoints, break_ties, na.rm,
-                               allowParallel, predictor, outcome, mod_name, subgroup_var,
-                               tol_metric, ...)
+                               direction, boot_runs, boot_stratify, use_midpoints,
+                               break_ties, na.rm, allowParallel, predictor, outcome,
+                               mod_name, subgroup_var, tol_metric, ...)
         )
     } else {
         cutpointr_internal(x, class, subgroup, method, metric, pos_class, neg_class,
-                           direction, boot_runs, use_midpoints, break_ties, na.rm,
-                           allowParallel, predictor, outcome, mod_name, subgroup_var,
-                           tol_metric, ...)
+                           direction, boot_runs, boot_stratify, use_midpoints,
+                           break_ties, na.rm, allowParallel, predictor, outcome,
+                           mod_name, subgroup_var, tol_metric, ...)
     }
 }
 
@@ -451,7 +454,7 @@ cutpointr_ <- function(data, x, class, subgroup = NULL,
 
 
 cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
-                               neg_class, direction, boot_runs,
+                               neg_class, direction, boot_runs, boot_stratify,
                                use_midpoints, break_ties, na.rm, allowParallel, predictor,
                                outcome, mod_name, subgroup_var,
                                tol_metric, ...) {
@@ -699,14 +702,22 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
         bootstrap <- dat %>%
             dplyr::transmute_(boot = ~ purrr::map2(dat$data, dat$pos_class,
                                                     function(g, pc) {
-                # ind_pos <- which(unlist(g[, outcome]) == pc)
-                # ind_neg <- which(unlist(g[, outcome]) == neg_class)
+                if (boot_stratify) {
+                    ind_pos <- which(unlist(g[, outcome]) == pc)
+                    ind_neg <- which(unlist(g[, outcome]) == neg_class)
+                } else {
+                    ind_pos <- NA
+                    ind_neg <- NA
+                }
                 boot_g <- foreach::foreach(rep = 1:boot_runs, .combine = rbind,
                     .export = c("method", "direction", "metric", "break_ties",
-                    "neg_class", "mn", "use_midpoints",
-                    "predictor", "outcome", "tol_metric")) %seq_or_par%
+                    "neg_class", "mn", "use_midpoints", "boot_stratify",
+                    "predictor", "outcome", "tol_metric", "ind_pos", "ind_neg"),
+                    .errorhandling = "remove") %seq_or_par%
                     {
-                        b_ind <- simple_boot(data = g, dep_var = outcome)
+                        b_ind <- simple_boot(data = g, dep_var = outcome,
+                                             ind_pos = ind_pos, ind_neg = ind_neg,
+                                             stratify = boot_stratify)
                         optcut_b <- method(data = g[b_ind, ], x = predictor,
                                            metric_func = metric,
                                            class = outcome,
@@ -714,7 +725,8 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                            pos_class = pc,
                                            neg_class = neg_class,
                                            tol_metric = tol_metric,
-                                           use_midpoints = use_midpoints, ...)
+                                           use_midpoints = use_midpoints,
+                                           ...)
                         optcut_b <- check_method_cols(optcut_b)
                         optcut_b <- tibble::as_tibble(optcut_b)
                         optcut_b <- apply_break_ties(optcut_b, break_ties)
@@ -841,8 +853,14 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                         bootstrap <- dplyr::bind_cols(bootstrap, roc_curve_oob)
                         return(bootstrap)
                     }
+                tidyr::drop_na(boot_g)
                 return(boot_g)
             }))
+        missing_reps <- purrr::map_lgl(.x = bootstrap$boot,
+                                       .f = function(x) nrow(x) != boot_runs)
+        if (any(missing_reps)) {
+            message("Some bootstrap repetitions were removed because of errors.")
+        }
     }
     res <- dplyr::bind_cols(optcut, boot = bootstrap)
     class(res) <- c("cutpointr", class(res))
@@ -901,6 +919,7 @@ multi_cutpointr <- function(data, x = NULL, class, silent = FALSE, ...) {
         if (!silent) message(paste0(coln, ":"))
         cutpointr_(data, coln, class, silent = silent, ...)
     })
-    class(res) <- c("multi_cutpointr", class(res))
+    class(res) <- c("multi_cutpointr",
+                    class(res)[-which(class(res) == "cutpointr")])
     return(res)
 }
