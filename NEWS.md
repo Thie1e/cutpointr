@@ -1,3 +1,23 @@
+# cutpointr 0.7.6.9000
+- Add `type` argument to `plot_roc` for choosing line or step 
+- Report the number of missing values in the bootstrap results. 
+`summary.cutpointr` and `summary.multi_cutpointr` now print an
+additional `NAs` column in the bootstrap summary
+and `cutpointr` issues a message if any bootstrap repeats failed (e.g. because
+only one class was drawn). 
+- Make the printed output of `summary.cutpointr`  and `summary.multi_cutpointr`
+more compact
+- No rounding of numbers in `summary.cutpointr` and `summary.multi_cutpointr`. 
+The rounding is now done in `print.summary_cutpointr` and 
+`print.summary_multi_cutpointr`, respectively, and can be controlled via the
+`digits` argument
+- The bootstrapping no longer tries to redraw bootstrap samples if only one 
+class is drawn. In that case the repetition is removed from the results via
+`.errorhandling = "remove"` in `foreach`.
+- Stratified bootstrapping is now supported via the `boot_stratify` argument.
+- The object returned by `multi_cutpointr` does not have the `cutpointr` class
+anymore. 
+
 # cutpointr 0.7.6
 - Let `roc()` return a tibble instead of a data.frame
 - Printing results of `roc()` is now possible with `plot_roc()`
