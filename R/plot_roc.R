@@ -5,6 +5,7 @@
 #' @param x A cutpointr or roc_cutpointr object.
 #' @param display_cutpoint (logical) Whether or not to display the optimal
 #' cutpoint as a dot on the ROC curve for cutpointr objects.
+#' @param type "line" for line plot (default) or "step" for step plot.
 #' @param ... Additional arguments (unused).
 #' @examples
 #' opt_cut <- cutpointr(suicide, dsi, suicide)
@@ -14,19 +15,19 @@
 #' plot_roc(opt_cut_2groups, display_cutpoint = TRUE)
 #' @family cutpointr plotting functions
 #' @export
-plot_roc <- function(x, display_cutpoint = TRUE, ...) {
+plot_roc <- function(x, display_cutpoint = TRUE, type = "line", ...) {
     args <- list(...)
     if ("cutpointr" %in% class(x)) {
-        plot_roc_cp(x = x, display_cutpoint = display_cutpoint, args)
+        plot_roc_cp(x = x, display_cutpoint = display_cutpoint, type = type, args)
     } else if ("roc_cutpointr" %in% class(x)) {
-        plot_roc_rcp(x = x, args)
+        plot_roc_rcp(x = x, type = type, args)
     } else {
-        stop(paste("Can not plot ROC curve form object of type",
-                   paste(class(x), collapse = ", ")))
+        stop(paste("Can only plot ROC curve from objects of types cutpointr",
+                   "and roc_cutpointr"))
     }
 }
 
-plot_roc_cp <- function(x, display_cutpoint, ...) {
+plot_roc_cp <- function(x, display_cutpoint, type, ...) {
     predictor <- as.name(x$predictor[1])
     outcome <- as.name(x$outcome[1])
 
@@ -64,7 +65,6 @@ plot_roc_cp <- function(x, display_cutpoint, ...) {
         tidyr::unnest_(unnest_cols = "roc_curve")
     roc <- ggplot2::ggplot(res_unnested,
                            ggplot2::aes_(x = ~ 1 - tnr, y = ~ tpr, color = clr_roc)) +
-        ggplot2::geom_step() +
         roc_title +
         ggplot2::xlab("1 - Specificity") +
         ggplot2::ylab("Sensitivity") +
@@ -72,16 +72,25 @@ plot_roc_cp <- function(x, display_cutpoint, ...) {
     if (display_cutpoint) {
         roc <- roc + ggplot2::geom_point(data = optcut_coords, color = "black")
     }
+    if (type == "line") {
+        roc <- roc + ggplot2::geom_line()
+    } else if (type == "step") {
+        roc <- roc + ggplot2::geom_step()
+    }
     return(roc)
 }
 
-plot_roc_rcp <- function(x, ...) {
+plot_roc_rcp <- function(x, type, ...) {
     roc_title <- ggplot2::ggtitle("ROC curve")
     roc <- ggplot2::ggplot(x, ggplot2::aes_(x = ~ 1 - tnr, y = ~ tpr)) +
-        ggplot2::geom_step() +
         roc_title +
         ggplot2::xlab("1 - Specificity") +
         ggplot2::ylab("Sensitivity") +
         ggplot2::theme(aspect.ratio = 1)
+    if (type == "line") {
+        roc <- roc + ggplot2::geom_line()
+    } else if (type == "step") {
+        roc <- roc + ggplot2::geom_step()
+    }
     return(roc)
 }
