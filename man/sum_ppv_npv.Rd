@@ -36,15 +36,15 @@ Other metric functions: \code{\link{F1_score}},
   \code{\link{abs_d_sens_spec}}, \code{\link{accuracy}},
   \code{\link{cohens_kappa}}, \code{\link{cutpoint}},
   \code{\link{false_omission_rate}},
+  \code{\link{metric_constrain}},
   \code{\link{misclassification_cost}}, \code{\link{npv}},
   \code{\link{odds_ratio}}, \code{\link{p_chisquared}},
   \code{\link{plr}}, \code{\link{ppv}},
   \code{\link{precision}}, \code{\link{prod_ppv_npv}},
   \code{\link{prod_sens_spec}}, \code{\link{recall}},
   \code{\link{risk_ratio}}, \code{\link{roc01}},
-  \code{\link{sens_constrain}}, \code{\link{sensitivity}},
-  \code{\link{specificity}}, \code{\link{sum_sens_spec}},
-  \code{\link{total_utility}}, \code{\link{tpr}},
-  \code{\link{tp}}, \code{\link{youden}}
+  \code{\link{sensitivity}}, \code{\link{specificity}},
+  \code{\link{sum_sens_spec}}, \code{\link{total_utility}},
+  \code{\link{tpr}}, \code{\link{tp}}, \code{\link{youden}}
 }
 \concept{metric functions}

@@ -4,13 +4,16 @@
 \alias{plot_metric}
 \title{Plot a metric over all possible cutoffs from a cutpointr object}
 \usage{
-plot_metric(x, conf_lvl = 0.95)
+plot_metric(x, conf_lvl = 0.95, add_unsmoothed = TRUE)
 }
 \arguments{
 \item{x}{A cutpointr object.}
 
 \item{conf_lvl}{The confidence level of the bootstrap confidence interval.
 Set to 0 to draw no bootstrap confidence interval.}
+
+\item{add_unsmoothed}{Add the line of unsmoothed metric values to the plot.
+Applicable for some smoothing methods, e.g. maximize_gam_metric.}
 }
 \description{
 If \code{maximize_metric} is used as \code{method} function in cutpointr the computed

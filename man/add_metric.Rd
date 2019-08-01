@@ -28,8 +28,9 @@ cutpointr(suicide, dsi, suicide, gender) \%>\%
   select(optimal_cutpoint, subgroup, AUC, sum_sens_spec, ppv, npv)
 }
 \seealso{
-Other main cutpointr functions: \code{\link{cutpointr_}},
-  \code{\link{cutpointr}}, \code{\link{multi_cutpointr}},
+Other main cutpointr functions: \code{\link{boot_ci}},
+  \code{\link{boot_test}}, \code{\link{cutpointr}},
+  \code{\link{multi_cutpointr}},
   \code{\link{predict.cutpointr}}, \code{\link{roc}}
 }
 \concept{main cutpointr functions}
