@@ -1,22 +1,56 @@
 # cutpointr 0.7.6.9000
+
+## Most important changes
+- `cutpointr` and `roc` now both use tidyeval. `!!` can be used when an argument
+should be unquoted, as in `dplyr`, 
+e.g. `myvar <- "dsi"; cutpointr(suicide, !!myvar, suicide)`. `cutpointr_` is now
+deprecated. Transforming variables directly in the call is thus no longer
+supported, e.g. `cutpointr(suicide, dsi * 2, suicide)` now throws an error.
+- The object returned by `multi_cutpointr` does not have the `cutpointr` class
+anymore. 
+
+## New functions
+- A new `boot_ci` function is available that calculates confidence intervals
+(the empirical quantiles) based on the bootstrap results.
+- The `auc` function is now exported and can be used to calculate the AUC from
+a `roc_cutpointr` object, e.g. `auc(roc(suicide, dsi, suicide, "yes", "no"))`
+- `boot_test` is a new function for carrying out a bootstrap test for 
+equivalence of a metric, e.g. the AUC, the Youden-Index or also the optimal
+cutpoint. The standard deviation is calculated as `sd` of the differences
+in metric values per bootstrap repetition, then a z-test is calculated.
+
+## Plotting
 - Add `type` argument to `plot_roc` for choosing line or step 
-- Report the number of missing values in the bootstrap results. 
+
+## Bootstrapping
+- The bootstrapping no longer tries to redraw bootstrap samples if only one 
+class is drawn. In that case the repetition is removed from the results via
+`.errorhandling = "remove"` in `foreach`.
+- Subsequently report the number of missing values in the bootstrap results. 
 `summary.cutpointr` and `summary.multi_cutpointr` now print an
 additional `NAs` column in the bootstrap summary
 and `cutpointr` issues a message if any bootstrap repeats failed (e.g. because
 only one class was drawn). 
+- Stratified bootstrapping is now supported via the `boot_stratify` argument.
+
+# Misc
 - Make the printed output of `summary.cutpointr`  and `summary.multi_cutpointr`
 more compact
-- No rounding of numbers in `summary.cutpointr` and `summary.multi_cutpointr`. 
-The rounding is now done in `print.summary_cutpointr` and 
+- No rounding of numbers in `summary.cutpointr` and `summary.multi_cutpointr`
+any more. The rounding is now done in `print.summary_cutpointr` and 
 `print.summary_multi_cutpointr`, respectively, and can be controlled via the
 `digits` argument
-- The bootstrapping no longer tries to redraw bootstrap samples if only one 
-class is drawn. In that case the repetition is removed from the results via
-`.errorhandling = "remove"` in `foreach`.
-- Stratified bootstrapping is now supported via the `boot_stratify` argument.
-- The object returned by `multi_cutpointr` does not have the `cutpointr` class
-anymore. 
+- `plot_metric` has a new `add_unsmoothed` argument for adding the unsmoothed
+metric values to the plot as a dashed line (default `TRUE`). Helpful to 
+inspect the smoothing of functions like `maximize_gam_metric`.
+- Add some mathematical details to `?oc_youden_kernel`.
+- The Readme and vignette have been updated and condensed a bit.
+
+## Fixes
+- Fix the default for `break_ties` in `cutpointr.default` by setting it to
+`median` as it was already in `cutpointr.numeric` and `cutpointr_`.
+
+
 
 # cutpointr 0.7.6
 - Let `roc()` return a tibble instead of a data.frame
