@@ -39,8 +39,19 @@ kappa_from_oc <- function(roc_curve, oc, direction, opt_ind = NULL) {
               tn = roc_curve$tn[opt_ind], fn = roc_curve$fn[opt_ind])
 }
 
+#' Calculate AUC from a roc_cutpointr object
+#'
+#' Calculate the area under the ROC curve using the trapezoidal rule.
+#'
+#' @param roc_cutpointr A roc_cutpointr object resulting from the roc() function.
 #' @source Forked from the AUC package
-auc <- function(tpr, fpr) {
+#' @export
+auc <- function(roc_cutpointr) {
+    if (!inherits(roc_cutpointr, "roc_cutpointr")) {
+        stop("Expecting a roc_cutpointr object.")
+    }
+    tpr <- roc_cutpointr$tpr
+    fpr <- roc_cutpointr$fpr
     l_tpr <- length(tpr)
     l_fpr <- length(fpr)
     stopifnot(l_tpr == l_fpr)
@@ -173,40 +184,7 @@ specificity <- function(fp, tn, ...) {
 #' @param min_constrain Minimum desired value of constrain_metric.
 #' @param main_metric Metric to be optimized.
 #' @param suffix Character string to be added to the name of main_metric.
-#' @name sens_constrain
-#' @export
-sens_constrain <- function(tp, fp, tn, fn, constrain_metric = specificity,
-                           min_constrain = 0.5, ...) {
-    metric_constrain <- sensitivity(tp = tp, fn = fn)
-    constraint <- constrain_metric(tp = tp, fp = fp, tn = tn, fn = fn)
-    constraint <- as.numeric(unlist(constraint))
-    metric_constrain[constraint < min_constrain, ] <- 0
-    colnames(metric_constrain) <- "sens_constrain"
-    return(metric_constrain)
-}
-#' @rdname sens_constrain
-#' @export
-spec_constrain <- function(tp, fp, tn, fn, constrain_metric = sensitivity,
-                           min_constrain = 0.5, ...) {
-    metric_constrain <- specificity(fp = fp, tn = tn)
-    constraint <- constrain_metric(tp = tp, fp = fp, tn = tn, fn = fn)
-    constraint <- as.numeric(unlist(constraint))
-    metric_constrain[constraint < min_constrain, ] <- 0
-    colnames(metric_constrain) <- "spec_constrain"
-    return(metric_constrain)
-}
-#' @rdname sens_constrain
-#' @export
-acc_constrain <- function(tp, fp, tn, fn, constrain_metric = sensitivity,
-                           min_constrain = 0.5, ...) {
-    metric_constrain <- accuracy(tp = tp, tn = tn, fp = fp, fn = fn)
-    constraint <- constrain_metric(tp = tp, fp = fp, tn = tn, fn = fn)
-    constraint <- as.numeric(unlist(constraint))
-    metric_constrain[constraint < min_constrain, ] <- 0
-    colnames(metric_constrain) <- "acc_constrain"
-    return(metric_constrain)
-}
-#' @rdname sens_constrain
+#' @name metric_constrain
 #' @export
 metric_constrain <- function(tp, fp, tn, fn,
                              main_metric = sensitivity,
@@ -220,6 +198,39 @@ metric_constrain <- function(tp, fp, tn, fn,
     constraint <- as.numeric(unlist(constraint))
     metric_constrain[constraint < min_constrain, ] <- 0
     colnames(metric_constrain) <- paste0(colnames(metric_constrain), suffix)
+    return(metric_constrain)
+}
+#' @rdname metric_constrain
+#' @export
+sens_constrain <- function(tp, fp, tn, fn, constrain_metric = specificity,
+                           min_constrain = 0.5, ...) {
+    metric_constrain <- sensitivity(tp = tp, fn = fn)
+    constraint <- constrain_metric(tp = tp, fp = fp, tn = tn, fn = fn)
+    constraint <- as.numeric(unlist(constraint))
+    metric_constrain[constraint < min_constrain, ] <- 0
+    colnames(metric_constrain) <- "sens_constrain"
+    return(metric_constrain)
+}
+#' @rdname metric_constrain
+#' @export
+spec_constrain <- function(tp, fp, tn, fn, constrain_metric = sensitivity,
+                           min_constrain = 0.5, ...) {
+    metric_constrain <- specificity(fp = fp, tn = tn)
+    constraint <- constrain_metric(tp = tp, fp = fp, tn = tn, fn = fn)
+    constraint <- as.numeric(unlist(constraint))
+    metric_constrain[constraint < min_constrain, ] <- 0
+    colnames(metric_constrain) <- "spec_constrain"
+    return(metric_constrain)
+}
+#' @rdname metric_constrain
+#' @export
+acc_constrain <- function(tp, fp, tn, fn, constrain_metric = sensitivity,
+                           min_constrain = 0.5, ...) {
+    metric_constrain <- accuracy(tp = tp, tn = tn, fp = fp, fn = fn)
+    constraint <- constrain_metric(tp = tp, fp = fp, tn = tn, fn = fn)
+    constraint <- as.numeric(unlist(constraint))
+    metric_constrain[constraint < min_constrain, ] <- 0
+    colnames(metric_constrain) <- "acc_constrain"
     return(metric_constrain)
 }
 
