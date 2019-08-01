@@ -10,6 +10,10 @@
 #' are both from \pkg{KernSmooth} with default parameters, except for
 #' the bandwidth selection, which uses the standard deviation as scale estimate.
 #'
+#' The cutpoint is estimated as the cutpoint that maximizes the Youden-Index
+#' given by \eqn{J = max_c {F_N(c) - G_N(c) }} where
+#' \eqn{J} and \eqn{G} are the smoothed distribution functions.
+#'
 #' @inheritParams oc_youden_normal
 #' @source Fluss, R., Faraggi, D., & Reiser, B. (2005). Estimation of the
 #' Youden Index and its associated cutoff point. Biometrical Journal, 47(4), 458–472.
@@ -46,13 +50,13 @@ oc_youden_kernel <- function(data, x, class, pos_class, neg_class,
     pos_k <- KernSmooth::bkde(x_pos, bandwidth = bw_p)
 
 
-    oc <- stats::optimize(
+    oc <- suppressWarnings(stats::optimize(
         f = youden_kern,
         interval = c(min(c(x_pos, x_neg)), max(c(x_pos, x_neg))),
         maximum = TRUE,
         neg_k = neg_k,
         pos_k = pos_k
-    )$maximum
+    )$maximum)
 
     # Extremely high or low cutoffs can result in some scenarios
     if (oc < min(c(x_neg, x_pos))) {

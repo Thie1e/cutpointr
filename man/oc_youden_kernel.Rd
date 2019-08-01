@@ -45,6 +45,10 @@ plug-in method.
 The functions for calculating the kernel density estimate and the bandwidth
 are both from \pkg{KernSmooth} with default parameters, except for
 the bandwidth selection, which uses the standard deviation as scale estimate.
+
+The cutpoint is estimated as the cutpoint that maximizes the Youden-Index
+given by \eqn{J = max_c {F_N(c) - G_N(c) }} where
+\eqn{J} and \eqn{G} are the smoothed distribution functions.
 }
 \examples{
 data(suicide)
