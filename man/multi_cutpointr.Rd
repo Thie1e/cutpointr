@@ -4,7 +4,7 @@
 \alias{multi_cutpointr}
 \title{Calculate optimal cutpoints and further statistics for multiple predictors}
 \usage{
-multi_cutpointr(data, x = NULL, class, silent = FALSE, ...)
+multi_cutpointr(data, x = NULL, class, subgroup, silent = FALSE, ...)
 }
 \arguments{
 \item{data}{A data frame.}
@@ -12,6 +12,9 @@ multi_cutpointr(data, x = NULL, class, silent = FALSE, ...)
 \item{x}{Character vector of predictor variables. If NULL all numeric columns.}
 
 \item{class}{The name of the outcome / independent variable.}
+
+\item{subgroup}{An additional covariate that identifies subgroups. Separate
+optimal cutpoints will be determined per group.}
 
 \item{silent}{Whether to suppress messages.}
 
@@ -37,22 +40,24 @@ variable will be >= 0.5. AUC may be < 0.5 if subgroups are specified as
 \examples{
 library(cutpointr)
 
-multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
+multi_cutpointr(suicide, x = c("age", "dsi"), class = suicide,
                 pos_class = "yes")
 
-mcp <- multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
-                       subgroup = "gender", pos_class = "yes")
+mcp <- multi_cutpointr(suicide, x = c("age", "dsi"), class = suicide,
+                       subgroup = gender, pos_class = "yes")
 mcp
 
 (scp <- summary(mcp))
 \dontrun{
+## The result is a data frame
 tibble:::print.tbl(scp)
 }
 
 }
 \seealso{
 Other main cutpointr functions: \code{\link{add_metric}},
-  \code{\link{cutpointr_}}, \code{\link{cutpointr}},
-  \code{\link{predict.cutpointr}}, \code{\link{roc}}
+  \code{\link{boot_ci}}, \code{\link{boot_test}},
+  \code{\link{cutpointr}}, \code{\link{predict.cutpointr}},
+  \code{\link{roc}}
 }
 \concept{main cutpointr functions}

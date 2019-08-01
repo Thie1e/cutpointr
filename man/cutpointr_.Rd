@@ -6,12 +6,13 @@
 \usage{
 cutpointr_(data, x, class, subgroup = NULL, method = maximize_metric,
   metric = sum_sens_spec, pos_class = NULL, neg_class = NULL,
-  direction = NULL, boot_runs = 0, use_midpoints = FALSE,
-  break_ties = median, na.rm = FALSE, allowParallel = FALSE,
-  silent = FALSE, tol_metric = 1e-06, ...)
+  direction = NULL, boot_runs = 0, boot_stratify = FALSE,
+  use_midpoints = FALSE, break_ties = median, na.rm = FALSE,
+  allowParallel = FALSE, silent = FALSE, tol_metric = 1e-06, ...)
 }
 \arguments{
-\item{data}{A data.frame with the data needed for x, class and subgroup.}
+\item{data}{A data.frame with the data needed for x, class and optionally
+subgroup.}
 
 \item{x}{(character) The variable name to be used for
 classification, e.g. predictions or test values.}
@@ -39,6 +40,10 @@ is supposed to be larger or smaller for the positive class.}
 
 \item{boot_runs}{(numerical) If positive, this number of bootstrap samples
 will be used to assess the variability and the out-of-sample performance.}
+
+\item{boot_stratify}{(logical) If the bootstrap is stratified, bootstrap
+samples are drawn in both classes and then combined, keeping the number
+of positives and negatives constant in every resample.}
 
 \item{use_midpoints}{(logical) If TRUE (default FALSE) the returned optimal
 cutpoint will be the mean of the optimal cutpoint and the next highest
@@ -83,9 +88,3 @@ summary(opt_cut)
 plot(opt_cut)
 predict(opt_cut, newdata = data.frame(dsi = 0:5))
 }
-\seealso{
-Other main cutpointr functions: \code{\link{add_metric}},
-  \code{\link{cutpointr}}, \code{\link{multi_cutpointr}},
-  \code{\link{predict.cutpointr}}, \code{\link{roc}}
-}
-\concept{main cutpointr functions}

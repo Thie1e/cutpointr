@@ -11,27 +11,30 @@ cutpointr(...)
 \method{cutpointr}{default}(data, x, class, subgroup = NULL,
   method = maximize_metric, metric = sum_sens_spec, pos_class = NULL,
   neg_class = NULL, direction = NULL, boot_runs = 0,
-  use_midpoints = FALSE, break_ties = c, na.rm = FALSE,
-  allowParallel = FALSE, silent = FALSE, tol_metric = 1e-06, ...)
+  boot_stratify = FALSE, use_midpoints = FALSE, break_ties = median,
+  na.rm = FALSE, allowParallel = FALSE, silent = FALSE,
+  tol_metric = 1e-06, ...)
 
 \method{cutpointr}{numeric}(x, class, subgroup = NULL,
   method = maximize_metric, metric = sum_sens_spec, pos_class = NULL,
   neg_class = NULL, direction = NULL, boot_runs = 0,
-  use_midpoints = FALSE, break_ties = median, na.rm = FALSE,
-  allowParallel = FALSE, silent = FALSE, tol_metric = 1e-06, ...)
+  boot_stratify = FALSE, use_midpoints = FALSE, break_ties = median,
+  na.rm = FALSE, allowParallel = FALSE, silent = FALSE,
+  tol_metric = 1e-06, ...)
 }
 \arguments{
 \item{...}{Further optional arguments that will be passed to method.
 minimize_metric and maximize_metric pass ... to metric.}
 
-\item{data}{A data.frame with the data needed for x, class and subgroup.}
+\item{data}{A data.frame with the data needed for x, class and optionally
+subgroup.}
 
-\item{x}{The variable name without quotes to be used for classification,
-e.g. predictions, or an expression. The raw vector of values if the data argument
+\item{x}{The variable name to be used for classification,
+e.g. predictions. The raw vector of values if the data argument
 is unused.}
 
-\item{class}{The variable name without quotes indicating class membership
-or an expression. The raw vector of values if the data argument is unused.}
+\item{class}{The variable name indicating class membership.
+If the data argument is unused, the vector of raw numeric values.}
 
 \item{subgroup}{An additional covariate that identifies subgroups or the raw data if
 data = NULL. Separate optimal cutpoints will be determined per group.
@@ -54,6 +57,10 @@ is supposed to be larger or smaller for the positive class.}
 
 \item{boot_runs}{(numerical) If positive, this number of bootstrap samples
 will be used to assess the variability and the out-of-sample performance.}
+
+\item{boot_stratify}{(logical) If the bootstrap is stratified, bootstrap
+samples are drawn in both classes and then combined, keeping the number
+of positives and negatives constant in every resample.}
 
 \item{use_midpoints}{(logical) If TRUE (default FALSE) the returned optimal
 cutpoint will be the mean of the optimal cutpoint and the next highest
@@ -94,6 +101,10 @@ package please see \code{vignette("cutpointr", package = "cutpointr")}
 If \code{direction} and/or \code{pos_class} and \code{neg_class} are not given, the function will
 assume that higher values indicate the positive class and use the class
 with a higher median as the positive class.
+
+This function uses tidyeval to support unquoted arguments. For programming
+with \code{cutpointr} the operator \code{!!} can be used to unquote an argument, see the
+examples.
 
 Different methods can be selected for determining the optimal cutpoint via
 the method argument. The package includes the following method functions:
@@ -261,25 +272,21 @@ opt_cut
 tibble:::print.tbl(s_opt_cut)
 
 ## Bootstrapping also works on individual subgroups
-## low boot_runs for illustrative purposes
 set.seed(30)
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 5)
+opt_cut <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 1000,
+  boot_stratify = TRUE)
 opt_cut
 summary(opt_cut)
 plot(opt_cut)
 
-## Transforming variables (unrealistic, just to show the functionality)
-opt_cut <- cutpointr(suicide, x = log(dsi + 1), class = suicide == "yes",
-    subgroup = dsi \%\% 2 == 0)
-opt_cut
-predict(opt_cut, newdata = data.frame(dsi = 1:3))
-
 ## Parallelized bootstrapping
+  library(doParallel)
+  library(doRNG)
   cl <- makeCluster(2) # 2 cores
   registerDoParallel(cl)
   registerDoRNG(12) # Reproducible parallel loops using doRNG
   opt_cut <- cutpointr(suicide, dsi, suicide, gender,
-                       boot_runs = 10, allowParallel = TRUE)
+                       boot_runs = 1000, allowParallel = TRUE)
   stopCluster(cl)
   opt_cut
   plot(opt_cut)
@@ -295,7 +302,8 @@ opt_cut
 }
 \seealso{
 Other main cutpointr functions: \code{\link{add_metric}},
-  \code{\link{cutpointr_}}, \code{\link{multi_cutpointr}},
+  \code{\link{boot_ci}}, \code{\link{boot_test}},
+  \code{\link{multi_cutpointr}},
   \code{\link{predict.cutpointr}}, \code{\link{roc}}
 }
 \concept{main cutpointr functions}
