@@ -400,15 +400,23 @@ cutpointr.numeric <- function(x, class, subgroup = NULL,
 #' plot(opt_cut)
 #' predict(opt_cut, newdata = data.frame(dsi = 0:5))
 #' @importFrom stats median
-#' @family main cutpointr functions
 #' @export
 cutpointr_ <- function(data, x, class, subgroup = NULL,
                       method = maximize_metric, metric = sum_sens_spec,
                       pos_class = NULL, neg_class = NULL, direction = NULL,
-                      boot_runs = 0, use_midpoints = FALSE,
-                      break_ties = median, na.rm = FALSE,
+                      boot_runs = 0, boot_stratify = FALSE,
+                      use_midpoints = FALSE, break_ties = median, na.rm = FALSE,
                       allowParallel = FALSE, silent = FALSE,
                       tol_metric = 1e-6, ...) {
+
+    signal_soft_deprecated(paste(
+        "cutpointr_() is deprecated.",
+        "Please use cutpointr() instead.",
+        "The help page gives an example on programming with cutpointr",
+        "using quoted arguments. For general information see the tidyeval book",
+        ": https://tidyeval.tidyverse.org"
+    ))
+
     #
     # SE
     #
