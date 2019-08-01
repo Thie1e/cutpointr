@@ -1,4 +1,4 @@
-# cutpointr 0.7.6.9000
+# cutpointr 1.0.0
 
 ## Most important changes
 - `cutpointr` and `roc` now both use tidyeval. `!!` can be used when an argument
