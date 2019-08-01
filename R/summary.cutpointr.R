@@ -9,7 +9,7 @@ summary.cutpointr <- function(object, ...) {
         }
         x_summary[[r]]$cutpointr <- temprow
         x_summary[[r]]$desc <- temprow$data[[1]] %>%
-            dplyr::select_(as.name(temprow$predictor)) %>%
+            dplyr::select(temprow$predictor) %>%
             unlist %>%
             summary_sd
         x_summary[[r]]$desc_byclass <-
@@ -25,7 +25,7 @@ summary.cutpointr <- function(object, ...) {
                                                    "Mean", "3rd Qu.", "95%", "Max.", "SD", "NAs")
         x_summary[[r]]$n_obs <- nrow(temprow$data[[1]])
         x_summary[[r]]$n_pos <- temprow$data[[1]] %>%
-            dplyr::select_(as.name(temprow$outcome)) %>%
+            dplyr::select(temprow$outcome) %>%
             unlist %>% (function(x) sum(x == temprow$pos_class))
         x_summary[[r]]$n_neg <- x_summary[[r]]$n_obs - x_summary[[r]]$n_pos
         # Confusion Matrix
@@ -67,7 +67,7 @@ tidy_summary <- function(x) {
     )
     if (has_boot_results(x)) {
         res <- dplyr::bind_cols(res,
-                                tidyr::nest_(x[["boot"]], key_col = "boot"),
+                                tidyr::nest(x[["boot"]], .key = "boot"),
                                 boot_runs = x$boot_runs)
     }
     if (has_column(x, "subgroup")) {

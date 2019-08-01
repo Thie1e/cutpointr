@@ -21,7 +21,7 @@ print.summary_cutpointr <- function(x, digits = 4, ...) {
         }
 
         x$cutpointr[[i]] %>%
-            dplyr::select(AUC) %>%
+            dplyr::select(.data$AUC) %>%
             round(digits = digits) %>%
             dplyr::mutate(n = x$n_obs[i],
                           n_pos = x$n_pos[i],
@@ -33,10 +33,10 @@ print.summary_cutpointr <- function(x, digits = 4, ...) {
 
         purrr::map_df(1:length(x$cutpointr[[i]]$optimal_cutpoint[[1]]), function(j) {
             x$cutpointr[[i]] %>%
-                dplyr::select(optimal_cutpoint,
+                dplyr::select(.data$optimal_cutpoint,
                                !!find_metric_name(x$cutpointr[[i]]),
-                               acc, sensitivity,
-                               specificity) %>%
+                               .data$acc, .data$sensitivity,
+                               .data$specificity) %>%
                 purrr::map_df(get_fnth, n = j)
         }) %>%
             as.data.frame %>%
@@ -47,33 +47,15 @@ print.summary_cutpointr <- function(x, digits = 4, ...) {
 
         cat("\n")
 
-        # for (j in 1:nrow(x$confusion_matrix[[i]])) {
-        #     # cat(paste0("Cutpoint ", x$confusion_matrix[[i]]$cutpoint[j], ":"))
-        #     # cat("\n")
-        #     cm <- unlist(x$confusion_matrix[[i]][j, 2:5])
-        #     dim(cm) <- c(2,2)
-        #     dimnames(cm) <- list(prediction = c(as.character(x$cutpointr[[i]]$pos_class),
-        #                                         as.character(x$cutpointr[[i]]$neg_class)),
-        #                          observation = c(as.character(x$cutpointr[[i]]$pos_class),
-        #                                          as.character(x$cutpointr[[i]]$neg_class)))
-        #     print(cm)
-        #     cat("\n")
-        # }
-        # cat("\n")
         cat(paste("Predictor summary:", "\n"))
         rownames(x$desc[[i]]) <- "overall"
         print(round(rbind(x$desc[[i]], x$desc_by_class[[i]]), digits = digits))
-        # print(x$desc[[i]])
-        # cat("\n")
-        # cat(paste("Predictor summary per class:", "\n"))
-        # print(x$desc_by_class[[i]])
         if (has_boot_results(x[i, ])) {
             cat("\n")
             cat(paste("Bootstrap summary:", "\n"))
             print.data.frame(
                 x[["boot"]][[i]] %>%
                     dplyr::mutate_if(is.numeric, round, digits = digits),
-                # round(x[["boot"]][[i]], digits = round),
                 row.names = rep("", nrow(x[["boot"]][[i]]))
             )
         }

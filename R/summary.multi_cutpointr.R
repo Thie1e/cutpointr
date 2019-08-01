@@ -70,7 +70,7 @@ tidy_summary_multi <- function(x) {
     )
     if (has_boot_results(x)) {
         res <- dplyr::bind_cols(res,
-                                tidyr::nest_(x[["boot"]], key_col = "boot"),
+                                tidyr::nest(x[["boot"]], .key = "boot"),
                                 boot_runs = x$boot_runs)
     }
     if (has_column(x, "subgroup")) {

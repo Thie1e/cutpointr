@@ -32,9 +32,9 @@ plot_cut_boot <- function(x, ...) {
 
     if (has_boot_results(x)) {
         res_boot_unnested <- x %>%
-            dplyr::select_(.dots = dts_boot) %>%
-            dplyr::mutate_(boot = ~ prepare_bind_rows(boot)) %>%
-            tidyr::unnest_(unnest_cols = "boot")
+            dplyr::select(dts_boot) %>%
+            dplyr::mutate(boot = prepare_bind_rows(.data$boot)) %>%
+            tidyr::unnest(.data$boot)
         cutpoints <- unlist(res_boot_unnested$optimal_cutpoint)
         if (all(na_inf_omit(cutpoints %% 1 == 0)) |
             only_one_unique(na_inf_omit(cutpoints))) {
@@ -48,8 +48,8 @@ plot_cut_boot <- function(x, ...) {
         # If multiple optimal cutpoints optimal_cutpoint is a list
         if (is.list(res_boot_unnested$optimal_cutpoint)) {
             res_boot_unnested <- res_boot_unnested %>%
-                dplyr::select_(.dots = list("-roc_curve_b", "-roc_curve_oob")) %>%
-                tidyr::unnest_()
+                dplyr::select(-c("roc_curve_b", "roc_curve_oob")) %>%
+                tidyr::unnest()
         }
         boot_cut <- suppressMessages(
             ggplot2::ggplot(res_boot_unnested,

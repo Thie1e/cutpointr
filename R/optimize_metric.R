@@ -6,7 +6,7 @@ optimize_metric <- function(data, x, class, metric_func = youden,
     args <- list(...)
     metric_name_call <- as.character(substitute(metric_func))
     if (metric_name_call != "metric_func") metric_name <- metric_name_call
-    roccurve <- roc(data = data, x = x, class = class, pos_class = pos_class,
+    roccurve <- roc(data = data, x = !!x, class = !!class, pos_class = pos_class,
                     neg_class = neg_class, direction = direction)
     m <- metric_func(tp = roccurve[["tp"]], fp = roccurve[["fp"]],
                      tn = roccurve[["tn"]], fn = roccurve[["fn"]], ...)
@@ -110,7 +110,7 @@ optimize_metric <- function(data, x, class, metric_func = youden,
         }
     }
     if (return_roc) {
-        res <- dplyr::bind_cols(res, tidyr::nest_(roccurve, key_col = "roc_curve"))
+        res <- dplyr::bind_cols(res, tidyr::nest(roccurve, .key = "roc_curve"))
     }
     if (loess) metric_name <- paste0("loess_", metric_name)
     if (spline) metric_name <- paste0("spline_", metric_name)

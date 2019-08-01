@@ -18,67 +18,86 @@
 plot_x <- function(x, display_cutpoint = TRUE, ...) {
 
     args <- list(...)
-    predictor <- as.name(x$predictor[1])
-    outcome <- as.name(x$outcome[1])
+    predictor <- as.character(x$predictor[1])
+    outcome <- as.character(x$outcome[1])
 
     if (!(has_column(x, "subgroup"))) {
-        dts <- "data"
-        dts_cutpoint <- "optimal_cutpoint"
-        fll <- NULL
-        clr <- NULL
-        clr_roc <- NULL
+        res_unnested <- x %>%
+            dplyr::select(.data$data) %>%
+            tidyr::unnest(.data$data)
         transparency <- 1
-    } else {
-        dts <- c("data", "subgroup")
-        dts_cutpoint <- c("subgroup", "optimal_cutpoint")
-        fll <- "subgroup"
-        clr <- "subgroup"
-        clr_roc <- ~ subgroup
-        transparency <- 0.6
-    }
 
-    res_unnested <- x %>%
-        dplyr::select_(.dots = dts) %>%
-        tidyr::unnest_(unnest_cols = "data")
-    if (!(has_column(x, "subgroup"))) {
-        col <- NULL
-    } else {
+        if (all(na_inf_omit(unlist(dplyr::select(res_unnested, predictor))) %% 1 == 0) |
+            only_one_unique(
+                na_inf_omit(unlist(dplyr::select(res_unnested, predictor)))
+            )) {
+            all_integer = TRUE
+            dist_plot <- ggplot2::geom_bar(alpha = transparency, position = "identity")
+        } else {
+            all_integer = FALSE
+            dist_plot <- ggplot2::geom_density(alpha = transparency)
+        }
+        dist <- ggplot2::ggplot(res_unnested,
+                                ggplot2::aes(x = !!rlang::ensym(predictor))) +
+            dist_plot +
+            # facet by class because always 2
+            ggplot2::facet_wrap(outcome, scales = "free_y") +
+            ggplot2::ggtitle("Independent variable",
+                             "optimal cutpoint and distribution by class") +
+            ggplot2::xlab("value")
+        if (display_cutpoint) {
+            cutpoint_dat <- x %>%
+                dplyr::select(.data$optimal_cutpoint)
+            if (is.list(x$optimal_cutpoint)) {
+                cutpoint_dat <- tidyr::unnest(cutpoint_dat)
+            }
+            dist <- dist +
+                ggplot2::geom_vline(data = cutpoint_dat,
+                                    ggplot2::aes(xintercept = optimal_cutpoint),
+                                    show.legend = FALSE)
+        }
+    } else if (has_column(x, "subgroup")) {
+        res_unnested <- x %>%
+            dplyr::select("data", "subgroup") %>%
+            tidyr::unnest(.data$data)
         res_unnested <- dplyr::full_join(res_unnested,
                                          x[, c("optimal_cutpoint", "subgroup")],
                                          by = "subgroup")
-        col <- ~ subgroup
-    }
-    if (all(na_inf_omit(unlist(dplyr::select_(res_unnested, .dots = predictor))) %% 1 == 0) |
-        only_one_unique(
-            na_inf_omit(unlist(dplyr::select_(res_unnested, .dots = predictor)))
-        )) {
-        all_integer = TRUE
-        dist_plot <- ggplot2::geom_bar(alpha = transparency, position = "identity")
-    } else {
-        all_integer = FALSE
-        dist_plot <- ggplot2::geom_density(alpha = transparency)
-    }
-    dist <- ggplot2::ggplot(res_unnested,
-                            ggplot2::aes_string(x = predictor,
-                                                fill = fll, color = clr)) +
-        dist_plot +
-        # facet by class because always 2
-        ggplot2::facet_wrap(outcome, scales = "free_y") +
-        ggplot2::ggtitle("Independent variable",
-                         "optimal cutpoint and distribution by class") +
-        ggplot2::xlab("value")
-    if (display_cutpoint) {
-        cutpoint_dat <- x %>%
-            dplyr::select_(.dots = dts_cutpoint)
-        if (is.list(x$optimal_cutpoint)) {
-            cutpoint_dat <- tidyr::unnest_(cutpoint_dat)
+        transparency <- 0.6
+        if (all(na_inf_omit(unlist(dplyr::select(res_unnested, predictor))) %% 1 == 0) |
+            only_one_unique(
+                na_inf_omit(unlist(dplyr::select(res_unnested, predictor)))
+            )) {
+            all_integer = TRUE
+            dist_plot <- ggplot2::geom_bar(alpha = transparency, position = "identity")
+        } else {
+            all_integer = FALSE
+            dist_plot <- ggplot2::geom_density(alpha = transparency)
         }
-        dist <- dist +
-        ggplot2::geom_vline(data = cutpoint_dat,
-                            ggplot2::aes_(xintercept = ~ optimal_cutpoint,
-                                          color = col), show.legend = FALSE)
+        dist <- ggplot2::ggplot(res_unnested,
+                                ggplot2::aes(x = !!rlang::ensym(predictor),
+                                             fill = subgroup,
+                                             color = subgroup)) +
+            dist_plot +
+            # facet by class because always 2
+            ggplot2::facet_wrap(outcome, scales = "free_y") +
+            ggplot2::ggtitle("Independent variable",
+                             "optimal cutpoint and distribution by class") +
+            ggplot2::xlab("value") +
+            ggplot2::labs(color = "Subgroup", fill = "Subgroup")
+        if (display_cutpoint) {
+            cutpoint_dat <- x %>%
+                dplyr::select(.data$subgroup, .data$optimal_cutpoint)
+            if (is.list(x$optimal_cutpoint)) {
+                cutpoint_dat <- tidyr::unnest(cutpoint_dat)
+            }
+            dist <- dist +
+                ggplot2::geom_vline(data = cutpoint_dat,
+                                    ggplot2::aes(xintercept = optimal_cutpoint,
+                                                 color = subgroup),
+                                    show.legend = FALSE)
+        }
     }
-
     if (!all_integer) dist <- dist + ggplot2::geom_rug(alpha = 0.5)
     return(dist)
 }

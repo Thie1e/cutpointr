@@ -12,6 +12,7 @@
 #' opt_cut <- cutpointr(suicide, dsi, suicide, boot_runs = 10)
 #' plot_metric_boot(opt_cut)
 #' @family cutpointr plotting functions
+#' @importFrom rlang .data
 #' @export
 plot_metric_boot <- function(x, ...) {
 
@@ -20,27 +21,23 @@ plot_metric_boot <- function(x, ...) {
     if (!(has_column(x, "subgroup"))) {
         dts_boot <- "boot"
         dts <- "data"
-        fll <- NULL
-        clr <- NULL
         transparency <- 1
     } else {
         dts_boot <- c("boot", "subgroup")
         dts <- c("data", "subgroup")
-        fll <- "subgroup"
-        clr <- "subgroup"
         transparency <- 0.6
     }
 
-    if(has_boot_results(x)) {
+    if (has_boot_results(x)) {
         res_boot_unnested <- x %>%
-            dplyr::select_(.dots = dts_boot) %>%
-            dplyr::mutate_(boot = ~ prepare_bind_rows(boot)) %>%
-            tidyr::unnest_(unnest_cols = "boot") %>%
-            dplyr::select_(.dots = list("-roc_curve_b", "-roc_curve_oob"))
+            dplyr::select(dts_boot) %>%
+            dplyr::mutate(boot = prepare_bind_rows(.data$boot)) %>%
+            tidyr::unnest(.data$boot) %>%
+            dplyr::select(-c("roc_curve_b", "roc_curve_oob"))
         # If multiple optimal cutpoints optimal_cutpoint is a list
         if (is.list(res_boot_unnested$optimal_cutpoint)) {
             res_boot_unnested <- res_boot_unnested %>%
-                tidyr::unnest_()
+                tidyr::unnest()
         }
         metric_name <- find_metric_name_boot(res_boot_unnested)
         if (all(na_inf_omit(get(metric_name, res_boot_unnested) %% 1 == 0)) |
@@ -51,14 +48,25 @@ plot_metric_boot <- function(x, ...) {
             all_integer = FALSE
             dist_plot <- ggplot2::geom_density(alpha = transparency)
         }
-        boot_metric <- suppressMessages(
-            ggplot2::ggplot(res_boot_unnested,
-                            ggplot2::aes_string(x = metric_name,
-                                                fill = fll, color = clr)) +
-                dist_plot +
-                ggplot2::ggtitle("Bootstrap", "out-of-bag estimates") +
-                ggplot2::xlab(metric_name)
-        )
+        if (!(has_column(x, "subgroup"))) {
+            boot_metric <- suppressMessages(
+                ggplot2::ggplot(res_boot_unnested,
+                                ggplot2::aes(x = !!rlang::ensym(metric_name))) +
+                    dist_plot +
+                    ggplot2::ggtitle("Bootstrap", "out-of-bag estimates") +
+                    ggplot2::xlab(metric_name)
+            )
+        } else {
+            boot_metric <- suppressMessages(
+                ggplot2::ggplot(res_boot_unnested,
+                                ggplot2::aes(x = !!rlang::ensym(metric_name),
+                                             fill = subgroup,
+                                             color = subgroup)) +
+                    dist_plot +
+                    ggplot2::ggtitle("Bootstrap", "out-of-bag estimates") +
+                    ggplot2::xlab(metric_name)
+            )
+        }
         if (!all_integer) boot_metric <- boot_metric +
             ggplot2::geom_rug(alpha = 0.5)
     } else {

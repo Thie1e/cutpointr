@@ -72,7 +72,7 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
         met <- sanitize_metric(met, m_name = met_name, n = nrow(x))
         met <- check_metric_name(met)
         xvar_name <<- colnames(met)
-        x <- dplyr::bind_cols(x, tibble::as_data_frame(met))
+        x <- dplyr::bind_cols(x, tibble::as_tibble(met))
         x
     })
     rocdat <- purrr::map(.x = rocdat, .f = function(x) {
@@ -88,7 +88,7 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
         met <- sanitize_metric(met, m_name = yvar_name, n = nrow(x))
         met <- check_metric_name(met)
         yvar_name <<- colnames(met)
-        x <- dplyr::bind_cols(x, tibble::as_data_frame(met))
+        x <- dplyr::bind_cols(x, tibble::as_tibble(met))
         x
     })
 
@@ -100,17 +100,17 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
                 met <- sanitize_metric(met, m_name = xvar_name, n = nrow(x),
                                                    silent = TRUE)
                 met <- check_metric_name(met)
-                x <- dplyr::bind_cols(x, tibble::as_data_frame(met))
+                x <- dplyr::bind_cols(x, tibble::as_tibble(met))
                 met <- yvar(x = x, tp = x$tp, fp = x$fp, tn = x$tn, fn = x$fn)
                 met <- sanitize_metric(met, m_name = yvar_name, n = nrow(x),
                                                    silent = TRUE)
                 met <- check_metric_name(met)
-                x <- dplyr::bind_cols(x, tibble::as_data_frame(met))
+                x <- dplyr::bind_cols(x, tibble::as_tibble(met))
                 x
             })
             ci <- x[["boot"]][[i]]$roc_curve_b %>%
                 dplyr::bind_rows() %>%
-                dplyr::select_(.dots = c(xvar_name, yvar_name)) %>%
+                dplyr::select(!!rlang::sym(xvar_name), !!rlang::sym(yvar_name)) %>%
                 dplyr::group_by(!!rlang::sym(xvar_name)) %>%
                 dplyr::summarise(ymin = stats::quantile(!!rlang::sym(yvar_name),
                                                         (1 - conf_lvl) / 2, na.rm = TRUE),

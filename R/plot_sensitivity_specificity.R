@@ -22,10 +22,8 @@ plot_sensitivity_specificity <- function(x, display_cutpoint = TRUE, ...) {
 
     if (!(has_column(x, "subgroup"))) {
         dts_pr <- c("roc_curve", "optimal_cutpoint")
-        ltype <- NULL
     } else {
         dts_pr <- c("roc_curve", "subgroup", "optimal_cutpoint")
-        ltype <- ~ subgroup
     }
 
     if (!(has_column(x, "subgroup"))) {
@@ -36,43 +34,50 @@ plot_sensitivity_specificity <- function(x, display_cutpoint = TRUE, ...) {
     }
     for (r in 1:nrow(x)) {
         x$roc_curve[[r]] <- x$roc_curve[[r]] %>%
-            dplyr::mutate_(Sensitivity = ~ tp / (tp + fn),
-                           Specificity = ~ tn / (tn + fp))
+            dplyr::mutate(Sensitivity = tp / (tp + fn),
+                          Specificity = tn / (tn + fp))
     }
     res_unnested <- x %>%
-        dplyr::select_(.dots = dts_pr) %>%
-        tidyr::unnest_(unnest_cols = c("roc_curve"))
-    res_unnested <- x %>%
-        tidyr::unnest_(unnest_cols = c("roc_curve"))
+        dplyr::select(dts_pr) %>%
+        tidyr::unnest(.data$roc_curve)
     res_unnested <- res_unnested[is.finite(res_unnested$x.sorted), ]
-    res_unnested <- tidyr::gather_(res_unnested, key_col = "metric",
-                                    value_col = "value",
-                                    gather_cols = c("Sensitivity", "Specificity"))
-    pr <- ggplot2::ggplot(res_unnested,
-                          ggplot2::aes_(x = ~ x.sorted, y = ~ value,
-                                        color = ~ metric, linetype = ltype)) +
-        ggplot2::geom_line() +
-        plot_title +
-        ggplot2::xlab("Cutpoint") +
-        ggplot2::ylab("Sensitivity and Specificity")
+    res_unnested <- tidyr::gather(res_unnested, key = "metric", value = "value",
+                                  Sensitivity, Specificity)
+    if (!(has_column(x, "subgroup"))) {
+      pr <- ggplot2::ggplot(res_unnested,
+                            ggplot2::aes(x = x.sorted, y = value,
+                                         color = metric))
+    } else {
+      pr <- ggplot2::ggplot(res_unnested,
+                            ggplot2::aes(x = x.sorted, y = value,
+                                         color = metric, linetype = subgroup))
+    }
+    pr <- pr +
+      ggplot2::geom_line() +
+      plot_title +
+      ggplot2::xlab("Cutpoint") +
+      ggplot2::ylab("Sensitivity and Specificity")
     if (display_cutpoint) {
         if (!(has_column(x, "subgroup"))) {
             res_cutpoints <- x %>%
-                dplyr::select_(.dots = "optimal_cutpoint")
+                dplyr::select(.data$optimal_cutpoint)
             if (is.list(res_cutpoints$optimal_cutpoint)) {
-                res_cutpoints <- tidyr::unnest_(res_cutpoints)
+                res_cutpoints <- tidyr::unnest(res_cutpoints)
             }
+            pr <- pr +
+                ggplot2::geom_vline(data = res_cutpoints,
+                                    ggplot2::aes(xintercept = optimal_cutpoint))
         } else {
             res_cutpoints <- x %>%
-                dplyr::select_(.dots = list("optimal_cutpoint", "subgroup"))
+                dplyr::select(.data$optimal_cutpoint, .data$subgroup)
             if (is.list(res_cutpoints$optimal_cutpoint)) {
-                res_cutpoints <- tidyr::unnest_(res_cutpoints)
+                res_cutpoints <- tidyr::unnest(res_cutpoints)
             }
+            pr <- pr +
+                ggplot2::geom_vline(data = res_cutpoints,
+                                    ggplot2::aes(xintercept = optimal_cutpoint,
+                                                 linetype = subgroup))
         }
-        pr <- pr +
-            ggplot2::geom_vline(data = res_cutpoints,
-                                ggplot2::aes_(xintercept = ~ optimal_cutpoint,
-                                              linetype = ltype))
     }
     return(pr)
 }

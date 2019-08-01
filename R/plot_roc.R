@@ -33,15 +33,9 @@ plot_roc_cp <- function(x, display_cutpoint, type, ...) {
 
     if (!(has_column(x, "subgroup"))) {
         dts_roc <- "roc_curve"
-        fll <- NULL
-        clr <- NULL
-        clr_roc <- NULL
         transparency <- 1
     } else {
         dts_roc <- c("roc_curve", "subgroup")
-        fll <- "subgroup"
-        clr <- "subgroup"
-        clr_roc <- ~ subgroup
         transparency <- 0.6
     }
 
@@ -61,14 +55,24 @@ plot_roc_cp <- function(x, display_cutpoint, type, ...) {
         optcut_coords <- do.call(rbind, optcut_coords)
     }
     res_unnested <- x %>%
-        dplyr::select_(.dots = dts_roc) %>%
-        tidyr::unnest_(unnest_cols = "roc_curve")
-    roc <- ggplot2::ggplot(res_unnested,
-                           ggplot2::aes_(x = ~ 1 - tnr, y = ~ tpr, color = clr_roc)) +
-        roc_title +
-        ggplot2::xlab("1 - Specificity") +
-        ggplot2::ylab("Sensitivity") +
-        ggplot2::theme(aspect.ratio = 1)
+        dplyr::select(dts_roc) %>%
+        tidyr::unnest(.data$roc_curve)
+    if (!(has_column(x, "subgroup"))) {
+        roc <- ggplot2::ggplot(res_unnested,
+                               ggplot2::aes(x = 1 - tnr, y = tpr)) +
+            roc_title +
+            ggplot2::xlab("1 - Specificity") +
+            ggplot2::ylab("Sensitivity") +
+            ggplot2::theme(aspect.ratio = 1)
+    } else if (has_column(x, "subgroup")) {
+        roc <- ggplot2::ggplot(res_unnested,
+                               ggplot2::aes(x = 1 - tnr, y = tpr, color = subgroup)) +
+            roc_title +
+            ggplot2::xlab("1 - Specificity") +
+            ggplot2::ylab("Sensitivity") +
+            ggplot2::theme(aspect.ratio = 1)
+
+    }
     if (display_cutpoint) {
         roc <- roc + ggplot2::geom_point(data = optcut_coords, color = "black")
     }
@@ -82,7 +86,7 @@ plot_roc_cp <- function(x, display_cutpoint, type, ...) {
 
 plot_roc_rcp <- function(x, type, ...) {
     roc_title <- ggplot2::ggtitle("ROC curve")
-    roc <- ggplot2::ggplot(x, ggplot2::aes_(x = ~ 1 - tnr, y = ~ tpr)) +
+    roc <- ggplot2::ggplot(x, ggplot2::aes(x = 1 - tnr, y = tpr)) +
         roc_title +
         ggplot2::xlab("1 - Specificity") +
         ggplot2::ylab("Sensitivity") +
