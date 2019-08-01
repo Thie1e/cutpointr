@@ -13,9 +13,9 @@ roc(data, x, class, pos_class, neg_class, direction = ">=",
 \arguments{
 \item{data}{A data.frame or matrix. Will be converted to a data.frame.}
 
-\item{x}{(character) The numeric independent (predictor) variable.}
+\item{x}{(unquoted) The numeric independent (predictor) variable.}
 
-\item{class}{(character) A binary vector of outcome values.}
+\item{class}{(unquoted) A binary vector of outcome values.}
 
 \item{pos_class}{The value of 'class' that represents the positive cases.}
 
@@ -43,19 +43,26 @@ true negative rate (tnr) and false negative rate (fnr) are returned.
 To enable classifying all observations as belonging to only one class the
 predictor values will be augmented by Inf or -Inf. The returned object can
 be plotted with plot_roc.
+
+This function uses tidyeval to support unquoted arguments. For programming
+with \code{roc} the operator \code{!!} can be used to unquote an argument,
+see the examples.
 }
 \examples{
-## First two classes of the iris data
-dat <- iris[1:100, ]
-roc_curve <- roc(data = dat, x = "Petal.Width", class = "Species",
-pos_class = "versicolor", neg_class = "setosa", direction = ">=")
+roc_curve <- roc(data = suicide, x = dsi, class = suicide,
+  pos_class = "yes", neg_class = "no", direction = ">=")
 roc_curve
 plot_roc(roc_curve)
+auc(roc_curve)
+
+## Unquoting an argument
+myvar <- "dsi"
+roc(suicide, x = !!myvar, suicide, pos_class = "yes", neg_class = "no")
 }
 \seealso{
 Other main cutpointr functions: \code{\link{add_metric}},
-  \code{\link{cutpointr_}}, \code{\link{cutpointr}},
-  \code{\link{multi_cutpointr}},
+  \code{\link{boot_ci}}, \code{\link{boot_test}},
+  \code{\link{cutpointr}}, \code{\link{multi_cutpointr}},
   \code{\link{predict.cutpointr}}
 }
 \concept{main cutpointr functions}

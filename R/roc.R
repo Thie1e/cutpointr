@@ -11,9 +11,13 @@
 #' predictor values will be augmented by Inf or -Inf. The returned object can
 #' be plotted with plot_roc.
 #'
+#' This function uses tidyeval to support unquoted arguments. For programming
+#' with \code{roc} the operator \code{!!} can be used to unquote an argument,
+#' see the examples.
+#'
 #' @param data A data.frame or matrix. Will be converted to a data.frame.
-#' @param x (character) The numeric independent (predictor) variable.
-#' @param class (character) A binary vector of outcome values.
+#' @param x (unquoted) The numeric independent (predictor) variable.
+#' @param class (unquoted) A binary vector of outcome values.
 #' @param pos_class The value of 'class' that represents the positive cases.
 #' @param neg_class The value of 'class' that represents the negative cases.
 #' @param direction (character) One of ">=" or "<=". Specifies if the positive
@@ -23,12 +27,15 @@
 #' @return A data frame with the columns x.sorted, tp, fp, tn, fn, tpr, tnr, fpr,
 #' and fnr.
 #' @examples
-#' ## First two classes of the iris data
-#' dat <- iris[1:100, ]
-#' roc_curve <- roc(data = dat, x = "Petal.Width", class = "Species",
-#' pos_class = "versicolor", neg_class = "setosa", direction = ">=")
+#' roc_curve <- roc(data = suicide, x = dsi, class = suicide,
+#'   pos_class = "yes", neg_class = "no", direction = ">=")
 #' roc_curve
 #' plot_roc(roc_curve)
+#' auc(roc_curve)
+#'
+#' ## Unquoting an argument
+#' myvar <- "dsi"
+#' roc(suicide, x = !!myvar, suicide, pos_class = "yes", neg_class = "no")
 #' @export
 #' @family main cutpointr functions
 #' @source
@@ -36,11 +43,14 @@
 roc <- function(data, x, class, pos_class, neg_class, direction = ">=",
                 silent = FALSE) {
     stopifnot(direction %in% c(">=", "<="))
-    data <- as.data.frame(data)
-    stopifnot(is.character(x))
-    stopifnot(is.character(class))
-    class <- data[, class]
-    x <- data[, x]
+    stopifnot(is.data.frame(data))
+
+    x_sym <- rlang::ensym(x)
+    x_expr <- rlang::enexpr(x_sym)
+    x <- rlang::eval_tidy(expr = x_expr, data = data)
+    class_sym <- rlang::ensym(class)
+    class_expr <- rlang::enexpr(class_sym)
+    class <- rlang::eval_tidy(expr = class_expr, data = data)
 
     if (direction == ">=") {
         pred.order <- order(x, decreasing = TRUE)
@@ -93,7 +103,6 @@ roc <- function(data, x, class, pos_class, neg_class, direction = ">=",
     tnr <- tn / n_neg
     fpr <- 1 - tnr
     fnr <- 1 - tpr
-    # res <- data.frame(x.sorted, tp, fp, tn, fn, tpr, tnr, fpr, fnr)
     res <- tibble::tibble(x.sorted, tp, fp, tn, fn, tpr, tnr, fpr, fnr)
     class(res) <- c(class(res), "roc_cutpointr")
     if (!silent) {
