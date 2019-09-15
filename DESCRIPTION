@@ -3,7 +3,7 @@ Type: Package
 Title: Determine and Evaluate Optimal Cutpoints in Binary
     Classification Tasks
 Version: 1.0.0
-Date: 2019-08-01
+Date: 2019-09-09
 Authors@R: person("Christian", "Thiele", , "c.thiele@gmx-topmail.de", c("aut", "cre"))
 Description: Estimate cutpoints that optimize a specified metric in binary classification tasks
     and validate performance using bootstrapping. Some methods for more robust cutpoint
@@ -20,7 +20,7 @@ Imports:
     gridExtra (>= 2.2.1),
     foreach (>= 1.4.3),
     dplyr (>= 0.8.0),
-    tidyr (>= 0.8.0),
+    tidyr (>= 1.0.0),
     purrr (>= 0.3.0),
     tibble (>= 2.1.1),
     ggplot2 (>= 2.2.0),

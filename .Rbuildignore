@@ -12,3 +12,10 @@
 ^appveyor\.yml$
 ^cran-comments.md$
 ^\.png$
+^README_cache/
+cutpointr-Ex_i386.Rout
+cutpointr-Ex_x64.Rout
+examples_i386
+examples_x64 
+tests_i386
+tests_x64

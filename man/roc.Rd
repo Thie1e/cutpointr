@@ -13,9 +13,9 @@ roc(data, x, class, pos_class, neg_class, direction = ">=",
 \arguments{
 \item{data}{A data.frame or matrix. Will be converted to a data.frame.}
 
-\item{x}{(unquoted) The numeric independent (predictor) variable.}
+\item{x}{The name of the numeric predictor variable.}
 
-\item{class}{(unquoted) A binary vector of outcome values.}
+\item{class}{The name of the binary outcome variable.}
 
 \item{pos_class}{The value of 'class' that represents the positive cases.}
 

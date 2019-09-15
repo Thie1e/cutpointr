@@ -13,14 +13,17 @@ anymore.
 - A new `boot_ci` function is available that calculates confidence intervals
 (the empirical quantiles) based on the bootstrap results.
 - The `auc` function is now exported and can be used to calculate the AUC from
-a `roc_cutpointr` object, e.g. `auc(roc(suicide, dsi, suicide, "yes", "no"))`
+a `cutpointr` or `roc_cutpointr` object, 
+e.g. `auc(roc(suicide, dsi, suicide, "yes", "no"))`
 - `boot_test` is a new function for carrying out a bootstrap test for 
 equivalence of a metric, e.g. the AUC, the Youden-Index or also the optimal
 cutpoint. The standard deviation is calculated as `sd` of the differences
 in metric values per bootstrap repetition, then a z-test is calculated.
 
 ## Plotting
-- Add `type` argument to `plot_roc` for choosing line or step 
+- New `type` argument to `plot_roc` for choosing line or step 
+- The resulting object from `roc_cutpointr` can now simply be plotted with 
+`plot()`
 
 ## Bootstrapping
 - The bootstrapping no longer tries to redraw bootstrap samples if only one 
@@ -45,6 +48,8 @@ metric values to the plot as a dashed line (default `TRUE`). Helpful to
 inspect the smoothing of functions like `maximize_gam_metric`.
 - Add some mathematical details to `?oc_youden_kernel`.
 - The Readme and vignette have been updated and condensed a bit.
+- A warning is issued if in `metric_constrain` or one of the other constrained
+metrics `min_constrain` can not be achieved.
 
 ## Fixes
 - Fix the default for `break_ties` in `cutpointr.default` by setting it to

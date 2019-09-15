@@ -12,7 +12,9 @@
 #' respectively (controlled via the \code{in_bag} argument).
 #' Possible values are optimal_cutpoint, AUC,
 #' acc, sensitivity, specificity, and the metric that was selected
-#' in \code{cutpointr}.
+#' in \code{cutpointr}. Note that there is no "out-of-bag optimal cutpoint", so
+#' when selecting \code{variable = optimal_cutpoint} the test will be based on
+#' the in-bag data.
 #'
 #' The test statistic is calculated as z = (t1 - t2) / sd(t1 - t2) where t1 and
 #' t2 are the metric values on the full sample and sd(t1 - t2) is the standard
@@ -106,13 +108,13 @@ boot_test <- function(x, y = NULL, variable = "AUC", in_bag = TRUE,
             dat_var1 <- x %>%
                 dplyr::filter(.data$subgroup == var1) %>%
                 dplyr::select(.data$boot) %>%
-                tidyr::unnest() %>%
+                tidyr::unnest(.data$boot) %>%
                 dplyr::select(paste0(variable, suffix)) %>%
                 unlist
             dat_var2 <- x %>%
                 dplyr::filter(.data$subgroup == var2) %>%
                 dplyr::select(.data$boot) %>%
-                tidyr::unnest() %>%
+                tidyr::unnest(.data$boot) %>%
                 dplyr::select(paste0(variable, suffix)) %>%
                 unlist
             sdt <- stats::sd(dat_var1 - dat_var2, na.rm = TRUE)
@@ -150,12 +152,12 @@ boot_test <- function(x, y = NULL, variable = "AUC", in_bag = TRUE,
         }
         dat_var1 <- x %>%
             dplyr::select(.data$boot) %>%
-            tidyr::unnest() %>%
+            tidyr::unnest(.data$boot) %>%
             dplyr::select(paste0(variable, suffix)) %>%
             unlist
         dat_var2 <- y %>%
             dplyr::select(.data$boot) %>%
-            tidyr::unnest() %>%
+            tidyr::unnest(.data$boot) %>%
             dplyr::select(paste0(variable, suffix)) %>%
             unlist
         if (length(dat_var1) != length(dat_var2)) {

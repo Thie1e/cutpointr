@@ -507,9 +507,9 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
         if (na.rm) dat <- stats::na.omit(dat)
         g <- unique(dat$subgroup)
         dat <- dat %>%
+            dplyr::mutate(subgroup = as.character(subgroup)) %>%
             dplyr::group_by(subgroup) %>%
-            tidyr::nest(.key = "data") %>%
-            dplyr::mutate(subgroup = as.character(subgroup))
+            tidyr::nest(data = c(!!predictor, !!outcome))
         dat$pos_class <- pos_class
         optcut <- purrr::pmap(list(dat$subgroup, dat$data), function(g, d) {
             if (nrow(d) <= 1) stop(paste("Subgroup", g, "has <= 1 observations"))
@@ -531,7 +531,9 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                 roc_curve <- roc(data = d, x = !!predictor, class = !!outcome,
                                  pos_class = pos_class, neg_class = neg_class,
                                  direction = direction)
-                roc_curve <- tidyr::nest(roc_curve, .key = "roc_curve")
+                roc_curve <- tidyr::nest(.data = roc_curve,
+                                         roc_curve = dplyr::everything()) %>%
+                    tibble::as_tibble()
                 optcut <- dplyr::bind_cols(roc_curve,
                                            tibble::as_tibble(optcut))
             } else {
@@ -585,7 +587,8 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                 return(x)
             })
         }
-        optcut <- dplyr::bind_rows(optcut)
+        # Suppress "Vectorizing 'vctrs_list_of' elements may not preserve their attributes"
+        optcut <- suppressWarnings(dplyr::bind_rows(optcut))
         optcut <- optcut %>%
             dplyr::mutate(
                 AUC = purrr::map_dbl(roc_curve, function(r) {
@@ -597,12 +600,12 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
             )
         optcut <- tibble::as_tibble(optcut)
         optcut <- dplyr::full_join(optcut, dat, by = "subgroup")
-    } else {
+    } else if (is.null(subgroup)) {
         dat <- tibble::tibble(x = x, class = class)
         colnames(dat) <- c(predictor, outcome)
         if (na.rm) dat <- stats::na.omit(dat)
         dat <- dat %>%
-            tidyr::nest(.key = "data")
+            tidyr::nest(data = c(!!predictor, !!outcome))
         dat$pos_class <- pos_class
         optcut <- method(data = dat$data[[1]],  x = predictor, class = outcome,
                          metric_func = metric,
@@ -619,9 +622,10 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                              x = !!predictor, class = !!outcome,
                              pos_class = pos_class, neg_class = neg_class,
                              direction = direction)
-            roc_curve <- tidyr::nest(roc_curve, .key = "roc_curve")
-            optcut <- dplyr::bind_cols(roc_curve,
-                                       tibble::as_tibble(optcut))
+            roc_curve <- tidyr::nest(.data = roc_curve,
+                                     roc_curve = dplyr::everything()) %>%
+                tibble::as_tibble()
+            optcut <- dplyr::bind_cols(roc_curve, tibble::as_tibble(optcut))
         } else {
             check_roc_curve(optcut)
         }
@@ -695,139 +699,148 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
         `%seq_or_par%` <- foreach::`%do%`
     }
     if (boot_runs <= 0) {
-        bootstrap <- rep(NA, times = nrow(optcut))
+        boot_res <- rep(NA, times = nrow(optcut))
     } else {
         message("Running bootstrap...")
         boot_runs <- ceiling(boot_runs)
-        bootstrap <- dat %>%
-            dplyr::transmute(boot = purrr::map2(dat$data, dat$pos_class,
-                                                    function(g, pc) {
-                if (boot_stratify) {
-                    ind_pos <- which(unlist(g[, outcome]) == pc)
-                    ind_neg <- which(unlist(g[, outcome]) == neg_class)
-                } else {
-                    ind_pos <- NA
-                    ind_neg <- NA
-                }
-                boot_g <- foreach::foreach(rep = 1:boot_runs, .combine = rbind,
-                    .export = c("method", "direction", "metric", "break_ties",
-                    "neg_class", "mn", "use_midpoints", "boot_stratify",
-                    "predictor", "outcome", "tol_metric"),
-                    .errorhandling = "remove") %seq_or_par%
-                    {
-                        b_ind <- simple_boot(data = g, dep_var = outcome,
-                                             ind_pos = ind_pos, ind_neg = ind_neg,
-                                             stratify = boot_stratify)
-                        optcut_b <- method(data = g[b_ind, ], x = predictor,
-                                           metric_func = metric,
-                                           class = outcome,
-                                           direction = direction,
-                                           pos_class = pc,
-                                           neg_class = neg_class,
-                                           tol_metric = tol_metric,
-                                           use_midpoints = use_midpoints,
-                                           ...)
-                        optcut_b <- check_method_cols(optcut_b)
-                        optcut_b <- tibble::as_tibble(optcut_b)
-                        optcut_b <- apply_break_ties(optcut_b, break_ties)
-                        # LOO-Bootstrap
-                        if (!(has_column(optcut_b, "roc_curve"))) {
-                            roc_curve_b <- roc(data = g[b_ind, ], x = !!predictor,
-                                               class = !!outcome,
-                                               pos_class = pc, neg_class = neg_class,
-                                               direction = direction, silent = TRUE)
-                            roc_curve_b <- tidyr::nest(roc_curve_b,
-                                                       .key = "roc_curve")
-                            optcut_b <- dplyr::bind_cols(optcut_b, roc_curve_b)
-                        }
-                        opt_ind_b <- get_opt_ind(roc_curve = optcut_b$roc_curve[[1]],
-                                                 oc = unlist(optcut_b$optimal_cutpoint),
-                                                 direction = direction)
-                        auc_b <- auc(optcut_b$roc_curve[[1]])
-                        Sens_Spec_b <- sesp_from_oc(optcut_b$roc_curve[[1]],
-                                                     oc = unlist(optcut_b$optimal_cutpoint),
-                                                     direction = direction,
-                                                     opt_ind = opt_ind_b)
-                        Acc_b <- accuracy_from_oc(optcut_b$roc_curve[[1]],
-                                                  oc = unlist(optcut_b$optimal_cutpoint),
-                                                  direction = direction,
-                                                  opt_ind = opt_ind_b)[, "accuracy"]
-                        kap_b <- kappa_from_oc(optcut_b$roc_curve[[1]],
-                                               oc = unlist(optcut_b$optimal_cutpoint),
-                                               direction = direction,
-                                               opt_ind = opt_ind_b)
-                        metric_b <- metric(tp = optcut_b$roc_curve[[1]]$tp[opt_ind_b],
-                                             fp = optcut_b$roc_curve[[1]]$fp[opt_ind_b],
-                                             tn = optcut_b$roc_curve[[1]]$tn[opt_ind_b],
-                                             fn = optcut_b$roc_curve[[1]]$fn[opt_ind_b])
-                        metric_b <- check_metric_name(metric_b)
-                        roc_curve_oob <- roc(data = g[-b_ind, ], x = !!predictor,
-                                             class = !!outcome,
-                                             pos_class = pc, neg_class = neg_class,
-                                             direction = direction, silent = TRUE)
-                        opt_ind_oob <- get_opt_ind(roc_curve = roc_curve_oob,
-                                                 oc = unlist(optcut_b$optimal_cutpoint),
-                                                 direction = direction)
-                        auc_oob <- auc(roc_curve_oob)
-                        Sens_Spec_oob <- sesp_from_oc(roc_curve_oob,
-                                                     oc = unlist(optcut_b$optimal_cutpoint),
-                                                     direction = direction,
-                                                     opt_ind = opt_ind_oob)
-                        Acc_oob <- accuracy_from_oc(roc_curve_oob,
-                                                  oc = unlist(optcut_b$optimal_cutpoint),
-                                                  direction = direction,
-                                                  opt_ind = opt_ind_oob)[, "accuracy"]
-                        kap_oob <- kappa_from_oc(roc_curve_oob,
-                                               oc = unlist(optcut_b$optimal_cutpoint),
-                                               direction = direction,
-                                               opt_ind = opt_ind_oob)
-                        metric_oob <- metric(tp = roc_curve_oob$tp[opt_ind_oob],
-                                             fp = roc_curve_oob$fp[opt_ind_oob],
-                                             tn = roc_curve_oob$tn[opt_ind_oob],
-                                             fn = roc_curve_oob$fn[opt_ind_oob])
-                        metric_oob <- check_metric_name(metric_oob)
-                        mn <- make.names(colnames(metric_oob))
-
-                        bootstrap <- tibble::tibble(
-                            optimal_cutpoint =  optcut_b$optimal_cutpoint,
-                            AUC_b             =  auc_b,
-                            AUC_oob           =  auc_oob
-                        )
-                        bootstrap <- bootstrap %>%
-                            add_list( metric_b[, mn], paste0(mn, "_b")) %>%
-                            add_list(metric_oob[, mn], paste0(mn, "_oob")) %>%
-                            add_list(Acc_b, "acc_b") %>%
-                            add_list(Acc_oob, "acc_oob") %>%
-                            add_list(Sens_Spec_b[, "sensitivity"], "sensitivity_b") %>%
-                            add_list(Sens_Spec_oob[, "sensitivity"], "sensitivity_oob") %>%
-                            add_list(Sens_Spec_b[, "specificity"], "specificity_b") %>%
-                            add_list(Sens_Spec_oob[, "specificity"], "specificity_oob") %>%
-                            add_list(kap_b[, "cohens_kappa"], "cohens_kappa_b") %>%
-                            add_list(kap_oob[, "cohens_kappa"], "cohens_kappa_oob") %>%
-                            add_list(optcut_b$roc_curve[[1]]$tp[opt_ind_b], "TP_b") %>%
-                            add_list(optcut_b$roc_curve[[1]]$fp[opt_ind_b], "FP_b") %>%
-                            add_list(optcut_b$roc_curve[[1]]$tn[opt_ind_b], "TN_b") %>%
-                            add_list(optcut_b$roc_curve[[1]]$fn[opt_ind_b], "FN_b") %>%
-                            add_list(roc_curve_oob$tp[opt_ind_oob], "TP_oob") %>%
-                            add_list(roc_curve_oob$fp[opt_ind_oob], "FP_oob") %>%
-                            add_list(roc_curve_oob$tn[opt_ind_oob], "TN_oob") %>%
-                            add_list(roc_curve_oob$fn[opt_ind_oob], "FN_oob")
-                        bootstrap$roc_curve_b =  optcut_b$roc_curve
-                        roc_curve_oob <- tidyr::nest(roc_curve_oob,
-                                                     .key = "roc_curve_oob")
-                        bootstrap <- dplyr::bind_cols(bootstrap, roc_curve_oob)
-                        return(bootstrap)
+        boot_res <- purrr::map2(dat$data, dat$pos_class, function(g, pc) {
+            if (boot_stratify) {
+                ind_pos <- which(unlist(g[, outcome]) == pc)
+                ind_neg <- which(unlist(g[, outcome]) == neg_class)
+            } else {
+                ind_pos <- NA
+                ind_neg <- NA
+            }
+            boot_g <- foreach::foreach(rep = 1:boot_runs,
+                                       .export = c("method", "direction",
+                                                   "metric", "break_ties",
+                                                   "neg_class", "mn",
+                                                   "use_midpoints",
+                                                   "boot_stratify",
+                                                   "predictor", "outcome",
+                                                   "tol_metric"),
+                                       .errorhandling = "remove") %seq_or_par%
+                {
+                    b_ind <- simple_boot(data = g, dep_var = outcome,
+                                         ind_pos = ind_pos, ind_neg = ind_neg,
+                                         stratify = boot_stratify)
+                    optcut_b <- method(data = g[b_ind, ], x = predictor,
+                                       metric_func = metric,
+                                       class = outcome,
+                                       direction = direction,
+                                       pos_class = pc,
+                                       neg_class = neg_class,
+                                       tol_metric = tol_metric,
+                                       use_midpoints = use_midpoints,
+                                       ...)
+                    optcut_b <- check_method_cols(optcut_b)
+                    optcut_b <- tibble::as_tibble(optcut_b)
+                    optcut_b <- apply_break_ties(optcut_b, break_ties)
+                    # LOO-Bootstrap
+                    if (!(has_column(optcut_b, "roc_curve"))) {
+                        roc_curve_b <- roc(data = g[b_ind, ], x = !!predictor,
+                                         class = !!outcome,
+                                         pos_class = pc, neg_class = neg_class,
+                                         direction = direction, silent = TRUE)
+                        roc_curve_b <- tidyr::nest(.data = roc_curve_b,
+                                                   roc_curve = dplyr::everything()) %>%
+                            tibble::as_tibble()
+                        optcut_b <- dplyr::bind_cols(tibble::as_tibble(optcut_b),
+                                                     roc_curve_b)
                     }
-                tidyr::drop_na(boot_g)
-                return(boot_g)
-            }))
-        missing_reps <- purrr::map_lgl(.x = bootstrap$boot,
+                    opt_ind_b <- get_opt_ind(roc_curve = optcut_b$roc_curve[[1]],
+                                             oc = unlist(optcut_b$optimal_cutpoint),
+                                             direction = direction)
+                    auc_b <- auc(optcut_b$roc_curve[[1]])
+                    Sens_Spec_b <- sesp_from_oc(optcut_b$roc_curve[[1]],
+                                                oc = unlist(optcut_b$optimal_cutpoint),
+                                                direction = direction,
+                                                opt_ind = opt_ind_b)
+                    Acc_b <- accuracy_from_oc(optcut_b$roc_curve[[1]],
+                                              oc = unlist(optcut_b$optimal_cutpoint),
+                                              direction = direction,
+                                              opt_ind = opt_ind_b)[, "accuracy"]
+                    kap_b <- kappa_from_oc(optcut_b$roc_curve[[1]],
+                                           oc = unlist(optcut_b$optimal_cutpoint),
+                                           direction = direction,
+                                           opt_ind = opt_ind_b)
+                    metric_b <- metric(tp = optcut_b$roc_curve[[1]]$tp[opt_ind_b],
+                                       fp = optcut_b$roc_curve[[1]]$fp[opt_ind_b],
+                                       tn = optcut_b$roc_curve[[1]]$tn[opt_ind_b],
+                                       fn = optcut_b$roc_curve[[1]]$fn[opt_ind_b])
+                    metric_b <- check_metric_name(metric_b)
+                    roc_curve_oob <- roc(data = g[-b_ind, ], x = !!predictor,
+                                         class = !!outcome,
+                                         pos_class = pc, neg_class = neg_class,
+                                         direction = direction, silent = TRUE)
+                    opt_ind_oob <- get_opt_ind(roc_curve = roc_curve_oob,
+                                               oc = unlist(optcut_b$optimal_cutpoint),
+                                               direction = direction)
+                    auc_oob <- auc(roc_curve_oob)
+                    Sens_Spec_oob <- sesp_from_oc(roc_curve_oob,
+                                                  oc = unlist(optcut_b$optimal_cutpoint),
+                                                  direction = direction,
+                                                  opt_ind = opt_ind_oob)
+                    Acc_oob <- accuracy_from_oc(roc_curve_oob,
+                                                oc = unlist(optcut_b$optimal_cutpoint),
+                                                direction = direction,
+                                                opt_ind = opt_ind_oob)[, "accuracy"]
+                    kap_oob <- kappa_from_oc(roc_curve_oob,
+                                             oc = unlist(optcut_b$optimal_cutpoint),
+                                             direction = direction,
+                                             opt_ind = opt_ind_oob)
+                    metric_oob <- metric(tp = roc_curve_oob$tp[opt_ind_oob],
+                                         fp = roc_curve_oob$fp[opt_ind_oob],
+                                         tn = roc_curve_oob$tn[opt_ind_oob],
+                                         fn = roc_curve_oob$fn[opt_ind_oob])
+                    metric_oob <- check_metric_name(metric_oob)
+                    mn <- make.names(colnames(metric_oob))
+
+                    bootstrap <- tibble::tibble(
+                        optimal_cutpoint =  optcut_b$optimal_cutpoint,
+                        AUC_b             =  auc_b,
+                        AUC_oob           =  auc_oob
+                    )
+                    bootstrap <- bootstrap %>%
+                        add_list( metric_b[, mn], paste0(mn, "_b")) %>%
+                        add_list(metric_oob[, mn], paste0(mn, "_oob")) %>%
+                        add_list(Acc_b, "acc_b") %>%
+                        add_list(Acc_oob, "acc_oob") %>%
+                        add_list(Sens_Spec_b[, "sensitivity"], "sensitivity_b") %>%
+                        add_list(Sens_Spec_oob[, "sensitivity"], "sensitivity_oob") %>%
+                        add_list(Sens_Spec_b[, "specificity"], "specificity_b") %>%
+                        add_list(Sens_Spec_oob[, "specificity"], "specificity_oob") %>%
+                        add_list(kap_b[, "cohens_kappa"], "cohens_kappa_b") %>%
+                        add_list(kap_oob[, "cohens_kappa"], "cohens_kappa_oob") %>%
+                        add_list(optcut_b$roc_curve[[1]]$tp[opt_ind_b], "TP_b") %>%
+                        add_list(optcut_b$roc_curve[[1]]$fp[opt_ind_b], "FP_b") %>%
+                        add_list(optcut_b$roc_curve[[1]]$tn[opt_ind_b], "TN_b") %>%
+                        add_list(optcut_b$roc_curve[[1]]$fn[opt_ind_b], "FN_b") %>%
+                        add_list(roc_curve_oob$tp[opt_ind_oob], "TP_oob") %>%
+                        add_list(roc_curve_oob$fp[opt_ind_oob], "FP_oob") %>%
+                        add_list(roc_curve_oob$tn[opt_ind_oob], "TN_oob") %>%
+                        add_list(roc_curve_oob$fn[opt_ind_oob], "FN_oob")
+                    bootstrap$roc_curve_b =  optcut_b$roc_curve
+                    roc_curve_oob <- tidyr::nest(.data = roc_curve_oob,
+                                                 roc_curve_oob = dplyr::everything()) %>%
+                        tibble::as_tibble()
+                    bootstrap <- dplyr::bind_cols(bootstrap,
+                                               tibble::as_tibble(roc_curve_oob))
+                    return(bootstrap)
+                }
+            boot_g <- prepare_bind_rows(boot_g)
+            boot_g <- suppressWarnings(dplyr::bind_rows(boot_g))
+            tidyr::drop_na(boot_g)
+            return(boot_g)
+        })
+        missing_reps <- purrr::map_lgl(.x = boot_res,
                                        .f = function(x) nrow(x) != boot_runs)
         if (any(missing_reps)) {
             message("Some bootstrap repetitions were removed because of errors.")
         }
     }
-    res <- dplyr::bind_cols(optcut, boot = bootstrap)
+    optcut$boot = boot_res
+    res <- optcut
     class(res) <- c("cutpointr", class(res))
     return(res)
 }
@@ -896,17 +909,18 @@ multi_cutpointr <- function(data, x = NULL, class, subgroup,
         subgroup_lab <- NULL
     }
     if (missing(subgroup)) {
-        res <- purrr::map_df(x, function(coln) {
+        res <- purrr::map(x, function(coln) {
             if (!silent) message(paste0(coln, ":"))
             cutpointr(data, !!coln, !!class_lab, silent = silent, ...)
         })
     } else {
-        res <- purrr::map_df(x, function(coln) {
+        res <- purrr::map(x, function(coln) {
             if (!silent) message(paste0(coln, ":"))
             cutpointr(data, !!coln, !!class_lab, subgroup = !!subgroup_lab,
                       silent = silent, ...)
         })
     }
+    res <- suppressWarnings(dplyr::bind_rows(res))
     class(res) <- c("multi_cutpointr",
                     class(res)[-which(class(res) == "cutpointr")])
     return(res)

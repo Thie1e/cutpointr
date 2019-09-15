@@ -39,14 +39,15 @@ plot_precision_recall <- function(x, display_cutpoint = TRUE, ...) {
                            Recall = tp / (tp + fn))
     }
     if (display_cutpoint) {
-        optcut_coords <- apply(x, 1, function(r) {
-            opt_ind <- get_opt_ind(roc_curve = r$roc_curve,
-                                   oc = r$optimal_cutpoint,
-                                   direction = r$direction)
-            data.frame(Precision = r$roc_curve$Precision[opt_ind],
-                       Recall = r$roc_curve$Recall[opt_ind])
+        optcut_coords <- purrr::pmap_df(x, function(...) {
+            args <- list(...)
+            opt_ind <- get_opt_ind(roc_curve = args$roc_curve,
+                                   oc = args$optimal_cutpoint,
+                                   direction = args$direction)
+            data.frame(Precision = args$roc_curve$Precision[opt_ind],
+                       Recall = args$roc_curve$Recall[opt_ind])
+
         })
-        optcut_coords <- do.call(rbind, optcut_coords)
     }
     res_unnested <- x %>%
         dplyr::select(dts_pr) %>%

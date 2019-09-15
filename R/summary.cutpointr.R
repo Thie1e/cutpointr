@@ -67,7 +67,7 @@ tidy_summary <- function(x) {
     )
     if (has_boot_results(x)) {
         res <- dplyr::bind_cols(res,
-                                tidyr::nest(x[["boot"]], .key = "boot"),
+                                tibble::tibble(boot = list(x[["boot"]])),
                                 boot_runs = x$boot_runs)
     }
     if (has_column(x, "subgroup")) {

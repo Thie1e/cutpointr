@@ -125,6 +125,15 @@ test_that("AUC calculation is correct and works with Inf and -Inf", {
     expect_equal(round(cp$AUC, 3), 0.541)
 })
 
+test_that("Plotting ROC curve from roc()", {
+    set.seed(123)
+    tempdat <- data.frame(x = rnorm(100),
+                          y = factor(c(rep(0, 50), rep(1, 50))))
+    roc_cutpointr <- cutpointr::roc(tempdat, x, y, pos_class = 1, neg_class = 0)
+    expect_silent(print(plot_roc(roc_cutpointr)))
+})
+
+
 test_that("Correct midpoints are found", {
     temp <- data.frame(x = c(-Inf, 1, 2, 3, 5, Inf), y = c(1, 1, 1, 0, 0, 0))
     optcut <- cutpointr(temp, x, y, use_midpoints = TRUE, pos_class = 1)
@@ -1406,4 +1415,18 @@ test_that("boot_test works correctly", {
     expect_equal(round(bt$p_adj, 3), c(0.753, 0.647, 0.647))
     bt <- boot_test(cp, variable = youden, correction = "bonferroni")
     expect_equal(round(bt$p_adj, 3), c(1, 0.647, 0.731))
+})
+
+test_that("Bootstrap works with multiple cutpoints when not breaking ties", {
+    set.seed(827)
+    tempdat <- data.frame(x = rnorm(1000),
+                          y = sample(0:1, size = 1000, replace = TRUE),
+                          g = sample(0:1, size = 1000, replace = TRUE))
+    set.seed(73)
+    cp <- cutpointr(tempdat, x, y, break_ties = c, boot_runs = 200)
+    expect_silent(summary(cp))
+
+    set.seed(73)
+    cp <- cutpointr(tempdat, x, y, g, break_ties = c, boot_runs = 100)
+    expect_silent(summary(cp))
 })

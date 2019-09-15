@@ -1,4 +1,4 @@
-#' Plot ROC curve from a cutpointr object
+#' Plot ROC curve from a cutpointr or roc_cutpointr object
 #'
 #' Given a \code{cutpointr} object this function plots the ROC curve(s)
 #' per subgroup, if given. Also plots a ROC curve from the output of \code{roc()}.
@@ -13,21 +13,21 @@
 #'
 #' opt_cut_2groups <- cutpointr(suicide, dsi, suicide, gender)
 #' plot_roc(opt_cut_2groups, display_cutpoint = TRUE)
+#'
+#' roc_curve <- roc(suicide, x = dsi, class = suicide, pos_class = "yes",
+#'   neg_class = "no", direction = ">=")
+#' plot(roc_curve)
+#' auc(roc_curve)
 #' @family cutpointr plotting functions
+#' @name plot_roc
 #' @export
-plot_roc <- function(x, display_cutpoint = TRUE, type = "line", ...) {
-    args <- list(...)
-    if ("cutpointr" %in% class(x)) {
-        plot_roc_cp(x = x, display_cutpoint = display_cutpoint, type = type, args)
-    } else if ("roc_cutpointr" %in% class(x)) {
-        plot_roc_rcp(x = x, type = type, args)
-    } else {
-        stop(paste("Can only plot ROC curve from objects of types cutpointr",
-                   "and roc_cutpointr"))
-    }
+plot_roc <- function(x, ...) {
+    UseMethod("plot_roc", x)
 }
 
-plot_roc_cp <- function(x, display_cutpoint, type, ...) {
+#' @rdname plot_roc
+#' @export
+plot_roc.cutpointr <- function(x, display_cutpoint = TRUE, type = "line", ...) {
     predictor <- as.name(x$predictor[1])
     outcome <- as.name(x$outcome[1])
 
@@ -45,14 +45,15 @@ plot_roc_cp <- function(x, display_cutpoint, type, ...) {
         roc_title <- ggplot2::ggtitle("ROC curve", "by class")
     }
     if (display_cutpoint) {
-        optcut_coords <- apply(x, 1, function(r) {
-            opt_ind <- get_opt_ind(roc_curve = r$roc_curve,
-                                   oc = r$optimal_cutpoint,
-                                   direction = r$direction)
-            data.frame(tpr = r$roc_curve$tpr[opt_ind],
-                       tnr = r$roc_curve$tnr[opt_ind])
+        optcut_coords <- purrr::pmap_df(x, function(...) {
+            args <- list(...)
+            opt_ind <- get_opt_ind(roc_curve = args$roc_curve,
+                                   oc = args$optimal_cutpoint,
+                                   direction = args$direction)
+            data.frame(tpr = args$roc_curve$tpr[opt_ind],
+                       tnr = args$roc_curve$tnr[opt_ind])
+
         })
-        optcut_coords <- do.call(rbind, optcut_coords)
     }
     res_unnested <- x %>%
         dplyr::select(dts_roc) %>%
@@ -84,7 +85,9 @@ plot_roc_cp <- function(x, display_cutpoint, type, ...) {
     return(roc)
 }
 
-plot_roc_rcp <- function(x, type, ...) {
+#' @rdname plot_roc
+#' @export
+plot_roc.roc_cutpointr <- function(x, type = "line", ...) {
     roc_title <- ggplot2::ggtitle("ROC curve")
     roc <- ggplot2::ggplot(x, ggplot2::aes(x = 1 - tnr, y = tpr)) +
         roc_title +
@@ -97,4 +100,10 @@ plot_roc_rcp <- function(x, type, ...) {
         roc <- roc + ggplot2::geom_step()
     }
     return(roc)
+}
+
+#' @inherit plot_roc
+#' @export
+plot.roc_cutpointr <- function(x, type = "line", ...) {
+    plot_roc(x, type = type)
 }

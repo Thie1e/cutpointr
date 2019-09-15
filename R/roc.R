@@ -16,8 +16,8 @@
 #' see the examples.
 #'
 #' @param data A data.frame or matrix. Will be converted to a data.frame.
-#' @param x (unquoted) The numeric independent (predictor) variable.
-#' @param class (unquoted) A binary vector of outcome values.
+#' @param x The name of the numeric predictor variable.
+#' @param class The name of the binary outcome variable.
 #' @param pos_class The value of 'class' that represents the positive cases.
 #' @param neg_class The value of 'class' that represents the negative cases.
 #' @param direction (character) One of ">=" or "<=". Specifies if the positive
@@ -43,7 +43,7 @@
 roc <- function(data, x, class, pos_class, neg_class, direction = ">=",
                 silent = FALSE) {
     stopifnot(direction %in% c(">=", "<="))
-    stopifnot(is.data.frame(data))
+    data <- as.data.frame(data)
 
     x_sym <- rlang::ensym(x)
     x_expr <- rlang::enexpr(x_sym)
@@ -104,10 +104,11 @@ roc <- function(data, x, class, pos_class, neg_class, direction = ">=",
     fpr <- 1 - tnr
     fnr <- 1 - tpr
     res <- tibble::tibble(x.sorted, tp, fp, tn, fn, tpr, tnr, fpr, fnr)
-    class(res) <- c(class(res), "roc_cutpointr")
+    class(res) <- c("roc_cutpointr", class(res))
     if (!silent) {
         if (is.nan(res$tpr[1])) warning("ROC curve contains no positives")
         if (res$fpr[1] == 0 & res$fpr[nrow(res)] == 0) warning("ROC curve contains no negatives")
     }
     return(res)
 }
+

@@ -263,12 +263,16 @@ add_list <- function(x, y, name) {
 # multiple optimal cutpoints)
 # Convert non-list columns to list so that bind_rows doesn't complain
 prepare_bind_rows <- function(x) {
-    stopifnot(is.list(x))
+    stopifnot(inherits(x, "list"))
     if (length(x) < 2) {
         return(x)
     } else {
-        list_cols <- purrr::map(x, function(x) {
-            which(purrr::map_chr(x, class) == "list")
+        list_cols <- purrr::map(x, function(df) {
+            df %>%
+                purrr::map(function(col) (is.list(col)))
+        })
+        list_cols <- purrr::map(list_cols, function(coltypes) {
+            which(unlist(coltypes))
         })
         list_cols <- unique(unlist(list_cols))
         x <- purrr::map(x, function(x) {
