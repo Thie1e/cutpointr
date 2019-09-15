@@ -100,9 +100,9 @@ cp
 #>   sensitivity specificity      AUC pos_class neg_class prevalence outcome
 #>         <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1    0.888889    0.862903 0.923779 yes       no         0.0676692 suicide
-#>   predictor data               roc_curve          boot 
-#>   <chr>     <list>             <list>             <lgl>
-#> 1 dsi       <tibble [532 x 2]> <tibble [13 x 10]> NA
+#>   predictor           data roc_curve          boot 
+#>   <chr>     <list<df[,2]>> <list>             <lgl>
+#> 1 dsi            [532 x 2] <tibble [13 x 10]> NA
 ```
 
 ``` r
@@ -292,9 +292,9 @@ opt_cut
 #>   sensitivity specificity      AUC pos_class neg_class prevalence outcome
 #>         <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1    0.888889    0.862903 0.923779 yes       no         0.0676692 suicide
-#>   predictor data               roc_curve          boot                 
-#>   <chr>     <list>             <list>             <list>               
-#> 1 dsi       <tibble [532 x 2]> <tibble [13 x 10]> <tibble [1,000 x 23]>
+#>   predictor           data roc_curve          boot                 
+#>   <chr>     <list<df[,2]>> <list>             <list>               
+#> 1 dsi            [532 x 2] <tibble [13 x 10]> <tibble [1,000 x 23]>
 ```
 
 The returned object has the additional column `boot` which is a nested
@@ -412,10 +412,10 @@ if (suppressPackageStartupMessages(require(doParallel) & require(doRNG))) {
 #>      <dbl>       <dbl>       <dbl>    <dbl> <chr>     <fct>          <dbl>
 #> 1 0.885204    0.925926    0.882192 0.944647 yes       no         0.0688776
 #> 2 0.842857    0.777778    0.847328 0.861747 yes       no         0.0642857
-#>   outcome predictor grouping data               roc_curve         
-#>   <chr>   <chr>     <chr>    <list>             <list>            
-#> 1 suicide dsi       gender   <tibble [392 x 2]> <tibble [11 x 10]>
-#> 2 suicide dsi       gender   <tibble [140 x 2]> <tibble [11 x 10]>
+#>   outcome predictor grouping           data roc_curve         
+#>   <chr>   <chr>     <chr>    <list<df[,2]>> <list>            
+#> 1 suicide dsi       gender        [392 x 2] <tibble [11 x 10]>
+#> 2 suicide dsi       gender        [140 x 2] <tibble [11 x 10]>
 #>   boot                 
 #>   <list>               
 #> 1 <tibble [1,000 x 23]>
@@ -464,10 +464,10 @@ cutpointr(suicide, dsi, suicide, gender,
 #>      <dbl>       <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl>
 #> 1 0.956633    0.444444    0.994521 0.944647 yes       no         0.0688776
 #> 2 0.95        0.222222    1        0.861747 yes       no         0.0642857
-#>   outcome predictor grouping data               roc_curve         boot 
-#>   <chr>   <chr>     <chr>    <list>             <list>            <lgl>
-#> 1 suicide dsi       gender   <tibble [392 x 2]> <tibble [11 x 9]> NA   
-#> 2 suicide dsi       gender   <tibble [140 x 2]> <tibble [11 x 9]> NA
+#>   outcome predictor grouping           data roc_curve         boot 
+#>   <chr>   <chr>     <chr>    <list<df[,2]>> <list>            <lgl>
+#> 1 suicide dsi       gender        [392 x 2] <tibble [11 x 9]> NA   
+#> 2 suicide dsi       gender        [140 x 2] <tibble [11 x 9]> NA
 ```
 
 ## LOESS smoothing for selecting a cutpoint
@@ -644,10 +644,10 @@ cutpointr(suicide, dsi, suicide, gender, method = oc_youden_normal)
 #>      <dbl>       <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl>
 #> 1 0.895408    0.814815    0.901370 0.944647 yes       no         0.0688776
 #> 2 0.864286    0.666667    0.877863 0.861747 yes       no         0.0642857
-#>   outcome predictor grouping data               roc_curve         boot 
-#>   <chr>   <chr>     <chr>    <list>             <list>            <lgl>
-#> 1 suicide dsi       gender   <tibble [392 x 2]> <tibble [11 x 9]> NA   
-#> 2 suicide dsi       gender   <tibble [140 x 2]> <tibble [11 x 9]> NA
+#>   outcome predictor grouping           data roc_curve         boot 
+#>   <chr>   <chr>     <chr>    <list<df[,2]>> <list>            <lgl>
+#> 1 suicide dsi       gender        [392 x 2] <tibble [11 x 9]> NA   
+#> 2 suicide dsi       gender        [140 x 2] <tibble [11 x 9]> NA
 ```
 
 ### Nonparametric kernel method
@@ -693,10 +693,10 @@ cutpointr(suicide, dsi, suicide, gender, method = oc_youden_kernel)
 #>      <dbl>       <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl>
 #> 1 0.885204    0.925926    0.882192 0.944647 yes       no         0.0688776
 #> 2 0.807143    0.777778    0.809160 0.861747 yes       no         0.0642857
-#>   outcome predictor grouping data               roc_curve         boot 
-#>   <chr>   <chr>     <chr>    <list>             <list>            <lgl>
-#> 1 suicide dsi       gender   <tibble [392 x 2]> <tibble [11 x 9]> NA   
-#> 2 suicide dsi       gender   <tibble [140 x 2]> <tibble [11 x 9]> NA
+#>   outcome predictor grouping           data roc_curve         boot 
+#>   <chr>   <chr>     <chr>    <list<df[,2]>> <list>            <lgl>
+#> 1 suicide dsi       gender        [392 x 2] <tibble [11 x 9]> NA   
+#> 2 suicide dsi       gender        [140 x 2] <tibble [11 x 9]> NA
 ```
 
 # Additional features
@@ -823,7 +823,7 @@ opt_cut <- cutpointr(suicide, dsi, suicide, metric = sum_sens_spec,
 library(tidyr)
 opt_cut %>% 
     select(optimal_cutpoint, sum_sens_spec) %>% 
-    unnest
+    unnest(cols = c(optimal_cutpoint, sum_sens_spec))
 #> # A tibble: 2 x 2
 #>   optimal_cutpoint sum_sens_spec
 #>              <dbl>         <dbl>
@@ -1103,7 +1103,7 @@ misclassification_cost
 #>     colnames(misclassification_cost) <- "misclassification_cost"
 #>     return(misclassification_cost)
 #> }
-#> <bytecode: 0x0000000019b3f808>
+#> <bytecode: 0x000000001a992a18>
 #> <environment: namespace:cutpointr>
 ```
 
@@ -1146,10 +1146,10 @@ opt_cut
 #>      <dbl>       <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl>
 #> 1 0.885204    0.925926    0.882192 0.944647 yes       no         0.0688776
 #> 2 0.807143    0.777778    0.809160 0.861747 yes       no         0.0642857
-#>   outcome predictor grouping data               roc_curve         
-#>   <chr>   <chr>     <chr>    <list>             <list>            
-#> 1 suicide dsi       gender   <tibble [392 x 2]> <tibble [11 x 10]>
-#> 2 suicide dsi       gender   <tibble [140 x 2]> <tibble [11 x 10]>
+#>   outcome predictor grouping           data roc_curve         
+#>   <chr>   <chr>     <chr>    <list<df[,2]>> <list>            
+#> 1 suicide dsi       gender        [392 x 2] <tibble [11 x 10]>
+#> 2 suicide dsi       gender        [140 x 2] <tibble [11 x 10]>
 #>   boot               
 #>   <list>             
 #> 1 <tibble [200 x 23]>
@@ -1167,7 +1167,6 @@ plot_metric(opt_cut, conf_lvl = 0.9)
 
 ``` r
 plot_metric_boot(opt_cut)
-#> Warning: Removed 2 rows containing non-finite values (stat_density).
 ```
 
 ![](README-unnamed-chunk-36-3.png)<!-- -->
@@ -1266,6 +1265,8 @@ opt_cut %>%
     unnest %>% 
     ggplot(aes(x = suicide, y = dsi)) + 
     geom_boxplot(alpha = 0.3) + facet_grid(~subgroup)
+#> Warning: `cols` is now required.
+#> Please use `cols = c(data)`
 ```
 
 ![](README-unnamed-chunk-39-1.png)<!-- -->
@@ -1343,17 +1344,17 @@ proc_roc <- function(x, class) {
 
 ![](README-unnamed-chunk-46-1.png)<!-- -->
 
-|     n | task                  |  cutpointr | OptimalCutpoints |       pROC |       ROCR | ThresholdROC |
-| ----: | :-------------------- | ---------: | ---------------: | ---------: | ---------: | -----------: |
-| 1e+02 | Cutpoint Estimation   |    3.74240 |          2.23460 |    0.62865 |    1.77800 |      1.16505 |
-| 1e+03 | Cutpoint Estimation   |    3.98780 |         41.38755 |    0.96695 |    2.16340 |     35.00540 |
-| 1e+04 | Cutpoint Estimation   |    5.88415 |       2572.59990 |    4.08630 |    5.75695 |   2540.70465 |
-| 1e+05 | Cutpoint Estimation   |   24.19750 |               NA |   38.42105 |   44.20670 |           NA |
-| 1e+06 | Cutpoint Estimation   |  315.76775 |               NA |  665.85710 |  685.96530 |           NA |
-| 1e+07 | Cutpoint Estimation   | 3379.11065 |               NA | 7554.83890 | 7974.18370 |           NA |
-| 1e+02 | ROC curve calculation |    0.74110 |               NA |    0.43720 |    1.72670 |           NA |
-| 1e+03 | ROC curve calculation |    0.87265 |               NA |    0.71055 |    2.10230 |           NA |
-| 1e+04 | ROC curve calculation |    1.88950 |               NA |    3.74965 |    5.74135 |           NA |
-| 1e+05 | ROC curve calculation |   12.05315 |               NA |   35.70095 |   43.80525 |           NA |
-| 1e+06 | ROC curve calculation |  169.69530 |               NA |  653.70820 |  685.96605 |           NA |
-| 1e+07 | ROC curve calculation | 2164.20860 |               NA | 7463.19680 | 8088.85530 |           NA |
+|     n | task                  |    cutpointr | OptimalCutpoints |        pROC |        ROCR | ThresholdROC |
+| ----: | :-------------------- | -----------: | ---------------: | ----------: | ----------: | -----------: |
+| 1e+02 | Cutpoint Estimation   |    4.5018015 |         2.288702 |    0.662101 |    1.812802 |     1.194301 |
+| 1e+03 | Cutpoint Estimation   |    4.8394010 |        45.056801 |    0.981001 |    2.176401 |    36.239852 |
+| 1e+04 | Cutpoint Estimation   |    8.5662515 |      2538.612001 |    4.031701 |    5.667101 |  2503.801251 |
+| 1e+05 | Cutpoint Estimation   |   45.3845010 |               NA |   37.150151 |   43.118751 |           NA |
+| 1e+06 | Cutpoint Estimation   |  465.0032010 |               NA |  583.095000 |  607.023851 |           NA |
+| 1e+07 | Cutpoint Estimation   | 5467.3328010 |               NA | 7339.356101 | 7850.258700 |           NA |
+| 1e+02 | ROC curve calculation |    0.7973505 |               NA |    0.447701 |    1.732651 |           NA |
+| 1e+03 | ROC curve calculation |    0.8593010 |               NA |    0.694802 |    2.035852 |           NA |
+| 1e+04 | ROC curve calculation |    1.8781510 |               NA |    3.658050 |    5.662151 |           NA |
+| 1e+05 | ROC curve calculation |   11.0992510 |               NA |   35.329301 |   42.820852 |           NA |
+| 1e+06 | ROC curve calculation |  159.8100505 |               NA |  610.433700 |  612.471901 |           NA |
+| 1e+07 | ROC curve calculation | 2032.6935510 |               NA | 7081.897251 | 7806.385452 |           NA |

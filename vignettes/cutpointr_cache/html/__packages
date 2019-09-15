@@ -1,0 +1,12 @@
+base
+cutpointr
+foreach
+iterators
+doParallel
+registry
+pkgmaker
+rngtools
+doRNG
+ggplot2
+dplyr
+tidyr

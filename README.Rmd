@@ -657,7 +657,7 @@ opt_cut <- cutpointr(suicide, dsi, suicide, metric = sum_sens_spec,
 library(tidyr)
 opt_cut %>% 
     select(optimal_cutpoint, sum_sens_spec) %>% 
-    unnest
+    unnest(cols = c(optimal_cutpoint, sum_sens_spec))
 ```
 
 
@@ -1119,26 +1119,26 @@ results$task <- "Cutpoint Estimation"
 ```{r, echo = FALSE}
 # These are the original results on our system
 # dput(results)
-results <- structure(list(time = c(3.7424, 1.778, 0.62865, 2.2346, 1.16505,
-    3.9878, 2.1634, 0.96695, 41.38755, 35.0054, 5.88415, 5.75695,
-    2572.5999, 4.0863, 2540.70465, 24.1975, 44.2067, 38.42105, 315.76775,
-    685.9653, 665.8571, 3379.11065, 7974.1837, 7554.8389), Solution = c("cutpointr",
-    "ROCR", "pROC", "OptimalCutpoints", "ThresholdROC", "cutpointr",
-    "ROCR", "pROC", "OptimalCutpoints", "ThresholdROC", "cutpointr",
-    "ROCR", "OptimalCutpoints", "pROC", "ThresholdROC", "cutpointr",
-    "ROCR", "pROC", "cutpointr", "ROCR", "pROC", "cutpointr", "ROCR",
-    "pROC"), n = c(100, 100, 100, 100, 100, 1000, 1000, 1000, 1000,
-    1000, 10000, 10000, 10000, 10000, 10000, 1e+05, 1e+05, 1e+05,
-    1e+06, 1e+06, 1e+06, 1e+07, 1e+07, 1e+07), task = c("Cutpoint Estimation",
-    "Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation",
-    "Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation",
-    "Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation",
-    "Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation",
-    "Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation",
-    "Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation",
-    "Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation",
-    "Cutpoint Estimation", "Cutpoint Estimation")), row.names = c(NA,
-    -24L), class = "data.frame")
+results <- structure(list(time = c(4.5018015, 1.812802, 0.662101, 2.2887015, 
+1.194301, 4.839401, 2.1764015, 0.981001, 45.0568005, 36.2398515, 
+8.5662515, 5.667101, 2538.612001, 4.031701, 2503.8012505, 45.384501, 
+43.118751, 37.150151, 465.003201, 607.023851, 583.0950005, 5467.332801, 
+7850.2587, 7339.356101), Solution = c("cutpointr", "ROCR", "pROC", 
+"OptimalCutpoints", "ThresholdROC", "cutpointr", "ROCR", "pROC", 
+"OptimalCutpoints", "ThresholdROC", "cutpointr", "ROCR", "OptimalCutpoints", 
+"pROC", "ThresholdROC", "cutpointr", "ROCR", "pROC", "cutpointr", 
+"ROCR", "pROC", "cutpointr", "ROCR", "pROC"), n = c(100, 100, 
+100, 100, 100, 1000, 1000, 1000, 1000, 1000, 10000, 10000, 10000, 
+10000, 10000, 1e+05, 1e+05, 1e+05, 1e+06, 1e+06, 1e+06, 1e+07, 
+1e+07, 1e+07), task = c("Cutpoint Estimation", "Cutpoint Estimation", 
+"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
+"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
+"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
+"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
+"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
+"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
+"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
+"Cutpoint Estimation")), row.names = c(NA, -24L), class = "data.frame")
 ```
 
 
@@ -1250,14 +1250,15 @@ results_roc$task <- "ROC curve calculation"
 
 ```{r, echo = FALSE}
 # Our results
-results_roc <- structure(list(time = c(0.7411, 1.7267, 0.4372, 0.87265, 2.1023, 
-0.71055, 1.8895, 5.74135, 3.74965, 12.05315, 43.80525, 35.70095, 
-169.6953, 685.96605, 653.7082, 2164.2086, 8088.8553, 7463.1968
-), Solution = c("cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", 
+results_roc <- structure(list(time = c(0.7973505, 1.732651, 0.447701, 0.859301, 
+2.0358515, 0.694802, 1.878151, 5.662151, 3.6580505, 11.099251, 
+42.8208515, 35.3293005, 159.8100505, 612.471901, 610.4337005, 
+2032.693551, 7806.3854515, 7081.897251), Solution = c("cutpointr", 
+"ROCR", "pROC", "cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", 
 "pROC", "cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", "pROC", 
-"cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", "pROC"), n = c(100, 
-100, 100, 1000, 1000, 1000, 10000, 10000, 10000, 1e+05, 1e+05, 
-1e+05, 1e+06, 1e+06, 1e+06, 1e+07, 1e+07, 1e+07), task = c("ROC curve calculation", 
+"cutpointr", "ROCR", "pROC"), n = c(100, 100, 100, 1000, 1000, 
+1000, 10000, 10000, 10000, 1e+05, 1e+05, 1e+05, 1e+06, 1e+06, 
+1e+06, 1e+07, 1e+07, 1e+07), task = c("ROC curve calculation", 
 "ROC curve calculation", "ROC curve calculation", "ROC curve calculation", 
 "ROC curve calculation", "ROC curve calculation", "ROC curve calculation", 
 "ROC curve calculation", "ROC curve calculation", "ROC curve calculation", 
