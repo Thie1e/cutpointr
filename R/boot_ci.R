@@ -1,6 +1,7 @@
 #' Calculate bootstrap confidence intervals from a cutpointr object
 #'
-#' Given a \code{cutpointr} object this function calculates a bootstrap
+#' Given a \code{cutpointr} object that includes bootstrap results
+#' this function calculates a bootstrap
 #' confidence interval for a selected variable.
 #' Missing values are removed before calculating the quantiles.
 #' Values of the selected variable are returned for the percentiles alpha / 2
@@ -10,7 +11,7 @@
 #' of the in-bag AUC \code{variable = AUC_b} should be set.
 #'
 #' @param x (character) The numeric independent (predictor) variable.
-#' @param variable Variables to calculate CI for
+#' @param variable Variable to calculate CI for
 #' @param alpha Alpha level. Quantiles of the bootstrapped values are returned
 #' for (alpha / 2) and 1 - (alpha / 2).
 #' @return A data frame with the columns quantile and value

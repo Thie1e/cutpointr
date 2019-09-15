@@ -9,7 +9,7 @@ boot_ci(x, variable, alpha = 0.05)
 \arguments{
 \item{x}{(character) The numeric independent (predictor) variable.}
 
-\item{variable}{Variables to calculate CI for}
+\item{variable}{Variable to calculate CI for}
 
 \item{alpha}{Alpha level. Quantiles of the bootstrapped values are returned
 for (alpha / 2) and 1 - (alpha / 2).}
@@ -18,7 +18,8 @@ for (alpha / 2) and 1 - (alpha / 2).}
 A data frame with the columns quantile and value
 }
 \description{
-Given a \code{cutpointr} object this function calculates a bootstrap
+Given a \code{cutpointr} object that includes bootstrap results
+this function calculates a bootstrap
 confidence interval for a selected variable.
 Missing values are removed before calculating the quantiles.
 Values of the selected variable are returned for the percentiles alpha / 2

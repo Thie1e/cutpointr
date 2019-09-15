@@ -44,7 +44,9 @@ where the suffixes _b and _oob indicate in-bag and out-of-bag estimates,
 respectively (controlled via the \code{in_bag} argument).
 Possible values are optimal_cutpoint, AUC,
 acc, sensitivity, specificity, and the metric that was selected
-in \code{cutpointr}.
+in \code{cutpointr}. Note that there is no "out-of-bag optimal cutpoint", so
+when selecting \code{variable = optimal_cutpoint} the test will be based on
+the in-bag data.
 
 The test statistic is calculated as z = (t1 - t2) / sd(t1 - t2) where t1 and
 t2 are the metric values on the full sample and sd(t1 - t2) is the standard
