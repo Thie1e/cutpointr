@@ -2,7 +2,7 @@
 % Please edit documentation in R/cutpointr.R
 \name{cutpointr_}
 \alias{cutpointr_}
-\title{The standard evaluation version of cutpointr}
+\title{The standard evaluation version of cutpointr (deprecated)}
 \usage{
 cutpointr_(data, x, class, subgroup = NULL, method = maximize_metric,
   metric = sum_sens_spec, pos_class = NULL, neg_class = NULL,
@@ -74,8 +74,8 @@ minimize_metric and maximize_metric pass ... to metric.}
 }
 \description{
 This function is equivalent to \code{cutpointr} but takes only quoted arguments
-for \code{x}, \code{class} and \code{subgroup}. This function is suitable for
-programming with. For details on \code{cutpointr} see help("cutpointr").
+for \code{x}, \code{class} and \code{subgroup}. This was useful before
+\code{cutpointr} supported tidyeval.
 }
 \examples{
 library(cutpointr)

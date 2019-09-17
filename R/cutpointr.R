@@ -372,11 +372,12 @@ cutpointr.numeric <- function(x, class, subgroup = NULL,
 
 
 
-#' The standard evaluation version of cutpointr
+#' The standard evaluation version of cutpointr (deprecated)
 #'
 #' This function is equivalent to \code{cutpointr} but takes only quoted arguments
-#' for \code{x}, \code{class} and \code{subgroup}. This function is suitable for
-#' programming with. For details on \code{cutpointr} see help("cutpointr").
+#' for \code{x}, \code{class} and \code{subgroup}. This was useful before
+#' \code{cutpointr} supported tidyeval.
+#'
 #' @inheritParams cutpointr
 #' @param x (character) The variable name to be used for
 #'  classification, e.g. predictions or test values.
