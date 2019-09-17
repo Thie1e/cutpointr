@@ -104,7 +104,8 @@ boot_test <- function(x, y = NULL, variable = "AUC", in_bag = TRUE,
         combs <- do.call(rbind, combs)
         combs <- data.frame(var1 = combs[, 1], var2 = combs[, 2],
                             stringsAsFactors = FALSE)
-        test_res <- purrr::map2_dfr(.x = combs$var1, .y = combs$var2, .f = function(var1, var2) {
+        test_res <- purrr::map2_dfr(.x = combs$var1, .y = combs$var2,
+                                    .f = function(var1, var2) {
             dat_var1 <- x %>%
                 dplyr::filter(.data$subgroup == var1) %>%
                 dplyr::select(.data$boot) %>%
@@ -117,6 +118,14 @@ boot_test <- function(x, y = NULL, variable = "AUC", in_bag = TRUE,
                 tidyr::unnest(.data$boot) %>%
                 dplyr::select(paste0(variable, suffix)) %>%
                 unlist
+            na_v1 <- sum(is.na(dat_var1))
+            na_v2 <- sum(is.na(dat_var2))
+            if (na_v1 > 0 | na_v2 > 0) {
+                message(var1, " vs. ", var2, ": ",
+                        "Omitting missing values. Using ",
+                        nrow(x$boot[[1]]) - max(na_v1, na_v2),
+                        " observations.")
+            }
             sdt <- stats::sd(dat_var1 - dat_var2, na.rm = TRUE)
             t1 <- x %>%
                 dplyr::filter(.data$subgroup == var1) %>%
@@ -167,6 +176,13 @@ boot_test <- function(x, y = NULL, variable = "AUC", in_bag = TRUE,
             lower_runs <- min(length(dat_var1), length(dat_var2))
             dat_var1 <- dat_var1[1:lower_runs]
             dat_var2 <- dat_var2[1:lower_runs]
+        }
+        na_v1 <- sum(is.na(dat_var1))
+        na_v2 <- sum(is.na(dat_var2))
+        if (na_v1 > 0 | na_v2 > 0) {
+            message("Omitting missing values. Using ",
+                    nrow(x$boot[[1]]) - max(na_v1, na_v2),
+                    " observations.")
         }
         sdt <- stats::sd(dat_var1 - dat_var2, na.rm = TRUE)
         t1 <- x %>%
