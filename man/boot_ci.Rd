@@ -4,12 +4,14 @@
 \alias{boot_ci}
 \title{Calculate bootstrap confidence intervals from a cutpointr object}
 \usage{
-boot_ci(x, variable, alpha = 0.05)
+boot_ci(x, variable, in_bag = TRUE, alpha = 0.05)
 }
 \arguments{
 \item{x}{(character) The numeric independent (predictor) variable.}
 
 \item{variable}{Variable to calculate CI for}
+
+\item{in_bag}{Whether the in-bag or out-of-bag results should be used for testing}
 
 \item{alpha}{Alpha level. Quantiles of the bootstrapped values are returned
 for (alpha / 2) and 1 - (alpha / 2).}
@@ -32,10 +34,10 @@ of the in-bag AUC \code{variable = AUC_b} should be set.
 \dontrun{
 opt_cut <- cutpointr(suicide, dsi, suicide, gender,
   metric = youden, boot_runs = 1000)
-boot_ci(opt_cut, optimal_cutpoint, 0.05)
-boot_ci(opt_cut, acc_oob, 0.05)
-boot_ci(opt_cut, cohens_kappa_oob, 0.05)
-boot_ci(opt_cut, AUC_b, 0.05)
+boot_ci(opt_cut, optimal_cutpoint, in_bag = FALSE, alpha = 0.05)
+boot_ci(opt_cut, acc, in_bag = FALSE, alpha = 0.05)
+boot_ci(opt_cut, cohens_kappa, in_bag = FALSE, alpha = 0.05)
+boot_ci(opt_cut, AUC, in_bag = TRUE, alpha = 0.05)
 }
 }
 \seealso{
