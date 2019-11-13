@@ -808,3 +808,12 @@ F1_score <- function(tp, fp, tn, fn, ...) {
     colnames(f) <- "F1_score"
     return(f)
 }
+
+#' @rdname F1_score
+#' @export
+Jaccard <- function(tp, fp, tn, fn, ...) {
+    f <- tp / (tp + fp + fn)
+    f <- matrix(f, ncol = 1)
+    colnames(f) <- "Jaccard"
+    return(f)
+}
