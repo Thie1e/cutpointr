@@ -809,7 +809,16 @@ F1_score <- function(tp, fp, tn, fn, ...) {
     return(f)
 }
 
-#' @rdname F1_score
+#' Calculate the Jaccard Index
+#'
+#' Calculate the Jaccard Index from
+#' true positives, false positives, true negatives and false negatives.
+#' The inputs must be vectors of equal length. \cr \cr
+#' Jaccard = (tp) / (tp + fp + fn) \cr
+#' @inheritParams accuracy
+#' @examples
+#' Jaccard(10, 5, 20, 10)
+#' Jaccard(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
 #' @export
 Jaccard <- function(tp, fp, tn, fn, ...) {
     f <- tp / (tp + fp + fn)

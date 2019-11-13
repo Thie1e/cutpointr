@@ -2,12 +2,9 @@
 % Please edit documentation in R/metrics.R
 \name{F1_score}
 \alias{F1_score}
-\alias{Jaccard}
 \title{Calculate the F1-score}
 \usage{
 F1_score(tp, fp, tn, fn, ...)
-
-Jaccard(tp, fp, tn, fn, ...)
 }
 \arguments{
 \item{tp}{(numeric) number of true positives.}
