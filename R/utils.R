@@ -191,7 +191,7 @@ sanitize_metric <- function(m, m_name, n, silent = TRUE) {
         m <- as.matrix(m)
     }
     if (!is.null(dim(m))) {
-        if (dim(m)[2] == 1 & class(m) == "matrix") {
+        if (dim(m)[2] == 1 & ("matrix" %in% class(m))) {
             res <- m
             if (is.null(colnames(res))) colnames(res) <- m_name
         } else {
