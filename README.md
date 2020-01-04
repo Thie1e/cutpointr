@@ -51,17 +51,6 @@ cp <- cutpointr(suicide, dsi, suicide,
                 method = maximize_metric, metric = sum_sens_spec)
 #> Assuming the positive class is yes
 #> Assuming the positive class has higher x values
-cp
-#> # A tibble: 1 x 16
-#>   direction optimal_cutpoint method          sum_sens_spec      acc
-#>   <chr>                <dbl> <chr>                   <dbl>    <dbl>
-#> 1 >=                       2 maximize_metric       1.75179 0.864662
-#>   sensitivity specificity      AUC pos_class neg_class prevalence outcome
-#>         <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>  
-#> 1    0.888889    0.862903 0.923779 yes       no         0.0676692 suicide
-#>   predictor           data roc_curve          boot 
-#>   <chr>     <list<df[,2]>> <list>             <lgl>
-#> 1 dsi            [532 × 2] <tibble [13 × 10]> NA
 ```
 
 ``` r
@@ -1070,7 +1059,6 @@ misclassification_cost
 #>     colnames(misclassification_cost) <- "misclassification_cost"
 #>     return(misclassification_cost)
 #> }
-#> <bytecode: 0x7fa7af31f9d8>
 #> <environment: namespace:cutpointr>
 ```
 

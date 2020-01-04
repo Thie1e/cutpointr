@@ -1,3 +1,8 @@
+# cutpointr 1.0.1
+
+- Prepare for matrix inheriting from class "array" in R 4.0.0 by making a minor
+change in non-exported utility function `sanitize_metric`
+
 # cutpointr 1.0.0
 
 ## Most important changes
