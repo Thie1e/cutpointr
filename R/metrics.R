@@ -819,40 +819,11 @@ F1_score <- function(tp, fp, tn, fn, ...) {
 #' @examples
 #' Jaccard(10, 5, 20, 10)
 #' Jaccard(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
+#' @family metric functions
 #' @export
 Jaccard <- function(tp, fp, tn, fn, ...) {
     f <- tp / (tp + fp + fn)
     f <- matrix(f, ncol = 1)
     colnames(f) <- "Jaccard"
     return(f)
-}
-
-#' Calculate the Log Loss
-#'
-#' Calculate the Log Loss from true positives, false positives,
-#' true negatives and false negatives.
-#' The inputs must be vectors of equal length. \cr \cr
-#' Log_Loss = -(y log(p) + (1 - y) log(1 - p)), but
-#' in the cases of thresholded values, p is either 0 or 1.
-#' @inheritParams accuracy
-#' @param eps Log loss is undefined for p=0 or p=1,
-#' so probabilities are clipped to max(eps, min(1 - eps, p)).
-#' @examples
-#' log_loss(10, 5, 20, 10)
-#' log_loss(c(10, 8), c(5, 7), c(20, 12), c(10, 18))
-#' @export
-log_loss <- function(tp, fp, tn, fn, eps = 1e-15, ...) {
-    # ... allows for base = 10 if you want
-
-    logger = function(x) {
-        log(x, ...)
-    }
-    res =
-        logger(1 - eps) * tn +
-        logger(1 - eps) * tp +
-        logger(eps) * fp +
-        logger(eps) * fn
-    res = cbind(-1 * sum(res))
-    colnames(res) <- "log_loss"
-    return(res)
 }

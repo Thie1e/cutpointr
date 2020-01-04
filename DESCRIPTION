@@ -2,8 +2,8 @@ Package: cutpointr
 Type: Package
 Title: Determine and Evaluate Optimal Cutpoints in Binary
     Classification Tasks
-Version: 1.0.1
-Date: 2019-12-16
+Version: 1.0.1.9000
+Date: 2020-01-04
 Authors@R: person("Christian", "Thiele", , "c.thiele@gmx-topmail.de", c("aut", "cre"))
 Description: Estimate cutpoints that optimize a specified metric in binary classification tasks
     and validate performance using bootstrapping. Some methods for more robust cutpoint
