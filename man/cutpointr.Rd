@@ -8,19 +8,46 @@
 \usage{
 cutpointr(...)
 
-\method{cutpointr}{default}(data, x, class, subgroup = NULL,
-  method = maximize_metric, metric = sum_sens_spec, pos_class = NULL,
-  neg_class = NULL, direction = NULL, boot_runs = 0,
-  boot_stratify = FALSE, use_midpoints = FALSE, break_ties = median,
-  na.rm = FALSE, allowParallel = FALSE, silent = FALSE,
-  tol_metric = 1e-06, ...)
+\method{cutpointr}{default}(
+  data,
+  x,
+  class,
+  subgroup = NULL,
+  method = maximize_metric,
+  metric = sum_sens_spec,
+  pos_class = NULL,
+  neg_class = NULL,
+  direction = NULL,
+  boot_runs = 0,
+  boot_stratify = FALSE,
+  use_midpoints = FALSE,
+  break_ties = median,
+  na.rm = FALSE,
+  allowParallel = FALSE,
+  silent = FALSE,
+  tol_metric = 1e-06,
+  ...
+)
 
-\method{cutpointr}{numeric}(x, class, subgroup = NULL,
-  method = maximize_metric, metric = sum_sens_spec, pos_class = NULL,
-  neg_class = NULL, direction = NULL, boot_runs = 0,
-  boot_stratify = FALSE, use_midpoints = FALSE, break_ties = median,
-  na.rm = FALSE, allowParallel = FALSE, silent = FALSE,
-  tol_metric = 1e-06, ...)
+\method{cutpointr}{numeric}(
+  x,
+  class,
+  subgroup = NULL,
+  method = maximize_metric,
+  metric = sum_sens_spec,
+  pos_class = NULL,
+  neg_class = NULL,
+  direction = NULL,
+  boot_runs = 0,
+  boot_stratify = FALSE,
+  use_midpoints = FALSE,
+  break_ties = median,
+  na.rm = FALSE,
+  allowParallel = FALSE,
+  silent = FALSE,
+  tol_metric = 1e-06,
+  ...
+)
 }
 \arguments{
 \item{...}{Further optional arguments that will be passed to method.
@@ -301,9 +328,12 @@ opt_cut
 
 }
 \seealso{
-Other main cutpointr functions: \code{\link{add_metric}},
-  \code{\link{boot_ci}}, \code{\link{boot_test}},
-  \code{\link{multi_cutpointr}},
-  \code{\link{predict.cutpointr}}, \code{\link{roc}}
+Other main cutpointr functions: 
+\code{\link{add_metric}()},
+\code{\link{boot_ci}()},
+\code{\link{boot_test}()},
+\code{\link{multi_cutpointr}()},
+\code{\link{predict.cutpointr}()},
+\code{\link{roc}()}
 }
 \concept{main cutpointr functions}

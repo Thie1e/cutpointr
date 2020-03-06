@@ -8,8 +8,7 @@
 \usage{
 plot_roc(x, ...)
 
-\method{plot_roc}{cutpointr}(x, display_cutpoint = TRUE, type = "line",
-  ...)
+\method{plot_roc}{cutpointr}(x, display_cutpoint = TRUE, type = "line", ...)
 
 \method{plot_roc}{roc_cutpointr}(x, type = "line", ...)
 }
@@ -40,13 +39,14 @@ plot(roc_curve)
 auc(roc_curve)
 }
 \seealso{
-Other cutpointr plotting functions: \code{\link{plot.cutpointr}},
-  \code{\link{plot_cut_boot}},
-  \code{\link{plot_cutpointr}},
-  \code{\link{plot_metric_boot}},
-  \code{\link{plot_metric}},
-  \code{\link{plot_precision_recall}},
-  \code{\link{plot_sensitivity_specificity}},
-  \code{\link{plot_x}}
+Other cutpointr plotting functions: 
+\code{\link{plot.cutpointr}()},
+\code{\link{plot_cut_boot}()},
+\code{\link{plot_cutpointr}()},
+\code{\link{plot_metric_boot}()},
+\code{\link{plot_metric}()},
+\code{\link{plot_precision_recall}()},
+\code{\link{plot_sensitivity_specificity}()},
+\code{\link{plot_x}()}
 }
 \concept{cutpointr plotting functions}

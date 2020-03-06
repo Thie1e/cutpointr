@@ -8,7 +8,7 @@ test_that("Cutpointr returns a cutpointr without NAs and a certain Nr of rows", 
     expect_true("cutpointr" %in% class(opt_cut))
     expect_that(nrow(opt_cut), equals(1))
     expect_that(sum(is.na(opt_cut)), equals(1)) # boot is NA
-    expect_silent(plot(opt_cut))
+    expect_silent(print(plot(opt_cut)))
     expect_silent(print(plot_metric(opt_cut)))
     expect_silent(print(plot_roc(opt_cut)))
     expect_silent(print(plot_x(opt_cut)))
@@ -236,8 +236,8 @@ test_that("Correct cutpoints with example data", {
     optcut <- cutpointr(exdat, preds, obs,
                         method = maximize_metric, metric = cutpointr::youden)
     expect_equal(optcut$optimal_cutpoint, 1)
-    expect_equal(optcut$specificity, 1)
-    expect_equal(round(optcut$sensitivity, 2), 0.58)
+    expect_equal(as.numeric(optcut$specificity), 1)
+    expect_equal(round(as.numeric(optcut$sensitivity), 2), 0.58)
 })
 
 
@@ -560,15 +560,15 @@ test_that("Results for constrained metrics are equal to results by OptimalCutpoi
                             min_constrain = 0.85, constrain_metric = specificity)
     expect_equal(round(opt_cut_cp$optimal_cutpoint, 4), 1.3018)
     expect_equal(round(opt_cut_cp$sens_constrain, 4), 0.44)
-    expect_equal(round(opt_cut_cp$specificity, 4), 0.8500)
-    expect_equal(opt_cut_cp$sensitivity, opt_cut_cp$sens_constrain)
+    expect_equal(round(as.numeric(opt_cut_cp$specificity), 4), 0.8500)
+    expect_equal(as.numeric(opt_cut_cp$sensitivity), opt_cut_cp$sens_constrain)
 
     opt_cut_cp <- cutpointr(tempdat, x, y, metric = spec_constrain,
                             min_constrain = 0.85, constrain_metric = sensitivity)
     expect_equal(round(opt_cut_cp$optimal_cutpoint, 4), 0.2775)
     expect_equal(round(opt_cut_cp$spec_constrain, 4), 0.54)
-    expect_equal(round(opt_cut_cp$sensitivity, 4), 0.8500)
-    expect_equal(opt_cut_cp$specificity, opt_cut_cp$spec_constrain)
+    expect_equal(round(as.numeric(opt_cut_cp$sensitivity), 4), 0.8500)
+    expect_equal(as.numeric(opt_cut_cp$specificity), opt_cut_cp$spec_constrain)
 
     opt_cut_cp <- cutpointr(tempdat, x, y, metric = metric_constrain,
                             min_constrain = 0.85,
@@ -1018,9 +1018,9 @@ test_that("Main metric gets replaced correctly when ties are broken", {
     cp2 <- cutpointr(dat, x, group, metric = accuracy,
                     method = maximize_metric, break_ties = mean)
     expect_equal(unlist(cp$accuracy), c(0.6, 0.6))
-    expect_equal(unlist(cp$accuracy), unlist(cp$acc))
+    expect_equal(as.numeric(unlist(cp$accuracy)), unlist(cp$acc))
     expect_equal(cp2$accuracy, 0.55)
-    expect_equal(cp2$accuracy, cp2$acc)
+    expect_equal(as.numeric(cp2$accuracy), as.numeric(cp2$acc))
 
     # With subgroup
     dat <- structure(list(x = c(112.154869479653, 85.0195562661719, 93.9648809281475,
@@ -1375,7 +1375,7 @@ test_that("boot_ci works correctly", {
     set.seed(1349)
     cp <- cutpointr(suicide, dsi, suicide, boot_runs = 30)
     bci <- boot_ci(x = cp, variable = optimal_cutpoint, alpha = 0.05)
-    expect_equal(round(bci$values, 2), c(1, 3.27))
+    expect_equal(round(as.numeric(bci$values), 2), c(1, 3.27))
 
     set.seed(1349)
     cp <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 30)
@@ -1393,15 +1393,15 @@ test_that("boot_test works correctly", {
     cp_m <- cutpointr(suicide %>% dplyr::filter(gender == "male"),
                       dsi, suicide, boot_runs = 100)
     bt <- boot_test(cp_f, cp_m, AUC, in_bag = TRUE)
-    expect_equal(round(bt$p, 3), 0.249)
-    expect_equal(round(bt$z, 2), 1.15)
+    expect_equal(round(as.numeric(bt$p), 3), 0.249)
+    expect_equal(round(as.numeric(bt$z), 2), 1.15)
 
     set.seed(9184)
     cp <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 100)
     btg <- boot_test(cp, variable = AUC, in_bag = TRUE)
     expect_equal(round(btg$p, 3), 0.306)
     expect_equal(btg$subgroup1, "female")
-    expect_equal(btg$d, bt$d)
+    expect_equal(as.numeric(btg$d), as.numeric(bt$d))
 
     dat <- suicide
     set.seed(765)

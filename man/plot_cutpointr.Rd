@@ -4,8 +4,13 @@
 \alias{plot_cutpointr}
 \title{General purpose plotting function for cutpointr or roc_cutpointr objects}
 \usage{
-plot_cutpointr(x, xvar = cutpoint, yvar = sum_sens_spec,
-  conf_lvl = 0.95, aspect_ratio = NULL)
+plot_cutpointr(
+  x,
+  xvar = cutpoint,
+  yvar = sum_sens_spec,
+  conf_lvl = 0.95,
+  aspect_ratio = NULL
+)
 }
 \arguments{
 \item{x}{A \code{cutpointr} or \code{roc_cutpointr} object.}
@@ -59,13 +64,14 @@ plot_cutpointr(oc, cutpoint, function(tp, tn, fp, fn, ...) tp / fp) +
 
 }
 \seealso{
-Other cutpointr plotting functions: \code{\link{plot.cutpointr}},
-  \code{\link{plot_cut_boot}},
-  \code{\link{plot_metric_boot}},
-  \code{\link{plot_metric}},
-  \code{\link{plot_precision_recall}},
-  \code{\link{plot_roc}},
-  \code{\link{plot_sensitivity_specificity}},
-  \code{\link{plot_x}}
+Other cutpointr plotting functions: 
+\code{\link{plot.cutpointr}()},
+\code{\link{plot_cut_boot}()},
+\code{\link{plot_metric_boot}()},
+\code{\link{plot_metric}()},
+\code{\link{plot_precision_recall}()},
+\code{\link{plot_roc}()},
+\code{\link{plot_sensitivity_specificity}()},
+\code{\link{plot_x}()}
 }
 \concept{cutpointr plotting functions}

@@ -10,8 +10,7 @@ and S+ to analyze and compare ROC curves. BMC Bioinformatics, 12(1), 77.
 https://doi.org/10.1186/1471-2105-12-77
 }
 \usage{
-boot_test(x, y = NULL, variable = "AUC", in_bag = TRUE,
-  correction = "holm")
+boot_test(x, y = NULL, variable = "AUC", in_bag = TRUE, correction = "holm")
 }
 \arguments{
 \item{x}{A cutpointr object with bootstrap results}
@@ -80,9 +79,12 @@ boot_test(cp, variable = sum_sens_spec, in_bag = FALSE)
 
 }
 \seealso{
-Other main cutpointr functions: \code{\link{add_metric}},
-  \code{\link{boot_ci}}, \code{\link{cutpointr}},
-  \code{\link{multi_cutpointr}},
-  \code{\link{predict.cutpointr}}, \code{\link{roc}}
+Other main cutpointr functions: 
+\code{\link{add_metric}()},
+\code{\link{boot_ci}()},
+\code{\link{cutpointr}()},
+\code{\link{multi_cutpointr}()},
+\code{\link{predict.cutpointr}()},
+\code{\link{roc}()}
 }
 \concept{main cutpointr functions}

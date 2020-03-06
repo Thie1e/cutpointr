@@ -14,15 +14,39 @@ of optimal cutoff values: mechanisms, magnitude, and solutions.
 Clinical Chemistry, (4), 729–738.
 }
 \usage{
-maximize_loess_metric(data, x, class, metric_func = youden,
-  pos_class = NULL, neg_class = NULL, direction, criterion = "aicc",
-  degree = 1, family = "symmetric", user.span = NULL, tol_metric,
-  use_midpoints, ...)
+maximize_loess_metric(
+  data,
+  x,
+  class,
+  metric_func = youden,
+  pos_class = NULL,
+  neg_class = NULL,
+  direction,
+  criterion = "aicc",
+  degree = 1,
+  family = "symmetric",
+  user.span = NULL,
+  tol_metric,
+  use_midpoints,
+  ...
+)
 
-minimize_loess_metric(data, x, class, metric_func = youden,
-  pos_class = NULL, neg_class = NULL, direction, criterion = "aicc",
-  degree = 1, family = "symmetric", user.span = NULL, tol_metric,
-  use_midpoints, ...)
+minimize_loess_metric(
+  data,
+  x,
+  class,
+  metric_func = youden,
+  pos_class = NULL,
+  neg_class = NULL,
+  direction,
+  criterion = "aicc",
+  degree = 1,
+  family = "symmetric",
+  user.span = NULL,
+  tol_metric,
+  use_midpoints,
+  ...
+)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -103,12 +127,15 @@ metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
 plot_metric(oc)
 }
 \seealso{
-Other method functions: \code{\link{maximize_boot_metric}},
-  \code{\link{maximize_gam_metric}},
-  \code{\link{maximize_metric}},
-  \code{\link{maximize_spline_metric}},
-  \code{\link{oc_manual}}, \code{\link{oc_mean}},
-  \code{\link{oc_median}}, \code{\link{oc_youden_kernel}},
-  \code{\link{oc_youden_normal}}
+Other method functions: 
+\code{\link{maximize_boot_metric}()},
+\code{\link{maximize_gam_metric}()},
+\code{\link{maximize_metric}()},
+\code{\link{maximize_spline_metric}()},
+\code{\link{oc_manual}()},
+\code{\link{oc_mean}()},
+\code{\link{oc_median}()},
+\code{\link{oc_youden_kernel}()},
+\code{\link{oc_youden_normal}()}
 }
 \concept{method functions}

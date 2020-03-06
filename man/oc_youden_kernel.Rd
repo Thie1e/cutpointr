@@ -60,12 +60,15 @@ if (require(KernSmooth)) {
 }
 }
 \seealso{
-Other method functions: \code{\link{maximize_boot_metric}},
-  \code{\link{maximize_gam_metric}},
-  \code{\link{maximize_loess_metric}},
-  \code{\link{maximize_metric}},
-  \code{\link{maximize_spline_metric}},
-  \code{\link{oc_manual}}, \code{\link{oc_mean}},
-  \code{\link{oc_median}}, \code{\link{oc_youden_normal}}
+Other method functions: 
+\code{\link{maximize_boot_metric}()},
+\code{\link{maximize_gam_metric}()},
+\code{\link{maximize_loess_metric}()},
+\code{\link{maximize_metric}()},
+\code{\link{maximize_spline_metric}()},
+\code{\link{oc_manual}()},
+\code{\link{oc_mean}()},
+\code{\link{oc_median}()},
+\code{\link{oc_youden_normal}()}
 }
 \concept{method functions}

@@ -7,8 +7,7 @@
 Forked from the \pkg{ROCR} package
 }
 \usage{
-roc(data, x, class, pos_class, neg_class, direction = ">=",
-  silent = FALSE)
+roc(data, x, class, pos_class, neg_class, direction = ">=", silent = FALSE)
 }
 \arguments{
 \item{data}{A data.frame or matrix. Will be converted to a data.frame.}
@@ -60,9 +59,12 @@ myvar <- "dsi"
 roc(suicide, x = !!myvar, suicide, pos_class = "yes", neg_class = "no")
 }
 \seealso{
-Other main cutpointr functions: \code{\link{add_metric}},
-  \code{\link{boot_ci}}, \code{\link{boot_test}},
-  \code{\link{cutpointr}}, \code{\link{multi_cutpointr}},
-  \code{\link{predict.cutpointr}}
+Other main cutpointr functions: 
+\code{\link{add_metric}()},
+\code{\link{boot_ci}()},
+\code{\link{boot_test}()},
+\code{\link{cutpointr}()},
+\code{\link{multi_cutpointr}()},
+\code{\link{predict.cutpointr}()}
 }
 \concept{main cutpointr functions}

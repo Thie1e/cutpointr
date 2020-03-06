@@ -4,11 +4,26 @@
 \alias{cutpointr_}
 \title{The standard evaluation version of cutpointr (deprecated)}
 \usage{
-cutpointr_(data, x, class, subgroup = NULL, method = maximize_metric,
-  metric = sum_sens_spec, pos_class = NULL, neg_class = NULL,
-  direction = NULL, boot_runs = 0, boot_stratify = FALSE,
-  use_midpoints = FALSE, break_ties = median, na.rm = FALSE,
-  allowParallel = FALSE, silent = FALSE, tol_metric = 1e-06, ...)
+cutpointr_(
+  data,
+  x,
+  class,
+  subgroup = NULL,
+  method = maximize_metric,
+  metric = sum_sens_spec,
+  pos_class = NULL,
+  neg_class = NULL,
+  direction = NULL,
+  boot_runs = 0,
+  boot_stratify = FALSE,
+  use_midpoints = FALSE,
+  break_ties = median,
+  na.rm = FALSE,
+  allowParallel = FALSE,
+  silent = FALSE,
+  tol_metric = 1e-06,
+  ...
+)
 }
 \arguments{
 \item{data}{A data.frame with the data needed for x, class and optionally

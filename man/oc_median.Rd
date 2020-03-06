@@ -26,13 +26,15 @@ oc_median(suicide, "dsi")
 cutpointr(suicide, dsi, suicide, method = oc_median)
 }
 \seealso{
-Other method functions: \code{\link{maximize_boot_metric}},
-  \code{\link{maximize_gam_metric}},
-  \code{\link{maximize_loess_metric}},
-  \code{\link{maximize_metric}},
-  \code{\link{maximize_spline_metric}},
-  \code{\link{oc_manual}}, \code{\link{oc_mean}},
-  \code{\link{oc_youden_kernel}},
-  \code{\link{oc_youden_normal}}
+Other method functions: 
+\code{\link{maximize_boot_metric}()},
+\code{\link{maximize_gam_metric}()},
+\code{\link{maximize_loess_metric}()},
+\code{\link{maximize_metric}()},
+\code{\link{maximize_spline_metric}()},
+\code{\link{oc_manual}()},
+\code{\link{oc_mean}()},
+\code{\link{oc_youden_kernel}()},
+\code{\link{oc_youden_normal}()}
 }
 \concept{method functions}

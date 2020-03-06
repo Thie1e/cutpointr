@@ -7,18 +7,47 @@
 \alias{acc_constrain}
 \title{Metrics that are constrained by another metric}
 \usage{
-metric_constrain(tp, fp, tn, fn, main_metric = sensitivity,
-  constrain_metric = specificity, min_constrain = 0.5,
-  suffix = "_constrain", ...)
+metric_constrain(
+  tp,
+  fp,
+  tn,
+  fn,
+  main_metric = sensitivity,
+  constrain_metric = specificity,
+  min_constrain = 0.5,
+  suffix = "_constrain",
+  ...
+)
 
-sens_constrain(tp, fp, tn, fn, constrain_metric = specificity,
-  min_constrain = 0.5, ...)
+sens_constrain(
+  tp,
+  fp,
+  tn,
+  fn,
+  constrain_metric = specificity,
+  min_constrain = 0.5,
+  ...
+)
 
-spec_constrain(tp, fp, tn, fn, constrain_metric = sensitivity,
-  min_constrain = 0.5, ...)
+spec_constrain(
+  tp,
+  fp,
+  tn,
+  fn,
+  constrain_metric = sensitivity,
+  min_constrain = 0.5,
+  ...
+)
 
-acc_constrain(tp, fp, tn, fn, constrain_metric = sensitivity,
-  min_constrain = 0.5, ...)
+acc_constrain(
+  tp,
+  fp,
+  tn,
+  fn,
+  constrain_metric = sensitivity,
+  min_constrain = 0.5,
+  ...
+)
 }
 \arguments{
 \item{tp}{(numeric) number of true positives.}
@@ -53,20 +82,34 @@ cp <- cutpointr(suicide, dsi, suicide,
 plot_metric(cp)
 }
 \seealso{
-Other metric functions: \code{\link{F1_score}},
-  \code{\link{abs_d_ppv_npv}},
-  \code{\link{abs_d_sens_spec}}, \code{\link{accuracy}},
-  \code{\link{cohens_kappa}}, \code{\link{cutpoint}},
-  \code{\link{false_omission_rate}},
-  \code{\link{misclassification_cost}}, \code{\link{npv}},
-  \code{\link{odds_ratio}}, \code{\link{p_chisquared}},
-  \code{\link{plr}}, \code{\link{ppv}},
-  \code{\link{precision}}, \code{\link{prod_ppv_npv}},
-  \code{\link{prod_sens_spec}}, \code{\link{recall}},
-  \code{\link{risk_ratio}}, \code{\link{roc01}},
-  \code{\link{sensitivity}}, \code{\link{specificity}},
-  \code{\link{sum_ppv_npv}}, \code{\link{sum_sens_spec}},
-  \code{\link{total_utility}}, \code{\link{tpr}},
-  \code{\link{tp}}, \code{\link{youden}}
+Other metric functions: 
+\code{\link{F1_score}()},
+\code{\link{Jaccard}()},
+\code{\link{abs_d_ppv_npv}()},
+\code{\link{abs_d_sens_spec}()},
+\code{\link{accuracy}()},
+\code{\link{cohens_kappa}()},
+\code{\link{cutpoint}()},
+\code{\link{false_omission_rate}()},
+\code{\link{misclassification_cost}()},
+\code{\link{npv}()},
+\code{\link{odds_ratio}()},
+\code{\link{p_chisquared}()},
+\code{\link{plr}()},
+\code{\link{ppv}()},
+\code{\link{precision}()},
+\code{\link{prod_ppv_npv}()},
+\code{\link{prod_sens_spec}()},
+\code{\link{recall}()},
+\code{\link{risk_ratio}()},
+\code{\link{roc01}()},
+\code{\link{sensitivity}()},
+\code{\link{specificity}()},
+\code{\link{sum_ppv_npv}()},
+\code{\link{sum_sens_spec}()},
+\code{\link{total_utility}()},
+\code{\link{tpr}()},
+\code{\link{tp}()},
+\code{\link{youden}()}
 }
 \concept{metric functions}

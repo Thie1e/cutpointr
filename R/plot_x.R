@@ -49,11 +49,12 @@ plot_x <- function(x, display_cutpoint = TRUE, ...) {
             cutpoint_dat <- x %>%
                 dplyr::select(.data$optimal_cutpoint)
             if (is.list(x$optimal_cutpoint)) {
-                cutpoint_dat <- tidyr::unnest(cutpoint_dat)
+                cutpoint_dat <- tidyr::unnest(cols = optimal_cutpoint,
+                                              data = cutpoint_dat)
             }
             dist <- dist +
                 ggplot2::geom_vline(data = cutpoint_dat,
-                                    ggplot2::aes(xintercept = optimal_cutpoint),
+                                    mapping = ggplot2::aes(xintercept = optimal_cutpoint),
                                     show.legend = FALSE)
         }
     } else if (has_column(x, "subgroup")) {
@@ -89,12 +90,13 @@ plot_x <- function(x, display_cutpoint = TRUE, ...) {
             cutpoint_dat <- x %>%
                 dplyr::select(.data$subgroup, .data$optimal_cutpoint)
             if (is.list(x$optimal_cutpoint)) {
-                cutpoint_dat <- tidyr::unnest(cutpoint_dat)
+                cutpoint_dat <- tidyr::unnest(cols = optimal_cutpoint,
+                                              data = cutpoint_dat)
             }
             dist <- dist +
                 ggplot2::geom_vline(data = cutpoint_dat,
-                                    ggplot2::aes(xintercept = optimal_cutpoint,
-                                                 color = subgroup),
+                                    mapping = ggplot2::aes(xintercept = optimal_cutpoint,
+                                                           color = subgroup),
                                     show.legend = FALSE)
         }
     }

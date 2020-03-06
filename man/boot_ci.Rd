@@ -41,9 +41,12 @@ boot_ci(opt_cut, AUC, in_bag = TRUE, alpha = 0.05)
 }
 }
 \seealso{
-Other main cutpointr functions: \code{\link{add_metric}},
-  \code{\link{boot_test}}, \code{\link{cutpointr}},
-  \code{\link{multi_cutpointr}},
-  \code{\link{predict.cutpointr}}, \code{\link{roc}}
+Other main cutpointr functions: 
+\code{\link{add_metric}()},
+\code{\link{boot_test}()},
+\code{\link{cutpointr}()},
+\code{\link{multi_cutpointr}()},
+\code{\link{predict.cutpointr}()},
+\code{\link{roc}()}
 }
 \concept{main cutpointr functions}

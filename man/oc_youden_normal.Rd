@@ -4,8 +4,15 @@
 \alias{oc_youden_normal}
 \title{Determine an optimal cutpoint for the Youden-Index assuming normal distributions}
 \usage{
-oc_youden_normal(data, x, class, pos_class = NULL, neg_class = NULL,
-  direction, ...)
+oc_youden_normal(
+  data,
+  x,
+  class,
+  pos_class = NULL,
+  neg_class = NULL,
+  direction,
+  ...
+)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -39,12 +46,15 @@ oc_youden_normal(suicide, "dsi", "suicide",
 cutpointr(suicide, dsi, suicide, method = oc_youden_normal)
 }
 \seealso{
-Other method functions: \code{\link{maximize_boot_metric}},
-  \code{\link{maximize_gam_metric}},
-  \code{\link{maximize_loess_metric}},
-  \code{\link{maximize_metric}},
-  \code{\link{maximize_spline_metric}},
-  \code{\link{oc_manual}}, \code{\link{oc_mean}},
-  \code{\link{oc_median}}, \code{\link{oc_youden_kernel}}
+Other method functions: 
+\code{\link{maximize_boot_metric}()},
+\code{\link{maximize_gam_metric}()},
+\code{\link{maximize_loess_metric}()},
+\code{\link{maximize_metric}()},
+\code{\link{maximize_spline_metric}()},
+\code{\link{oc_manual}()},
+\code{\link{oc_mean}()},
+\code{\link{oc_median}()},
+\code{\link{oc_youden_kernel}()}
 }
 \concept{method functions}

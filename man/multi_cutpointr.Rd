@@ -55,9 +55,12 @@ tibble:::print.tbl(scp)
 
 }
 \seealso{
-Other main cutpointr functions: \code{\link{add_metric}},
-  \code{\link{boot_ci}}, \code{\link{boot_test}},
-  \code{\link{cutpointr}}, \code{\link{predict.cutpointr}},
-  \code{\link{roc}}
+Other main cutpointr functions: 
+\code{\link{add_metric}()},
+\code{\link{boot_ci}()},
+\code{\link{boot_test}()},
+\code{\link{cutpointr}()},
+\code{\link{predict.cutpointr}()},
+\code{\link{roc}()}
 }
 \concept{main cutpointr functions}

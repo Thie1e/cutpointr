@@ -5,15 +5,45 @@
 \alias{minimize_spline_metric}
 \title{Optimize a metric function in binary classification after spline smoothing}
 \usage{
-maximize_spline_metric(data, x, class, metric_func = youden,
-  pos_class = NULL, neg_class = NULL, direction, w = NULL,
-  df = NULL, spar = 1, nknots = cutpoint_knots, df_offset = NULL,
-  penalty = 1, control_spar = list(), tol_metric, use_midpoints, ...)
+maximize_spline_metric(
+  data,
+  x,
+  class,
+  metric_func = youden,
+  pos_class = NULL,
+  neg_class = NULL,
+  direction,
+  w = NULL,
+  df = NULL,
+  spar = 1,
+  nknots = cutpoint_knots,
+  df_offset = NULL,
+  penalty = 1,
+  control_spar = list(),
+  tol_metric,
+  use_midpoints,
+  ...
+)
 
-minimize_spline_metric(data, x, class, metric_func = youden,
-  pos_class = NULL, neg_class = NULL, direction, w = NULL,
-  df = NULL, spar = 1, nknots = cutpoint_knots, df_offset = NULL,
-  penalty = 1, control_spar = list(), tol_metric, use_midpoints, ...)
+minimize_spline_metric(
+  data,
+  x,
+  class,
+  metric_func = youden,
+  pos_class = NULL,
+  neg_class = NULL,
+  direction,
+  w = NULL,
+  df = NULL,
+  spar = 1,
+  nknots = cutpoint_knots,
+  df_offset = NULL,
+  penalty = 1,
+  control_spar = list(),
+  tol_metric,
+  use_midpoints,
+  ...
+)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -101,12 +131,15 @@ df = 5, metric = accuracy)
 plot_metric(oc)
 }
 \seealso{
-Other method functions: \code{\link{maximize_boot_metric}},
-  \code{\link{maximize_gam_metric}},
-  \code{\link{maximize_loess_metric}},
-  \code{\link{maximize_metric}}, \code{\link{oc_manual}},
-  \code{\link{oc_mean}}, \code{\link{oc_median}},
-  \code{\link{oc_youden_kernel}},
-  \code{\link{oc_youden_normal}}
+Other method functions: 
+\code{\link{maximize_boot_metric}()},
+\code{\link{maximize_gam_metric}()},
+\code{\link{maximize_loess_metric}()},
+\code{\link{maximize_metric}()},
+\code{\link{oc_manual}()},
+\code{\link{oc_mean}()},
+\code{\link{oc_median}()},
+\code{\link{oc_youden_kernel}()},
+\code{\link{oc_youden_normal}()}
 }
 \concept{method functions}

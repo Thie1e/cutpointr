@@ -5,11 +5,31 @@
 \alias{minimize_metric}
 \title{Optimize a metric function in binary classification}
 \usage{
-maximize_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction, tol_metric, use_midpoints, ...)
+maximize_metric(
+  data,
+  x,
+  class,
+  metric_func = youden,
+  pos_class = NULL,
+  neg_class = NULL,
+  direction,
+  tol_metric,
+  use_midpoints,
+  ...
+)
 
-minimize_metric(data, x, class, metric_func = youden, pos_class = NULL,
-  neg_class = NULL, direction, tol_metric, use_midpoints, ...)
+minimize_metric(
+  data,
+  x,
+  class,
+  metric_func = youden,
+  pos_class = NULL,
+  neg_class = NULL,
+  direction,
+  tol_metric,
+  use_midpoints,
+  ...
+)
 }
 \arguments{
 \item{data}{A data frame or tibble in which the columns that are given in x
@@ -68,12 +88,15 @@ cutpointr(suicide, dsi, suicide, method = maximize_metric, metric = accuracy)
 cutpointr(suicide, dsi, suicide, method = minimize_metric, metric = abs_d_sens_spec)
 }
 \seealso{
-Other method functions: \code{\link{maximize_boot_metric}},
-  \code{\link{maximize_gam_metric}},
-  \code{\link{maximize_loess_metric}},
-  \code{\link{maximize_spline_metric}},
-  \code{\link{oc_manual}}, \code{\link{oc_mean}},
-  \code{\link{oc_median}}, \code{\link{oc_youden_kernel}},
-  \code{\link{oc_youden_normal}}
+Other method functions: 
+\code{\link{maximize_boot_metric}()},
+\code{\link{maximize_gam_metric}()},
+\code{\link{maximize_loess_metric}()},
+\code{\link{maximize_spline_metric}()},
+\code{\link{oc_manual}()},
+\code{\link{oc_mean}()},
+\code{\link{oc_median}()},
+\code{\link{oc_youden_kernel}()},
+\code{\link{oc_youden_normal}()}
 }
 \concept{method functions}
