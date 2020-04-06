@@ -2,8 +2,8 @@ Package: cutpointr
 Type: Package
 Title: Determine and Evaluate Optimal Cutpoints in Binary
     Classification Tasks
-Version: 1.0.1.9000
-Date: 2020-01-04
+Version: 1.0.2
+Date: 2020-04-06
 Authors@R: person("Christian", "Thiele", , "c.thiele@gmx-topmail.de", c("aut", "cre"))
 Description: Estimate cutpoints that optimize a specified metric in binary classification tasks
     and validate performance using bootstrapping. Some methods for more robust cutpoint
@@ -22,13 +22,13 @@ Imports:
     dplyr (>= 0.8.0),
     tidyr (>= 1.0.0),
     purrr (>= 0.3.0),
-    tibble (>= 2.1.1),
-    ggplot2 (>= 2.2.0),
+    tibble (>= 3.0.0),
+    ggplot2 (>= 3.0.0),
     Rcpp (>= 0.12.12),
     stats,
     utils,
     rlang (>= 0.4.0)
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Suggests:
     KernSmooth (>= 2.23-15),
     fANCOVA (>= 0.5-1),
@@ -38,5 +38,7 @@ Suggests:
     knitr,
     rmarkdown,
     mgcv (>= 1.8),
-    crayon (>= 1.3.4)
+    crayon (>= 1.3.4),
+    registry (>= 0.5-1),
+    pkgmaker(>= 0.31.1),
 VignetteBuilder: knitr

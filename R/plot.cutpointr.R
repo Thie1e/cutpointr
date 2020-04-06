@@ -40,8 +40,12 @@ plot.cutpointr <- function(x, ...) {
     plots <- lapply(plots, function(p) p + args)
     rows <- round(sum(keep) / 2)
     pos <- ifelse(rows > 1, "right", "bottom")
-    suppressMessages(p <- grid_arrange_shared_legend(plots,
-                                                nrow = rows, ncol = 2,
-                                                position = pos))
-    invisible(p)
+    # suppressMessages(p <- grid_arrange_shared_legend(plots,
+    #                                             nrow = rows, ncol = 2,
+    #                                             position = pos))
+    # invisible(p)
+    grid_arrange_shared_legend(plots,
+                               nrow = rows,
+                               ncol = 2,
+                               position = pos)
 }

@@ -4,11 +4,13 @@
 \name{prostate_nodal}
 \alias{prostate_nodal}
 \title{Nodal involvement and acid phosphatase levels in 53 prostate cancer patients}
-\format{A data frame with 53 rows and 2 variables:
+\format{
+A data frame with 53 rows and 2 variables:
 \describe{
   \item{acid_phosphatase}{(numeric) Blood serum level of acid phosphatase}
   \item{nodal_involvement}{(logical) Whether neighboring lymph nodes were involved}
-}}
+}
+}
 \source{
 Le CT (2006). A solution for the most basic optimization problem associated with an ROC curve. Statistical methods in medical research 15: 571–584
 }

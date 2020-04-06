@@ -2,18 +2,34 @@ context("test-cutpointr.R")
 library(cutpointr)
 library(ggplot2)
 
-test_that("Cutpointr returns a cutpointr without NAs and a certain Nr of rows", {
+test_plot.cutpointr <- function(cutpointr_object) {
+    tempplot <- plot(cutpointr_object)
+    expect_identical(class(tempplot), c("gtable", "gTree", "grob", "gDesc"))
+}
+
+test_ggplot_functions <- function(cutpointr_object, do_plot_metric = TRUE) {
+    if (do_plot_metric) {
+        tempplot <- plot_metric(cutpointr_object)
+        expect_identical(class(tempplot), c("gg", "ggplot"))
+    }
+    tempplot2 <- plot_roc(cutpointr_object)
+    expect_identical(class(tempplot2), c("gg", "ggplot"))
+    tempplot3 <- plot_x(cutpointr_object)
+    expect_identical(class(tempplot3), c("gg", "ggplot"))
+    tempplot4 <- plot_precision_recall(cutpointr_object)
+    expect_identical(class(tempplot4), c("gg", "ggplot"))
+    tempplot5 <- plot_sensitivity_specificity(cutpointr_object)
+    expect_identical(class(tempplot5), c("gg", "ggplot"))
+}
+
+test_that("Cutpointr standard application", {
     data(suicide)
     opt_cut <- cutpointr(suicide, dsi, suicide)
     expect_true("cutpointr" %in% class(opt_cut))
     expect_that(nrow(opt_cut), equals(1))
     expect_that(sum(is.na(opt_cut)), equals(1)) # boot is NA
-    expect_silent(print(plot(opt_cut)))
-    expect_silent(print(plot_metric(opt_cut)))
-    expect_silent(print(plot_roc(opt_cut)))
-    expect_silent(print(plot_x(opt_cut)))
-    expect_silent(print(plot_precision_recall(opt_cut)))
-    expect_silent(print(plot_sensitivity_specificity(opt_cut)))
+    test_plot.cutpointr(opt_cut)
+    test_ggplot_functions(opt_cut)
 })
 
 test_that("Cutpointr works with different data types", {
@@ -23,19 +39,19 @@ test_that("Cutpointr works with different data types", {
     opt_cut <- cutpointr(tempdat, x, y)
     expect_that(nrow(opt_cut), equals(1))
     expect_that(sum(is.na(opt_cut)), equals(1))
-    expect_silent(plot(opt_cut))
+    test_plot.cutpointr(opt_cut)
 
     tempdat$y <- factor(tempdat$y)
     opt_cut <- cutpointr(tempdat, x, y)
     expect_that(nrow(opt_cut), equals(1))
     expect_that(sum(is.na(opt_cut)), equals(1))
-    expect_silent(plot(opt_cut))
+    test_plot.cutpointr(opt_cut)
 
     tempdat$y <- as.character(tempdat$y)
     opt_cut <- cutpointr(tempdat, x, y)
     expect_that(nrow(opt_cut), equals(1))
     expect_that(sum(is.na(opt_cut)), equals(1))
-    expect_silent(plot(opt_cut))
+    test_plot.cutpointr(opt_cut)
 
     # With subgroup
     set.seed(567)
@@ -45,34 +61,22 @@ test_that("Cutpointr works with different data types", {
     opt_cut <- cutpointr(tempdat, x, y, g)
     expect_that(nrow(opt_cut), equals(3))
     expect_that(sum(is.na(opt_cut)), equals(3))
-    expect_silent(plot(opt_cut))
-    expect_silent(print(plot_metric(opt_cut)))
-    expect_silent(print(plot_roc(opt_cut)))
-    expect_silent(print(plot_x(opt_cut)))
-    expect_silent(print(plot_precision_recall(opt_cut)))
-    expect_silent(print(plot_sensitivity_specificity(opt_cut)))
+    test_plot.cutpointr(opt_cut)
+    test_ggplot_functions(opt_cut)
 
     tempdat$g <- factor(tempdat$g)
     opt_cut <- cutpointr(tempdat, x, y, g)
     expect_that(nrow(opt_cut), equals(3))
     expect_that(sum(is.na(opt_cut)), equals(3))
-    expect_silent(plot(opt_cut))
-    expect_silent(print(plot_metric(opt_cut)))
-    expect_silent(print(plot_roc(opt_cut)))
-    expect_silent(print(plot_x(opt_cut)))
-    expect_silent(print(plot_precision_recall(opt_cut)))
-    expect_silent(print(plot_sensitivity_specificity(opt_cut)))
+    test_plot.cutpointr(opt_cut)
+    test_ggplot_functions(opt_cut)
 
     tempdat$g <- as.character(tempdat$g)
     opt_cut <- cutpointr(tempdat, x, y, g)
     expect_that(nrow(opt_cut), equals(3))
     expect_that(sum(is.na(opt_cut)), equals(3))
-    expect_silent(plot(opt_cut))
-    expect_silent(print(plot_metric(opt_cut)))
-    expect_silent(print(plot_roc(opt_cut)))
-    expect_silent(print(plot_x(opt_cut)))
-    expect_silent(print(plot_precision_recall(opt_cut)))
-    expect_silent(print(plot_sensitivity_specificity(opt_cut)))
+    test_plot.cutpointr(opt_cut)
+    test_ggplot_functions(opt_cut)
 })
 
 test_that("Bootstrap does not return duplicate colnames", {
@@ -96,14 +100,8 @@ test_that("Plotting with bootstrapping is silent", {
     tempdat <- data.frame(x = rnorm(100),
                           y = sample(0:1, size = 100, replace = TRUE))
     opt_cut <- cutpointr(tempdat, x, y, boot_runs = 20)
-    # expect_warning(plot(opt_cut), regexp = "foo")
-    expect_silent(plot(opt_cut))
-    expect_silent(print(plot_metric(opt_cut)))
-    expect_silent(print(plot_roc(opt_cut)))
-    expect_silent(print(plot_cut_boot(opt_cut)))
-    expect_silent(print(plot_metric_boot(opt_cut)))
-    expect_silent(print(plot_x(opt_cut)))
-    expect_silent(print(plot_precision_recall(opt_cut)))
+    test_plot.cutpointr(opt_cut)
+    test_ggplot_functions(opt_cut)
 })
 
 test_that("AUC calculation is correct and works with Inf and -Inf", {
@@ -130,7 +128,8 @@ test_that("Plotting ROC curve from roc()", {
     tempdat <- data.frame(x = rnorm(100),
                           y = factor(c(rep(0, 50), rep(1, 50))))
     roc_cutpointr <- cutpointr::roc(tempdat, x, y, pos_class = 1, neg_class = 0)
-    expect_silent(print(plot_roc(roc_cutpointr)))
+    tempplot <- plot_roc(roc_cutpointr)
+    expect_identical(class(tempplot), c("gg", "ggplot"))
 })
 
 
@@ -163,7 +162,8 @@ test_that("no duplicate column names are returned", {
                           y = factor(sample(0:1, size = 100, replace = TRUE)))
     optcut <- cutpointr(tempdat, x, y, method = oc_youden_normal)
     expect_true(all(table(colnames(optcut)) == 1))
-    expect_silent(plot(optcut))
+    test_plot.cutpointr(optcut)
+    test_ggplot_functions(optcut, do_plot_metric = FALSE)
     if (require(fANCOVA)) {
         optcut <- cutpointr(tempdat, x, y, method = oc_youden_kernel)
         expect_true(all(table(colnames(optcut)) == 1))
@@ -171,10 +171,12 @@ test_that("no duplicate column names are returned", {
     }
     optcut <- cutpointr(tempdat, x, y)
     expect_true(all(table(colnames(optcut)) == 1))
-    expect_silent(plot(optcut))
+    test_plot.cutpointr(optcut)
+    test_ggplot_functions(optcut)
     optcut <- cutpointr(tempdat, x, y, method = oc_manual, cutpoint = 30)
     expect_true(all(table(colnames(optcut)) == 1))
-    expect_silent(plot(optcut))
+    test_plot.cutpointr(optcut)
+    test_ggplot_functions(optcut, do_plot_metric = FALSE)
 
     set.seed(1234)
     tempdat <- data.frame(x = rnorm(100),
@@ -182,18 +184,22 @@ test_that("no duplicate column names are returned", {
                           g = factor(sample(0:1, size = 100, replace = TRUE)))
     optcut <- cutpointr(tempdat, x, y, g, method = oc_youden_normal)
     expect_true(all(table(colnames(optcut)) == 1))
-    expect_silent(plot(optcut))
+    test_plot.cutpointr(optcut)
+    test_ggplot_functions(optcut, do_plot_metric = FALSE)
     if (require(fANCOVA)) {
         optcut <- cutpointr(tempdat, x, y, g, method = oc_youden_kernel)
         expect_true(all(table(colnames(optcut)) == 1))
-        expect_silent(plot(optcut))
+        test_plot.cutpointr(optcut)
+        test_ggplot_functions(optcut, do_plot_metric = FALSE)
     }
     optcut <- cutpointr(tempdat, x, y, g)
     expect_true(all(table(colnames(optcut)) == 1))
-    expect_silent(plot(optcut))
+    test_plot.cutpointr(optcut)
+    test_ggplot_functions(optcut, do_plot_metric = FALSE)
     optcut <- cutpointr(tempdat, x, y, g, method = oc_manual, cutpoint = 30)
     expect_true(all(table(colnames(optcut)) == 1))
-    expect_silent(plot(optcut))
+    test_plot.cutpointr(optcut)
+    test_ggplot_functions(optcut, do_plot_metric = FALSE)
 })
 
 test_that("Correct cutpoints with example data", {
@@ -217,15 +223,18 @@ test_that("Correct cutpoints with example data", {
     optcut <- cutpointr(exdat, preds, obs, method = minimize_metric,
                         metric = abs_d_sens_spec, na.rm = T)
     expect_equal(optcut$optimal_cutpoint, 1)
-    expect_silent(plot(optcut))
+    test_plot.cutpointr(optcut)
+    test_ggplot_functions(optcut)
     optcut <- cutpointr(exdat, preds, obs, method = maximize_metric,
                         metric = accuracy, na.rm = T)
     expect_equal(optcut$optimal_cutpoint, 1)
-    expect_silent(plot(optcut))
+    test_plot.cutpointr(optcut)
+    test_ggplot_functions(optcut)
     optcut <- cutpointr(exdat, preds, obs, method = maximize_metric,
                         metric = youden, na.rm = T)
     expect_equal(optcut$optimal_cutpoint, 1)
-    expect_silent(plot(optcut))
+    test_plot.cutpointr(optcut)
+    test_ggplot_functions(optcut)
 
     # With Inf and -Inf
     exdat <- data.frame(obs = c(rep(0, 20),
@@ -250,13 +259,15 @@ test_that("Metric colnames that are already in cutpointr are modified", {
     opt_cut <- cutpointr(suicide, dsi, suicide, metric = metricfunc,
                          boot_runs = 5)
     expect_equal(colnames(opt_cut)[4], "metric_sensitivity")
-    expect_silent(plot(opt_cut))
+    test_plot.cutpointr(opt_cut)
+    test_ggplot_functions(opt_cut)
     expect_silent(summary(opt_cut))
 
     opt_cut <- cutpointr(suicide, dsi, suicide, gender, metric = metricfunc,
                          boot_runs = 5)
     expect_equal(colnames(opt_cut)[5], "metric_sensitivity")
-    expect_silent(plot(opt_cut))
+    test_plot.cutpointr(opt_cut)
+    test_ggplot_functions(opt_cut)
     expect_silent(summary(opt_cut))
 
     metricfunc <- function(tp, fp, tn, fn) {
@@ -267,12 +278,14 @@ test_that("Metric colnames that are already in cutpointr are modified", {
     opt_cut <- cutpointr(suicide, dsi, suicide, metric = metricfunc,
                          boot_runs = 5)
     expect_equal(colnames(opt_cut)[4], "metric_AUC")
-    expect_silent(plot(opt_cut))
+    test_plot.cutpointr(opt_cut)
+    test_ggplot_functions(opt_cut)
     expect_silent(summary(opt_cut))
     opt_cut <- cutpointr(suicide, dsi, suicide, gender, metric = metricfunc,
                          boot_runs = 5)
     expect_equal(colnames(opt_cut)[5], "metric_AUC")
-    expect_silent(plot(opt_cut))
+    test_plot.cutpointr(opt_cut)
+    test_ggplot_functions(opt_cut)
     expect_silent(summary(opt_cut))
 
     metricfunc <- function(tp, fp, tn, fn) {
@@ -287,13 +300,15 @@ test_that("Metric colnames that are already in cutpointr are modified", {
     opt_cut <- cutpointr(suicide, dsi, suicide, method = oc_youden_normal,
                          metric = metricfunc, boot_runs = 5)
     expect_equal(colnames(opt_cut)[4], "metric_roc_curve")
-    expect_silent(plot(opt_cut))
+    test_plot.cutpointr(opt_cut)
+    test_ggplot_functions(opt_cut, do_plot_metric = FALSE)
     expect_silent(summary(opt_cut))
 
     opt_cut <- cutpointr(suicide, dsi, suicide, gender, method = oc_youden_normal,
                          metric = metricfunc, boot_runs = 5)
     expect_equal(colnames(opt_cut)[5], "metric_roc_curve")
-    expect_silent(plot(opt_cut))
+    test_plot.cutpointr(opt_cut)
+    test_ggplot_functions(opt_cut, do_plot_metric = FALSE)
     expect_silent(summary(opt_cut))
 })
 
@@ -865,25 +880,22 @@ test_that("smoothing splines lead to plausible results", {
     cp <- cutpointr(suicide, dsi, suicide, method = maximize_spline_metric,
                     nknots = 5, spar = 0.3)
     expect_equal(cp$optimal_cutpoint, 3)
-    expect_silent(plot(cp))
-    expect_silent(print(plot_metric(cp)))
-    expect_silent(print(plot_roc(cp)))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp)
     expect_silent(summary(cp))
 
     cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric,
                     nknots = 5, spar = 0.3)
     expect_equal(cp$optimal_cutpoint, c(3, 3))
-    expect_silent(plot(cp))
-    expect_silent(print(plot_metric(cp)))
-    expect_silent(print(plot_roc(cp)))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp)
     expect_silent(summary(cp))
 
     cp <- cutpointr(suicide, dsi, suicide, method = minimize_spline_metric,
                     nknots = 5, spar = 0.3, df = 5, metric = abs_d_sens_spec)
     expect_equal(cp$optimal_cutpoint, 3)
-    expect_silent(plot(cp))
-    expect_silent(print(plot_metric(cp)))
-    expect_silent(print(plot_roc(cp)))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp)
     expect_silent(summary(cp))
 })
 
@@ -891,25 +903,22 @@ test_that("gam smoothing leads to plausible results", {
     cp <- cutpointr(suicide, dsi, suicide, method = maximize_gam_metric,
                     metric = youden)
     expect_equal(cp$optimal_cutpoint, 2)
-    expect_silent(plot(cp))
-    expect_silent(print(plot_metric(cp)))
-    expect_silent(print(plot_roc(cp)))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp)
     expect_silent(summary(cp))
 
     cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_gam_metric,
                     metric = youden)
     expect_equal(cp$optimal_cutpoint, c(2, 2))
-    expect_silent(plot(cp))
-    expect_silent(print(plot_metric(cp)))
-    expect_silent(print(plot_roc(cp)))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp)
     expect_silent(summary(cp))
 
     cp <- cutpointr(suicide, dsi, suicide, gender, method = minimize_gam_metric,
                     metric = abs_d_sens_spec)
     expect_equal(cp$optimal_cutpoint, c(2, 2))
-    expect_silent(plot(cp))
-    expect_silent(print(plot_metric(cp)))
-    expect_silent(print(plot_roc(cp)))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp)
     expect_silent(summary(cp))
 })
 
@@ -918,25 +927,25 @@ test_that("bootstrapped cutpoints lead to plausible results", {
     cp <- cutpointr(suicide, dsi, suicide, method = maximize_boot_metric,
                     metric = youden, boot_cut = 10)
     expect_equal(cp$optimal_cutpoint, 1.9)
-    expect_silent(plot(cp))
-    expect_silent(print(plot_roc(cp)))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp, do_plot_metric = FALSE)
     expect_silent(summary(cp))
 
     set.seed(14)
     cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_boot_metric,
                     metric = youden, boot_cut = 10)
     expect_equal(cp$optimal_cutpoint, c(2.2, 3.2))
-    expect_silent(plot(cp))
-    expect_silent(print(plot_roc(cp)))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp, do_plot_metric = FALSE)
     expect_silent(summary(cp))
 
     set.seed(15)
     cp <- cutpointr(suicide, dsi, suicide, gender, method = minimize_boot_metric,
                     metric = abs_d_sens_spec, boot_cut = 10)
     expect_equal(cp$optimal_cutpoint, c(2.1, 2.2))
-    expect_silent(plot(cp))
     expect_error(plot_metric(cp))
-    expect_silent(print(plot_roc(cp)))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp, do_plot_metric = FALSE)
     expect_silent(summary(cp))
 })
 
@@ -1108,7 +1117,8 @@ test_that("cutpointr works with custom method function", {
     expect_equal(colnames(cp)[4], "youden_index")
     expect_equal(cp$optimal_cutpoint, 1.991)
     expect_equal(cp$method, "CutOff_Optimised")
-    expect_silent(plot(cp))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp, do_plot_metric = FALSE)
 
     set.seed(927)
     cp <- cutpointr(suicide, dsi, suicide, method = CutOff_Optimised,
@@ -1116,13 +1126,15 @@ test_that("cutpointr works with custom method function", {
     expect_equal(colnames(cp)[4], "youden_index")
     expect_equal(cp$optimal_cutpoint, 1.991)
     expect_equal(cp$method, "CutOff_Optimised")
-    expect_silent(plot(cp))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp, do_plot_metric = FALSE)
 
     cp <- cutpointr(suicide, dsi, suicide, gender, method = CutOff_Optimised)
     expect_equal(colnames(cp)[5], "youden_index")
     expect_equal(cp$optimal_cutpoint, c(1.990, 2.992))
     expect_equal(cp$method, c("CutOff_Optimised", "CutOff_Optimised"))
-    expect_silent(plot(cp))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp, do_plot_metric = FALSE)
 
     set.seed(264)
     cp <- cutpointr(suicide, dsi, suicide, gender, method = CutOff_Optimised,
@@ -1130,7 +1142,8 @@ test_that("cutpointr works with custom method function", {
     expect_equal(colnames(cp)[5], "youden_index")
     expect_equal(cp$optimal_cutpoint, c(1.990, 2.992))
     expect_equal(cp$method, c("CutOff_Optimised", "CutOff_Optimised"))
-    expect_silent(plot(cp))
+    test_plot.cutpointr(cp)
+    test_ggplot_functions(cp, do_plot_metric = FALSE)
 })
 
 test_that("predict behaves as expected", {
@@ -1227,8 +1240,6 @@ test_that("add_metric adds metrics correctly", {
     oc <- add_metric(oc, list(ppv, npv))
     expect_equal(oc$ppv, c(0.3676471, 0.2592593), tolerance = 1e-5)
     expect_equal(oc$npv, c(0.9938272, 0.9823009), tolerance = 1e-5)
-    oc <- add_metric(oc, list(ppv)) # fügt ppv1 hinzu
-    expect_equal(round(oc$ppv1, 7), c(0.3676471, 0.2592593))
 
     oc <- cutpointr(suicide, dsi, suicide)
     oc <- add_metric(oc, list(F1_score, precision))
@@ -1399,7 +1410,7 @@ test_that("boot_test works correctly", {
     set.seed(9184)
     cp <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 100)
     btg <- boot_test(cp, variable = AUC, in_bag = TRUE)
-    expect_equal(round(btg$p, 3), 0.306)
+    expect_equal(as.numeric(round(btg$p, 3)), 0.306)
     expect_equal(btg$subgroup1, "female")
     expect_equal(as.numeric(btg$d), as.numeric(bt$d))
 

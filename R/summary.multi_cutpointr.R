@@ -47,7 +47,7 @@ summary.multi_cutpointr <- function(object, ...) {
             x_summary[[r]]$boot_runs <- nrow(temprow[["boot"]][[1]])
         }
     }
-    x_summary <- purrr::map_df(x_summary, tidy_summary_multi)
+    x_summary <- suppressMessages(purrr::map_df(x_summary, tidy_summary_multi))
     class(x_summary) <- c("summary_multi_cutpointr", class(x_summary))
     return(x_summary)
 }

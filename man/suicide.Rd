@@ -4,13 +4,15 @@
 \name{suicide}
 \alias{suicide}
 \title{Suicide attempts and DSI sum scores of 532 subjects}
-\format{A data frame with 532 rows and 4 variables:
+\format{
+A data frame with 532 rows and 4 variables:
 \describe{
   \item{age}{(numeric) Age of participants in years}
   \item{gender}{(factor) Gender}
   \item{dsi}{(numeric) Sum-score (0 = low suicidality, 12 = high suicidality)}
   \item{suicide}{(factor) Past suicide attempt (no = no attempt, yes = at least one attempt)}
-}}
+}
+}
 \source{
 von Glischinski, M., Teisman, T., Prinz, S., Gebauer, J., and Hirschfeld, G. (2017). Depressive Symptom Inventory- Suicidality Subscale: Optimal cut points for clinical and non-clinical samples. Clinical Psychology & Psychotherapy
 }
