@@ -1,3 +1,8 @@
+# cutpointr 1.0.2
+
+- Minor internal changes for compatibility with the latest updates of
+some packages from the tidyverse (e.g. `tibble` 3.0.0)
+
 # cutpointr 1.0.1
 
 - Prepare for matrix inheriting from class "array" in R 4.0.0 by making a minor
