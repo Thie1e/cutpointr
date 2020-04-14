@@ -2,12 +2,15 @@ Package: cutpointr
 Type: Package
 Title: Determine and Evaluate Optimal Cutpoints in Binary
     Classification Tasks
-Version: 1.0.2
+Version: 1.0.2.9000
 Date: 2020-04-06
 Authors@R: person("Christian", "Thiele", , "c.thiele@gmx-topmail.de", c("aut", "cre"))
 Description: Estimate cutpoints that optimize a specified metric in binary classification tasks
     and validate performance using bootstrapping. Some methods for more robust cutpoint
-    estimation and various plotting functions are included.
+    estimation are supported, e.g. a parametric method assuming normal distributions,
+    bootstrapped cutpoints, and smoothing of the metric values per cutpoint using
+    Generalized Additive Models. Various plotting functions are included. For an overview
+    of the package see Thiele and Hirschfeld (2020) <arXiv:2002.09209>.
 License: GPL-3
 URL: https://github.com/thie1e/cutpointr
 BugReports: https://github.com/thie1e/cutpointr/issues
