@@ -4,7 +4,12 @@ Title: Determine and Evaluate Optimal Cutpoints in Binary
     Classification Tasks
 Version: 1.0.2.9000
 Date: 2020-04-06
-Authors@R: person("Christian", "Thiele", , "c.thiele@gmx-topmail.de", c("aut", "cre"))
+Authors@R:
+    person(given = "Christian",
+           family = "Thiele",
+           role = c("cre", "aut"),
+           email = "c.thiele@gmx-topmail.de",
+           comment = c(ORCID = "0000-0002-1156-5117"))
 Description: Estimate cutpoints that optimize a specified metric in binary classification tasks
     and validate performance using bootstrapping. Some methods for more robust cutpoint
     estimation are supported, e.g. a parametric method assuming normal distributions,
