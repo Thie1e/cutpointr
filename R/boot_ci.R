@@ -53,7 +53,7 @@ boot_ci <- function(x, variable, in_bag = TRUE, alpha = 0.05) {
                            na.rm = TRUE)
         res <- tibble::tibble(
             quantile = c(alpha / 2, 1 - alpha / 2),
-            values = values
+            values = unname(values)
         )
         return(res)
     } else {
@@ -74,7 +74,7 @@ boot_ci <- function(x, variable, in_bag = TRUE, alpha = 0.05) {
             tibble::tibble(
                 subgroup = s,
                 quantile = c(alpha / 2, 1 - alpha / 2),
-                values = values
+                values = unname(values)
             )
         })
         return(res)
