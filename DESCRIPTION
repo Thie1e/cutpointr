@@ -30,6 +30,7 @@ Imports:
     Rcpp (>= 0.12.12),
     stats,
     utils,
+    vctrs,
     rlang (>= 0.4.0)
 RoxygenNote: 7.1.0
 Suggests:
