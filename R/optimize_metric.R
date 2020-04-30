@@ -362,7 +362,7 @@ maximize_boot_metric <- function(data, x, class, metric_func = youden,
                             tol_metric, use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimal_cutpoints <- purrr::map(1:boot_cut, function(i) {
-        b_ind <- simple_boot(data = data, dep_var = class)
+        b_ind <- simple_boot(data = data, dep_var = class, stratify = FALSE)
         opt_cut <- optimize_metric(data = data[b_ind, ],
                                    x = x, class = class,
                                    metric_func = metric_func,
@@ -390,7 +390,7 @@ minimize_boot_metric <- function(data, x, class, metric_func = youden,
                             tol_metric, use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
     optimal_cutpoints <- purrr::map(1:boot_cut, function(i) {
-        b_ind <- simple_boot(data = data, dep_var = class)
+        b_ind <- simple_boot(data = data, dep_var = class, stratify = FALSE)
         opt_cut <- optimize_metric(data = data[b_ind, ],
                                    x = x, class = class,
                                    metric_func = metric_func,

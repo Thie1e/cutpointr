@@ -294,7 +294,7 @@ prepare_bind_rows <- function(x) {
 # confidence intervals.
 simple_boot <- function(ind_pos = NULL, ind_neg = NULL,
                         data = NULL, dep_var = NULL,
-                        stratify = FALSE) {
+                        stratify) {
     if (stratify) {
         b_ind_pos <- sample(ind_pos, size = length(ind_pos), replace = TRUE)
         b_ind_neg <- sample(ind_neg, size = length(ind_neg), replace = TRUE)
