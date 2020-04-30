@@ -532,10 +532,11 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                 roc_curve <- roc(data = d, x = !!predictor, class = !!outcome,
                                  pos_class = pos_class, neg_class = neg_class,
                                  direction = direction)
-                roc_curve <- tidyr::nest(.data = roc_curve,
-                                         roc_curve = dplyr::everything()) %>%
-                    tibble::as_tibble()
-                optcut <- dplyr::bind_cols(roc_curve,
+                # roc_curve <- tidyr::nest(.data = tibble::as_tibble(roc_curve),
+                #                          roc_curve = dplyr::everything()) %>%
+                #     tibble::as_tibble()
+                roc_curve <- tibble::tibble(roc_curve = list(roc_curve))
+                optcut <- dplyr::bind_cols(tibble::as_tibble(roc_curve),
                                            tibble::as_tibble(optcut))
             } else {
                 check_roc_curve(optcut)
@@ -623,9 +624,10 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                              x = !!predictor, class = !!outcome,
                              pos_class = pos_class, neg_class = neg_class,
                              direction = direction)
-            roc_curve <- tidyr::nest(.data = roc_curve,
-                                     roc_curve = dplyr::everything()) %>%
-                tibble::as_tibble()
+            # roc_curve <- tidyr::nest(.data = tibble::as_tibble(roc_curve),
+            #                          roc_curve = dplyr::everything()) %>%
+            #     tibble::as_tibble()
+            roc_curve <- tibble::tibble(roc_curve = list(roc_curve))
             optcut <- dplyr::bind_cols(roc_curve, tibble::as_tibble(optcut))
         } else {
             check_roc_curve(optcut)
@@ -743,9 +745,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                          class = !!outcome,
                                          pos_class = pc, neg_class = neg_class,
                                          direction = direction, silent = TRUE)
-                        roc_curve_b <- tidyr::nest(.data = roc_curve_b,
-                                                   roc_curve = dplyr::everything()) %>%
-                            tibble::as_tibble()
+                        roc_curve_b <- tibble::tibble(roc_curve = list(roc_curve_b))
                         optcut_b <- dplyr::bind_cols(tibble::as_tibble(optcut_b),
                                                      roc_curve_b)
                     }
@@ -803,7 +803,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                         AUC_oob           =  auc_oob
                     )
                     bootstrap <- bootstrap %>%
-                        add_list( metric_b[, mn], paste0(mn, "_b")) %>%
+                        add_list(metric_b[, mn], paste0(mn, "_b")) %>%
                         add_list(metric_oob[, mn], paste0(mn, "_oob")) %>%
                         add_list(Acc_b, "acc_b") %>%
                         add_list(Acc_oob, "acc_oob") %>%
@@ -822,22 +822,22 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                         add_list(roc_curve_oob$tn[opt_ind_oob], "TN_oob") %>%
                         add_list(roc_curve_oob$fn[opt_ind_oob], "FN_oob")
                     bootstrap$roc_curve_b =  optcut_b$roc_curve
-                    roc_curve_oob <- tidyr::nest(.data = roc_curve_oob,
-                                                 roc_curve_oob = dplyr::everything()) %>%
-                        tibble::as_tibble()
+                    roc_curve_oob <- tibble::tibble(roc_curve_oob = list(roc_curve_oob))
                     bootstrap <- dplyr::bind_cols(bootstrap,
-                                               tibble::as_tibble(roc_curve_oob))
+                                                  tibble::as_tibble(roc_curve_oob))
                     return(bootstrap)
                 }
             boot_g <- prepare_bind_rows(boot_g)
             boot_g <- suppressWarnings(dplyr::bind_rows(boot_g))
-            tidyr::drop_na(boot_g)
             return(boot_g)
         })
         missing_reps <- purrr::map_lgl(.x = boot_res,
                                        .f = function(x) nrow(x) != boot_runs)
         if (any(missing_reps)) {
-            message("Some bootstrap repetitions were removed because of errors.")
+            # Some repetitions may be missing even when boot_stratify = TRUE
+            # when there's only one class in the out-of-bag data
+            message(paste("Some bootstrap repetitions were removed because",
+            "of missing values or errors."))
         }
     }
     optcut$boot = boot_res

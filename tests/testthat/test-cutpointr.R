@@ -1386,12 +1386,12 @@ test_that("boot_ci works correctly", {
     set.seed(1349)
     cp <- cutpointr(suicide, dsi, suicide, boot_runs = 30)
     bci <- boot_ci(x = cp, variable = optimal_cutpoint, alpha = 0.05)
-    expect_equal(round(as.numeric(bci$values), 2), c(1, 3.27))
+    expect_equal(round(as.numeric(bci$values), 3), c(1, 3.275))
 
     set.seed(1349)
     cp <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 30)
     bci <- boot_ci(x = cp, variable = optimal_cutpoint, alpha = 0.05)
-    expect_equal(round(bci$values, 2), c(2, 2, 1, 4.55))
+    expect_equal(as.numeric(round(bci$values, 3)), c(2, 2, 1, 4.55))
     expect_equal(bci$subgroup, c("female", "female", "male", "male"))
 })
 
@@ -1399,13 +1399,13 @@ test_that("boot_ci works correctly", {
 test_that("boot_test works correctly", {
     set.seed(123)
     cp_f <- cutpointr(suicide %>% dplyr::filter(gender == "female"),
-                      dsi, suicide, boot_runs = 100)
+                      dsi, suicide, boot_runs = 100, boot_stratify = T)
     set.seed(924)
     cp_m <- cutpointr(suicide %>% dplyr::filter(gender == "male"),
-                      dsi, suicide, boot_runs = 100)
+                      dsi, suicide, boot_runs = 100, boot_stratify = T)
     bt <- boot_test(cp_f, cp_m, AUC, in_bag = TRUE)
-    expect_equal(round(as.numeric(bt$p), 3), 0.249)
-    expect_equal(round(as.numeric(bt$z), 2), 1.15)
+    expect_equal(round(as.numeric(bt$p), 3), 0.287)
+    expect_equal(round(as.numeric(bt$z), 2), 1.07)
 
     set.seed(9184)
     cp <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 100)
@@ -1422,10 +1422,10 @@ test_that("boot_test works correctly", {
                     metric = youden)
     bt <- boot_test(cp, variable = youden)
     expect_equal(nrow(bt), 3)
-    expect_equal(round(bt$p, 3), c(0.753, 0.216, 0.244))
-    expect_equal(round(bt$p_adj, 3), c(0.753, 0.647, 0.647))
+    expect_equal(as.numeric(round(bt$p, 3)), c(0.753, 0.216, 0.244))
+    expect_equal(as.numeric(round(bt$p_adj, 3)), c(0.753, 0.647, 0.647))
     bt <- boot_test(cp, variable = youden, correction = "bonferroni")
-    expect_equal(round(bt$p_adj, 3), c(1, 0.647, 0.731))
+    expect_equal(as.numeric(round(bt$p_adj, 3)), c(1, 0.647, 0.731))
 })
 
 test_that("Bootstrap works with multiple cutpoints when not breaking ties", {

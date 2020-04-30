@@ -62,7 +62,7 @@ plot_x <- function(x, display_cutpoint = TRUE, ...) {
             dplyr::select("data", "subgroup") %>%
             tidyr::unnest(.data$data)
         res_unnested <- dplyr::full_join(res_unnested,
-                                         x[, c("optimal_cutpoint", "subgroup")],
+                                         tibble::as_tibble(x[, c("optimal_cutpoint", "subgroup")]),
                                          by = "subgroup")
         transparency <- 0.6
         if (all(na_inf_omit(unlist(dplyr::select(res_unnested, predictor))) %% 1 == 0) |

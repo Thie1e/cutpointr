@@ -27,7 +27,7 @@ add_metric <- function(object, metric) {
             }
             # Get numbers of TP, FP, TN, FN at optimal cutpoint(s) from ROC curve(s)
             # and calculate the metric(s). Allow for type instability of the metric func:
-            purrr::pmap_df(list(object$optimal_cutpoint,
+            one_met <- purrr::pmap_df(list(object$optimal_cutpoint,
                                 object$roc_curve,
                                 object$direction),
                            function(optimal_cutpoint, roc_curve, direction) {
@@ -50,6 +50,8 @@ add_metric <- function(object, metric) {
                                }
                                tibble::tibble(!!met_name := met)
                            })
+            class(one_met) <- class(object)
+            return(one_met)
         })
         oc <- dplyr::bind_cols(object, met)
         return(oc)
@@ -70,7 +72,9 @@ add_metric <- function(object, metric) {
             }
             if (is.null(met_name)) met_name <- "added_metric"
             met <- as.numeric(met)
-            tibble::tibble(!!met_name := met)
+            met <- tibble::tibble(!!met_name := met)
+            class(met) <- class(object)
+            return(met)
         })
         roc_added <- dplyr::bind_cols(object, met)
         return(roc_added)

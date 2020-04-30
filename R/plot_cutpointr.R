@@ -72,7 +72,9 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
         met <- sanitize_metric(met, m_name = met_name, n = nrow(x))
         met <- check_metric_name(met)
         xvar_name <<- colnames(met)
-        x <- dplyr::bind_cols(x, tibble::as_tibble(met))
+        met <- tibble::as_tibble(met)
+        class(met) <- class(x) # Avoid warning from vctrs
+        x <- dplyr::bind_cols(x, met)
         x
     })
     rocdat <- purrr::map(.x = rocdat, .f = function(x) {
@@ -88,7 +90,9 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
         met <- sanitize_metric(met, m_name = yvar_name, n = nrow(x))
         met <- check_metric_name(met)
         yvar_name <<- colnames(met)
-        x <- dplyr::bind_cols(x, tibble::as_tibble(met))
+        met <- tibble::as_tibble(met)
+        class(met) <- class(x) # Avoid warning from vctrs
+        x <- dplyr::bind_cols(x, met)
         x
     })
 
@@ -100,12 +104,16 @@ plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
                 met <- sanitize_metric(met, m_name = xvar_name, n = nrow(x),
                                                    silent = TRUE)
                 met <- check_metric_name(met)
-                x <- dplyr::bind_cols(x, tibble::as_tibble(met))
+                met <- tibble::as_tibble(met)
+                class(met) <- class(x) # Avoid warning from vctrs
+                x <- dplyr::bind_cols(x, met)
                 met <- yvar(x = x, tp = x$tp, fp = x$fp, tn = x$tn, fn = x$fn)
                 met <- sanitize_metric(met, m_name = yvar_name, n = nrow(x),
                                                    silent = TRUE)
                 met <- check_metric_name(met)
-                x <- dplyr::bind_cols(x, tibble::as_tibble(met))
+                met <- tibble::as_tibble(met)
+                class(met) <- class(x) # Avoid warning from vctrs
+                x <- dplyr::bind_cols(x, met)
                 x
             })
             ci <- x[["boot"]][[i]]$roc_curve_b %>%
