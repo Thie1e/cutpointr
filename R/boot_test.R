@@ -137,7 +137,7 @@ boot_test <- function(x, y = NULL, variable = "AUC", in_bag = TRUE,
                 unlist
             z <- (t1 - t2) / sdt
             if (t1 - t2 == 0 & is.nan(sdt)) z  <- 0
-            p <- stats::pnorm(-abs(z)) * 2
+            p <- unname(stats::pnorm(-abs(z)) * 2)
             tibble::tibble(subgroup1 = var1,
                            subgroup2 = var2,
                            test_var = variable,
@@ -148,7 +148,7 @@ boot_test <- function(x, y = NULL, variable = "AUC", in_bag = TRUE,
                            z = z,
                            in_bag = in_bag)
         })
-        test_res$p_adj <- stats::p.adjust(p = test_res$p, method = correction)
+        test_res$p_adj <- unname(stats::p.adjust(p = test_res$p, method = correction))
     } else if (!(is.null(y))) {
         # Test two ungrouped cutpointr objects vs. each other
         if (!has_boot_results(y)) {
