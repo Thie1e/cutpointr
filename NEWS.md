@@ -1,3 +1,10 @@
+# cutpointr 1.0.3
+
+- Some changes for vctrs 0.3.0 and dplyr 1.0.0: Unname and correctly assign
+classes to a few objects instead of using vctrs::df_cast and vctrs::df_ptype2
+to keep compatibility with vctrs 0.2.4
+- Added ORCID and article reference to Description
+
 # cutpointr 1.0.2
 
 - Minor internal changes for compatibility with the latest updates of
