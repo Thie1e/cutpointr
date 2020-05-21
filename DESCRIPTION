@@ -35,7 +35,6 @@ Imports:
     Rcpp (>= 0.12.12),
     stats,
     utils,
-    vctrs (>= 0.2.4),
     rlang (>= 0.4.0)
 RoxygenNote: 7.1.0
 Suggests:
@@ -49,5 +48,6 @@ Suggests:
     mgcv (>= 1.8),
     crayon (>= 1.3.4),
     registry (>= 0.5-1),
-    pkgmaker(>= 0.31.1)
+    pkgmaker(>= 0.31.1),
+    vctrs (>= 0.2.4)
 VignetteBuilder: knitr
