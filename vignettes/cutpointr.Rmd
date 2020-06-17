@@ -11,6 +11,8 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(fig.width = 6, fig.height = 5, fig.align = "center")
+options(rmarkdown.html_vignette.check_title = FALSE)
+load("vignettedata/vignettedata.Rdata")
 ```
 
 **cutpointr** is an R package for tidy calculation of "optimal" cutpoints. It 
@@ -177,11 +179,14 @@ performance of the cutpoint estimation method. If a subgroup is given,
 the bootstrapping is carried out separately for every
 subgroup which is also reflected in the plots and output.
 
-```{r, cache=TRUE}
+```{r separate subgroups and bootstrapping, eval = FALSE}
 set.seed(12)
-opt_cut <- cutpointr(suicide, dsi, suicide, boot_runs = 1000)
-opt_cut
+opt_cut_b <- cutpointr(suicide, dsi, suicide, boot_runs = 1000)
 ```
+```{r}
+opt_cut_b
+```
+
 
 The returned object has the additional column `boot` which is a nested tibble that
 includes the cutpoints per bootstrap sample along with the metric calculated using 
@@ -208,16 +213,15 @@ plot(opt_cut)
 Using `foreach` and `doRNG` the bootstrapping can be parallelized easily. The
 **doRNG** package is being used to make the bootstrap sampling reproducible.
 
-```{r, cache=TRUE}
-if (suppressPackageStartupMessages(require(doParallel) & require(doRNG))) {
-  cl <- makeCluster(2) # 2 cores
-  registerDoParallel(cl)
-  registerDoRNG(12) # Reproducible parallel loops using doRNG
-  opt_cut <- cutpointr(suicide, dsi, suicide, gender, pos_class = "yes",
-                 direction = ">=", boot_runs = 1000, allowParallel = TRUE)
-  stopCluster(cl)
-  opt_cut
-}
+```{r, eval = FALSE}
+library(doParallel)
+cl <- makeCluster(2) # 2 cores
+registerDoParallel(cl)
+registerDoRNG(12) # Reproducible parallel loops using doRNG
+opt_cut <- cutpointr(suicide, dsi, suicide, gender, pos_class = "yes",
+                     direction = ">=", boot_runs = 1000, allowParallel = TRUE)
+stopCluster(cl)
+opt_cut
 ```
 
 
@@ -273,7 +277,7 @@ Using parameters for the LOESS smoothing of `criterion = "aicc"`, `degree = 2`,
 `family = "symmetric"`, and `user.span = 0.7` we get the following smoothed
 versions of the above metrics:
 
-```{r}
+```{r, message = FALSE}
 opt_cut <- cutpointr(suicide, dsi, suicide, gender, 
                      method = minimize_loess_metric,
                      criterion = "aicc", family = "symmetric", 
@@ -651,17 +655,17 @@ based on, for example, a metric but is instead set manually using the
 in the literature or in other external sources. 
 
 The `oc_manual` function could also be used to set the cutpoint to the sample
-mean using `cutpoint = mean(data$x)`. However, this may introduce a bias into the
+mean using `cutpoint = mean(data$x)`. However, this may introduce bias into the
 bootstrap validation procedure, since the actual mean of the population is
 not known and thus the mean to be used as the cutpoint should be automatically determined in every resample.
 To do so, the `oc_mean` and `oc_median` functions can be used.
 
-```{r}
+```{r, eval = FALSE}
 set.seed(100)
 opt_cut_manual <- cutpointr(suicide, dsi, suicide, method = oc_manual, 
-                       cutpoint = mean(suicide$dsi), boot_runs = 30)
+                       cutpoint = mean(suicide$dsi), boot_runs = 1000)
 set.seed(100)
-opt_cut_mean <- cutpointr(suicide, dsi, suicide, method = oc_mean, boot_runs = 30)
+opt_cut_mean <- cutpointr(suicide, dsi, suicide, method = oc_mean, boot_runs = 1000)
 ```
 
 
@@ -714,26 +718,23 @@ the output contains one row per subgroup and the function
 that accesses the data should be mapped to every row or the data should be 
 grouped by subgroup.
 
-```{r, cache=TRUE}
-# Extracting the bootstrap results
+```{r, eval = FALSE, message = FALSE}
 set.seed(123)
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 1000)
+opt_cut_b_g <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 1000)
+```
 
-# Using base R to summarise the result of the bootstrap
-summary(opt_cut$boot[[1]]$optimal_cutpoint)
-summary(opt_cut$boot[[2]]$optimal_cutpoint)
 
+```{r, message = FALSE}
 # Using dplyr and tidyr
 library(tidyr)
-opt_cut %>% 
+opt_cut_b_g %>% 
   group_by(subgroup) %>% 
-  select(boot) %>% 
-  unnest(boot) %>% 
+  select(subgroup, boot) %>%
+  unnest(cols = boot) %>% 
   summarise(sd_oc_boot = sd(optimal_cutpoint),
             m_oc_boot  = mean(optimal_cutpoint),
             m_acc_oob  = mean(acc_oob))
 ```
-
 
 
 ## Adding metrics to the result of cutpointr() or roc()
@@ -857,16 +858,12 @@ To display no confidence interval set `conf_lvl = 0`.
 - `plot_x`: Plot the distribution of the predictor variable
 
 ```{r, fig.width=4, fig.height=3}
-set.seed(102)
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, method = minimize_metric,
-                     metric = abs_d_sens_spec, boot_runs = 200, silent = TRUE)
-opt_cut
-plot_cut_boot(opt_cut)
-plot_metric(opt_cut, conf_lvl = 0.9)
-plot_metric_boot(opt_cut)
-plot_precision_recall(opt_cut)
-plot_sensitivity_specificity(opt_cut)
-plot_roc(opt_cut)
+plot_cut_boot(opt_cut_b_g)
+plot_metric(opt_cut_b_g, conf_lvl = 0.9)
+plot_metric_boot(opt_cut_b_g)
+plot_precision_recall(opt_cut_b_g)
+plot_sensitivity_specificity(opt_cut_b_g)
+plot_roc(opt_cut_b_g)
 ```
 
 All plot functions, except for the standard plot method that returns
@@ -875,7 +872,7 @@ than can be further modified. For example, changing labels, title, and the theme
 can be achieved this way:
 
 ```{r, fig.width=4, fig.height=3}
-p <- plot_x(opt_cut)
+p <- plot_x(opt_cut_b_g)
 p + ggtitle("Distribution of dsi") + theme_minimal() + xlab("Depression score")
 ```
 
@@ -899,12 +896,9 @@ for TPR by FPR (a ROC curve) cannot be plotted easily, as the values of the fals
 positive rate vary per bootstrap sample.
 
 ```{r, fig.width=4, fig.height=3, cache=FALSE}
-set.seed(500)
-oc <- cutpointr(suicide, dsi, suicide, boot_runs = 1000, 
-                metric = sum_ppv_npv) # metric irrelevant for plot_cutpointr
-plot_cutpointr(oc, xvar = cutpoints, yvar = sum_sens_spec, conf_lvl = 0.9)
-plot_cutpointr(oc, xvar = fpr, yvar = tpr, aspect_ratio = 1, conf_lvl = 0)
-plot_cutpointr(oc, xvar = cutpoint, yvar = tp, conf_lvl = 0.9) + geom_point()
+plot_cutpointr(opt_cut_b, xvar = cutpoints, yvar = sum_sens_spec, conf_lvl = 0.9)
+plot_cutpointr(opt_cut_b, xvar = fpr, yvar = tpr, aspect_ratio = 1, conf_lvl = 0)
+plot_cutpointr(opt_cut_b, xvar = cutpoint, yvar = tp, conf_lvl = 0.9) + geom_point()
 ```
 
 
@@ -916,13 +910,10 @@ extracted and plotted manually. The relevant
 nested tibbles are in the columns `data`, `roc_curve` and `boot`. The following
 is an example of accessing and plotting the grouped data.
 
-```{r, fig.width=4, fig.height=3, cache=FALSE}
-set.seed(123) 
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 1000)
-
-opt_cut %>% 
+```{r, fig.width=4, fig.height=3}
+opt_cut_b_g %>% 
     select(data, subgroup) %>% 
-    unnest %>% 
+    unnest(cols = data) %>% 
     ggplot(aes(x = suicide, y = dsi)) + 
     geom_boxplot(alpha = 0.3) + facet_grid(~subgroup)
 ```

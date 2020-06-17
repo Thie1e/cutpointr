@@ -1,3 +1,7 @@
+# cutpointr 1.0.31
+
+- Accelerate tests and vignette building to lower runtime on CRAN
+
 # cutpointr 1.0.3
 
 - Some changes for vctrs 0.3.0 and dplyr 1.0.0: Unname and correctly assign

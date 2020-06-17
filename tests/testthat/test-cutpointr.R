@@ -259,15 +259,15 @@ test_that("Metric colnames that are already in cutpointr are modified", {
     opt_cut <- cutpointr(suicide, dsi, suicide, metric = metricfunc,
                          boot_runs = 5)
     expect_equal(colnames(opt_cut)[4], "metric_sensitivity")
-    test_plot.cutpointr(opt_cut)
-    test_ggplot_functions(opt_cut)
+    # test_plot.cutpointr(opt_cut)
+    # test_ggplot_functions(opt_cut)
     expect_silent(summary(opt_cut))
 
     opt_cut <- cutpointr(suicide, dsi, suicide, gender, metric = metricfunc,
                          boot_runs = 5)
     expect_equal(colnames(opt_cut)[5], "metric_sensitivity")
-    test_plot.cutpointr(opt_cut)
-    test_ggplot_functions(opt_cut)
+    # test_plot.cutpointr(opt_cut)
+    # test_ggplot_functions(opt_cut)
     expect_silent(summary(opt_cut))
 
     metricfunc <- function(tp, fp, tn, fn) {
@@ -278,14 +278,14 @@ test_that("Metric colnames that are already in cutpointr are modified", {
     opt_cut <- cutpointr(suicide, dsi, suicide, metric = metricfunc,
                          boot_runs = 5)
     expect_equal(colnames(opt_cut)[4], "metric_AUC")
-    test_plot.cutpointr(opt_cut)
-    test_ggplot_functions(opt_cut)
+    # test_plot.cutpointr(opt_cut)
+    # test_ggplot_functions(opt_cut)
     expect_silent(summary(opt_cut))
     opt_cut <- cutpointr(suicide, dsi, suicide, gender, metric = metricfunc,
                          boot_runs = 5)
     expect_equal(colnames(opt_cut)[5], "metric_AUC")
-    test_plot.cutpointr(opt_cut)
-    test_ggplot_functions(opt_cut)
+    # test_plot.cutpointr(opt_cut)
+    # test_ggplot_functions(opt_cut)
     expect_silent(summary(opt_cut))
 
     metricfunc <- function(tp, fp, tn, fn) {
@@ -300,15 +300,15 @@ test_that("Metric colnames that are already in cutpointr are modified", {
     opt_cut <- cutpointr(suicide, dsi, suicide, method = oc_youden_normal,
                          metric = metricfunc, boot_runs = 5)
     expect_equal(colnames(opt_cut)[4], "metric_roc_curve")
-    test_plot.cutpointr(opt_cut)
-    test_ggplot_functions(opt_cut, do_plot_metric = FALSE)
+    # test_plot.cutpointr(opt_cut)
+    # test_ggplot_functions(opt_cut, do_plot_metric = FALSE)
     expect_silent(summary(opt_cut))
 
     opt_cut <- cutpointr(suicide, dsi, suicide, gender, method = oc_youden_normal,
                          metric = metricfunc, boot_runs = 5)
     expect_equal(colnames(opt_cut)[5], "metric_roc_curve")
-    test_plot.cutpointr(opt_cut)
-    test_ggplot_functions(opt_cut, do_plot_metric = FALSE)
+    # test_plot.cutpointr(opt_cut)
+    # test_ggplot_functions(opt_cut, do_plot_metric = FALSE)
     expect_silent(summary(opt_cut))
 })
 
@@ -1117,8 +1117,8 @@ test_that("cutpointr works with custom method function", {
     expect_equal(colnames(cp)[4], "youden_index")
     expect_equal(cp$optimal_cutpoint, 1.991)
     expect_equal(cp$method, "CutOff_Optimised")
-    test_plot.cutpointr(cp)
-    test_ggplot_functions(cp, do_plot_metric = FALSE)
+    # test_plot.cutpointr(cp)
+    # test_ggplot_functions(cp, do_plot_metric = FALSE)
 
     set.seed(927)
     cp <- cutpointr(suicide, dsi, suicide, method = CutOff_Optimised,
@@ -1133,8 +1133,8 @@ test_that("cutpointr works with custom method function", {
     expect_equal(colnames(cp)[5], "youden_index")
     expect_equal(cp$optimal_cutpoint, c(1.990, 2.992))
     expect_equal(cp$method, c("CutOff_Optimised", "CutOff_Optimised"))
-    test_plot.cutpointr(cp)
-    test_ggplot_functions(cp, do_plot_metric = FALSE)
+    # test_plot.cutpointr(cp)
+    # test_ggplot_functions(cp, do_plot_metric = FALSE)
 
     set.seed(264)
     cp <- cutpointr(suicide, dsi, suicide, gender, method = CutOff_Optimised,
@@ -1399,18 +1399,18 @@ test_that("boot_ci works correctly", {
 test_that("boot_test works correctly", {
     set.seed(123)
     cp_f <- cutpointr(suicide %>% dplyr::filter(gender == "female"),
-                      dsi, suicide, boot_runs = 100, boot_stratify = T)
+                      dsi, suicide, boot_runs = 10, boot_stratify = T)
     set.seed(924)
     cp_m <- cutpointr(suicide %>% dplyr::filter(gender == "male"),
-                      dsi, suicide, boot_runs = 100, boot_stratify = T)
+                      dsi, suicide, boot_runs = 10, boot_stratify = T)
     bt <- boot_test(cp_f, cp_m, AUC, in_bag = TRUE)
-    expect_equal(round(as.numeric(bt$p), 3), 0.287)
-    expect_equal(round(as.numeric(bt$z), 2), 1.07)
+    expect_equal(round(as.numeric(bt$p), 3), 0.175)
+    expect_equal(round(as.numeric(bt$z), 2), 1.36)
 
     set.seed(9184)
-    cp <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 100)
+    cp <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 10)
     btg <- boot_test(cp, variable = AUC, in_bag = TRUE)
-    expect_equal(as.numeric(round(btg$p, 3)), 0.306)
+    expect_equal(as.numeric(round(btg$p, 3)), 0.139)
     expect_equal(btg$subgroup1, "female")
     expect_equal(as.numeric(btg$d), as.numeric(bt$d))
 
@@ -1418,26 +1418,27 @@ test_that("boot_test works correctly", {
     set.seed(765)
     dat$g <- sample(c("a", "b", "c"), size = nrow(suicide), replace = TRUE)
     set.seed(745)
-    cp <- cutpointr(dat, dsi, suicide, g, boot_runs = 100, boot_stratify = TRUE,
+    cp <- cutpointr(dat, dsi, suicide, g, boot_runs = 15, boot_stratify = TRUE,
                     metric = youden)
     bt <- boot_test(cp, variable = youden)
     expect_equal(nrow(bt), 3)
-    expect_equal(as.numeric(round(bt$p, 3)), c(0.753, 0.216, 0.244))
-    expect_equal(as.numeric(round(bt$p_adj, 3)), c(0.753, 0.647, 0.647))
+    expect_equal(as.numeric(round(bt$p, 3)), c(0.731, 0.274, 0.378))
+    expect_equal(as.numeric(round(bt$p_adj, 3)), c(0.821, 0.821, 0.821))
     bt <- boot_test(cp, variable = youden, correction = "bonferroni")
-    expect_equal(as.numeric(round(bt$p_adj, 3)), c(1, 0.647, 0.731))
+    expect_equal(as.numeric(round(bt$p_adj, 3)), c(1, 0.821, 1))
 })
 
-test_that("Bootstrap works with multiple cutpoints when not breaking ties", {
-    set.seed(827)
-    tempdat <- data.frame(x = rnorm(1000),
-                          y = sample(0:1, size = 1000, replace = TRUE),
-                          g = sample(0:1, size = 1000, replace = TRUE))
-    set.seed(73)
-    cp <- cutpointr(tempdat, x, y, break_ties = c, boot_runs = 200)
-    expect_silent(summary(cp))
-
-    set.seed(73)
-    cp <- cutpointr(tempdat, x, y, g, break_ties = c, boot_runs = 100)
-    expect_silent(summary(cp))
-})
+## runtime too long
+# test_that("Bootstrap works with multiple cutpoints when not breaking ties", {
+#     set.seed(827)
+#     tempdat <- data.frame(x = rnorm(1000),
+#                           y = sample(0:1, size = 1000, replace = TRUE),
+#                           g = sample(0:1, size = 1000, replace = TRUE))
+#     set.seed(73)
+#     cp <- cutpointr(tempdat, x, y, break_ties = c, boot_runs = 200)
+#     expect_silent(summary(cp))
+#
+#     set.seed(73)
+#     cp <- cutpointr(tempdat, x, y, g, break_ties = c, boot_runs = 100)
+#     expect_silent(summary(cp))
+# })
