@@ -1,4 +1,4 @@
-# cutpointr 1.0.2
+# cutpointr 1.0.31
 
 ## R CMD check results
 
