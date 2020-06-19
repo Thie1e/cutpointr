@@ -1,5 +1,9 @@
 # cutpointr 1.0.31
 
+- Reduce size of tarball for CRAN by removing some superfluous files
+
+# cutpointr 1.0.31
+
 - Accelerate tests and vignette building to lower runtime on CRAN
 
 # cutpointr 1.0.3
