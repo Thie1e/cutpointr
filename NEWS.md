@@ -1,4 +1,4 @@
-# cutpointr 1.0.31
+# cutpointr 1.0.32
 
 - Reduce size of tarball for CRAN by removing some superfluous files
 
