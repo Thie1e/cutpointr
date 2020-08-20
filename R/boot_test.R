@@ -24,6 +24,10 @@
 #' If two cutpointr objects are compared and the numbers of bootstrap repetitions
 #' differ, the smaller number will be used.
 #'
+#' Since pairwise differences are calculated for this test, the test function
+#' does not support multiple optimal cutpoints, because it is unclear how the
+#' differences should be calculated in that case.
+#'
 #' @param x A cutpointr object with bootstrap results
 #' @param y If x does not contain subgroups another cutpointr object
 #' @param variable The variable for testing
