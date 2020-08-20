@@ -23,7 +23,9 @@ A data frame with the columns quantile and value
 Given a \code{cutpointr} object that includes bootstrap results
 this function calculates a bootstrap
 confidence interval for a selected variable.
-Missing values are removed before calculating the quantiles.
+Missing values are removed before calculating the quantiles. In the case
+of multiple optimal cutpoints all cutpoints / metric values are included
+in the calculation.
 Values of the selected variable are returned for the percentiles alpha / 2
 and 1 - alpha / 2. The metrics in the bootstrap data frames of
 \code{cutpointr} are suffixed with \code{_b} and \code{_oob} to indicate
