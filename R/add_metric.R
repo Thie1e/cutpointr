@@ -19,7 +19,9 @@
 #' @importFrom rlang !! :=
 add_metric <- function(object, metric) {
     if (!is.list(metric)) stop("The metric function(s) must be given as a list.")
-    stopifnot(("cutpointr" %in% class(object)) | ("roc_cutpointr" %in% class(object)))
+    if (!(("cutpointr" %in% class(object)) | ("roc_cutpointr" %in% class(object)))) {
+        stop("add_metric only supports cutpointr and roc_cutpointr objects.")
+    }
     if ("cutpointr" %in% class(object)) {
         met <- purrr::map(metric, function(metric_func) {
             if (!is.function(metric_func)) {
@@ -83,9 +85,11 @@ add_metric <- function(object, metric) {
                         tibble::tibble(met_b, met_oob)
                     })
                     # Bind rows allowing for multiple optimal cutpoints
-                    has_multiple <- any(purrr::map_dbl(one_met, function(x) {
-                        length(unlist(x)) > 2
-                    }))
+                    has_multiple <- any(
+                        purrr::map_lgl(one_met, function(x) {
+                            length(unlist(x)) > 2
+                        })
+                    )
                     if (has_multiple) {
                         one_met <- purrr::map_df(one_met, function(x) {
                             if (length(unlist(x)) == 2) {
