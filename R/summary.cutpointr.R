@@ -37,9 +37,11 @@ summary.cutpointr <- function(object, ...) {
             temprow$roc_curve[[1]][oi, c("tp", "fn", "fp", "tn")]
         )
         if (has_boot_results(temprow)) {
-            x_summary[[r]][["boot"]] <- purrr::map(temprow[["boot"]][[1]][, 1:13], function(x) {
-                summary_sd(x)
-            })
+            x_summary[[r]][["boot"]] <- temprow[["boot"]][[1]] %>%
+                dplyr::select(-(TP_b:roc_curve_oob)) %>%
+                purrr::map(function(x) {
+                    summary_sd(x)
+                })
             x_summary[[r]][["boot"]] <- do.call(rbind, x_summary[[r]][["boot"]])
             x_summary[[r]][["boot"]] <- as.data.frame(x_summary[[r]][["boot"]])
             x_summary[[r]][["boot"]] <- tibble::rownames_to_column(x_summary[[r]][["boot"]],

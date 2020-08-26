@@ -1,4 +1,5 @@
 #' @export
+#' @importFrom tidyselect any_of
 print.summary_cutpointr <- function(x, digits = 4, ...) {
     cat(paste("Method:", x$cutpointr[[1]]$method, "\n"))
     cat(paste("Predictor:", x$cutpointr[[1]]$predictor, "\n"))
@@ -33,10 +34,14 @@ print.summary_cutpointr <- function(x, digits = 4, ...) {
 
         purrr::map_df(1:length(x$cutpointr[[i]]$optimal_cutpoint[[1]]), function(j) {
             x$cutpointr[[i]] %>%
-                dplyr::select(.data$optimal_cutpoint,
-                               !!find_metric_name(x$cutpointr[[i]]),
-                               .data$acc, .data$sensitivity,
-                               .data$specificity) %>%
+                # dplyr::select(-c(direction, method, AUC:boot)) %>%
+                dplyr::select(!tidyselect::any_of(c("direction", "subgroup",
+                                                    "method", "AUC",
+                                                    "pos_class", "neg_class",
+                                                    "prevalence", "outcome",
+                                                    "predictor", "grouping",
+                                                    "data", "roc_curve",
+                                                    "boot"))) %>%
                 purrr::map_df(get_fnth, n = j)
         }) %>%
             as.data.frame %>%

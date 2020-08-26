@@ -2,7 +2,7 @@ Package: cutpointr
 Type: Package
 Title: Determine and Evaluate Optimal Cutpoints in Binary
     Classification Tasks
-Version: 1.0.32.9000
+Version: 1.0.32.9001
 Date: 2020-06-19
 Authors@R:
     person(given = "Christian",
@@ -28,6 +28,7 @@ Imports:
     gridExtra (>= 2.2.1),
     foreach (>= 1.4.3),
     dplyr (>= 0.8.0),
+    tidyselect (>= 1.1.0),
     tidyr (>= 1.0.0),
     purrr (>= 0.3.0),
     tibble (>= 3.0.0),
