@@ -800,6 +800,13 @@ test_that("multi_cutpointr runs without errors", {
     mcg4 <- multi_cutpointr(suicide, x = c("age", "dsi"), class = suicide,
                           subgroup = "gender", pos_class = "yes")
     expect_identical(mcg, mcg4)
+
+    # We had a bug with cutpointr 1.0.32 where class had to be named suicide
+    temp <- suicide
+    temp$foo <- temp$suicide
+    temp$suicide <- NULL
+    temp_mc <- multi_cutpointr(temp, x = c("age", "dsi"), class = foo)
+    expect_equal(temp_mc$optimal_cutpoint, c(56, 2))
 })
 
 test_that("AUC is always >= 0.5 with automatic assumptions", {

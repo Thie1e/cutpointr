@@ -922,7 +922,7 @@ multi_cutpointr <- function(data, x = NULL, class, subgroup,
         })
     }
     res <- suppressWarnings(dplyr::bind_rows(res))
-    class(res) <- c("multi_cutpointr",
-                    class(res)[-which(class(res) == "cutpointr")])
+    base::class(res) <- c("multi_cutpointr",
+                          base::class(res)[-which(base::class(res) == "cutpointr")])
     return(res)
 }

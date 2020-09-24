@@ -3,7 +3,7 @@ Type: Package
 Title: Determine and Evaluate Optimal Cutpoints in Binary
     Classification Tasks
 Version: 1.0.32.9001
-Date: 2020-06-19
+Date: 2020-09-25
 Authors@R:
     person(given = "Christian",
            family = "Thiele",

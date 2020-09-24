@@ -1,3 +1,11 @@
+# cutpointr 1.0.32.9001
+
+- `boot_ci` now works with multiple cutpoints (if `break_ties = c`)
+- `add_metric` now adds the selected metrics to the bootstrap results, too.
+- Include metrics that were added with `add_metric` in `summary()`
+- Fix a bug in `multi_cutpointr` that forced the `class` variable to be
+named "suicide". 
+
 # cutpointr 1.0.32
 
 - Reduce size of tarball for CRAN by removing some superfluous files
