@@ -849,9 +849,10 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
 
 #' Calculate optimal cutpoints and further statistics for multiple predictors
 #'
-#' Runs \code{cutpointr_} over multiple predictor variables. If
-#' \code{x = NULL}, \code{cutpointr_}
-#' will be run using all numeric columns in the data set as predictors except for the
+#' Runs \code{cutpointr} over multiple predictor variables. Tidyeval via
+#' \code{!!} is supported for \code{class} and \code{subgroup}. If
+#' \code{x = NULL}, \code{cutpointr} will be run using all numeric columns
+#' in the data set as predictors except for the
 #' variable in \code{class} and, if given, \code{subgroup}.
 #'
 #' The automatic determination of positive / negative classes and \code{direction}
@@ -888,12 +889,15 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
 #' @importFrom purrr %>%
 #' @family main cutpointr functions
 #' @export
-multi_cutpointr <- function(data, x = NULL, class, subgroup,
+multi_cutpointr <- function(data, x = NULL, class, subgroup = NULL,
                             silent = FALSE, ...) {
-    # If the user assumes silent is still the fourth argument
-    if (!missing(subgroup)) {
-        subgroup_sym <- rlang::enquo(subgroup)
+    if (rlang::as_label(rlang::enquo(subgroup)) == "NULL") {
+        subgroup_lab <- "NULL"
+    } else {
+        subgroup_sym <- rlang::ensym(subgroup)
         subgroup_lab <- rlang::as_label(subgroup_sym)
+    }
+    if (subgroup_lab != "NULL") {
         if (subgroup_lab %in% c("TRUE", "FALSE", "T", "F")) {
             stop(paste("The arguments to multi_cutpointr",
                        "have changed. Please see ?multi_cutpointr"))
@@ -902,14 +906,10 @@ multi_cutpointr <- function(data, x = NULL, class, subgroup,
     class_sym <- rlang::ensym(class)
     class_lab <- rlang::as_label(class_sym)
     if (is.null(x)) x = get_numeric_cols(data, class_lab)
-    if (!missing(subgroup)) {
-        subgroup <- rlang::ensym(subgroup)
-        subgroup_lab <- rlang::as_label(subgroup)
+    if (subgroup_lab != "NULL") {
         x <- x[x != subgroup_lab]
-    } else {
-        subgroup_lab <- NULL
     }
-    if (missing(subgroup)) {
+    if (subgroup_lab == "NULL") {
         res <- purrr::map(x, function(coln) {
             if (!silent) message(paste0(coln, ":"))
             cutpointr(data, !!coln, !!class_lab, silent = silent, ...)

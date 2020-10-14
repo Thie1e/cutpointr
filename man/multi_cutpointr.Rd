@@ -4,7 +4,7 @@
 \alias{multi_cutpointr}
 \title{Calculate optimal cutpoints and further statistics for multiple predictors}
 \usage{
-multi_cutpointr(data, x = NULL, class, subgroup, silent = FALSE, ...)
+multi_cutpointr(data, x = NULL, class, subgroup = NULL, silent = FALSE, ...)
 }
 \arguments{
 \item{data}{A data frame.}
@@ -25,9 +25,10 @@ name for subgroup).}
 A data frame.
 }
 \description{
-Runs \code{cutpointr_} over multiple predictor variables. If
-\code{x = NULL}, \code{cutpointr_}
-will be run using all numeric columns in the data set as predictors except for the
+Runs \code{cutpointr} over multiple predictor variables. Tidyeval via
+\code{!!} is supported for \code{class} and \code{subgroup}. If
+\code{x = NULL}, \code{cutpointr} will be run using all numeric columns
+in the data set as predictors except for the
 variable in \code{class} and, if given, \code{subgroup}.
 }
 \details{

@@ -777,29 +777,46 @@ test_that("multi_cutpointr runs without errors", {
                           pos_class = "yes")
     expect_equal(mc$optimal_cutpoint, c(55, 2))
 
+    mc <- multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
+                          subgroup = NULL,
+                          pos_class = "yes")
+    expect_equal(mc$optimal_cutpoint, c(55, 2))
+
     mc2 <- multi_cutpointr(suicide, class = "suicide",
                           pos_class = "yes")
     expect_identical(mc, mc2)
 
     mc3 <- multi_cutpointr(suicide, x = c("age", "dsi"), class = suicide,
-                          pos_class = "yes", metric = sum_sens_spec)
+                            subgroup = NULL, pos_class = "yes")
     expect_identical(mc, mc3)
 
     mcg <- multi_cutpointr(suicide, x = c("age", "dsi"), class = "suicide",
-                          subgroup = "gender", pos_class = "yes")
+                           subgroup = "gender", pos_class = "yes")
     expect_equal(mcg$optimal_cutpoint, c(55, 21, 2, 3))
 
     mcg2 <- multi_cutpointr(suicide, class = "suicide",
-                          subgroup = "gender", pos_class = "yes")
+                            subgroup = "gender", pos_class = "yes")
     expect_identical(mcg, mcg2)
 
     mcg3 <- multi_cutpointr(suicide, x = c("age", "dsi"), class = suicide,
-                          subgroup = gender, pos_class = "yes")
+                            subgroup = gender, pos_class = "yes")
     expect_identical(mcg, mcg3)
 
     mcg4 <- multi_cutpointr(suicide, x = c("age", "dsi"), class = suicide,
-                          subgroup = "gender", pos_class = "yes")
+                            subgroup = "gender", pos_class = "yes")
     expect_identical(mcg, mcg4)
+
+    my_group_var <- "gender"
+    my_class_var <- "suicide"
+    mcg_new <- multi_cutpointr(suicide, x = c("age", "dsi"), class = !!my_class_var,
+                            subgroup = !!my_group_var,
+                            pos_class = "yes")
+    expect_identical(mcg, mcg_new)
+
+    mcg_new <- multi_cutpointr(suicide, x = c("age", "dsi"), class = !!my_class_var,
+                            subgroup = "gender",
+                            pos_class = "yes")
+    expect_identical(mcg, mcg_new)
 
     # We had a bug with cutpointr 1.0.32 where class had to be named suicide
     temp <- suicide

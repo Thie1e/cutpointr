@@ -1,10 +1,12 @@
-# cutpointr 1.0.32.9001
+# cutpointr 1.0.32.9002
 
-- `boot_ci` now works with multiple cutpoints (if `break_ties = c`)
+- `boot_ci` now works with multiple cutpoints (possible if `break_ties = c`).
 - `add_metric` now adds the selected metrics to the bootstrap results, too.
 - Include metrics that were added with `add_metric` in `summary()`
 - Fix a bug in `multi_cutpointr` that forced the `class` variable to be
 named "suicide". 
+- Change default value of `subgroup` in `multi_cutpointr` to `NULL` 
+(instead of missing) to make it consistent with `cutpointr`.
 
 # cutpointr 1.0.32
 
