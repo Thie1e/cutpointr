@@ -161,7 +161,7 @@ negative predictive value (NPV)
 - `risk_ratio`: risk ratio (relative risk)
 - `p_chisquared`: The p-value of a chi-squared test on the confusion
 matrix
-- `cost_misclassification`: The sum of the misclassification cost of
+- `misclassification_cost`: The sum of the misclassification cost of
 false positives and false negatives. Additional arguments: cost_fp, cost_fn
 - `total_utility`: The total utility of true / false positives / negatives.
 Additional arguments: utility_tp, utility_tn, cost_fp, cost_fn
@@ -948,9 +948,9 @@ opt_cut %>%
 # Benchmarks
 
 To offer a comparison to established solutions,
-**cutpointr** will be benchmarked against `optimal.cutpoints` 
-from the **OptimalCutpoints** package, **ThresholdROC** and custom functions based on
-the **ROCR** and **pROC** packages. By generating data of different sizes 
+**cutpointr** 1.0.0 will be benchmarked against `optimal.cutpoints` 
+from **OptimalCutpoints** 1.1-4, **ThresholdROC** 2.7 and custom functions based on
+**ROCR** 1.0-7 and **pROC** 1.15.0. By generating data of different sizes, 
 the benchmarks will offer a comparison of the scalability of the different 
 solutions. 
 
