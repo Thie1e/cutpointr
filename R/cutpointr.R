@@ -520,6 +520,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                     direction = direction, pos_class = pos_class,
                                     neg_class = neg_class, tol_metric = tol_metric,
                                     use_midpoints = use_midpoints,
+                                    boot_stratify = boot_stratify,
                                     ...)
             method_result <- check_method_cols(method_result)
             optcut <- dplyr::bind_cols(optcut, method_result)
@@ -613,6 +614,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                          metric_func = metric,
                          direction = direction, pos_class = pos_class,
                          neg_class = neg_class, tol_metric = tol_metric,
+                         boot_stratify = boot_stratify,
                          use_midpoints = use_midpoints, ...)
         optcut <- check_method_cols(optcut)
         if (length(optcut[["optimal_cutpoint"]][[1]]) > 1) {
@@ -624,9 +626,6 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                              x = !!predictor, class = !!outcome,
                              pos_class = pos_class, neg_class = neg_class,
                              direction = direction)
-            # roc_curve <- tidyr::nest(.data = tibble::as_tibble(roc_curve),
-            #                          roc_curve = dplyr::everything()) %>%
-            #     tibble::as_tibble()
             roc_curve <- tibble::tibble(roc_curve = list(roc_curve))
             optcut <- dplyr::bind_cols(roc_curve, tibble::as_tibble(optcut))
         } else {
@@ -734,6 +733,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                                        pos_class = pc,
                                        neg_class = neg_class,
                                        tol_metric = tol_metric,
+                                       boot_stratify = boot_stratify,
                                        use_midpoints = use_midpoints,
                                        ...)
                     optcut_b <- check_method_cols(optcut_b)

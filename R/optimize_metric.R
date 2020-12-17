@@ -337,6 +337,9 @@ user_span_cutpointr <- function(data, x) {
 #' cutpoints this function, e.g. mean or median, is applied to arrive at a single cutpoint.
 #' @param boot_cut (numeric) Number of bootstrap repetitions over which the mean
 #' optimal cutpoint is calculated.
+#' @param boot_stratify (logical) If the bootstrap is stratified, bootstrap
+#' samples are drawn in both classes and then combined, keeping the number of
+#' positives and negatives constant in every resample.
 #' @param inf_rm (logical) whether to remove infinite cutpoints before
 #' calculating the summary.
 #' @param tol_metric All cutpoints will be passed to \code{summary_func}
@@ -358,11 +361,23 @@ user_span_cutpointr <- function(data, x) {
 #' @export
 maximize_boot_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
-                            summary_func = mean, boot_cut = 50, inf_rm = TRUE,
+                            summary_func = mean, boot_cut = 50,
+                            boot_stratify, inf_rm = TRUE,
                             tol_metric, use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
+    if (boot_stratify) {
+        ind_pos <- which(unlist(data[, class]) == pos_class)
+        ind_neg <- which(unlist(data[, class]) == neg_class)
+    } else {
+        ind_pos <- NA
+        ind_neg <- NA
+    }
     optimal_cutpoints <- purrr::map(1:boot_cut, function(i) {
-        b_ind <- simple_boot(data = data, dep_var = class, stratify = FALSE)
+        b_ind <- simple_boot(data = data,
+                             ind_pos = ind_pos,
+                             ind_neg = ind_neg,
+                             dep_var = class,
+                             stratify = boot_stratify)
         opt_cut <- optimize_metric(data = data[b_ind, ],
                                    x = x, class = class,
                                    metric_func = metric_func,
@@ -386,11 +401,23 @@ maximize_boot_metric <- function(data, x, class, metric_func = youden,
 #' @export
 minimize_boot_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, direction,
-                            summary_func = mean, boot_cut = 50, inf_rm = TRUE,
+                            summary_func = mean, boot_cut = 50,
+                            boot_stratify, inf_rm = TRUE,
                             tol_metric, use_midpoints, ...) {
     metric_name <- as.character(substitute(metric_func))
+    if (boot_stratify) {
+        ind_pos <- which(unlist(data[, class]) == pos_class)
+        ind_neg <- which(unlist(data[, class]) == neg_class)
+    } else {
+        ind_pos <- NA
+        ind_neg <- NA
+    }
     optimal_cutpoints <- purrr::map(1:boot_cut, function(i) {
-        b_ind <- simple_boot(data = data, dep_var = class, stratify = FALSE)
+        b_ind <- simple_boot(data = data,
+                             ind_pos = ind_pos,
+                             ind_neg = ind_neg,
+                             dep_var = class,
+                             stratify = boot_stratify)
         opt_cut <- optimize_metric(data = data[b_ind, ],
                                    x = x, class = class,
                                    metric_func = metric_func,

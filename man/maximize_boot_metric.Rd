@@ -15,6 +15,7 @@ maximize_boot_metric(
   direction,
   summary_func = mean,
   boot_cut = 50,
+  boot_stratify,
   inf_rm = TRUE,
   tol_metric,
   use_midpoints,
@@ -31,6 +32,7 @@ minimize_boot_metric(
   direction,
   summary_func = mean,
   boot_cut = 50,
+  boot_stratify,
   inf_rm = TRUE,
   tol_metric,
   use_midpoints,
@@ -61,6 +63,10 @@ cutpoints this function, e.g. mean or median, is applied to arrive at a single c
 
 \item{boot_cut}{(numeric) Number of bootstrap repetitions over which the mean
 optimal cutpoint is calculated.}
+
+\item{boot_stratify}{(logical) If the bootstrap is stratified, bootstrap
+samples are drawn in both classes and then combined, keeping the number of
+positives and negatives constant in every resample.}
 
 \item{inf_rm}{(logical) whether to remove infinite cutpoints before
 calculating the summary.}
