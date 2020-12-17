@@ -2,9 +2,18 @@
 % Please edit documentation in R/add_metric.R
 \name{add_metric}
 \alias{add_metric}
+\alias{add_metric.cutpointr}
+\alias{add_metric.multi_cutpointr}
+\alias{add_metric.roc_cutpointr}
 \title{Add metrics to a cutpointr or roc_cutpointr object}
 \usage{
 add_metric(object, metric)
+
+\method{add_metric}{cutpointr}(object, metric)
+
+\method{add_metric}{multi_cutpointr}(object, metric)
+
+\method{add_metric}{roc_cutpointr}(object, metric)
 }
 \arguments{
 \item{object}{A cutpointr or roc_cutpointr object.}
