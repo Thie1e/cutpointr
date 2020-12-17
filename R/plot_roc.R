@@ -39,11 +39,7 @@ plot_roc.cutpointr <- function(x, display_cutpoint = TRUE, type = "line", ...) {
         transparency <- 0.6
     }
 
-    if (!(has_column(x, "subgroup"))) {
-        roc_title <- ggplot2::ggtitle("ROC curve")
-    } else {
-        roc_title <- ggplot2::ggtitle("ROC curve", "by class")
-    }
+    roc_title <- ggplot2::ggtitle("ROC curve")
     if (display_cutpoint) {
         optcut_coords <- purrr::pmap_df(x, function(...) {
             args <- list(...)

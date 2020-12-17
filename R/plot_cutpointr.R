@@ -47,7 +47,9 @@
 #' @export
 plot_cutpointr <- function(x, xvar = cutpoint, yvar = sum_sens_spec,
                            conf_lvl = 0.95, aspect_ratio = NULL) {
-    stopifnot("cutpointr" %in% class(x) | "roc_cutpointr" %in% class(x))
+    if (!("cutpointr" %in% class(x) | "roc_cutpointr" %in% class(x))) {
+        stop("plot_cutpointr only supports cutpointr and roc_cutpointr objects.")
+    }
     if ("cutpointr" %in% class(x)) {
         rocdat <- x$roc_curve
         subgroup <- suppressWarnings(x$subgroup)

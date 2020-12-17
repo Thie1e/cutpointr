@@ -18,7 +18,9 @@
 #' @family cutpointr plotting functions
 #' @export
 plot_metric <- function(x, conf_lvl = 0.95, add_unsmoothed = TRUE) {
-    stopifnot("cutpointr" %in% class(x))
+    if (!("cutpointr" %in% class(x))) {
+        stop("Only cutpointr objects are supported.")
+    }
     if (!(has_column(x$roc_curve[[1]], "m"))) {
         stop(paste("The cutpointr object does not include a metric column in",
                    "roc_curve - maybe because a method other than",

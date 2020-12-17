@@ -17,7 +17,9 @@
 #' @export
 plot_precision_recall <- function(x, display_cutpoint = TRUE, ...) {
 
-    stopifnot("cutpointr" %in% class(x))
+    if (!("cutpointr" %in% class(x))) {
+        stop("Only cutpointr objects are supported.")
+    }
     args <- list(...)
 
     if (!(has_column(x, "subgroup"))) {
@@ -28,11 +30,7 @@ plot_precision_recall <- function(x, display_cutpoint = TRUE, ...) {
         transparency <- 0.6
     }
 
-    if (!(has_column(x, "subgroup"))) {
-        plot_title <- ggplot2::ggtitle("Precision recall plot")
-    } else {
-        plot_title <- ggplot2::ggtitle("Precision recall plot", "by class")
-    }
+    plot_title <- ggplot2::ggtitle("Precision Recall Plot")
     for (r in 1:nrow(x)) {
         x$roc_curve[[r]] <- x$roc_curve[[r]] %>%
             dplyr::mutate(Precision = tp / (tp + fp),
