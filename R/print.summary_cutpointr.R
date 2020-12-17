@@ -21,14 +21,14 @@ print.summary_cutpointr <- function(x, digits = 4, ...) {
             cat(paste0(rep("-", getOption("width")), collapse = ""), "\n")
         }
 
-        x$cutpointr[[i]] %>%
+        tempdat <- x$cutpointr[[i]] %>%
             dplyr::select(.data$AUC) %>%
             round(digits = digits) %>%
             dplyr::mutate(n = x$n_obs[i],
                           n_pos = x$n_pos[i],
                           n_neg = x$n_neg[i]) %>%
-            as.data.frame %>%
-            print(row.names = FALSE)
+            as.data.frame()
+        print_df_nodat(tempdat, row.names = FALSE)
 
         cat("\n")
 
@@ -48,19 +48,18 @@ print.summary_cutpointr <- function(x, digits = 4, ...) {
             dplyr::left_join(y = x$confusion_matrix[[i]],
                              by = c("optimal_cutpoint" = "cutpoint")) %>%
             round(digits = digits) %>%
-            print(row.names = FALSE)
+            print_df_nodat(row.names = FALSE)
 
         cat("\n")
 
         cat(paste("Predictor summary:", "\n"))
-        rownames(x$desc[[i]]) <- "overall"
-        print(round(rbind(x$desc[[i]], x$desc_by_class[[i]]), digits = digits))
+        print_df_nodat(rbind(x$desc[[i]], x$desc_by_class[[i]]))
         if (has_boot_results(x[i, ])) {
             cat("\n")
             cat(paste("Bootstrap summary:", "\n"))
-            print.data.frame(
+            print_df_nodat(
                 x[["boot"]][[i]] %>%
-                    dplyr::mutate_if(is.numeric, round, digits = digits),
+                    dplyr::mutate_if(is.numeric, round, digits = 2),
                 row.names = rep("", nrow(x[["boot"]][[i]]))
             )
         }

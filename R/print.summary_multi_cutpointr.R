@@ -23,19 +23,21 @@ print.summary_multi_cutpointr <- function(x, digits = 4, ...) {
         cat(paste0(rep("-", getOption("width")), collapse = ""), "\n")
 
         x$cutpointr[[i]] %>%
-            dplyr::select(.data$AUC) %>%
-            round(digits = digits) %>%
-            dplyr::mutate(n = x$n_obs[i],
+            dplyr::select(.data$direction,
+                          .data$AUC) %>%
+            # round(digits = digits) %>%
+            dplyr::mutate(AUC = round(AUC, digits = digits),
+                          n = x$n_obs[i],
                           n_pos = x$n_pos[i],
                           n_neg = x$n_neg[i]) %>%
             as.data.frame %>%
-            print(row.names = FALSE)
+            print_df_nodat()
 
         cat("\n")
 
         purrr::map_df(1:length(x$cutpointr[[i]]$optimal_cutpoint[[1]]), function(j) {
             x$cutpointr[[i]] %>%
-                dplyr::select(.data$direction,
+                dplyr::select(# .data$direction,
                               .data$optimal_cutpoint,
                               !!find_metric_name(x$cutpointr[[i]]),
                               .data$acc, .data$sensitivity,
@@ -45,20 +47,21 @@ print.summary_multi_cutpointr <- function(x, digits = 4, ...) {
             as.data.frame %>%
             dplyr::left_join(y = x$confusion_matrix[[i]],
                              by = c("optimal_cutpoint" = "cutpoint")) %>%
-            dplyr::mutate_if(is.numeric, round, digits = 4) %>%
-            print(row.names = FALSE)
+            dplyr::mutate_if(is.numeric, round, digits = digits) %>%
+            print_df_nodat()
 
         cat("\n")
 
         cat(paste("Predictor summary:", "\n"))
-        rownames(x$desc[[i]]) <- "overall"
-        print(round(rbind(x$desc[[i]], x$desc_by_class[[i]]), digits = digits))
+        dplyr::bind_rows(x$desc[[i]], x$desc_by_class[[i]]) %>%
+            dplyr::mutate_if(is.numeric, function(x) round(x, digits)) %>%
+            print_df_nodat()
         if (has_boot_results(x[i, ])) {
             cat("\n")
             cat(paste("Bootstrap summary:", "\n"))
-            print.data.frame(
+            print_df_nodat(
                 x[["boot"]][[i]] %>%
-                    dplyr::mutate_if(is.numeric, round, digits = digits),
+                    dplyr::mutate_if(is.numeric, round, digits = 2),
                 row.names = rep("", nrow(x[["boot"]][[i]]))
             )
         }
