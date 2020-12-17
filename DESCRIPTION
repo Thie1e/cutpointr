@@ -2,8 +2,8 @@ Package: cutpointr
 Type: Package
 Title: Determine and Evaluate Optimal Cutpoints in Binary
     Classification Tasks
-Version: 1.0.32.9002
-Date: 2020-10-14
+Version: 1.1.0
+Date: 2020-12-17
 Authors@R:
     person(given = "Christian",
            family = "Thiele",

@@ -1,12 +1,26 @@
-# cutpointr 1.0.32.9002
+# cutpointr 1.1.0
 
-- `boot_ci` now works with multiple cutpoints (possible if `break_ties = c`).
+## Changes
+- `boot_ci` now works with multiple cutpoints (multiple cutpoints are possible
+if `break_ties = c`).
 - `add_metric` now adds the selected metrics to the bootstrap results, too.
-- Include metrics that were added with `add_metric` in `summary()`
-- Fix a bug in `multi_cutpointr` that forced the `class` variable to be
-named "suicide". 
+- Include metrics that were added with `add_metric` in `summary()`.
 - Change default value of `subgroup` in `multi_cutpointr` to `NULL` 
 (instead of missing) to make it consistent with `cutpointr`.
+- No rounding anymore within the internal function `summary_sd` so that the
+various summary functions now return all values without rounding.
+- Descriptive statistics in summary functions are now stored with the additional
+first column "Data" instead of giving the class values as row names.
+- Nicer printing of summary objects in Rmd documents.
+- `boot_stratify` is now passed to the method functions so that the bootstrap
+within `maximize_boot_metric` and `minimize_boot_metric` can be stratified, too.
+- Subtitles (such as "by class") have been removed from the plots because 
+the subtitles should have read "by subgroup" and because this is already clear
+from the legend.
+
+## Fixes
+- Fix a bug in `multi_cutpointr` that forced the `class` variable to be
+named "suicide". 
 
 # cutpointr 1.0.32
 
