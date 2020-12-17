@@ -9,20 +9,19 @@ summary.multi_cutpointr <- function(object, ...) {
         }
         x_summary[[r]]$predictor <- temprow$predictor
         x_summary[[r]]$cutpointr <- temprow
-        x_summary[[r]]$desc <- temprow$data[[1]] %>%
-            dplyr::select(!!as.name(temprow$predictor)) %>%
-            unlist %>%
-            summary_sd()
-        x_summary[[r]]$desc_byclass <-
-            split(temprow$data[[1]], temprow$data[[1]][, temprow$outcome]) %>%
-            purrr::map(function(x) {
-                dat <- x[, temprow$predictor]
-                dat <- unlist(dat)
-                summary_sd(dat)
-            })
-        x_summary[[r]]$desc_byclass <- data.frame(do.call(rbind, x_summary[[r]]$desc_byclass))
-        colnames(x_summary[[r]]$desc_byclass) <- c("Min.", "5%", "1st Qu.", "Median",
-                                                   "Mean", "3rd Qu.", "95%", "Max.", "SD", "NAs")
+        x_summary[[r]]$desc <- dplyr::bind_cols(
+            tibble::tibble(Data = "Overall"),
+            summary_sd_df(temprow$data[[1]] %>%
+                              dplyr::select(temprow$predictor))
+        )
+        temprow_split <- temprow$data[[1]] %>%
+            split(temprow$data[[1]][, temprow$outcome])
+        x_summary[[r]]$desc_byclass <- temprow_split %>%
+            purrr::map_df(function(x) summary_sd_df(x %>% dplyr::select(temprow$predictor)))
+        x_summary[[r]]$desc_byclass <- dplyr::bind_cols(
+            data.frame(Data = names(temprow_split), stringsAsFactors = FALSE),
+            x_summary[[r]]$desc_byclass
+        )
         x_summary[[r]]$n_obs <- nrow(temprow$data[[1]])
         x_summary[[r]]$n_pos <- temprow$data[[1]] %>%
             dplyr::select(!!as.name(temprow$outcome)) %>%
@@ -55,13 +54,10 @@ summary.multi_cutpointr <- function(object, ...) {
 # Convert the list output of summary.cutpointr to a data.frame
 # x is a single element of the resulting list from summary.cutpointr.
 tidy_summary_multi <- function(x) {
-    desc <- as.data.frame(matrix(x$desc, nrow = 1,
-                                 dimnames = list(NULL, names(x$desc))),
-                          row.names = "")
     res <- tibble::tibble(
         predictor = x$predictor,
         cutpointr = list(x$cutpointr),
-        desc = list(desc),
+        desc = list(x$desc),
         desc_by_class = list(x$desc_byclass),
         n_obs = x$n_obs,
         n_pos = x$n_pos,

@@ -171,7 +171,7 @@ get_opt_ind <- function(roc_curve, oc, direction) {
     })
 }
 
-summary_sd <- function(x, round_digits = 3) {
+summary_sd <- function(x) {
     x <- unlist(x)
     s <- summary(x)[1:6]
     result <- c(s[1],
@@ -181,7 +181,34 @@ summary_sd <- function(x, round_digits = 3) {
                 s[6],
                 SD = stats::sd(x, na.rm = TRUE),
                 NAs = sum(is.na(x)))
-    round(result, round_digits)
+    return(result)
+}
+
+summary_sd_df <- function(x) {
+    x <- unlist(x)
+    s <- summary(x)[1:6]
+    result <- c(s[1],
+                stats::quantile(x, 0.05, na.rm = TRUE),
+                s[2:5],
+                stats::quantile(x, 0.95, na.rm = TRUE),
+                s[6],
+                SD = stats::sd(x, na.rm = TRUE),
+                NAs = sum(is.na(x)))
+    result <- data.frame(`Min.` = result[1],
+                         `5%` = result[2],
+                         `1st Qu.` = result[3],
+                         `Median` = result[4],
+                         `Mean` = result[5],
+                         `3rd Qu.` = result[6],
+                         `95%` = result[7],
+                         `Max.` = result[8],
+                         `SD` = result[9],
+                         `NAs` = result[10],
+                         check.names = FALSE,
+                         row.names = NULL)
+    return(result)
+}
+
 # Printing function for data.frames without returning x invisibly and with
 # row.names = FALSE
 print_df_nodat <- function (x, ..., digits = NULL, quote = FALSE, right = TRUE,
