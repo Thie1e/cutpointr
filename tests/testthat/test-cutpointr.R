@@ -844,13 +844,13 @@ test_that("AUC is always >= 0.5 with automatic assumptions", {
 test_that("find_metric_name_boot finds correct metric", {
     oc <- cutpointr(x = suicide$dsi, class = suicide$suicide,
                     metric = abs_d_sens_spec, method = minimize_metric,
-                    boot_runs = 10)
+                    boot_runs = 3)
     expect_true(cutpointr:::find_metric_name_boot(oc$boot[[1]]) == "abs_d_sens_spec_oob")
 
     oc <- cutpointr(x = suicide$dsi, class = suicide$suicide,
                     subgroup = suicide$gender,
                     metric = abs_d_sens_spec, method = minimize_metric,
-                    boot_runs = 10)
+                    boot_runs = 3)
     expect_true(cutpointr:::find_metric_name_boot(oc$boot[[1]]) == "abs_d_sens_spec_oob")
 })
 
