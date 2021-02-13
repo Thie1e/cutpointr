@@ -39,7 +39,8 @@ plot_metric_boot <- function(x, ...) {
             res_boot_unnested <- res_boot_unnested %>%
                 tidyr::unnest()
         }
-        metric_name <- find_metric_name_boot(res_boot_unnested)
+        metric_name <- colnames(res_boot_unnested)[5]
+        stopifnot(grepl(pattern = "_oob", x = metric_name))
         if (all(na_inf_omit(get(metric_name, res_boot_unnested) %% 1 == 0)) |
             only_one_unique(na_inf_omit(get(metric_name, res_boot_unnested)))) {
             all_integer = TRUE
