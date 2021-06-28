@@ -25,7 +25,7 @@
       - [Finding all cutpoints with acceptable
         performance](#finding-all-cutpoints-with-acceptable-performance)
       - [Manual and mean / median
-        cutpoints](#manual-and-mean-median-cutpoints)
+        cutpoints](#manual-and-mean--median-cutpoints)
       - [Nonstandard evaluation via
         tidyeval](#nonstandard-evaluation-via-tidyeval)
       - [ROC curve and optimal cutpoint for multiple
@@ -44,8 +44,6 @@
 
 # cutpointr
 
-[![Travis-CI Build
-Status](https://travis-ci.org/Thie1e/cutpointr.svg?branch=master)](https://travis-ci.org/Thie1e/cutpointr)
 [![AppVeyor Build
 Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr)
 [![Project Status: Active - The project has reached a stable, usable
@@ -108,10 +106,10 @@ summary(cp)
 #>                 2        1.7518 0.8647      0.8889      0.8629 32  4 68 428
 #> 
 #> Predictor summary: 
-#>         Min.   5% 1st Qu. Median  Mean 3rd Qu.  95% Max.    SD NAs
-#> overall    0 0.00       0      0 0.921       1 5.00   11 1.853   0
-#> no         0 0.00       0      0 0.633       0 4.00   10 1.412   0
-#> yes        0 0.75       4      5 4.889       6 9.25   11 2.550   0
+#>     Data Min.   5% 1st Qu. Median      Mean 3rd Qu.  95% Max.       SD NAs
+#>  Overall    0 0.00       0      0 0.9210526       1 5.00   11 1.852714   0
+#>       no    0 0.00       0      0 0.6330645       0 4.00   10 1.412225   0
+#>      yes    0 0.75       4      5 4.8888889       6 9.25   11 2.549821   0
 ```
 
 ``` r
@@ -279,9 +277,9 @@ opt_cut
 #>   specificity      AUC pos_class neg_class prevalence outcome predictor
 #>         <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>   <chr>    
 #> 1    0.862903 0.923779 yes       no         0.0676692 suicide dsi      
-#>   data               roc_curve          boot                 
-#>   <list>             <list>             <list>               
-#> 1 <tibble [532 x 2]> <tibble [13 x 10]> <tibble [1,000 x 23]>
+#>   data               roc_curve                 boot                 
+#>   <list>             <list>                    <list>               
+#> 1 <tibble [532 x 2]> <roc_cutpointr [13 x 10]> <tibble [1,000 x 23]>
 ```
 
 The returned object has the additional column `boot` which is a nested
@@ -294,23 +292,23 @@ metrics. The metrics are suffixed by `_b` to indicate in-bag results or
 opt_cut$boot
 #> [[1]]
 #> # A tibble: 1,000 x 23
-#>    optimal_cutpoint AUC_b AUC_oob sum_sens_spec_b sum_sens_spec_o~ acc_b acc_oob
-#>               <dbl> <dbl>   <dbl>           <dbl>            <dbl> <dbl>   <dbl>
-#>  1                2 0.957   0.884            1.80             1.71 0.874   0.842
-#>  2                1 0.918   0.935            1.70             1.70 0.752   0.771
-#>  3                2 0.920   0.946            1.79             1.73 0.874   0.864
-#>  4                2 0.940   0.962            1.82             1.76 0.893   0.851
-#>  5                2 0.849   0.96             1.66             1.76 0.848   0.887
-#>  6                4 0.926   0.927            1.80             1.51 0.925   0.881
-#>  7                2 0.927   0.919            1.74             1.78 0.885   0.862
-#>  8                2 0.958   0.882            1.82             1.67 0.863   0.861
-#>  9                4 0.911   0.923            1.80             1.53 0.914   0.879
-#> 10                1 0.871   0.975            1.62             1.80 0.737   0.820
-#> # ... with 990 more rows, and 16 more variables: sensitivity_b <dbl>,
-#> #   sensitivity_oob <dbl>, specificity_b <dbl>, specificity_oob <dbl>,
-#> #   cohens_kappa_b <dbl>, cohens_kappa_oob <dbl>, TP_b <dbl>, FP_b <dbl>,
-#> #   TN_b <int>, FN_b <int>, TP_oob <dbl>, FP_oob <dbl>, TN_oob <int>,
-#> #   FN_oob <int>, roc_curve_b <list>, roc_curve_oob <list>
+#>    optimal_cutpoint    AUC_b  AUC_oob sum_sens_spec_b sum_sens_spec_oob    acc_b
+#>               <dbl>    <dbl>    <dbl>           <dbl>             <dbl>    <dbl>
+#>  1                2 0.957271 0.883929         1.80385           1.71429 0.874060
+#>  2                1 0.917932 0.934547         1.70356           1.69732 0.751880
+#>  3                2 0.920303 0.946023         1.79462           1.73030 0.874060
+#>  4                2 0.940457 0.962121         1.82116           1.75713 0.892857
+#>  5                2 0.849167 0.96             1.66132           1.75556 0.847744
+#>  6                4 0.925729 0.926536         1.80080           1.51486 0.924812
+#>  7                2 0.927077 0.918705         1.74447           1.77536 0.885338
+#>  8                2 0.958148 0.882258         1.82238           1.66559 0.862782
+#>  9                4 0.910606 0.922593         1.80121           1.52730 0.913534
+#> 10                1 0.871421 0.975241         1.62103           1.80226 0.736842
+#> # ... with 990 more rows, and 17 more variables: acc_oob <dbl>,
+#> #   sensitivity_b <dbl>, sensitivity_oob <dbl>, specificity_b <dbl>,
+#> #   specificity_oob <dbl>, cohens_kappa_b <dbl>, cohens_kappa_oob <dbl>,
+#> #   TP_b <dbl>, FP_b <dbl>, TN_b <int>, FN_b <int>, TP_oob <dbl>, FP_oob <dbl>,
+#> #   TN_oob <int>, FN_oob <int>, roc_curve_b <list>, roc_curve_oob <list>
 ```
 
 The summary and plots include additional elements that summarize or
@@ -331,40 +329,26 @@ summary(opt_cut)
 #>                 2        1.7518 0.8647      0.8889      0.8629 32  4 68 428
 #> 
 #> Predictor summary: 
-#>         Min.   5% 1st Qu. Median  Mean 3rd Qu.  95% Max.    SD NAs
-#> overall    0 0.00       0      0 0.921       1 5.00   11 1.853   0
-#> no         0 0.00       0      0 0.633       0 4.00   10 1.412   0
-#> yes        0 0.75       4      5 4.889       6 9.25   11 2.550   0
+#>     Data Min.   5% 1st Qu. Median      Mean 3rd Qu.  95% Max.       SD NAs
+#>  Overall    0 0.00       0      0 0.9210526       1 5.00   11 1.852714   0
+#>       no    0 0.00       0      0 0.6330645       0 4.00   10 1.412225   0
+#>      yes    0 0.75       4      5 4.8888889       6 9.25   11 2.549821   0
 #> 
 #> Bootstrap summary: 
-#>           Variable  Min.    5% 1st Qu. Median  Mean 3rd Qu.   95%  Max.    SD
-#>   optimal_cutpoint 1.000 1.000   2.000  2.000 2.118   2.000 4.000 4.000 0.721
-#>              AUC_b 0.830 0.880   0.908  0.926 0.924   0.943 0.962 0.976 0.025
-#>            AUC_oob 0.822 0.863   0.901  0.923 0.922   0.951 0.971 0.996 0.034
-#>    sum_sens_spec_b 1.566 1.671   1.722  1.759 1.758   1.796 1.837 1.890 0.053
-#>  sum_sens_spec_oob 1.369 1.556   1.660  1.718 1.714   1.778 1.861 1.904 0.091
-#>              acc_b 0.729 0.771   0.853  0.867 0.861   0.882 0.908 0.936 0.037
-#>            acc_oob 0.716 0.768   0.846  0.863 0.856   0.879 0.902 0.930 0.038
-#>      sensitivity_b 0.725 0.806   0.865  0.903 0.900   0.939 0.975 1.000 0.053
-#>    sensitivity_oob 0.444 0.667   0.800  0.868 0.859   0.929 1.000 1.000 0.101
-#>      specificity_b 0.721 0.757   0.849  0.865 0.858   0.880 0.913 0.943 0.041
-#>    specificity_oob 0.693 0.755   0.844  0.862 0.855   0.880 0.914 0.944 0.044
-#>     cohens_kappa_b 0.160 0.266   0.371  0.416 0.412   0.462 0.524 0.662 0.075
-#>   cohens_kappa_oob 0.149 0.252   0.337  0.393 0.389   0.442 0.514 0.625 0.079
-#>  NAs
-#>    0
-#>    0
-#>    0
-#>    0
-#>    0
-#>    0
-#>    0
-#>    0
-#>    0
-#>    0
-#>    0
-#>    0
-#>    0
+#>           Variable Min.   5% 1st Qu. Median Mean 3rd Qu.  95% Max.   SD NAs
+#>   optimal_cutpoint 1.00 1.00    2.00   2.00 2.12    2.00 4.00 4.00 0.72   0
+#>              AUC_b 0.83 0.88    0.91   0.93 0.92    0.94 0.96 0.98 0.02   0
+#>            AUC_oob 0.82 0.86    0.90   0.92 0.92    0.95 0.97 1.00 0.03   0
+#>    sum_sens_spec_b 1.57 1.67    1.72   1.76 1.76    1.80 1.84 1.89 0.05   0
+#>  sum_sens_spec_oob 1.37 1.56    1.66   1.72 1.71    1.78 1.86 1.90 0.09   0
+#>              acc_b 0.73 0.77    0.85   0.87 0.86    0.88 0.91 0.94 0.04   0
+#>            acc_oob 0.72 0.77    0.85   0.86 0.86    0.88 0.90 0.93 0.04   0
+#>      sensitivity_b 0.72 0.81    0.86   0.90 0.90    0.94 0.98 1.00 0.05   0
+#>    sensitivity_oob 0.44 0.67    0.80   0.87 0.86    0.93 1.00 1.00 0.10   0
+#>      specificity_b 0.72 0.76    0.85   0.86 0.86    0.88 0.91 0.94 0.04   0
+#>    specificity_oob 0.69 0.76    0.84   0.86 0.86    0.88 0.91 0.94 0.04   0
+#>     cohens_kappa_b 0.16 0.27    0.37   0.42 0.41    0.46 0.52 0.66 0.07   0
+#>   cohens_kappa_oob 0.15 0.25    0.34   0.39 0.39    0.44 0.51 0.62 0.08   0
 plot(opt_cut)
 ```
 
@@ -396,10 +380,14 @@ if (suppressPackageStartupMessages(require(doParallel) & require(doRNG))) {
 #>         <dbl>       <dbl>    <dbl> <chr>     <fct>          <dbl> <chr>  
 #> 1    0.925926    0.882192 0.944647 yes       no         0.0688776 suicide
 #> 2    0.777778    0.847328 0.861747 yes       no         0.0642857 suicide
-#>   predictor grouping data               roc_curve          boot                 
-#>   <chr>     <chr>    <list>             <list>             <list>               
-#> 1 dsi       gender   <tibble [392 x 2]> <tibble [11 x 10]> <tibble [1,000 x 23]>
-#> 2 dsi       gender   <tibble [140 x 2]> <tibble [11 x 10]> <tibble [1,000 x 23]>
+#>   predictor grouping data               roc_curve                
+#>   <chr>     <chr>    <list>             <list>                   
+#> 1 dsi       gender   <tibble [392 x 2]> <roc_cutpointr [11 x 10]>
+#> 2 dsi       gender   <tibble [140 x 2]> <roc_cutpointr [11 x 10]>
+#>   boot                 
+#>   <list>               
+#> 1 <tibble [1,000 x 23]>
+#> 2 <tibble [1,000 x 23]>
 ```
 
 # More robust cutpoint estimation methods
@@ -444,10 +432,10 @@ cutpointr(suicide, dsi, suicide, gender,
 #>         <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1    0.444444    0.994521 0.944647 yes       no         0.0688776 suicide
 #> 2    0.222222    1        0.861747 yes       no         0.0642857 suicide
-#>   predictor grouping data               roc_curve         boot 
-#>   <chr>     <chr>    <list>             <list>            <lgl>
-#> 1 dsi       gender   <tibble [392 x 2]> <tibble [11 x 9]> NA   
-#> 2 dsi       gender   <tibble [140 x 2]> <tibble [11 x 9]> NA
+#>   predictor grouping data               roc_curve                boot 
+#>   <chr>     <chr>    <list>             <list>                   <lgl>
+#> 1 dsi       gender   <tibble [392 x 2]> <roc_cutpointr [11 x 9]> NA   
+#> 2 dsi       gender   <tibble [140 x 2]> <roc_cutpointr [11 x 9]> NA
 ```
 
 ## LOESS smoothing for selecting a cutpoint
@@ -505,7 +493,6 @@ opt_cut <- cutpointr(suicide, dsi, suicide, gender,
                      metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
 #> Assuming the positive class is yes
 #> Assuming the positive class has higher x values
-#> fANCOVA 0.5-1 loaded
 ```
 
 ``` r
@@ -624,10 +611,10 @@ cutpointr(suicide, dsi, suicide, gender, method = oc_youden_normal)
 #>         <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1    0.814815    0.901370 0.944647 yes       no         0.0688776 suicide
 #> 2    0.666667    0.877863 0.861747 yes       no         0.0642857 suicide
-#>   predictor grouping data               roc_curve         boot 
-#>   <chr>     <chr>    <list>             <list>            <lgl>
-#> 1 dsi       gender   <tibble [392 x 2]> <tibble [11 x 9]> NA   
-#> 2 dsi       gender   <tibble [140 x 2]> <tibble [11 x 9]> NA
+#>   predictor grouping data               roc_curve                boot 
+#>   <chr>     <chr>    <list>             <list>                   <lgl>
+#> 1 dsi       gender   <tibble [392 x 2]> <roc_cutpointr [11 x 9]> NA   
+#> 2 dsi       gender   <tibble [140 x 2]> <roc_cutpointr [11 x 9]> NA
 ```
 
 ### Nonparametric kernel method
@@ -673,10 +660,10 @@ cutpointr(suicide, dsi, suicide, gender, method = oc_youden_kernel)
 #>         <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1    0.925926    0.882192 0.944647 yes       no         0.0688776 suicide
 #> 2    0.777778    0.809160 0.861747 yes       no         0.0642857 suicide
-#>   predictor grouping data               roc_curve         boot 
-#>   <chr>     <chr>    <list>             <list>            <lgl>
-#> 1 dsi       gender   <tibble [392 x 2]> <tibble [11 x 9]> NA   
-#> 2 dsi       gender   <tibble [140 x 2]> <tibble [11 x 9]> NA
+#>   predictor grouping data               roc_curve                boot 
+#>   <chr>     <chr>    <list>             <list>                   <lgl>
+#> 1 dsi       gender   <tibble [392 x 2]> <roc_cutpointr [11 x 9]> NA   
+#> 2 dsi       gender   <tibble [140 x 2]> <roc_cutpointr [11 x 9]> NA
 ```
 
 # Additional features
@@ -697,14 +684,14 @@ auc(roc_curve)
 #> [1] 0.9237791
 head(roc_curve)
 #> # A tibble: 6 x 9
-#>   x.sorted    tp    fp    tn    fn    tpr   tnr     fpr   fnr
-#>      <dbl> <dbl> <dbl> <int> <int>  <dbl> <dbl>   <dbl> <dbl>
-#> 1      Inf     0     0   496    36 0      1     0       1    
-#> 2       11     1     0   496    35 0.0278 1     0       0.972
-#> 3       10     2     1   495    34 0.0556 0.998 0.00202 0.944
-#> 4        9     3     1   495    33 0.0833 0.998 0.00202 0.917
-#> 5        8     4     1   495    32 0.111  0.998 0.00202 0.889
-#> 6        7     7     1   495    29 0.194  0.998 0.00202 0.806
+#>   x.sorted    tp    fp    tn    fn       tpr      tnr        fpr      fnr
+#>      <dbl> <dbl> <dbl> <int> <int>     <dbl>    <dbl>      <dbl>    <dbl>
+#> 1      Inf     0     0   496    36 0         1        0          1       
+#> 2       11     1     0   496    35 0.0277778 1        0          0.972222
+#> 3       10     2     1   495    34 0.0555556 0.997984 0.00201613 0.944444
+#> 4        9     3     1   495    33 0.0833333 0.997984 0.00201613 0.916667
+#> 5        8     4     1   495    32 0.111111  0.997984 0.00201613 0.888889
+#> 6        7     7     1   495    29 0.194444  0.997984 0.00201613 0.805556
 plot_roc(roc_curve)
 ```
 
@@ -807,8 +794,8 @@ opt_cut %>%
 #> # A tibble: 2 x 2
 #>   optimal_cutpoint sum_sens_spec
 #>              <dbl>         <dbl>
-#> 1                2          1.75
-#> 2                1          1.70
+#> 1                2       1.75179
+#> 2                1       1.70251
 ```
 
 ## Manual and mean / median cutpoints
@@ -880,35 +867,31 @@ summary(mcp)
 #> 
 #> Predictor: age 
 #> -------------------------------------------------------------------------------- 
-#>     AUC   n n_pos n_neg
-#>  0.5257 532    36   496
+#>  direction    AUC   n n_pos n_neg
+#>         <= 0.5257 532    36   496
 #> 
-#>  direction optimal_cutpoint sum_sens_spec    acc sensitivity specificity tp fn
-#>         <=             55.5        1.1154 0.1992      0.9722      0.1431 35  1
-#>   fp tn
-#>  425 71
+#>  optimal_cutpoint sum_sens_spec    acc sensitivity specificity tp fn  fp tn
+#>              55.5        1.1154 0.1992      0.9722      0.1431 35  1 425 71
 #> 
 #> Predictor summary: 
-#>         Min. 5% 1st Qu. Median   Mean 3rd Qu.   95% Max.     SD NAs
-#> overall   18 19      24   28.0 34.126   41.25 65.00   83 15.054   0
-#> no        18 19      24   28.0 34.222   41.25 65.50   83 15.186   0
-#> yes       18 18      22   27.5 32.806   41.25 54.25   69 13.227   0
+#>     Data Min. 5% 1st Qu. Median    Mean 3rd Qu.   95% Max.      SD NAs
+#>  Overall   18 19      24   28.0 34.1259   41.25 65.00   83 15.0542   0
+#>       no   18 19      24   28.0 34.2218   41.25 65.50   83 15.1857   0
+#>      yes   18 18      22   27.5 32.8056   41.25 54.25   69 13.2273   0
 #> 
 #> Predictor: dsi 
 #> -------------------------------------------------------------------------------- 
-#>     AUC   n n_pos n_neg
-#>  0.9238 532    36   496
+#>  direction    AUC   n n_pos n_neg
+#>         >= 0.9238 532    36   496
 #> 
-#>  direction optimal_cutpoint sum_sens_spec    acc sensitivity specificity tp fn
-#>         >=              1.5        1.7518 0.8647      0.8889      0.8629 32  4
-#>  fp  tn
-#>  68 428
+#>  optimal_cutpoint sum_sens_spec    acc sensitivity specificity tp fn fp  tn
+#>               1.5        1.7518 0.8647      0.8889      0.8629 32  4 68 428
 #> 
 #> Predictor summary: 
-#>         Min.   5% 1st Qu. Median  Mean 3rd Qu.  95% Max.    SD NAs
-#> overall    0 0.00       0      0 0.921       1 5.00   11 1.853   0
-#> no         0 0.00       0      0 0.633       0 4.00   10 1.412   0
-#> yes        0 0.75       4      5 4.889       6 9.25   11 2.550   0
+#>     Data Min.   5% 1st Qu. Median   Mean 3rd Qu.  95% Max.     SD NAs
+#>  Overall    0 0.00       0      0 0.9211       1 5.00   11 1.8527   0
+#>       no    0 0.00       0      0 0.6331       0 4.00   10 1.4122   0
+#>      yes    0 0.75       4      5 4.8889       6 9.25   11 2.5498   0
 ```
 
 ## Accessing `data`, `roc_curve`, and `boot`
@@ -948,12 +931,11 @@ opt_cut %>%
             m_oc_boot  = mean(optimal_cutpoint),
             m_acc_oob  = mean(acc_oob))
 #> Adding missing grouping variables: `subgroup`
-#> `summarise()` ungrouping output (override with `.groups` argument)
 #> # A tibble: 2 x 4
 #>   subgroup sd_oc_boot m_oc_boot m_acc_oob
 #>   <chr>         <dbl>     <dbl>     <dbl>
-#> 1 female        0.766      2.17     0.880
-#> 2 male          1.51       2.92     0.806
+#> 1 female     0.765835    2.172   0.879809
+#> 2 male       1.51434     2.9205  0.806057
 ```
 
 ## Adding metrics to the result of cutpointr() or roc()
@@ -984,14 +966,14 @@ roc(data = suicide, x = dsi, class = suicide, pos_class = "yes",
   select(x.sorted, tp, fp, tn, fn, cohens_kappa, F1_score) %>% 
   head()
 #> # A tibble: 6 x 7
-#>   x.sorted    tp    fp    tn    fn cohens_kappa F1_score
-#>      <dbl> <dbl> <dbl> <int> <int>        <dbl>    <dbl>
-#> 1      Inf     0     0   496    36       0        0     
-#> 2       11     1     0   496    35       0.0506   0.0541
-#> 3       10     2     1   495    34       0.0931   0.103 
-#> 4        9     3     1   495    33       0.138    0.15  
-#> 5        8     4     1   495    32       0.182    0.195 
-#> 6        7     7     1   495    29       0.301    0.318
+#>   x.sorted    tp    fp    tn    fn cohens_kappa  F1_score
+#>      <dbl> <dbl> <dbl> <int> <int>        <dbl>     <dbl>
+#> 1      Inf     0     0   496    36    0         0        
+#> 2       11     1     0   496    35    0.0505813 0.0540541
+#> 3       10     2     1   495    34    0.0931229 0.102564 
+#> 4        9     3     1   495    33    0.138338  0.15     
+#> 5        8     4     1   495    32    0.181615  0.195122 
+#> 6        7     7     1   495    29    0.300981  0.318182
 ```
 
 ## User-defined functions
@@ -1084,7 +1066,7 @@ misclassification_cost
 #>     colnames(misclassification_cost) <- "misclassification_cost"
 #>     return(misclassification_cost)
 #> }
-#> <bytecode: 0x0000000021bf57e0>
+#> <bytecode: 0x00000000139a4b38>
 #> <environment: namespace:cutpointr>
 ```
 
@@ -1127,10 +1109,14 @@ opt_cut
 #>         <dbl>       <dbl>    <dbl> <fct>     <fct>          <dbl> <chr>  
 #> 1    0.925926    0.882192 0.944647 yes       no         0.0688776 suicide
 #> 2    0.777778    0.809160 0.861747 yes       no         0.0642857 suicide
-#>   predictor grouping data               roc_curve          boot               
-#>   <chr>     <chr>    <list>             <list>             <list>             
-#> 1 dsi       gender   <tibble [392 x 2]> <tibble [11 x 10]> <tibble [200 x 23]>
-#> 2 dsi       gender   <tibble [140 x 2]> <tibble [11 x 10]> <tibble [200 x 23]>
+#>   predictor grouping data               roc_curve                
+#>   <chr>     <chr>    <list>             <list>                   
+#> 1 dsi       gender   <tibble [392 x 2]> <roc_cutpointr [11 x 10]>
+#> 2 dsi       gender   <tibble [140 x 2]> <roc_cutpointr [11 x 10]>
+#>   boot               
+#>   <list>             
+#> 1 <tibble [200 x 23]>
+#> 2 <tibble [200 x 23]>
 plot_cut_boot(opt_cut)
 ```
 
@@ -1144,6 +1130,7 @@ plot_metric(opt_cut, conf_lvl = 0.9)
 
 ``` r
 plot_metric_boot(opt_cut)
+#> Warning: Removed 2 rows containing non-finite values (stat_density).
 ```
 
 ![](man/figures/README-unnamed-chunk-36-3.png)<!-- -->
