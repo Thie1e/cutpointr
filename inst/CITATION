@@ -1,0 +1,16 @@
+bibentry(bibtype = "Article",
+  title        = "{cutpointr}: Improved Estimation and Validation of Optimal Cutpoints in {R}",
+  author       = c(person(given = "Christian",
+                          family = "Thiele",
+                          email = "christian.thiele@fh-bielefeld.de"),
+                   person(given = "Gerrit",
+                          family = "Hirschfeld")),
+  journal      = "Journal of Statistical Software",
+  year         = "2021",
+  volume       = "98",
+  number       = "11",
+  pages        = "1--27",
+  doi          = "10.18637/jss.v098.i11",
+  header       = "To cite cutpointr in publications use:"
+)
+

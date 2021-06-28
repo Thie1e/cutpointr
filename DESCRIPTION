@@ -2,8 +2,8 @@ Package: cutpointr
 Type: Package
 Title: Determine and Evaluate Optimal Cutpoints in Binary
     Classification Tasks
-Version: 1.1.0
-Date: 2021-02-13
+Version: 1.1.1
+Date: 2021-06-28
 Authors@R:
     person(given = "Christian",
            family = "Thiele",
@@ -15,7 +15,7 @@ Description: Estimate cutpoints that optimize a specified metric in binary class
     estimation are supported, e.g. a parametric method assuming normal distributions,
     bootstrapped cutpoints, and smoothing of the metric values per cutpoint using
     Generalized Additive Models. Various plotting functions are included. For an overview
-    of the package see Thiele and Hirschfeld (2020) <arXiv:2002.09209>.
+    of the package see Thiele and Hirschfeld (2021) <doi:10.18637/jss.v098.i11>.
 License: GPL-3
 URL: https://github.com/thie1e/cutpointr
 BugReports: https://github.com/thie1e/cutpointr/issues
