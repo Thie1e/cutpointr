@@ -86,8 +86,8 @@ is supposed to be larger or smaller for the positive class.}
 will be used to assess the variability and the out-of-sample performance.}
 
 \item{boot_stratify}{(logical) If the bootstrap is stratified, bootstrap
-samples are drawn in both classes and then combined, keeping the number
-of positives and negatives constant in every resample.}
+samples are drawn separately in both classes and then combined, keeping the
+proportion of positives and negatives constant in every resample.}
 
 \item{use_midpoints}{(logical) If TRUE (default FALSE) the returned optimal
 cutpoint will be the mean of the optimal cutpoint and the next highest
@@ -122,7 +122,7 @@ will determine "optimal" cutpoints using various selectable methods. The
 methods for cutpoint determination can be evaluated using bootstrapping. An
 estimate of the cutpoint variability and the out-of-sample performance can then
 be returned with \code{summary} or \code{plot}. For an introduction to the
-package please see \code{vignette("cutpointr", package = "cutpointr")}
+package please see \code{vignette("cutpointr", package = "cutpointr")}.
 }
 \details{
 If \code{direction} and/or \code{pos_class} and \code{neg_class} are not given, the function will

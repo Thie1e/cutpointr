@@ -57,8 +57,8 @@ is supposed to be larger or smaller for the positive class.}
 will be used to assess the variability and the out-of-sample performance.}
 
 \item{boot_stratify}{(logical) If the bootstrap is stratified, bootstrap
-samples are drawn in both classes and then combined, keeping the number
-of positives and negatives constant in every resample.}
+samples are drawn separately in both classes and then combined, keeping the
+proportion of positives and negatives constant in every resample.}
 
 \item{use_midpoints}{(logical) If TRUE (default FALSE) the returned optimal
 cutpoint will be the mean of the optimal cutpoint and the next highest
