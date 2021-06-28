@@ -76,10 +76,46 @@ below the specified minimum will be zero.
 The inputs must be vectors of equal length.
 }
 \examples{
-## Maximum sensitivity when specificity is at least 95\%
-cp <- cutpointr(suicide, dsi, suicide,
-  metric = sens_constrain, constrain_metric = ppv, min_constrain = 0.75)
+## Maximum sensitivity when Positive Predictive Value (PPV) is at least 75\%
+library(dplyr)
+library(purrr)
+library(cutpointr)
+cp <- cutpointr(data = suicide, x = dsi, class = suicide,
+method = maximize_metric,
+metric = sens_constrain,
+constrain_metric = ppv,
+min_constrain = 0.75)
+## All metric values (m) where PPV < 0.75 are zero
 plot_metric(cp)
+cp$roc_curve
+## We can confirm that PPV is indeed >= 0.75
+cp \%>\%
+    add_metric(list(ppv))
+## We can also do so for the complete ROC curve(s)
+cp \%>\%
+    pull(roc_curve) \%>\%
+    map(~ add_metric(., list(sensitivity, ppv)))
+
+## Use the metric_constrain function for a combination of any two metrics
+## Estimate optimal cutpoint for precision given a recall of at least 70\%
+cp <- cutpointr(data = suicide, x = dsi, class = suicide,
+                subgroup = gender,
+                method = maximize_metric,
+                metric = metric_constrain,
+                main_metric = precision,
+                suffix = "_constrained",
+                constrain_metric = recall,
+                min_constrain = 0.70)
+## All metric values (m) where recall < 0.7 are zero
+plot_metric(cp)
+## We can confirm that recall is indeed >= 0.70 and that precision_constrain
+## is identical to precision for the estimated cutpoint
+cp \%>\%
+    add_metric(list(recall, precision))
+## We can also do so for the complete ROC curve(s)
+cp \%>\%
+    pull(roc_curve) \%>\%
+    map(~ add_metric(., list(recall, precision)))
 }
 \seealso{
 Other metric functions: 
