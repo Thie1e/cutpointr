@@ -1,3 +1,10 @@
+# cutpointr 1.1.1
+
+## Changes
+- Clarified the help for the boot_stratify parameter
+- Better examples for the constrained metrics
+- Added reference and citation for the article about cutpointr in JSS
+
 # cutpointr 1.1.0
 
 ## Changes
