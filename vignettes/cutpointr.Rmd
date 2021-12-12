@@ -196,15 +196,15 @@ metrics are suffixed by `_b` to indicate in-bag results or `_oob` to indicate
 out-of-bag results:
 
 ```{r}
-opt_cut$boot
+opt_cut_b$boot
 ```
 
 The summary and plots include additional elements that summarize or display the
 bootstrap results:
 
 ```{r}
-summary(opt_cut)
-plot(opt_cut)
+summary(opt_cut_b)
+plot(opt_cut_b)
 ```
 
 
