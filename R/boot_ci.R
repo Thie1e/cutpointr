@@ -12,7 +12,7 @@
 #' in-bag and out-of-bag, respectively. For example, to calculate quantiles
 #' of the in-bag AUC \code{variable = AUC_b} should be set.
 #'
-#' @param x (character) The numeric independent (predictor) variable.
+#' @param x A cutpointr object with bootstrap results
 #' @param variable Variable to calculate CI for
 #' @param alpha Alpha level. Quantiles of the bootstrapped values are returned
 #' for (alpha / 2) and 1 - (alpha / 2).
