@@ -1,0 +1,99 @@
+---
+title: "cutpointr: Bootstrapping"
+author: "Christian Thiele, Lorenz A. Kapsner"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{cutpointr}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(fig.width = 6, fig.height = 5, fig.align = "center")
+options(rmarkdown.html_vignette.check_title = FALSE)
+load("vignettedata/vignettedata.Rdata")
+```
+
+**cutpointr** implements two types of bootstrapping:
+
+1. Determine optimal cutpoints without / with bootstrapping
+2. Validate cutpoint optimization with bootstrapping
+
+This vignette will briefly go through some examples for both approaches.
+
+# Determine optimal cutpoints
+
+## On the full dataset: `maximize_metric`
+
+As a first basic example, the determining of an optimal cutpoint will be 
+demonstrated by maximizing the Youden-index.
+Using the method `maximize_metric`, this is performed on the full data set:
+
+```{r}
+library(cutpointr)
+data(suicide)
+opt_cut <- cutpointr(
+    data = suicide,
+    x = dsi,
+    class = suicide,
+    method = maximize_metric,
+    metric = youden,
+    pos_class = "yes",
+    direction = ">="
+)
+summary(opt_cut)
+```
+
+The fields in the resulting R object `opt_cut` to be interpreted as follows:
+
+* `$optimal_cutpoint`: the optimal cutpoint determined by maximizing the Youden-Index on the full `suicide` dataset
+* `$sensitivity`: the sensitivity when applying the cutpoint to the full dataset
+* `$specificity`: the specificity when applying the cutpoint to the full dataset
+* `$youden`: the maximal Youden-index determined by the optimization (= sensitivity + specificity - 1)
+
+
+## Bootstrap cutpoints: `maximize_boot_metric`
+
+The determination of the optimal cutpoint can also be performed using 
+bootstrapping. Therefore, the methods `maximize_boot_metric`/`minimize_boot_metric` 
+need to be chosen. 
+These function provide further arguments to configure the bootstrapping. These 
+can be viewed with `help("maximize_boot_metric", "cutpointr")`. The most
+important parameters are:
+
+* `boot_cut`: The number of bootstrapping repetitions
+* `boot_stratify`: If bootstrap samples are drawn in both classes separately before combining them to keep the number of positives/negatives constant in every sample
+* `summary_func`: Summary function to aggregate the optimal cutpoints from the bootstrapping to arrive at one final optimal cutpoint
+
+```{r}
+library(cutpointr)
+data(suicide)
+opt_cut <- cutpointr(
+    data = suicide,
+    x = dsi,
+    class = suicide,
+    method = maximize_boot_metric,
+    boot_cut = 200,
+    summary_func = mean,
+    metric = youden,
+    pos_class = "yes",
+    direction = ">="
+)
+summary(opt_cut)
+```
+
+The fields in the resulting R object `opt_cut` to be interpreted as follows:
+
+* `$optimal_cutpoint`: the optimal cutpoint is the aggregated number (as defined with `summary_func`) over all n=`boot_cut` bootstrap samples. Please note, that no uncertainty measure (standard deviation, 95%-CI, etc.) are available here.
+* `$sensitivity`: the sensitivity when applying the optimal cutpoint to the full dataset
+* `$specificity`: the specificity when applying the optimal cutpoint to the full dataset
+* `$youden`: the (final) Youden-index when applying the optimal cutpoint to the full dataset
+
+# Validate cutpoint optimization with bootstrapping
+
+## `maximize_metric`
+
+## `maximize_boot_metric`
