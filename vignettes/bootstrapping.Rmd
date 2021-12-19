@@ -68,9 +68,11 @@ important parameters are:
 * `boot_stratify`: If bootstrap samples are drawn in both classes separately before combining them to keep the number of positives/negatives constant in every sample
 * `summary_func`: Summary function to aggregate the optimal cutpoints from the bootstrapping to arrive at one final optimal cutpoint
 
+The cutpoint is optimized in n=`boot_cut` bootstrap samples by maximizing/
+minimizing the respective metric (e.g. the Youden-index in this example).
+
 ```{r}
-library(cutpointr)
-data(suicide)
+set.seed(123)
 opt_cut <- cutpointr(
     data = suicide,
     x = dsi,
@@ -87,13 +89,85 @@ summary(opt_cut)
 
 The fields in the resulting R object `opt_cut` to be interpreted as follows:
 
-* `$optimal_cutpoint`: the optimal cutpoint is the aggregated number (as defined with `summary_func`) over all n=`boot_cut` bootstrap samples. Please note, that no uncertainty measure (standard deviation, 95%-CI, etc.) are available here.
+* `$optimal_cutpoint`: the optimal cutpoint is the aggregated value (as defined with `summary_func`) over all n=`boot_cut` bootstrap samples. Please note that no uncertainty measure (standard deviation, 95%-CI, etc.) are available here.
 * `$sensitivity`: the sensitivity when applying the optimal cutpoint to the full dataset
 * `$specificity`: the specificity when applying the optimal cutpoint to the full dataset
-* `$youden`: the (final) Youden-index when applying the optimal cutpoint to the full dataset
+* `$youden`: the (final) Youden-index when applying the optimal cutpoint to the full dataset. Please note that this is - similar to `$optimal_cutpoint` - the aggregated (e.g. mean) value over all bootstrap samples with no uncertainty measures available.
 
 # Validate cutpoint optimization with bootstrapping
 
+Any of the methods chosen to find the optimal cutpoints can be validated 
+subsequently with bootstrapping. This can easily be activated by setting 
+the argument `boot_runs` > 0. Please be aware that the first steps (as 
+described above) will be performed anyways, resulting in the same outputs 
+as above. 
+However, the same process will then be performed subsequently on n=`boot_runs` 
+bootstrap samples.
+For each of these bootstrap samples, several metrics and 
+performance measures are available from the resulting `$boot` object, both for 
+the *in-bag* (suffix: '_b') and the *out-of-bag* (suffix: '_oob') samples. 
+(Please note that the optimal cutpoint is determined on the in-bag samples only 
+and then applied to the out-of-bag samples for validation purposes, so its value 
+is available only once and without a suffix.) 
+
 ## `maximize_metric`
 
+```{r}
+opt_cut <- cutpointr(
+    data = suicide,
+    x = dsi,
+    class = suicide,
+    method = maximize_metric,
+    metric = youden,
+    pos_class = "yes",
+    direction = ">=",
+    boot_runs = 100
+)
+summary(opt_cut)
+```
+
+The interpretation of fields in the resulting R object `opt_cut` 
+is the same as above. The results from the bootstrapping are available from 
+`$boot`.
+
 ## `maximize_boot_metric`
+
+When bootstrapping cutpoints and using the 'external' cutpoint validation, the 
+optimal cutpoint will be determined on each of the n=`boot_runs` (outer) 
+bootstrap samples by performing n=`boot_cut` (inner) bootstrap rounds to 
+optimize the `metric` and then report this one 'optimal cutpoint', determined 
+by applying the `summary_func`. 
+
+Since the (inner) bootstrapping of optimal cutpoints is performed in each of the 
+(outer) validation bootstrap samples, this can be computational expensive and 
+take some (very long) time. Therefore, parallelization is implemented in 
+`cutpointr` by just setting its argument `allowParallel = TRUE` and initializing 
+a parallel environment.
+
+```{r}
+library(doParallel)
+library(doRNG)
+cl <- makeCluster(2) # 2 cores
+registerDoParallel(cl)
+registerDoRNG(12)
+set.seed(123)
+opt_cut <- cutpointr(
+    data = suicide,
+    x = dsi,
+    class = suicide,
+    method = maximize_boot_metric,
+    boot_cut = 200,
+    summary_func = mean,
+    metric = youden,
+    pos_class = "yes",
+    direction = ">=",
+    boot_runs = 100,
+    allowParallel = TRUE
+)
+stopCluster(cl)
+summary(opt_cut)
+```
+
+Again, the interpretation of fields in the resulting R object `opt_cut` 
+is the same as above. The results from the bootstrapping are available from 
+`$boot`.
