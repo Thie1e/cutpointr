@@ -1,0 +1,94 @@
+---
+title: "User-defined functions for estimation methods and metrics"
+author: "Christian Thiele"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{User-defined functions for estimation methods and metrics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(fig.width = 6, fig.height = 5, fig.align = "center")
+options(rmarkdown.html_vignette.check_title = FALSE)
+load("vignettedata/vignettedata.Rdata")
+```
+
+
+# User-defined functions
+
+## method
+
+User-defined functions can be supplied to `method`, which is the function that
+is responsible for returning the optimal cutpoint.
+To define a new method function, create a function that may take
+as input(s):
+
+- `data`: A `data.frame` or `tbl_df`
+- `x`: (character) The name of the predictor variable
+- `class`: (character) The name of the class variable
+- `metric_func`: A function for calculating a metric, e.g. accuracy. Note
+ that the method function does not necessarily have to accept this argument
+- `pos_class`: The positive class
+- `neg_class`: The negative class
+- `direction`: `">="` if the positive class has higher x values, `"<="` otherwise
+- `tol_metric`: (numeric) In the built-in methods, all cutpoints will be returned that lead to a metric
+value in the interval [m_max - tol_metric, m_max + tol_metric] where
+m_max is the maximum achievable metric value. This can be used to return
+multiple decent cutpoints and to avoid floating-point problems.
+- `use_midpoints`: (logical) In the built-in methods, if TRUE (default FALSE) the returned optimal
+cutpoint will be the mean of the optimal cutpoint and the next highest
+observation (for direction = ">") or the next lowest observation
+(for direction = "<") which avoids biasing the optimal cutpoint.
+- `...`: Further arguments that are passed to `metric` or that can be captured
+inside of `method`
+
+The function should return a data frame or tibble with
+one row, the column `optimal_cutpoint`, and an optional column with an arbitrary name
+with the metric value at the optimal cutpoint.
+
+For example, a function for choosing the cutpoint as the mean of the independent
+variable could look like this:
+
+```{r, eval = FALSE}
+mean_cut <- function(data, x, ...) {
+    oc <- mean(data[[x]])
+    return(data.frame(optimal_cutpoint = oc))
+}
+```
+
+If a `method` function does not return a metric column, the default `sum_sens_spec`, the sum of sensitivity and 
+specificity, is returned as the extra metric column in addition to accuracy, 
+sensitivity and specificity.
+
+Some `method` functions that make use of the additional arguments (that are 
+captured by `...`) are already included in **cutpointr**, see
+the list at the top. Since these functions are arguments to `cutpointr` 
+their code can be accessed by simply typing their name, see for example
+`oc_youden_normal`. 
+
+## metric
+
+User defined `metric` functions can be used as well. They are mainly useful in
+conjunction with `method = maximize_metric`, `method = minimize_metric`, or one of
+the other minimization and maximization functions. 
+In case of a different `method` function `metric` will only be used as the main
+out-of-bag metric when plotting the result. The `metric` function should 
+accept the following inputs as vectors:
+
+- `tp`: Vector of true positives
+- `fp`: Vector of false positives
+- `tn`: Vector of true negatives
+- `fn`: Vector of false negatives
+- `...`: Further arguments
+
+The function should return a numeric vector, a matrix, or a `data.frame` with one column. If the column is named, the name will be included in the output and plots. Avoid using names that are identical to the column names that are by default returned by **cutpointr**, as such names will be prefixed by `metric_` in the output. The inputs (`tp`, `fp`, `tn`, and `fn`) are vectors. 
+The code of the included metric functions can be accessed by simply typing their name.
+
+For example, this is the `misclassification_cost` metric function:
+
+```{r}
+misclassification_cost
+```
+

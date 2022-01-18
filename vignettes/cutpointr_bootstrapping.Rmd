@@ -4,7 +4,7 @@ author: "Christian Thiele, Lorenz A. Kapsner"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{cutpointr}
+  %\VignetteIndexEntry{Bootstrapping with cutpointr}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -22,7 +22,7 @@ library(magrittr)
 Bootstrapping is implemented in **cutpointr** with two goals:
 
 1.  Determine optimal cutpoints with bootstrapping (as an alternative to
-    determine them without bootstrapping)
+    determining them without bootstrapping)
 2.  Validate (any) cutpoint optimization with bootstrapping
 
 This vignette will briefly go through some examples for both approaches.
@@ -52,14 +52,14 @@ summary(opt_cut)
 
 The fields in the resulting R object `opt_cut` are to be interpreted as follows:
 
--   `$optimal_cutpoint`: The optimal cutpoint, which was determined by
+-   `$optimal_cutpoint`: The optimal cutpoint determined by
     maximizing the Youden-Index on the full `suicide` dataset.
 -   `$sensitivity`: The sensitivity when applying the cutpoint to the full
     dataset.
 -   `$specificity`: The specificity when applying the cutpoint to the full
     dataset.
--   `$youden`: The maximal Youden-Index (= sensitivity + specificity - 1), which
-    was determined by the optimization.
+-   `$youden`: The maximal Youden-Index (= sensitivity + specificity - 1), 
+determined by the optimization.
 
 ## Bootstrap cutpoints: `maximize_boot_metric`
 
@@ -72,13 +72,13 @@ most important arguments are:
 
 -   `boot_cut`: The number of bootstrapping repetitions.
 -   `boot_stratify`: If the bootstrap samples are drawn in both classes
-    separately before combining them to keep the number of positives/negatives
+    separately before combining them, keep the number of positives/negatives
     constant in every sample.
 -   `summary_func`: The summary function to aggregate the optimal cutpoints from
     the bootstrapping to arrive at one final optimal cutpoint.
 
 The cutpoint is optimized in n=`boot_cut` bootstrap samples by maximizing/
-minimizing the respective metric (e.g. the Youden-index in this example) in each
+minimizing the respective metric (e.g., the Youden-index in this example) in each
 of these bootstrap samples. Finally, the summary function is applied to
 aggregate the optimal cutpoints from the n=`boot_cut` bootstrap samples into one
 final 'optimal' cutpoint.
@@ -103,8 +103,10 @@ The fields in the resulting R object `opt_cut` are to be interpreted as follows:
 
 -   `$optimal_cutpoint`: The optimal cutpoint, which is the aggregated value (as
     defined with `summary_func`) over all n=`boot_cut` bootstrap samples. Please
-    note that no uncertainty measure (standard deviation, 95%-CI, etc.) are
-    available here.
+    note that no uncertainty measure (standard deviation, 95%-CI, etc.) is
+    available here (a bootstrap distribution of these cutpoints can be generated
+    using outer bootstrapping with `boot_runs > 0` and `maximize_metric`, 
+    as explained below).
 -   `$sensitivity`: The sensitivity when applying the optimal cutpoint to the
     full dataset.
 -   `$specificity`: The specificity when applying the optimal cutpoint to the
@@ -114,15 +116,15 @@ The fields in the resulting R object `opt_cut` are to be interpreted as follows:
 
 # Validate cutpoint optimization with bootstrapping
 
-Any of the methods chosen to find the optimal cutpoints can be validated
-subsequently with bootstrapping. This can easily be activated by setting the
+Any chosen methods to find the optimal cutpoints can be subsequently validated 
+with bootstrapping. This can easily be activated by setting the
 argument `boot_runs` \> 0. Please be aware that the first steps to calculate the
 optimal cutpoints with the specified method (as described above) will be
 performed in the very same manner as above, resulting in the same outputs as
 above (depending on the seed when bootstrapping cutpoints).
 
-However, the method to calculate the optimal cutpoints will then be performed
-subsequently on n=`boot_runs` bootstrap samples. For each of these bootstrap
+However, the method to calculate the optimal cutpoints will then additionally be
+performed on n=`boot_runs` bootstrap samples. For each of these bootstrap
 samples, several metrics and performance measures are available from the
 resulting `$boot` object, both for the *in-bag* (suffix: '\_b') and the
 *out-of-bag* (suffix: '\_oob') bootstrap samples. Please note that the optimal
@@ -162,9 +164,9 @@ bootstrap samples by maximizing/ minimizing the respective metric in each of
 these bootstrap samples and then by applying the summary function to aggregate
 the optimal cutpoints from the n=`boot_cut` bootstrap samples into one final
 'optimal' cutpoint. Hence, using the same seeds here results in the same outputs
-as above where no outer bootstrapping is applied.
+as above, where no outer bootstrapping is applied.
 
-In the validation routine, the chosen cutpoint optimization then repeated in
+In the validation routine, the chosen cutpoint optimization is then repeated in
 each of the n=`boot_runs` (outer) bootstrap samples: the optimal cutpoint is
 determined in each bootstrap sample by optimizing the `metric` on n=`boot_cut`
 (inner) bootstrap samples and applying the `summary_func` to aggregate them into
@@ -207,9 +209,12 @@ summary(opt_cut)
 opt_cut$boot[[1]] %>% head()
 ```
 
-Some visualizations of the bootstrapping results are available with the `plot`
+Some visualizations of the bootstrapping results are available with the `plot` 
 function:
 
 ```{r}
 plot(opt_cut)
 ```
+
+The two plots in the lower half can be generated separately with 
+`plot_cut_boot(opt_cut)` and `plot_metric_boot(opt_cut)`.

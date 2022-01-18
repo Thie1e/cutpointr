@@ -1,0 +1,110 @@
+---
+title: "ROC curves with cutpointr"
+author: "Christian Thiele"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ROC curves with cutpointr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(fig.width = 6, fig.height = 5, fig.align = "center")
+options(rmarkdown.html_vignette.check_title = FALSE)
+load("vignettedata/vignettedata.Rdata")
+```
+
+
+## Calculating only the ROC curve 
+
+When running `cutpointr`, a ROC curve is by default returned in the column `roc_curve`.
+This ROC curve can be plotted using `plot_roc`. Alternatively, if only the
+ROC curve is desired and no cutpoint needs to be calculated, the ROC curve
+can be created using `roc()` and plotted using `plot_cutpointr`.
+The `roc` function, unlike `cutpointr`, does not determine `direction`, `pos_class` or `neg_class`
+automatically.
+
+```{r, fig.width=4, fig.height=3}
+library(cutpointr)
+roc_curve <- roc(data = suicide, x = dsi, class = suicide,
+    pos_class = "yes", neg_class = "no", direction = ">=")
+auc(roc_curve)
+head(roc_curve)
+plot_roc(roc_curve)
+```
+
+
+## ROC curve and optimal cutpoint for multiple variables
+
+Alternatively, we can map the standard evaluation version `cutpointr` to 
+the column names. If `direction` and / or `pos_class` and `neg_class` are unspecified, these parameters
+will automatically be determined by **cutpointr** so that the AUC values for all
+variables will be $> 0.5$.
+
+We could do this manually, e.g. using `purrr::map`, but to make this task more convenient 
+`multi_cutpointr` can be used
+to achieve the same result. It maps multiple predictor columns to 
+`cutpointr`, by default all numeric columns except for the class column.
+
+```{r}
+mcp <- multi_cutpointr(suicide, class = suicide, pos_class = "yes", 
+                use_midpoints = TRUE, silent = TRUE) 
+summary(mcp)
+```
+
+
+## Accessing `data`, `roc_curve`, and `boot` 
+
+The object returned by `cutpointr` is of the classes `cutpointr`, `tbl_df`,
+`tbl`, and `data.frame`. Thus, it can be handled like a usual data frame. The
+columns `data`, `roc_curve`, and `boot` consist of nested data frames, which means that
+these are list columns whose elements are data frames. They can either be accessed
+using `[` or by using functions from the tidyverse. If subgroups were given, 
+the output contains one row per subgroup and the function 
+that accesses the data should be mapped to every row or the data should be 
+grouped by subgroup.
+
+```{r, eval = FALSE, message = FALSE}
+set.seed(123)
+opt_cut_b_g <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 500)
+```
+
+
+```{r, message = FALSE}
+library(dplyr)
+library(tidyr)
+opt_cut_b_g %>% 
+  group_by(subgroup) %>% 
+  select(subgroup, boot) %>%
+  unnest(cols = boot) %>% 
+  summarise(sd_oc_boot = sd(optimal_cutpoint),
+            m_oc_boot  = mean(optimal_cutpoint),
+            m_acc_oob  = mean(acc_oob))
+```
+
+
+## Adding metrics to the result of cutpointr() or roc()
+
+By default, the output of `cutpointr` includes the optimized metric and several
+other metrics. The `add_metric` function adds further metrics. 
+Here, we're adding the negative predictive value (NPV) and
+the positive predictive value (PPV) at the optimal cutpoint per subgroup:
+
+```{r}
+cutpointr(suicide, dsi, suicide, gender, metric = youden, silent = TRUE) %>% 
+    add_metric(list(ppv, npv)) %>% 
+    select(subgroup, optimal_cutpoint, youden, ppv, npv)
+```
+
+In the same fashion, additional metric columns can be added to a `roc_cutpointr`
+object:
+
+```{r}
+roc(data = suicide, x = dsi, class = suicide, pos_class = "yes",
+    neg_class = "no", direction = ">=") %>% 
+  add_metric(list(cohens_kappa, F1_score)) %>% 
+  select(x.sorted, tp, fp, tn, fn, cohens_kappa, F1_score) %>% 
+  head()
+```
+

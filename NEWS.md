@@ -1,3 +1,10 @@
+# cutpointr 1.1.2
+
+## Changes
+- The (very long) vignette has been split up into multiple vignettes, each
+ with its own topic. @kapsner has written an additional vignette on 
+ bootstrapping.
+
 # cutpointr 1.1.1
 
 ## Changes

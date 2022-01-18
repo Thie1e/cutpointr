@@ -4,7 +4,7 @@ author: "Christian Thiele"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{cutpointr}
+  %\VignetteIndexEntry{An introduction to cutpointr}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -225,182 +225,73 @@ opt_cut
 ```
 
 
-# More robust cutpoint estimation methods
-
-## Bootstrapped cutpoints
-
-It has been shown that bagging can substantially improve performance of a wide range of types of models in regression as well as in classification tasks. This method is available for cutpoint estimation via the `maximize_boot_metric` and `minimize_boot_metric` functions. If one of these functions is used as `method`, `boot_cut` bootstrap samples are drawn, the cutpoint optimization is carried out in each one and a summary (e.g. the mean) of the resulting optimal cutpoints on the bootstrap samples is returned as the optimal cutpoint in `cutpointr`. Note that if bootstrap validation is run, i.e. if `boot_runs` is larger zero, an outer bootstrap will be executed. In the bootstrap validation routine `boot_runs` bootstrap samples are generated and each one is again bootstrapped `boot_cut` times. This may lead to long run times, so activating the built-in parallelization may be advisable. 
-
-The advantages of bootstrapping the optimal cutpoint are that the procedure doesn't possess parameters that have to be tuned, unlike the LOESS smoothing, that it doesn't rely on assumptions, unlike the Normal method, and that it is applicable to any metric that can be used with `minimize_metric` or `maximize_metric`, unlike the Kernel method. Furthermore, like Random Forests cannot be overfit by increasing the number of trees, the bootstrapped cutpoints cannot be overfit by running an excessive amount of `boot_cut` repetitions. 
-
-```{r, cache=TRUE}
-set.seed(100)
-cutpointr(suicide, dsi, suicide, gender, 
-          method = maximize_boot_metric,
-          boot_cut = 200, summary_func = mean,
-          metric = accuracy, silent = TRUE)
-```
-
-
-## LOESS smoothing for selecting a cutpoint
-
-When using `maximize_metric` and `minimize_metric` the optimal cutpoint is 
-selected by searching the maximum or minimum of the metric function. For 
-example, we may want to minimize the misclassification cost. Since false 
-negatives (a suicide attempt was not anticipated) can be regarded as much more 
-severe than false positives we can set the cost of a false negative `cost_fn`
-for example to ten times the cost of a false positive.
-
-```{r}
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, method = minimize_metric,
-                     metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
-```
-
-```{r}
-plot_metric(opt_cut)
-```
-
-As this "optimal" cutpoint may depend on minor differences between the 
-possible cutoffs, smoothing of the function of metric values by
-cutpoint value might be desirable, especially in small samples. The
-`minimize_loess_metric` and `maximize_loess_metric` functions can be used
-to smooth the function so that the optimal cutpoint is selected based on the
-smoothed metric values. Options to modify the smoothing, which is implemented using
-`loess.as` from the **fANCOVA** package, include:
-
-- `criterion`: the criterion for automatic smoothing parameter selection: "aicc" denotes bias-corrected AIC criterion, "gcv" denotes generalized cross-validation.
-- `degree`: the degree of the local polynomials to be used. It can be 0, 1 or 2.
-- `family`: if "gaussian" fitting is by least-squares, and if "symmetric" a re-descending M estimator is used with Tukey's biweight function.
-- `user.span`: the user-defined parameter which controls the degree of smoothing.
-
-Using parameters for the LOESS smoothing of `criterion = "aicc"`, `degree = 2`, 
-`family = "symmetric"`, and `user.span = 0.7` we get the following smoothed
-versions of the above metrics:
-
-```{r, message = FALSE}
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, 
-                     method = minimize_loess_metric,
-                     criterion = "aicc", family = "symmetric", 
-                     degree = 2, user.span = 0.7,
-                     metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
-```
-
-```{r}
-plot_metric(opt_cut)
-```
-
-
-The optimal cutpoint for the female subgroup changes to 3. Note, though, that there 
-are no reliable rules for selecting the "best" smoothing parameters. Notably,
-the LOESS smoothing is sensitive to the number of unique cutpoints. A large 
-number of unique cutpoints generally leads to a more volatile curve of 
-metric values by cutpoint value, even after smoothing. Thus, the curve
-tends to be undersmoothed in that scenario. The unsmoothed metric
-values are returned in `opt_cut$roc_curve` in the column
-`m_unsmoothed`.
-
-
-## Smoothing via Generalized Additive Models for selecting a cutpoint
-
-In a similar fashion, the function of metric values per cutpoint can be smoothed 
-using Generalized Additive Models with smooth terms. Internally, `mgcv::gam` 
-carries out the smoothing which can be customized via the arguments
-`formula` and `optimizer`, see `help("gam", package = "mgcv")`. Most importantly,
-the GAM can be specified by altering the default formula, for example the 
-smoothing function could be configured to apply cubic regression splines (`"cr"`)
-as the smooth term. As the `suicide` data has only very few unique cutpoints,
-it is not very suitable for showcasing the GAM smoothing, so we will use two 
-classes of the `iris` data here. In this case, the purely empirical method and
-the GAM smoothing lead to identical cutpoints, but in practice the GAM smoothing
-tends to be more robust, especially with larger data. An attractive feature of
-the GAM smoothing is that the default values tend to work quite well and
-usually require no tuning, eliminating researcher degrees of freedom. 
-
-```{r}
-library(ggplot2)
-exdat <- iris
-exdat <- exdat[exdat$Species != "setosa", ]
-opt_cut <- cutpointr(exdat, Petal.Length, Species,
-                     method = minimize_gam_metric,
-                     formula = m ~ s(x.sorted, bs = "cr"),
-                     metric = abs_d_sens_spec)
-plot_metric(opt_cut)
-```
-
-
-## Spline smoothing for selecting a cutpoint
-
-Again in the same fashion the function of metric values per cutpoint can be smoothed 
-using smoothing splines. By default, the number of knots is automatically 
-chosen using the `cutpoint_knots` function. That function uses `stats::.nknots.smspl`,
-which is the default in `stats::smooth.spline` to pick the number of knots. 
-
-Alternatively, the number of knots
-can be set manually and also the other smoothing parameters of `stats::smooth.spline`
-can be set as desired. For details see `?maximize_spline_metric`. 
-
-```{r}
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, 
-                     method = minimize_spline_metric, spar = 0.4,
-                     metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
-plot_metric(opt_cut)
-```
-
-### Parametric method assuming normality
-
-The Normal method in `oc_youden_normal` is a parametric method for maximizing the Youden-Index or equivalently the sum of $Se$ and $Sp$. It relies on the assumption that the predictor for both the negative and positive observations is normally distributed. In that case it can be shown that
-
-$$c^* = \frac{(\mu_P \sigma_N^2 - \mu_N \sigma_P^2) - \sigma_N \sigma_P \sqrt{(\mu_N - \mu_P)^2 + (\sigma_N^2 - \sigma_P^2) log(\sigma_N^2 / \sigma_P^2)}}{\sigma_N^2 - \sigma_P^2}$$
-
-where the negative class is normally distributed with $\sim N(\mu_N, \sigma_N^2)$ and the positive class independently normally distributed with $\sim N(\mu_P, \sigma_P^2)$ provides the optimal cutpoint $c^*$ that maximizes the Youden-Index. If $\sigma_N$ and $\sigma_P$ are equal, the expression can be simplified to $c^* = \frac{\mu_N + \mu_P}{2}$. However, the `oc_youden_normal` method in cutpointr always assumes unequal standard deviations. Since this method does not select a cutpoint from the observed predictor values, it is questionable which values for $Se$ and $Sp$ should be reported. Here, the Youden-Index can be calculated as 
-
-$$J = \Phi(\frac{c^* - \mu_N}{\sigma_N}) - \Phi(\frac{c^* - \mu_P}{\sigma_P})$$
-
-if the assumption of normality holds. However, since there exist several methods that do not select cutpoints from the available observations and to unify the reporting of metrics for these methods, **cutpointr** reports all metrics, e.g. $Se$ and $Sp$, based on the empirical observations. 
-
-
-```{r}
-cutpointr(suicide, dsi, suicide, gender, method = oc_youden_normal)
-```
-
-### Nonparametric kernel method
-
-A nonparametric alternative is the Kernel method [@fluss_estimation_2005]. Here, the empirical distribution functions are smoothed using the Gaussian kernel functions $\hat{F}_N(t) = \frac{1}{n} \sum^n_{i=1} \Phi(\frac{t - y_i}{h_y})$ and $\hat{G}_P(t) = \frac{1}{m} \sum^m_{i=1} \Phi(\frac{t - x_i}{h_x})$ for the negative and positive classes respectively. Following Silverman's plug-in "rule of thumb" the bandwidths are selected as $h_y = 0.9 * min\{s_y, iqr_y/1.34\} * n^{-0.2}$ and $h_x = 0.9 * min\{s_x, iqr_x/1.34\} * m^{-0.2}$ where $s$ is the sample standard deviation and $iqr$ is the inter quartile range. It has been demonstrated that AUC estimation is rather insensitive to the choice of the bandwidth procedure [@faraggi_estimation_2002] and thus the plug-in bandwidth estimator has also been recommended for cutpoint estimation. The `oc_youden_kernel` function in **cutpointr** uses a Gaussian kernel and the direct plug-in method for selecting the bandwidths. The kernel smoothing is done via the `bkde` function from the **KernSmooth** package [@wand_kernsmooth:_2013]. 
-
-Again, there is a way to calculate the Youden-Index from the results of this method [@fluss_estimation_2005] which is
-
-$$\hat{J} = max_c \{\hat{F}_N(c) - \hat{G}_N(c) \}$$
-
-but as before we prefer to report all metrics based on applying the cutpoint that was estimated using the Kernel method to the empirical observations. 
-
-```{r}
-cutpointr(suicide, dsi, suicide, gender, method = oc_youden_kernel)
-```
 
 # Additional features
 
-## Calculating only the ROC curve 
+## Finding all cutpoints with acceptable performance
 
-When running `cutpointr`, a ROC curve is by default returned in the column `roc_curve`.
-This ROC curve can be plotted using `plot_roc`. Alternatively, if only the
-ROC curve is desired and no cutpoint needs to be calculated, the ROC curve
-can be created using `roc()` and plotted using `plot_cutpointr`.
-The `roc` function, unlike `cutpointr`, does not determine `direction`, `pos_class` or `neg_class`
-automatically.
+By default, most packages only return the "best" cutpoint and disregard other cutpoints with quite similar performance, even if the performance differences are minuscule. **cutpointr** makes this process more explicit via the `tol_metric` argument. For example, if all cutpoints are of interest that achieve at least an accuracy within `0.05` of the optimally achievable accuracy, `tol_metric` can be set to `0.05` and also those cutpoints will be returned. 
 
-```{r, fig.width=4, fig.height=3}
-roc_curve <- roc(data = suicide, x = dsi, class = suicide,
-    pos_class = "yes", neg_class = "no", direction = ">=")
-auc(roc_curve)
-head(roc_curve)
-plot_roc(roc_curve)
+In the case of the `suicide` data and when maximizing the sum of sensitivity and specificity, empirically the cutpoints 2 and 3 lead to quite similar performances. If `tol_metric` is set to `0.05`, both will be returned.
+
+```{r}
+library(tidyr)
+library(dplyr)
+opt_cut <- cutpointr(suicide, dsi, suicide, metric = sum_sens_spec, 
+                     tol_metric = 0.05, break_ties = c)
+opt_cut %>% 
+    select(optimal_cutpoint, sum_sens_spec) %>% 
+    unnest(cols = c(optimal_cutpoint, sum_sens_spec))
+```
+
+
+## Manual and mean / median cutpoints
+
+Using the `oc_manual` function the optimal cutpoint will not be determined 
+based on, for example, a metric but is instead set manually using the 
+`cutpoint` argument. This is useful for supplying and evaluating cutpoints that were found
+in the literature or in other external sources. 
+
+The `oc_manual` function could also be used to set the cutpoint to the sample
+mean using `cutpoint = mean(data$x)`. However, this may introduce bias into the
+bootstrap validation procedure, since the actual mean of the population is
+not known and thus the mean to be used as the cutpoint should be automatically determined in every resample.
+To do so, the `oc_mean` and `oc_median` functions can be used.
+
+```{r, eval = FALSE}
+set.seed(100)
+opt_cut_manual <- cutpointr(suicide, dsi, suicide, method = oc_manual, 
+                       cutpoint = mean(suicide$dsi), boot_runs = 1000)
+set.seed(100)
+opt_cut_mean <- cutpointr(suicide, dsi, suicide, method = oc_mean, boot_runs = 1000)
+```
+
+
+
+## Nonstandard evaluation via tidyeval
+
+The arguments to `cutpointr` do not need to be enclosed in quotes. This is 
+possible thanks to nonstandard evaluation of the arguments, which are 
+evaluated on `data`. 
+
+Functions that use nonstandard evaluation are often not suitable for 
+programming with. The use of nonstandard evaluation may lead to scoping 
+problems and subsequent obvious as well as possibly subtle errors. 
+**cutpointr** uses tidyeval internally and accordingly the same rules as 
+for programming with `dplyr` apply. Arguments can be unquoted with `!!`:
+
+```{r, eval = FALSE}
+myvar <- "dsi"
+cutpointr(suicide, !!myvar, suicide)
 ```
 
 
 
 ## Midpoints
 
-So far - which is the default in `cutpointr` - we have considered all unique values of the predictor as possible cutpoints. An alternative could be to use a sequence of equidistant values instead, for example in the case of the `suicide` data all integers in $[0, 10]$. However, with very sparse data and small intervals between the candidate cutpoints (i.e. a 'dense' sequence like `seq(0, 10, by = 0.01)`) this leads to the uninformative evaluation of large ranges of cutpoints that all result in the same metric value. A more elegant alternative, not only for the case of sparse data, that is supported by **cutpointr** is the use of a mean value of the optimal cutpoint and the next highest (if `direction = ">="`) or the next lowest (if `direction = "<="`) predictor value in the data. The result is an optimal cutpoint that is equal to the cutpoint that would be obtained using an infinitely dense sequence of candidate cutpoints and is thus usually more efficient computationally. This behavior can be activated by setting `use_midpoints = TRUE`, which is the default. If we use this setting, we obtain an optimal cutpoint of 1.5 for the complete sample on the `suicide` data instead of 2 when maximizing the sum of sensitivity and specificity.
+So far - which is the default in `cutpointr` - we have considered all unique values of the predictor as possible cutpoints. An alternative could be to use a sequence of equidistant values instead, for example in the case of the `suicide` data all integers in $[0, 10]$. However, with very sparse data and small intervals between the candidate cutpoints (i.e. a 'dense' sequence like `seq(0, 10, by = 0.01)`) this leads to the uninformative evaluation of large ranges of cutpoints that all result in the same metric value. A more elegant alternative, not only for the case of sparse data, that is supported by **cutpointr** is the use of a mean value of the optimal cutpoint and the next highest (if `direction = ">="`) or the next lowest (if `direction = "<="`) predictor value in the data. The result is an optimal cutpoint that is equal to the cutpoint that would be obtained using an infinitely dense sequence of candidate cutpoints and is thus usually more efficient computationally. 
+
+This behavior can be activated by setting `use_midpoints = TRUE`, which is the default. If we use this setting, we obtain an optimal cutpoint of 1.5 for the complete sample on the `suicide` data instead of 2 when maximizing the sum of sensitivity and specificity.
 
 Assume the following small data set:
 
@@ -619,7 +510,7 @@ plotdat_nomidpoints <- structure(list(sim_nr = c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
 ```
 
 ```{r, echo = FALSE}
-library(dplyr)
+library(ggplot2)
 ggplot(plotdat_nomidpoints %>% filter(!(method %in% c("spline_20"))), 
        aes(x = n, y = mean_err, color = method, shape = method)) + 
     geom_line() + geom_point() +
@@ -628,637 +519,4 @@ ggplot(plotdat_nomidpoints %>% filter(!(method %in% c("spline_20"))),
     scale_x_log10(breaks = c(30, 50, 75, 100, 150, 250, 500, 750, 1000)) +
     ggtitle("Bias of all methods when use_midpoints = FALSE",
             "normally distributed data, 10000 repetitions of simulation")
-```
-
-
-## Finding all cutpoints with acceptable performance
-
-By default, most packages only return the "best" cutpoint and disregard other cutpoints with quite similar performance, even if the performance differences are minuscule. **cutpointr** makes this process more explicit via the `tol_metric` argument. For example, if all cutpoints are of interest that achieve at least an accuracy within `0.05` of the optimally achievable accuracy, `tol_metric` can be set to `0.05` and also those cutpoints will be returned. 
-
-In the case of the `suicide` data and when maximizing the sum of sensitivity and specificity, empirically the cutpoints 2 and 3 lead to quite similar performances. If `tol_metric` is set to `0.05`, both will be returned.
-
-```{r}
-opt_cut <- cutpointr(suicide, dsi, suicide, metric = sum_sens_spec, 
-                     tol_metric = 0.05, break_ties = c)
-library(tidyr)
-opt_cut %>% 
-    select(optimal_cutpoint, sum_sens_spec) %>% 
-    unnest(cols = c(optimal_cutpoint, sum_sens_spec))
-```
-
-
-## Manual and mean / median cutpoints
-
-Using the `oc_manual` function the optimal cutpoint will not be determined 
-based on, for example, a metric but is instead set manually using the 
-`cutpoint` argument. This is useful for supplying and evaluating cutpoints that were found
-in the literature or in other external sources. 
-
-The `oc_manual` function could also be used to set the cutpoint to the sample
-mean using `cutpoint = mean(data$x)`. However, this may introduce bias into the
-bootstrap validation procedure, since the actual mean of the population is
-not known and thus the mean to be used as the cutpoint should be automatically determined in every resample.
-To do so, the `oc_mean` and `oc_median` functions can be used.
-
-```{r, eval = FALSE}
-set.seed(100)
-opt_cut_manual <- cutpointr(suicide, dsi, suicide, method = oc_manual, 
-                       cutpoint = mean(suicide$dsi), boot_runs = 1000)
-set.seed(100)
-opt_cut_mean <- cutpointr(suicide, dsi, suicide, method = oc_mean, boot_runs = 1000)
-```
-
-
-
-## Nonstandard evaluation via tidyeval
-
-The arguments to `cutpointr` do not need to be enclosed in quotes. This is 
-possible thanks to nonstandard evaluation of the arguments, which are 
-evaluated on `data`. 
-
-Functions that use nonstandard evaluation are often not suitable for 
-programming with. The use of nonstandard evaluation may lead to scoping 
-problems and subsequent obvious as well as possibly subtle errors. 
-**cutpointr** uses tidyeval internally and accordingly the same rules as 
-for programming with `dplyr` apply. Arguments can be unquoted with `!!`:
-
-```{r, eval = FALSE}
-myvar <- "dsi"
-cutpointr(suicide, !!myvar, suicide)
-```
-
-
-## ROC curve and optimal cutpoint for multiple variables
-
-Alternatively, we can map the standard evaluation version `cutpointr` to 
-the column names. If `direction` and / or `pos_class` and `neg_class` are unspecified, these parameters
-will automatically be determined by **cutpointr** so that the AUC values for all
-variables will be $> 0.5$.
-
-We could do this manually, e.g. using `purrr::map`, but to make this task more convenient 
-`multi_cutpointr` can be used
-to achieve the same result. It maps multiple predictor columns to 
-`cutpointr`, by default all numeric columns except for the class column.
-
-```{r}
-mcp <- multi_cutpointr(suicide, class = suicide, pos_class = "yes", 
-                use_midpoints = TRUE, silent = TRUE) 
-summary(mcp)
-```
-
-
-## Accessing `data`, `roc_curve`, and `boot` 
-
-The object returned by `cutpointr` is of the classes `cutpointr`, `tbl_df`,
-`tbl`, and `data.frame`. Thus, it can be handled like a usual data frame. The
-columns `data`, `roc_curve`, and `boot` consist of nested data frames, which means that
-these are list columns whose elements are data frames. They can either be accessed
-using `[` or by using functions from the tidyverse. If subgroups were given, 
-the output contains one row per subgroup and the function 
-that accesses the data should be mapped to every row or the data should be 
-grouped by subgroup.
-
-```{r, eval = FALSE, message = FALSE}
-set.seed(123)
-opt_cut_b_g <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 1000)
-```
-
-
-```{r, message = FALSE}
-# Using dplyr and tidyr
-library(tidyr)
-opt_cut_b_g %>% 
-  group_by(subgroup) %>% 
-  select(subgroup, boot) %>%
-  unnest(cols = boot) %>% 
-  summarise(sd_oc_boot = sd(optimal_cutpoint),
-            m_oc_boot  = mean(optimal_cutpoint),
-            m_acc_oob  = mean(acc_oob))
-```
-
-
-## Adding metrics to the result of cutpointr() or roc()
-
-By default, the output of `cutpointr` includes the optimized metric and several
-other metrics. The `add_metric` function adds further metrics. 
-Here, we're adding the negative predictive value (NPV) and
-the positive predictive value (PPV) at the optimal cutpoint per subgroup:
-
-```{r}
-cutpointr(suicide, dsi, suicide, gender, metric = youden, silent = TRUE) %>% 
-    add_metric(list(ppv, npv)) %>% 
-    select(subgroup, optimal_cutpoint, youden, ppv, npv)
-```
-
-In the same fashion, additional metric columns can be added to a `roc_cutpointr`
-object:
-
-```{r}
-roc(data = suicide, x = dsi, class = suicide, pos_class = "yes",
-    neg_class = "no", direction = ">=") %>% 
-  add_metric(list(cohens_kappa, F1_score)) %>% 
-  select(x.sorted, tp, fp, tn, fn, cohens_kappa, F1_score) %>% 
-  head()
-```
-
-
-## User-defined functions
-
-### method
-
-User-defined functions can be supplied to `method`, which is the function that
-is responsible for returning the optimal cutpoint.
-To define a new method function, create a function that may take
-as input(s):
-
-- `data`: A `data.frame` or `tbl_df`
-- `x`: (character) The name of the predictor variable
-- `class`: (character) The name of the class variable
-- `metric_func`: A function for calculating a metric, e.g. accuracy. Note
- that the method function does not necessarily have to accept this argument
-- `pos_class`: The positive class
-- `neg_class`: The negative class
-- `direction`: `">="` if the positive class has higher x values, `"<="` otherwise
-- `tol_metric`: (numeric) In the built-in methods, all cutpoints will be returned that lead to a metric
-value in the interval [m_max - tol_metric, m_max + tol_metric] where
-m_max is the maximum achievable metric value. This can be used to return
-multiple decent cutpoints and to avoid floating-point problems.
-- `use_midpoints`: (logical) In the built-in methods, if TRUE (default FALSE) the returned optimal
-cutpoint will be the mean of the optimal cutpoint and the next highest
-observation (for direction = ">") or the next lowest observation
-(for direction = "<") which avoids biasing the optimal cutpoint.
-- `...`: Further arguments that are passed to `metric` or that can be captured
-inside of `method`
-
-The function should return a data frame or tibble with
-one row, the column `optimal_cutpoint`, and an optional column with an arbitrary name
-with the metric value at the optimal cutpoint.
-
-For example, a function for choosing the cutpoint as the mean of the independent
-variable could look like this:
-
-```{r, eval = FALSE}
-mean_cut <- function(data, x, ...) {
-    oc <- mean(data[[x]])
-    return(data.frame(optimal_cutpoint = oc))
-}
-```
-
-If a `method` function does not return a metric column, the default `sum_sens_spec`, the sum of sensitivity and 
-specificity, is returned as the extra metric column in addition to accuracy, 
-sensitivity and specificity.
-
-Some `method` functions that make use of the additional arguments (that are 
-captured by `...`) are already included in **cutpointr**, see
-the list at the top. Since these functions are arguments to `cutpointr` 
-their code can be accessed by simply typing their name, see for example
-`oc_youden_normal`. 
-
-### metric
-
-User defined `metric` functions can be used as well. They are mainly useful in
-conjunction with `method = maximize_metric`, `method = minimize_metric`, or one of
-the other minimization and maximization functions. 
-In case of a different `method` function `metric` will only be used as the main
-out-of-bag metric when plotting the result. The `metric` function should 
-accept the following inputs as vectors:
-
-- `tp`: Vector of true positives
-- `fp`: Vector of false positives
-- `tn`: Vector of true negatives
-- `fn`: Vector of false negatives
-- `...`: Further arguments
-
-The function should return a numeric vector, a matrix, or a `data.frame` with one column. If the column is named, the name will be included in the output and plots. Avoid using names that are identical to the column names that are by default returned by **cutpointr**, as such names will be prefixed by `metric_` in the output. The inputs (`tp`, `fp`, `tn`, and `fn`) are vectors. 
-The code of the included metric functions can be accessed by simply typing their name.
-
-For example, this is the `misclassification_cost` metric function:
-
-```{r}
-misclassification_cost
-```
-
-
-# Plotting
-
-**cutpointr** includes several convenience functions for plotting data from a 
-`cutpointr` object. These include:
-
-- `plot_cutpointr`: General purpose plotting function for cutpointr or roc_cutpointr objects
-- `plot_cut_boot`: Plot the bootstrapped distribution of optimal cutpoints
-- `plot_metric`: If `maximize_metric` or `minimize_metric` was used this function
-plots all possible cutoffs on the x-axis vs. the respective metric values on
-the y-axis. If bootstrapping was run, a confidence interval based on the 
-bootstrapped distribution of metric values at each cutpoint can be displayed. 
-To display no confidence interval set `conf_lvl = 0`.
-- `plot_metric_boot`: Plot the distribution of out-of-bag metric values
-- `plot_precision_recall`: Plot the precision recall curve
-- `plot_sensitivity_specificity`: Plot all cutpoints vs. sensitivity and specificity
-- `plot_roc`: Plot the ROC curve
-- `plot_x`: Plot the distribution of the predictor variable
-
-```{r, fig.width=4, fig.height=3}
-plot_cut_boot(opt_cut_b_g)
-plot_metric(opt_cut_b_g, conf_lvl = 0.9)
-plot_metric_boot(opt_cut_b_g)
-plot_precision_recall(opt_cut_b_g)
-plot_sensitivity_specificity(opt_cut_b_g)
-plot_roc(opt_cut_b_g)
-```
-
-All plot functions, except for the standard plot method that returns
-a composed plot, return `ggplot` objects
-than can be further modified. For example, changing labels, title, and the theme
-can be achieved this way:
-
-```{r, fig.width=4, fig.height=3}
-p <- plot_x(opt_cut_b_g)
-p + ggtitle("Distribution of dsi") + theme_minimal() + xlab("Depression score")
-```
-
-## Flexible plotting function
-
-Using `plot_cutpointr` any metric can be chosen to be plotted on the x- or
-y-axis and results of `cutpointr()` as well as `roc()` can be plotted.
-If a `cutpointr` object is to be plotted, it is thus irrelevant which `metric` 
-function was chosen for cutpoint estimation. Any metric that can be calculated
-based on the ROC curve can be subsequently plotted as only the true / false
-positives / negatives over all cutpoints are needed.
-That way, not only the above plots can be produced, but also any 
-combination of two metrics (or metric functions) and / or cutpoints. The built-in
-metric functions as well as user-defined functions or anonymous functions can
-be supplied to `xvar` and `yvar`. If bootstrapping was run, confidence intervals
-can be plotted around the y-variable. This is especially useful if the cutpoints,
-available in the `cutpoints` function, are placed on the x-axis. 
-Note that confidence intervals can only be correctly plotted if the values of 
-`xvar` are constant across bootstrap samples. For example, confidence intervals 
-for TPR by FPR (a ROC curve) cannot be plotted easily, as the values of the false 
-positive rate vary per bootstrap sample.
-
-```{r, fig.width=4, fig.height=3, cache=FALSE}
-plot_cutpointr(opt_cut_b, xvar = cutpoints, yvar = sum_sens_spec, conf_lvl = 0.9)
-plot_cutpointr(opt_cut_b, xvar = fpr, yvar = tpr, aspect_ratio = 1, conf_lvl = 0)
-plot_cutpointr(opt_cut_b, xvar = cutpoint, yvar = tp, conf_lvl = 0.9) + geom_point()
-```
-
-
-## Manual plotting
-
-Since `cutpointr` returns a `data.frame` with the original data, bootstrap
-results, and the ROC curve in nested tibbles, these data can be conveniently 
-extracted and plotted manually. The relevant
-nested tibbles are in the columns `data`, `roc_curve` and `boot`. The following
-is an example of accessing and plotting the grouped data.
-
-```{r, fig.width=4, fig.height=3}
-opt_cut_b_g %>% 
-    select(data, subgroup) %>% 
-    unnest(cols = data) %>% 
-    ggplot(aes(x = suicide, y = dsi)) + 
-    geom_boxplot(alpha = 0.3) + facet_grid(~subgroup)
-```
-
-
-# Benchmarks
-
-To offer a comparison to established solutions,
-**cutpointr** will be benchmarked against `optimal.cutpoints` 
-from the **OptimalCutpoints** package, **ThresholdROC** and custom functions based on
-the **ROCR** and **pROC** packages. By generating data of different sizes 
-the benchmarks will offer a comparison of the scalability of the different 
-solutions. 
-
-Using `prediction` and `performance` from the **ROCR** package and `roc` from the
-**pROC** package, we can write functions for computing the cutpoint that maximizes the sum of sensitivity and
-specificity. **pROC** has a built-in function to optimize a few metrics:
-
-```{r, eval = FALSE}
-# Return cutpoint that maximizes the sum of sensitivity and specificiy
-# ROCR package
-rocr_sensspec <- function(x, class) {
-    pred <- ROCR::prediction(x, class)
-    perf <- ROCR::performance(pred, "sens", "spec")
-    sens <- slot(perf, "y.values")[[1]]
-    spec <- slot(perf, "x.values")[[1]]
-    cut <- slot(perf, "alpha.values")[[1]]
-    cut[which.max(sens + spec)]
-}
-
-# pROC package
-proc_sensspec <- function(x, class) {
-    r <- pROC::roc(class, x, algorithm = 2, levels = c(0, 1), direction = "<")
-    pROC::coords(r, "best", ret="threshold", transpose = FALSE)[1]
-}
-```
-
-The benchmarking will be carried out using the **microbenchmark** package and randomly
-generated data. The values of the `x` predictor variable are drawn from a normal distribution
-which leads to a lot more unique values than were encountered before in the 
-`suicide` data. Accordingly, the search for an optimal cutpoint is much more 
-demanding, if all possible cutpoints are evaluated.
-
-Benchmarks are run for sample sizes of 100, 1000, 1e4, 1e5, 1e6, and 1e7.
-For low sample sizes **cutpointr** is slower than the other
-solutions. While this should be of low practical importance, **cutpointr** scales
-more favorably with increasing sample size. The speed disadvantage in small
-samples that leads to the lower limit of around 25ms is mainly due to the nesting
-of the original data and the results that makes the compact output of `cutpointr`
-possible. This observation is emphasized by the fact that `cutpointr::roc` is 
-quite fast also in small samples. For sample sizes > 1e5 **cutpointr**
-is a little faster than the function based on **ROCR** and **pROC**. Both of these 
-solutions are generally faster than **OptimalCutpoints** and **ThresholdROC** with the exception of
-small samples. **OptimalCutpoints** and **ThresholdROC** had to be excluded from benchmarks with 
-more than 1e4 observations due to high memory requirements and/or excessive run times, rendering
-the use of these packages in larger samples impractical.
-
-
-```{r, eval = FALSE, echo = FALSE}
-library(OptimalCutpoints)
-library(ThresholdROC)
-n <- 100
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-x_pos <- dat$x[dat$y == 1]
-x_neg <- dat$x[dat$y == 0]
-bench_100 <- microbenchmark::microbenchmark(
-    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
-              direction = ">=", metric = youden, break_ties = mean),
-    rocr_sensspec(dat$x, dat$y),
-    proc_sensspec(dat$x, dat$y),
-    optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
-                      data = dat),
-    thres2(k1 = x_neg, k2 = x_pos, rho = 0.5,
-           method = "empirical", ci = FALSE),
-    times = 100, unit = "ms"
-)
-
-n <- 1000
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-x_pos <- dat$x[dat$y == 1]
-x_neg <- dat$x[dat$y == 0]
-bench_1000 <- microbenchmark::microbenchmark(
-    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
-              direction = ">=", metric = youden, break_ties = mean),
-    rocr_sensspec(dat$x, dat$y),
-    proc_sensspec(dat$x, dat$y),
-    optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
-                      data = dat),
-    thres2(k1 = x_neg, k2 = x_pos, rho = 0.5,
-           method = "empirical", ci = FALSE),
-    times = 100, unit = "ms"
-)
-
-n <- 10000
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-x_pos <- dat$x[dat$y == 1]
-x_neg <- dat$x[dat$y == 0]
-bench_10000 <- microbenchmark::microbenchmark(
-    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
-              direction = ">=", metric = youden, break_ties = mean, silent = TRUE),
-    rocr_sensspec(dat$x, dat$y),
-    optimal.cutpoints(X = "x", status = "y", tag.healthy = 0, methods = "Youden",
-                      data = dat),
-    proc_sensspec(dat$x, dat$y),
-    thres2(k1 = x_neg, k2 = x_pos, rho = 0.5,
-           method = "empirical", ci = FALSE),
-    times = 100
-)
-
-n <- 1e5
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-bench_1e5 <- microbenchmark::microbenchmark(
-    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
-              direction = ">=", metric = youden, break_ties = mean),
-    rocr_sensspec(dat$x, dat$y),
-    proc_sensspec(dat$x, dat$y),
-    times = 100, unit = "ms"
-)
-
-n <- 1e6
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-bench_1e6 <- microbenchmark::microbenchmark(
-    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
-              direction = ">=", metric = youden, break_ties = mean),
-    rocr_sensspec(dat$x, dat$y),
-    proc_sensspec(dat$x, dat$y),
-    times = 30, unit = "ms"
-)
-
-n <- 1e7
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-bench_1e7 <- microbenchmark::microbenchmark(
-    cutpointr(dat, x, y, pos_class = 1, neg_class = 0,
-              direction = ">=", metric = youden, break_ties = mean),
-    rocr_sensspec(dat$x, dat$y),
-    proc_sensspec(dat$x, dat$y),
-    times = 30, unit = "ms"
-)
-
-results <- rbind(
-    data.frame(time = summary(bench_100)$median,
-               Solution = summary(bench_100)$expr,
-               n = 100),
-    data.frame(time = summary(bench_1000)$median,
-               Solution = summary(bench_1000)$expr,
-               n = 1000),
-    data.frame(time = summary(bench_10000)$median,
-               Solution = summary(bench_10000)$expr,
-               n = 10000),
-    data.frame(time = summary(bench_1e5)$median,
-               Solution = summary(bench_1e5)$expr,
-               n = 1e5),
-    data.frame(time = summary(bench_1e6)$median,
-               Solution = summary(bench_1e6)$expr,
-               n = 1e6),
-    data.frame(time = summary(bench_1e7)$median,
-               Solution = summary(bench_1e7)$expr,
-               n = 1e7)
-)
-results$Solution <- as.character(results$Solution)
-results$Solution[grep(pattern = "cutpointr", x = results$Solution)] <- "cutpointr"
-results$Solution[grep(pattern = "rocr", x = results$Solution)] <- "ROCR"
-results$Solution[grep(pattern = "optimal", x = results$Solution)] <- "OptimalCutpoints"
-results$Solution[grep(pattern = "proc", x = results$Solution)] <- "pROC"
-results$Solution[grep(pattern = "thres", x = results$Solution)] <- "ThresholdROC"
-
-results$task <- "Cutpoint Estimation"
-```
-
-```{r, echo = FALSE}
-# These are the original results on our system
-# dput(results)
-results <- structure(list(time = c(4.5018015, 1.812802, 0.662101, 2.2887015, 
-1.194301, 4.839401, 2.1764015, 0.981001, 45.0568005, 36.2398515, 
-8.5662515, 5.667101, 2538.612001, 4.031701, 2503.8012505, 45.384501, 
-43.118751, 37.150151, 465.003201, 607.023851, 583.0950005, 5467.332801, 
-7850.2587, 7339.356101), Solution = c("cutpointr", "ROCR", "pROC", 
-"OptimalCutpoints", "ThresholdROC", "cutpointr", "ROCR", "pROC", 
-"OptimalCutpoints", "ThresholdROC", "cutpointr", "ROCR", "OptimalCutpoints", 
-"pROC", "ThresholdROC", "cutpointr", "ROCR", "pROC", "cutpointr", 
-"ROCR", "pROC", "cutpointr", "ROCR", "pROC"), n = c(100, 100, 
-100, 100, 100, 1000, 1000, 1000, 1000, 1000, 10000, 10000, 10000, 
-10000, 10000, 1e+05, 1e+05, 1e+05, 1e+06, 1e+06, 1e+06, 1e+07, 
-1e+07, 1e+07), task = c("Cutpoint Estimation", "Cutpoint Estimation", 
-"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
-"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
-"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
-"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
-"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
-"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
-"Cutpoint Estimation", "Cutpoint Estimation", "Cutpoint Estimation", 
-"Cutpoint Estimation")), row.names = c(NA, -24L), class = "data.frame")
-```
-
-
-```{r, eval = FALSE}
-# ROCR package
-rocr_roc <- function(x, class) {
-    pred <- ROCR::prediction(x, class)
-    perf <- ROCR::performance(pred, "sens", "spec")
-    return(NULL)
-}
-
-# pROC package
-proc_roc <- function(x, class) {
-    r <- pROC::roc(class, x, algorithm = 2, levels = c(0, 1), direction = "<")
-    return(NULL)
-}
-```
-
-
-
-```{r, eval = FALSE, echo = FALSE}
-n <- 100
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-bench_100 <- microbenchmark::microbenchmark(
-    cutpointr::roc(dat, "x", "y", pos_class = 1,
-                   neg_class = 0, direction = ">="),
-    rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y),
-    times = 100, unit = "ms"
-)
-n <- 1000
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-bench_1000 <- microbenchmark::microbenchmark(
-    cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
-                   direction = ">="),
-    rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y),
-    times = 100, unit = "ms"
-)
-n <- 10000
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-bench_10000 <- microbenchmark::microbenchmark(
-    cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
-                   direction = ">="),
-    rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y),
-    times = 100, unit = "ms"
-)
-n <- 1e5
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-bench_1e5 <- microbenchmark::microbenchmark(
-    cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
-                   direction = ">="),
-    rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y),
-    times = 100, unit = "ms"
-)
-n <- 1e6
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-bench_1e6 <- microbenchmark::microbenchmark(
-    cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
-                   direction = ">="),
-    rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y),
-    times = 30, unit = "ms"
-)
-n <- 1e7
-set.seed(123)
-dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
-bench_1e7 <- microbenchmark::microbenchmark(
-    cutpointr::roc(dat, "x", "y", pos_class = 1, neg_class = 0,
-                   direction = ">="),
-    rocr_roc(dat$x, dat$y),
-    proc_roc(dat$x, dat$y),
-    times = 30, unit = "ms"
-)
-
-results_roc <- rbind(
-    data.frame(time = summary(bench_100)$median,
-               Solution = summary(bench_100)$expr,
-               n = 100),
-    data.frame(time = summary(bench_1000)$median,
-               Solution = summary(bench_1000)$expr,
-               n = 1000),
-    data.frame(time = summary(bench_10000)$median,
-               Solution = summary(bench_10000)$expr,
-               n = 10000),
-    data.frame(time = summary(bench_1e5)$median,
-               Solution = summary(bench_1e5)$expr,
-               n = 1e5),
-    data.frame(time = summary(bench_1e6)$median,
-               Solution = summary(bench_1e6)$expr,
-               n = 1e6),
-    data.frame(time = summary(bench_1e7)$median,
-               Solution = summary(bench_1e7)$expr,
-               n = 1e7)
-)
-results_roc$Solution <- as.character(results_roc$Solution)
-results_roc$Solution[grep(pattern = "cutpointr", x = results_roc$Solution)] <- "cutpointr"
-results_roc$Solution[grep(pattern = "rocr", x = results_roc$Solution)] <- "ROCR"
-results_roc$Solution[grep(pattern = "proc", x = results_roc$Solution)] <- "pROC"
-results_roc$task <- "ROC curve calculation"
-```
-
-```{r, echo = FALSE}
-# Our results
-results_roc <- structure(list(time = c(0.7973505, 1.732651, 0.447701, 0.859301, 
-2.0358515, 0.694802, 1.878151, 5.662151, 3.6580505, 11.099251, 
-42.8208515, 35.3293005, 159.8100505, 612.471901, 610.4337005, 
-2032.693551, 7806.3854515, 7081.897251), Solution = c("cutpointr", 
-"ROCR", "pROC", "cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", 
-"pROC", "cutpointr", "ROCR", "pROC", "cutpointr", "ROCR", "pROC", 
-"cutpointr", "ROCR", "pROC"), n = c(100, 100, 100, 1000, 1000, 
-1000, 10000, 10000, 10000, 1e+05, 1e+05, 1e+05, 1e+06, 1e+06, 
-1e+06, 1e+07, 1e+07, 1e+07), task = c("ROC curve calculation", 
-"ROC curve calculation", "ROC curve calculation", "ROC curve calculation", 
-"ROC curve calculation", "ROC curve calculation", "ROC curve calculation", 
-"ROC curve calculation", "ROC curve calculation", "ROC curve calculation", 
-"ROC curve calculation", "ROC curve calculation", "ROC curve calculation", 
-"ROC curve calculation", "ROC curve calculation", "ROC curve calculation", 
-"ROC curve calculation", "ROC curve calculation")), row.names = c(NA, 
--18L), class = "data.frame")
-```
-
-```{r, echo = FALSE}
-results_all <- dplyr::bind_rows(results, results_roc)
-
-ggplot(results_all, aes(x = n, y = time, col = Solution, shape = Solution)) +
-  geom_point(size = 3) + geom_line() +
-  scale_y_log10(breaks = c(0.5, 1, 2, 3, 5, 10, 25, 100, 250, 1000, 5000, 1e4, 15000)) +
-  scale_x_log10(breaks = c(100, 1000, 1e4, 1e5, 1e6, 1e7)) +
-  ylab("Median Time (milliseconds, log scale)") + xlab("Sample Size (log scale)") +
-  theme_bw() +
-  theme(legend.position = "bottom", 
-        legend.key.width = unit(0.8, "cm"), 
-        panel.spacing = unit(1, "lines")) +
-  facet_grid(~task)
-```
-
-
-```{r, echo = FALSE}
-res_table <- tidyr::spread(results_all, Solution, time) %>% 
-  arrange(task)
-knitr::kable(res_table)
 ```
