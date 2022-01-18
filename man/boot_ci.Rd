@@ -7,7 +7,7 @@
 boot_ci(x, variable, in_bag = TRUE, alpha = 0.05)
 }
 \arguments{
-\item{x}{(character) The numeric independent (predictor) variable.}
+\item{x}{A cutpointr object with bootstrap results}
 
 \item{variable}{Variable to calculate CI for}
 
