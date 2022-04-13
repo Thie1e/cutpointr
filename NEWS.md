@@ -1,4 +1,4 @@
-# cutpointr 1.2.0
+# cutpointr 1.1.2
 
 ## Changes
 - The (very long) vignette has been split up into multiple vignettes, each
