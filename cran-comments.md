@@ -1,18 +1,19 @@
-# cutpointr 1.1.1
+# cutpointr 1.1.2
 
 ## R CMD check results
 
-There were no NOTEs, WARNINGs or ERRORS apart from the NOTE on Win Builder Devel that the DOI in DESCRIPTION may be incorrect. The DOI in the CITATION and DESCRIPTION is for a new JSS publication that will be registered after
-publication on CRAN.
+There were no NOTEs, WARNINGs or ERRORS.
 
 ### Local
-* R version 4.1.0, Platform: x86_64-w64-mingw32/x64 (64-bit) Running under: Windows 10 x64 (build 19043): no NOTEs, WARNINGs, or ERRORs.
+* R version 4.1.2, Platform: x86_64-w64-mingw32/x64 (64-bit) Running under: Windows 10 x64 (build 19044): no NOTEs, WARNINGs, or ERRORs.
 
 ### Win Builder
-* using R Under development (unstable) (2021-06-22 r80544) using platform: x86_64-w64-mingw32 (64-bit): There was one NOTE regarding a possibly incorrect DOI, see above.
+* using R version 4.2.0 beta (2022-04-11 r82149 ucrt), using platform: x86_64-w64-mingw32 (64-bit): no NOTEs, WARNINGs, or ERRORs.
 
 ### AppVeyor
-* R version 4.1.0 Patched (2021-06-26 r80567) Platform: x86_64-w64-mingw32/x64 (64-bit) Running under: Windows Server 2012 R2 x64 (build 9600): no NOTEs, WARNINGs, or ERRORs.
+
+* R version 4.1.3 Patched (2022-03-10 r81883), Platform: x86_64-w64-mingw32/x64 (64-bit), Running under: Windows Server 2012 R2 x64 (build 9600): No NOTEs, WARNINGs, or ERRORs.
+
 
 ## Downstream dependencies
 
