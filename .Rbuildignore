@@ -19,3 +19,4 @@ examples_i386
 examples_x64 
 tests_i386
 tests_x64
+^CRAN-SUBMISSION$
