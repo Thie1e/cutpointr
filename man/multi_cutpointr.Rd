@@ -18,8 +18,7 @@ optimal cutpoints will be determined per group.}
 
 \item{silent}{Whether to suppress messages.}
 
-\item{...}{Further arguments to be passed to cutpointr_ (Use a quoted variable
-name for subgroup).}
+\item{...}{Further arguments to be passed to cutpointr, e.g., boot_runs}
 }
 \value{
 A data frame.

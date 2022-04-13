@@ -9,7 +9,9 @@ optimize_metric <- function(data, x, class, metric_func = youden,
     roccurve <- roc(data = data, x = !!x, class = !!class, pos_class = pos_class,
                     neg_class = neg_class, direction = direction)
     m <- metric_func(tp = roccurve[["tp"]], fp = roccurve[["fp"]],
-                     tn = roccurve[["tn"]], fn = roccurve[["fn"]], ...)
+                     tn = roccurve[["tn"]], fn = roccurve[["fn"]],
+                     .roc_curve = roccurve,
+                     ...)
     m <- sanitize_metric(m, m_name = metric_name, n = nrow(roccurve))
     roccurve$m <- as.numeric(m)
     if (!is.null(colnames(m))) metric_name <- colnames(m)

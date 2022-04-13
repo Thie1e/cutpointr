@@ -550,7 +550,9 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                 m <- metric(tp = optcut$roc_curve[[1]]$tp[opt_ind],
                             fp = optcut$roc_curve[[1]]$fp[opt_ind],
                             tn = optcut$roc_curve[[1]]$tn[opt_ind],
-                            fn = optcut$roc_curve[[1]]$fn[opt_ind], ...)
+                            fn = optcut$roc_curve[[1]]$fn[opt_ind],
+                            .roc_curve = optcut$roc_curve[[1]],
+                            ...)
                 m <- check_metric_name(m)
                 colnames(m) <- make.names(colnames(m))
                 optcut <- dplyr::bind_cols(optcut, tibble::as_tibble(m))
@@ -563,7 +565,9 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
             m <- metric(tp = optcut$roc_curve[[1]]$tp[opt_ind],
                         fp = optcut$roc_curve[[1]]$fp[opt_ind],
                         tn = optcut$roc_curve[[1]]$tn[opt_ind],
-                        fn = optcut$roc_curve[[1]]$fn[opt_ind], ...)
+                        fn = optcut$roc_curve[[1]]$fn[opt_ind],
+                        .roc_curve = optcut$roc_curve[[1]],
+                        ...)
             optcut <- add_list(optcut, as.numeric(m), optcut$metric_name)
             sesp <- sesp_from_oc(optcut$roc_curve[[1]],
                                  oc = optcut$optimal_cutpoint,
@@ -639,7 +643,9 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
             m <- metric(tp = optcut$roc_curve[[1]]$tp[opt_ind],
                         fp = optcut$roc_curve[[1]]$fp[opt_ind],
                         tn = optcut$roc_curve[[1]]$tn[opt_ind],
-                        fn = optcut$roc_curve[[1]]$fn[opt_ind])
+                        fn = optcut$roc_curve[[1]]$fn[opt_ind],
+                        .roc_curve = optcut$roc_curve[[1]],
+                        ...)
             m <- check_metric_name(m)
             colnames(m) <- make.names(colnames(m))
             optcut <- dplyr::bind_cols(optcut, tibble::as_tibble(m))
@@ -652,7 +658,9 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
         m <- metric(tp = optcut$roc_curve[[1]]$tp[opt_ind],
                     fp = optcut$roc_curve[[1]]$fp[opt_ind],
                     tn = optcut$roc_curve[[1]]$tn[opt_ind],
-                    fn = optcut$roc_curve[[1]]$fn[opt_ind], ...)
+                    fn = optcut$roc_curve[[1]]$fn[opt_ind],
+                    .roc_curve = optcut$roc_curve[[1]],
+                    ...)
         optcut <- add_list(optcut, as.numeric(m), optcut$metric_name)
         sesp <- sesp_from_oc(optcut$roc_curve[[1]],
                              oc = optcut$optimal_cutpoint,
@@ -768,7 +776,9 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                     metric_b <- metric(tp = optcut_b$roc_curve[[1]]$tp[opt_ind_b],
                                        fp = optcut_b$roc_curve[[1]]$fp[opt_ind_b],
                                        tn = optcut_b$roc_curve[[1]]$tn[opt_ind_b],
-                                       fn = optcut_b$roc_curve[[1]]$fn[opt_ind_b])
+                                       fn = optcut_b$roc_curve[[1]]$fn[opt_ind_b],
+                                       .roc_curve = optcut_b$roc_curve[[1]],
+                                       ...)
                     metric_b <- check_metric_name(metric_b)
                     roc_curve_oob <- roc(data = g[-b_ind, ], x = !!predictor,
                                          class = !!outcome,
@@ -793,7 +803,9 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
                     metric_oob <- metric(tp = roc_curve_oob$tp[opt_ind_oob],
                                          fp = roc_curve_oob$fp[opt_ind_oob],
                                          tn = roc_curve_oob$tn[opt_ind_oob],
-                                         fn = roc_curve_oob$fn[opt_ind_oob])
+                                         fn = roc_curve_oob$fn[opt_ind_oob],
+                                         .roc_curve = roc_curve_oob,
+                                         ...)
                     metric_oob <- check_metric_name(metric_oob)
                     mn <- make.names(colnames(metric_oob))
 
@@ -867,8 +879,7 @@ cutpointr_internal <- function(x, class, subgroup, method, metric, pos_class,
 #' @param subgroup An additional covariate that identifies subgroups. Separate
 #' optimal cutpoints will be determined per group.
 #' @param silent Whether to suppress messages.
-#' @param ... Further arguments to be passed to cutpointr_ (Use a quoted variable
-#' name for subgroup).
+#' @param ... Further arguments to be passed to cutpointr, e.g., boot_runs
 #' @examples
 #' library(cutpointr)
 #'

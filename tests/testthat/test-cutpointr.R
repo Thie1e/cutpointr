@@ -1493,3 +1493,24 @@ test_that("boot_test works correctly", {
 #     cp <- cutpointr(tempdat, x, y, g, break_ties = c, boot_runs = 100)
 #     expect_silent(summary(cp))
 # })
+
+test_that("additional metric parameters are passed to bootstrap", {
+    my_metric <- function(tp, fp, tn, fn, myparam, ...) {
+        sens <- sensitivity(tp = tp, fn = fn)
+        spec <- specificity(fp = fp, tn = tn)
+        iu <- sens + spec + myparam
+        iu <- matrix(iu, ncol = 1)
+        colnames(iu) <- "myparam"
+        return(iu)
+    }
+
+    set.seed(19349)
+    cp <- cutpointr(suicide, dsi, suicide,
+                    boot_runs = 5,
+                    method = maximize_metric,
+                    metric = my_metric,
+                    myparam = 100)
+    expect_equal(all(cp$boot[[1]]$myparam_b > 100), TRUE)
+    expect_equal(all(cp$boot[[1]]$myparam_oob > 100), TRUE)
+})
+
