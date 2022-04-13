@@ -1,9 +1,15 @@
-# cutpointr 1.1.2
+# cutpointr 1.2.0
 
 ## Changes
 - The (very long) vignette has been split up into multiple vignettes, each
  with its own topic. @kapsner has written an additional vignette on 
  bootstrapping.
+- Update ?multi_cutpointr to say that it uses cutpointr(), not cutpointr_()
+
+## Fixes
+- When using an extra parameter for the metric, such as in sens_constrain, and 
+if bootstrapping was run, that parameter was not forwarded to the bootstrapping
+
 
 # cutpointr 1.1.1
 

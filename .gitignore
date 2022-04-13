@@ -35,3 +35,5 @@ inst/doc
 *.so
 *.dll
 revdep
+/doc/
+/Meta/
