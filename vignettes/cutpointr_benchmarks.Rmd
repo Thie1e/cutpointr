@@ -70,6 +70,7 @@ the use of these packages in larger samples impractical.
 ```{r, eval = FALSE, echo = FALSE}
 library(OptimalCutpoints)
 library(ThresholdROC)
+library(dplyr)
 n <- 100
 set.seed(123)
 dat <- data.frame(x = rnorm(n), y = sample(c(0:1), size = n, replace = TRUE))
@@ -354,7 +355,8 @@ ggplot(results_all, aes(x = n, y = time, col = Solution, shape = Solution)) +
 
 
 ```{r, echo = FALSE}
-res_table <- tidyr::spread(results_all, Solution, time) %>% 
-  arrange(task)
+library(tidyr)
+res_table <- tidyr::spread(results_all, Solution, time)
+res_table <- dplyr::arrange(res_table, task)
 knitr::kable(res_table)
 ```

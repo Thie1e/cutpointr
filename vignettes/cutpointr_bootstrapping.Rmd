@@ -16,7 +16,6 @@ editor_options:
 ```{r, include = FALSE}
 knitr::opts_chunk$set(fig.width = 6, fig.height = 5, fig.align = "center")
 options(rmarkdown.html_vignette.check_title = FALSE)
-library(magrittr)
 ```
 
 Bootstrapping is implemented in **cutpointr** with two goals:
@@ -153,7 +152,8 @@ above. The results from the bootstrapping are available from `$boot`.
 ```{r}
 
 summary(opt_cut)
-opt_cut$boot[[1]] %>% head()
+opt_cut$boot[[1]] |> 
+  head()
 ```
 
 ## `maximize_boot_metric`
@@ -206,7 +206,8 @@ same as above. The results from the bootstrapping are available from `$boot`.
 
 ```{r}
 summary(opt_cut)
-opt_cut$boot[[1]] %>% head()
+opt_cut$boot[[1]] |> 
+  head()
 ```
 
 Some visualizations of the bootstrapping results are available with the `plot` 

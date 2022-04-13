@@ -74,10 +74,10 @@ opt_cut_b_g <- cutpointr(suicide, dsi, suicide, gender, boot_runs = 500)
 ```{r, message = FALSE}
 library(dplyr)
 library(tidyr)
-opt_cut_b_g %>% 
-  group_by(subgroup) %>% 
-  select(subgroup, boot) %>%
-  unnest(cols = boot) %>% 
+opt_cut_b_g |> 
+  group_by(subgroup) |> 
+  select(subgroup, boot) |> 
+  unnest(cols = boot) |> 
   summarise(sd_oc_boot = sd(optimal_cutpoint),
             m_oc_boot  = mean(optimal_cutpoint),
             m_acc_oob  = mean(acc_oob))
@@ -92,8 +92,8 @@ Here, we're adding the negative predictive value (NPV) and
 the positive predictive value (PPV) at the optimal cutpoint per subgroup:
 
 ```{r}
-cutpointr(suicide, dsi, suicide, gender, metric = youden, silent = TRUE) %>% 
-    add_metric(list(ppv, npv)) %>% 
+cutpointr(suicide, dsi, suicide, gender, metric = youden, silent = TRUE) |> 
+    add_metric(list(ppv, npv)) |> 
     select(subgroup, optimal_cutpoint, youden, ppv, npv)
 ```
 
@@ -102,9 +102,9 @@ object:
 
 ```{r}
 roc(data = suicide, x = dsi, class = suicide, pos_class = "yes",
-    neg_class = "no", direction = ">=") %>% 
-  add_metric(list(cohens_kappa, F1_score)) %>% 
-  select(x.sorted, tp, fp, tn, fn, cohens_kappa, F1_score) %>% 
+    neg_class = "no", direction = ">=") |> 
+  add_metric(list(cohens_kappa, F1_score)) |> 
+  select(x.sorted, tp, fp, tn, fn, cohens_kappa, F1_score) |> 
   head()
 ```
 

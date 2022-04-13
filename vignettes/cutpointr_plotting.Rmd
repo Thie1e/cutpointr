@@ -99,9 +99,10 @@ is an example of accessing and plotting the grouped data.
 
 ```{r, fig.width=4, fig.height=3}
 library(dplyr)
-opt_cut_b_g %>% 
-    select(data, subgroup) %>% 
-    unnest(cols = data) %>% 
+library(tidyr)
+opt_cut_b_g |> 
+    select(data, subgroup) |> 
+    unnest(cols = data) |> 
     ggplot(aes(x = suicide, y = dsi)) + 
     geom_boxplot(alpha = 0.3) + 
     facet_grid(~subgroup)

@@ -239,8 +239,8 @@ library(tidyr)
 library(dplyr)
 opt_cut <- cutpointr(suicide, dsi, suicide, metric = sum_sens_spec, 
                      tol_metric = 0.05, break_ties = c)
-opt_cut %>% 
-    select(optimal_cutpoint, sum_sens_spec) %>% 
+opt_cut |> 
+    select(optimal_cutpoint, sum_sens_spec) |> 
     unnest(cols = c(optimal_cutpoint, sum_sens_spec))
 ```
 

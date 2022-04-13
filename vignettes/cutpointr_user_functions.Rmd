@@ -89,6 +89,7 @@ The code of the included metric functions can be accessed by simply typing their
 For example, this is the `misclassification_cost` metric function:
 
 ```{r}
+library(cutpointr)
 misclassification_cost
 ```
 
