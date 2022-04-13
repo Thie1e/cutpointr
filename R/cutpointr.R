@@ -295,7 +295,7 @@ cutpointr.default <- function(data, x, class, subgroup = NULL,
     }
 
     # Get method function
-    if (length(method) > 1 | !(class(method) == "function")) {
+    if (length(method) > 1 | !inherits(method, "function")) {
         stop("method should be a function")
     } else {
         cl <- match.call()
@@ -307,7 +307,7 @@ cutpointr.default <- function(data, x, class, subgroup = NULL,
     mod_name <- check_method_name(mod_name)
 
     # Get metric function
-    if (length(metric) > 1 | !(class(metric) == "function")) {
+    if (length(metric) > 1 | !inherits(metric, "function")) {
         stop("metric should be a function")
     }
     if (silent) {
@@ -340,7 +340,7 @@ cutpointr.numeric <- function(x, class, subgroup = NULL,
     subgroup_var <- "subgroup"
 
     # Get method function
-    if (length(method) > 1 | !(class(method) == "function")) {
+    if (length(method) > 1 | !inherits(method, "function")) {
         stop("method should be a function")
     } else {
         cl <- match.call()
@@ -352,7 +352,7 @@ cutpointr.numeric <- function(x, class, subgroup = NULL,
     mod_name <- check_method_name(mod_name)
 
     # Get metric function
-    if (length(metric) > 1 | !(class(metric) == "function")) {
+    if (length(metric) > 1 | !inherits(metric, "function")) {
         stop("metric should be a function")
     }
     if (silent) {
@@ -427,7 +427,7 @@ cutpointr_ <- function(data, x, class, subgroup = NULL,
     subgroup <- eval(substitute(subgroup), data, parent.frame())
 
     # Get method function
-    if (length(method) > 1 | !(class(method) == "function")) {
+    if (length(method) > 1 | !inherits(method, "function")) {
         stop("method should be a function")
     } else {
         cl <- match.call()
@@ -438,7 +438,7 @@ cutpointr_ <- function(data, x, class, subgroup = NULL,
     mod_name <- check_method_name(mod_name)
 
     # Get metric function
-    if (length(metric) > 1 | !(class(metric) == "function")) {
+    if (length(metric) > 1 | !inherits(metric, "function")) {
         stop("metric should be a function")
     }
     if (silent) {
