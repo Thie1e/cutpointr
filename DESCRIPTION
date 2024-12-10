@@ -2,8 +2,8 @@ Package: cutpointr
 Type: Package
 Title: Determine and Evaluate Optimal Cutpoints in Binary
     Classification Tasks
-Version: 1.1.2
-Date: 2022-04-13
+Version: 1.2.0
+Date: 2024-12-10
 Authors@R:
     person(given = "Christian",
            family = "Thiele",
@@ -37,7 +37,7 @@ Imports:
     stats,
     utils,
     rlang (>= 0.4.0)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.1
 Suggests:
     KernSmooth (>= 2.23-15),
     fANCOVA (>= 0.5-1),
@@ -49,6 +49,5 @@ Suggests:
     mgcv (>= 1.8),
     crayon (>= 1.3.4),
     registry (>= 0.5-1),
-    pkgmaker(>= 0.31.1),
     vctrs (>= 0.2.4)
 VignetteBuilder: knitr

@@ -1,3 +1,11 @@
+# cutpointr 1.2.0
+
+## Changes
+- Remove dependency pkgmaker
+- Remove maximize_spline_metric and minimize_spline_metric
+- Add boot_digits parameter to cutpointr:::print.summary_cutpointr
+
+
 # cutpointr 1.1.2
 
 ## Changes
@@ -105,7 +113,7 @@ and `cutpointr` issues a message if any bootstrap repeats failed (e.g. because
 only one class was drawn). 
 - Stratified bootstrapping is now supported via the `boot_stratify` argument.
 
-# Misc
+## Misc
 - Make the printed output of `summary.cutpointr`  and `summary.multi_cutpointr`
 more compact
 - No rounding of numbers in `summary.cutpointr` and `summary.multi_cutpointr`
