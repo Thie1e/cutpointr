@@ -612,7 +612,7 @@ plotdat_nomidpoints <- structure(list(sim_nr = c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
 
 ```{r, echo = FALSE}
 library(dplyr)
-ggplot(plotdat_nomidpoints %>% filter(!(method %in% c("spline_20"))), 
+ggplot(plotdat_nomidpoints, 
        aes(x = n, y = mean_err, color = method, shape = method)) + 
     geom_line() + geom_point() +
     facet_wrap(~ youden, scales = "fixed") +
