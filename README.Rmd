@@ -25,7 +25,7 @@ library(purrr)
 # cutpointr
 
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr)
-[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
 [![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr) 
 [![CRAN_Release_Badge](http://www.r-pkg.org/badges/version-ago/cutpointr)](https://CRAN.R-project.org/package=cutpointr)
 
@@ -124,8 +124,6 @@ The included methods for calculating cutpoints are:
 - `minimize_metric`: Minimize the metric function
 - `maximize_loess_metric`: Maximize the metric function after LOESS smoothing
 - `minimize_loess_metric`: Minimize the metric function after LOESS smoothing
-- `maximize_spline_metric`: Maximize the metric function after spline smoothing
-- `minimize_spline_metric`: Minimize the metric function after spline smoothing
 - `maximize_gam_metric`: Maximize the metric function after smoothing via Generalized Additive Models
 - `minimize_gam_metric`: Minimize the metric function after smoothing via Generalized Additive Models
 - `maximize_boot_metric`: Bootstrap the optimal cutpoint when maximizing a metric
@@ -339,24 +337,6 @@ opt_cut <- cutpointr(exdat, Petal.Length, Species,
 plot_metric(opt_cut)
 ```
 
-
-## Spline smoothing for selecting a cutpoint
-
-Again in the same fashion the function of metric values per cutpoint can be smoothed 
-using smoothing splines. By default, the number of knots is automatically 
-chosen using the `cutpoint_knots` function. That function uses `stats::.nknots.smspl`,
-which is the default in `stats::smooth.spline` to pick the number of knots. 
-
-Alternatively, the number of knots
-can be set manually and also the other smoothing parameters of `stats::smooth.spline`
-can be set as desired. For details see `?maximize_spline_metric`. 
-
-```{r}
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, 
-                     method = minimize_spline_metric, spar = 0.4,
-                     metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
-plot_metric(opt_cut)
-```
 
 ### Parametric method assuming normality
 
