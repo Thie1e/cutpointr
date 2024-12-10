@@ -142,10 +142,6 @@ the method argument. The package includes the following method functions:
  smoothing
  \item \code{minimize_loess_metric}: Minimize the metric function after LOESS
  smoothing
- \item \code{maximize_spline_metric}: Maximize the metric function after spline
- smoothing
- \item \code{minimize_spline_metric}: Minimize the metric function after spline
- smoothing
  \item \code{maximize_boot_metric}: Maximize the metric function as a summary of
  the optimal cutpoints in bootstrapped samples
  \item \code{minimize_boot_metric}: Minimize the metric function as a summary of
@@ -265,8 +261,7 @@ can be returned that lead to decent metric values in the vicinity of the
 optimal metric value. \code{tol_metric} is passed to metric and is only
 supported by the maximization and minimization functions, i.e.
 \code{maximize_metric}, \code{minimize_metric}, \code{maximize_loess_metric},
-\code{minimize_loess_metric}, \code{maximize_spline_metric}, and
-\code{minimize_spline_metric}. In \code{maximize_boot_metric} and
+\code{minimize_loess_metric}. In \code{maximize_boot_metric} and
 \code{minimize_boot_metric} multiple optimal cutpoints will be passed to the
 \code{summary_func} of these two functions.
 }

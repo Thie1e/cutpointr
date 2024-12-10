@@ -906,29 +906,6 @@ test_that("plot_cutpointr runs", {
     ))
 })
 
-test_that("smoothing splines lead to plausible results", {
-    cp <- cutpointr(suicide, dsi, suicide, method = maximize_spline_metric,
-                    nknots = 5, spar = 0.3)
-    expect_equal(cp$optimal_cutpoint, 3)
-    test_plot.cutpointr(cp)
-    test_ggplot_functions(cp)
-    expect_silent(summary(cp))
-
-    cp <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric,
-                    nknots = 5, spar = 0.3)
-    expect_equal(cp$optimal_cutpoint, c(3, 3))
-    test_plot.cutpointr(cp)
-    test_ggplot_functions(cp)
-    expect_silent(summary(cp))
-
-    cp <- cutpointr(suicide, dsi, suicide, method = minimize_spline_metric,
-                    nknots = 5, spar = 0.3, df = 5, metric = abs_d_sens_spec)
-    expect_equal(cp$optimal_cutpoint, 3)
-    test_plot.cutpointr(cp)
-    test_ggplot_functions(cp)
-    expect_silent(summary(cp))
-})
-
 test_that("gam smoothing leads to plausible results", {
     cp <- cutpointr(suicide, dsi, suicide, method = maximize_gam_metric,
                     metric = youden)
@@ -977,18 +954,6 @@ test_that("bootstrapped cutpoints lead to plausible results", {
     test_plot.cutpointr(cp)
     test_ggplot_functions(cp, do_plot_metric = FALSE)
     expect_silent(summary(cp))
-})
-
-test_that("this led to an error with get_rev_dups Rcpp function", {
-    dat <- rbind(data.frame(x = round(rnorm(5000), 1), y = 0),
-                 data.frame(x = round(rnorm(5000, mean = 0.05), 1), y = 1))
-    expect_silent(cutpointr(dat, x, y, method = maximize_spline_metric,
-                            nknots = 50, silent = TRUE))
-})
-
-
-test_that("cutpoint_knots returns correct results", {
-    expect_equal(cutpoint_knots(suicide, "dsi"), 12)
 })
 
 test_that("cutpointr handles multiple optimal cutpoints correctly", {
@@ -1189,36 +1154,6 @@ test_that("cutpointr works with custom method function", {
     expect_equal(cp$method, c("CutOff_Optimised", "CutOff_Optimised"))
     test_plot.cutpointr(cp)
     test_ggplot_functions(cp, do_plot_metric = FALSE)
-})
-
-test_that("predict behaves as expected", {
-    cp <- cutpointr(suicide, dsi, suicide, gender)
-    # Cutpoint 2 does not exist
-    expect_error(predict(cp,
-                         newdata = data.frame(dsi = c(2,3,4,5),
-                                              gender = c("female", "female", "female", "male")),
-                         cutpoint_nr = c(1,2)))
-
-    cp <- cutpointr(suicide, dsi, suicide,
-                    method = maximize_spline_metric, spar = 0.6)
-    # Cutpoint 2 does not exist
-    expect_error(predict(cp,
-                         newdata = data.frame(dsi = c(2,3,4,5),
-                                              gender = c("female", "female", "female", "male")),
-                         cutpoint_nr = c(2)))
-    # Subgroup does not exist
-    expect_error(predict(cp,
-                         newdata = data.frame(dsi = c(2,3,4,5),
-                                              gender = c("female", "female", "female", "male")),
-                         cutpoint_nr = c(1, 1)))
-
-    expect_equal(predict(cp, newdata = data.frame(dsi = 1:5)),
-                 factor(c("no", "no", "yes", "yes", "yes")))
-
-    cp <- cutpointr(suicide, dsi, suicide, use_midpoints = TRUE,
-                    method = maximize_spline_metric, spar = 0.6)
-    expect_equal(predict(cp, newdata = data.frame(dsi = 1:5)),
-                 factor(c("no", "no", "yes", "yes", "yes")))
 })
 
 test_that("has_column works with different data types", {

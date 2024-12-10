@@ -35,7 +35,6 @@ Other method functions:
 \code{\link{maximize_gam_metric}()},
 \code{\link{maximize_loess_metric}()},
 \code{\link{maximize_metric}()},
-\code{\link{maximize_spline_metric}()},
 \code{\link{oc_manual}()},
 \code{\link{oc_median}()},
 \code{\link{oc_youden_kernel}()},

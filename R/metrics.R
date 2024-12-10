@@ -475,7 +475,6 @@ npv <- function(tp, fp, tn, fn, ...) {
 #' The inputs must be vectors of equal length. \cr \cr
 #' ppv = tp / (tp + fp) \cr
 #' npv = tn / (tn + fn) \cr
-#' abs\_d\_ppv\_npv = |ppv - npv| \cr
 #' @inheritParams accuracy
 #' @examples
 #' abs_d_ppv_npv(10, 5, 20, 10)

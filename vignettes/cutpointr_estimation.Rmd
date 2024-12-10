@@ -120,24 +120,6 @@ plot_metric(opt_cut)
 ```
 
 
-## Spline smoothing for selecting a cutpoint
-
-Again in the same fashion the function of metric values per cutpoint can be smoothed 
-using smoothing splines. By default, the number of knots is automatically 
-chosen using the `cutpoint_knots` function. That function uses `stats::.nknots.smspl`,
-which is the default in `stats::smooth.spline` to pick the number of knots. 
-
-Alternatively, the number of knots
-can be set manually and also the other smoothing parameters of `stats::smooth.spline`
-can be set as desired. For details see `?maximize_spline_metric`. 
-
-```{r}
-opt_cut <- cutpointr(suicide, dsi, suicide, gender, 
-                     method = minimize_spline_metric, spar = 0.4,
-                     metric = misclassification_cost, cost_fp = 1, cost_fn = 10)
-plot_metric(opt_cut)
-```
-
 ### Parametric method assuming normality
 
 The Normal method in `oc_youden_normal` is a parametric method for maximizing the Youden-Index or equivalently the sum of $Se$ and $Sp$. It relies on the assumption that the predictor for both the negative and positive observations is normally distributed. In that case it can be shown that

@@ -73,8 +73,8 @@ Other metric functions:
 \code{\link{specificity}()},
 \code{\link{sum_ppv_npv}()},
 \code{\link{sum_sens_spec}()},
-\code{\link{tpr}()},
 \code{\link{tp}()},
+\code{\link{tpr}()},
 \code{\link{youden}()}
 }
 \concept{metric functions}

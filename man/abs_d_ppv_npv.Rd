@@ -24,7 +24,6 @@ true positives, false positives, true negatives and false negatives.
 The inputs must be vectors of equal length. \cr \cr
 ppv = tp / (tp + fp) \cr
 npv = tn / (tn + fn) \cr
-abs\_d\_ppv\_npv = |ppv - npv| \cr
 }
 \examples{
 abs_d_ppv_npv(10, 5, 20, 10)
@@ -57,8 +56,8 @@ Other metric functions:
 \code{\link{sum_ppv_npv}()},
 \code{\link{sum_sens_spec}()},
 \code{\link{total_utility}()},
-\code{\link{tpr}()},
 \code{\link{tp}()},
+\code{\link{tpr}()},
 \code{\link{youden}()}
 }
 \concept{metric functions}

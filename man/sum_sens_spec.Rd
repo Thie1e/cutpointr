@@ -56,8 +56,8 @@ Other metric functions:
 \code{\link{specificity}()},
 \code{\link{sum_ppv_npv}()},
 \code{\link{total_utility}()},
-\code{\link{tpr}()},
 \code{\link{tp}()},
+\code{\link{tpr}()},
 \code{\link{youden}()}
 }
 \concept{metric functions}

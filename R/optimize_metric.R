@@ -1,7 +1,7 @@
 optimize_metric <- function(data, x, class, metric_func = youden,
                             pos_class = NULL, neg_class = NULL, minmax,
                             direction, metric_name = "metric", loess = FALSE,
-                            spline = FALSE, gam = FALSE, return_roc = TRUE,
+                            gam = FALSE, return_roc = TRUE,
                             tol_metric, use_midpoints, ...) {
     args <- list(...)
     metric_name_call <- as.character(substitute(metric_func))
@@ -26,44 +26,6 @@ optimize_metric <- function(data, x, class, metric_func = youden,
                         family = args$family, user.span = args$user.span)
         roccurve$m <- NA
         roccurve$m[finite_roc] <- mod$fitted
-    }
-    if (spline) {
-        roccurve$m_unsmoothed <- roccurve$m
-        finite_x <- is.finite(roccurve$x.sorted)
-        finite_m <- is.finite(roccurve$m)
-        finite_roc <- (finite_x + finite_m) == 2
-        if (is.function(args$nknots)) {
-            nknots <- args$nknots(data = data, x = x)
-            message(paste("nknots:", nknots))
-        } else if (is.numeric(args$nknots)) {
-            nknots <- args$nknots
-        }
-        if (!is.null(args[["df"]])) {
-            mod <- stats::smooth.spline(x = roccurve$x.sorted[finite_roc],
-                                        y = roccurve$m[finite_roc],
-                                        w = args[["w"]], spar = args[["spar"]],
-                                        cv = FALSE, df = args[["df"]],
-                                        nknots = nknots, df.offset = args[["df_offset"]],
-                                        penalty = args[["penalty"]],
-                                        control.spar = args[["control_spar"]],
-                                        tol = 1e-100)
-        } else {
-            mod <- stats::smooth.spline(x = roccurve$x.sorted[finite_roc],
-                                        y = roccurve$m[finite_roc],
-                                        w = args[["w"]], spar = args[["spar"]],
-                                        cv = FALSE,
-                                        nknots = nknots, df.offset = args[["df_offset"]],
-                                        penalty = args[["penalty"]],
-                                        control.spar = args[["control_spar"]],
-                                        tol = 1e-100)
-        }
-        # smooth.spline builds bins of x values that are closer to each other
-        # than tol, so not all original x values may be returned
-        if (length(mod$x) != sum(finite_roc)) {
-            stop("Not all original x values returned by smooth.spline")
-        }
-        roccurve$m <- NA
-        roccurve$m[finite_roc] <- rev(mod$y)
     }
     if (gam) {
         roccurve$m_unsmoothed <- roccurve$m
@@ -113,7 +75,6 @@ optimize_metric <- function(data, x, class, metric_func = youden,
         res$roc_curve <- list(roccurve)
     }
     if (loess) metric_name <- paste0("loess_", metric_name)
-    if (spline) metric_name <- paste0("spline_", metric_name)
     if (gam) metric_name <- paste0("gam_", metric_name)
     res[, metric_name] <- m_oc
     return(res)
@@ -436,121 +397,6 @@ minimize_boot_metric <- function(data, x, class, metric_func = youden,
 }
 
 
-
-#' Optimize a metric function in binary classification after spline smoothing
-#'
-#' Given a function for computing a metric in \code{metric_func}, this function
-#' smoothes the function of metric value per cutpoint using smoothing splines. Then it
-#' optimizes the metric by selecting an optimal cutpoint. For further details
-#' on the smoothing spline see \code{?stats::smooth.spline}.
-#' The \code{metric} function should accept the following inputs:
-#' \itemize{
-#'  \item \code{tp}: vector of number of true positives
-#'  \item \code{fp}: vector of number of false positives
-#'  \item \code{tn}: vector of number of true negatives
-#'  \item \code{fn}: vector of number of false negatives
-#' }
-#'
-#' The above inputs are arrived at by using all unique values in \code{x}, Inf, and
-#' -Inf as possible cutpoints for classifying the variable in class.
-#'
-#' @return A tibble with the columns \code{optimal_cutpoint}, the corresponding metric
-#' value and \code{roc_curve}, a nested tibble that includes all possible cutoffs
-#' and the corresponding numbers of true and false positives / negatives and
-#' all corresponding metric values.
-#'
-#' @inheritParams oc_youden_normal
-#' @param metric_func (function) A function that computes a
-#' metric to be optimized. See description.
-#' @param w Optional vector of weights of the same length as x; defaults to all 1.
-#' @param df The desired equivalent number of degrees of freedom
-#' (trace of the smoother matrix). Must be in (1,nx], nx the number of
-#' unique x values.
-#' @param spar Smoothing parameter, typically (but not necessarily) in (0,1].
-#' When spar is specified, the coefficient lambda of the integral of the squared
-#' second derivative in the fit (penalized log likelihood) criterion is a
-#' monotone function of spar.
-#' @param nknots Integer or function giving the number of knots. The function
-#' should accept data and x (the name of the predictor variable) as inputs.
-#' By default nknots = 0.1 * log(n_dat / n_cut) * n_cut where n_dat is the
-#' number of observations and n_cut the number of unique predictor values.
-#' @param df_offset Allows the degrees of freedom to be increased by df_offset
-#' in the GCV criterion.
-#' @param penalty The coefficient of the penalty for degrees of freedom in the
-#' GCV criterion.
-#' @param control_spar Optional list with named components controlling the root
-#' finding when the smoothing parameter spar is computed, i.e., NULL. See
-#' help("smooth.spline") for further information.
-#' @param tol_metric All cutpoints will be returned that lead to a metric
-#' value in the interval [m_max - tol_metric, m_max + tol_metric] where
-#' m_max is the maximum achievable metric value. This can be used to return
-#' multiple decent cutpoints and to avoid floating-point problems.
-#' @param use_midpoints (logical) If TRUE (default FALSE) the returned optimal
-#' cutpoint will be the mean of the optimal cutpoint and the next highest
-#' observation (for direction = ">") or the next lowest observation
-#' (for direction = "<") which avoids biasing the optimal cutpoint.
-#' @param ... Further arguments that will be passed to metric_func.
-#'
-#' @examples
-#' oc <- cutpointr(suicide, dsi, suicide, gender, method = maximize_spline_metric,
-#' df = 5, metric = accuracy)
-#' plot_metric(oc)
-#' @export
-#' @family method functions
-#' @name maximize_spline_metric
-maximize_spline_metric <- function(data, x, class, metric_func = youden,
-                                   pos_class = NULL, neg_class = NULL, direction,
-                                   w = NULL, df = NULL, spar = 1,
-                                   nknots = cutpoint_knots, df_offset = NULL,
-                                   penalty = 1, control_spar = list(),
-                                   tol_metric, use_midpoints, ...) {
-    metric_name <- as.character(substitute(metric_func))
-    optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
-                    pos_class = pos_class, neg_class = neg_class, minmax = "max",
-                    direction = direction, metric_name = metric_name,
-                    w = w, df = df, spar = spar, nknots = nknots,
-                    df_offset = df_offset, penalty = penalty,
-                    control_spar = control_spar, spline = TRUE,
-                    tol_metric = tol_metric, use_midpoints = use_midpoints, ...)
-}
-
-#' @rdname maximize_spline_metric
-#' @export
-minimize_spline_metric <- function(data, x, class, metric_func = youden,
-                                   pos_class = NULL, neg_class = NULL, direction,
-                                   w = NULL, df = NULL, spar = 1,
-                                   nknots = cutpoint_knots,
-                                   df_offset = NULL, penalty = 1,
-                                   control_spar = list(), tol_metric,
-                                   use_midpoints, ...) {
-    metric_name <- as.character(substitute(metric_func))
-    optimize_metric(data = data, x = x, class = class, metric_func = metric_func,
-                    pos_class = pos_class, neg_class = neg_class, minmax = "min",
-                    direction = direction, metric_name = metric_name,
-                    w = w, df = df, spar = spar, nknots = nknots,
-                    df_offset = df_offset, penalty = penalty,
-                    control_spar = control_spar, spline = TRUE,
-                    tol_metric = tol_metric, use_midpoints = use_midpoints, ...)
-}
-
-#' Calculate number of knots to use in spline smoothing
-#'
-#' This function calculates the number of knots
-#' when using smoothing splines for smoothing a function of metric values per
-#' cutpoint value. The function for calculating the number of knots is equal
-#' to \code{stats::.nknots_smspl} but uses the number of unique cutpoints
-#' in the data as n.
-#'
-#' @param data A data frame
-#' @param x (character) The name of the predictor variable
-#' @examples
-#' cutpoint_knots(suicide, "dsi")
-#' @export
-cutpoint_knots <- function(data, x) {
-    n_cut <- length(unique(data[[x]]))
-    n_knots <- stats::.nknots.smspl(n_cut)
-    return(n_knots)
-}
 
 #' Optimize a metric function in binary classification after smoothing via
 #' generalized additive models

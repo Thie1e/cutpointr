@@ -1,6 +1,6 @@
 #' @export
 #' @importFrom tidyselect any_of
-print.summary_cutpointr <- function(x, digits = 4, ...) {
+print.summary_cutpointr <- function(x, digits = 4, boot_digits = 2, ...) {
     cat(paste("Method:", x$cutpointr[[1]]$method, "\n"))
     cat(paste("Predictor:", x$cutpointr[[1]]$predictor, "\n"))
     cat(paste("Outcome:", x$cutpointr[[1]]$outcome, "\n"))
@@ -59,7 +59,7 @@ print.summary_cutpointr <- function(x, digits = 4, ...) {
             cat(paste("Bootstrap summary:", "\n"))
             print_df_nodat(
                 x[["boot"]][[i]] %>%
-                    dplyr::mutate_if(is.numeric, round, digits = 2),
+                    dplyr::mutate_if(is.numeric, round, digits = boot_digits),
                 row.names = rep("", nrow(x[["boot"]][[i]]))
             )
         }
