@@ -24,9 +24,7 @@ library(purrr)
 
 # cutpointr
 
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Thie1e/cutpointr?branch=master&svg=true)](https://ci.appveyor.com/project/Thie1e/cutpointr)
 [![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
-[![codecov](https://codecov.io/github/thie1e/cutpointr/branch/master/graphs/badge.svg)](https://codecov.io/github/thie1e/cutpointr) 
 [![CRAN_Release_Badge](http://www.r-pkg.org/badges/version-ago/cutpointr)](https://CRAN.R-project.org/package=cutpointr)
 
 **cutpointr** is an R package for tidy calculation of "optimal" cutpoints. It 

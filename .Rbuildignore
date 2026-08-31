@@ -5,11 +5,9 @@
 ^\.Rproj\.user$
 ^packrat/
 ^\.Rprofile$
-^\.travis\.yml$
 ^README\.Rmd$
 ^README\.md$
 ^README-.*\.png$
-^appveyor\.yml$
 ^cran-comments.md$
 ^\.png$
 ^README_cache/
